@@ -1,0 +1,13 @@
+build/
+DerivedData/
+Snapper.xcodeproj/
+xcuserdata/
+*.xcuserstate
+*.xcarchive
+*.ipa
+*.dSYM
+*.mobileprovision
+*.p12
+*.cer
+.DS_Store
+.swiftpm/
