@@ -11,7 +11,7 @@ import SwiftUI
 /// the trail from moving below a locked-in profit threshold.
 struct AttachTrailingStopSheet: View {
     let position: PositionSnapshot
-    let onSubmit: (Double, Double?, String) async -> Void
+    let onSubmit: (Double, Double?, String) async -> Bool
 
     @Environment(\.dismiss) private var dismiss
     @State private var trailingPctText: String = ""
@@ -89,8 +89,11 @@ struct AttachTrailingStopSheet: View {
                         isSubmitting = true
                         Task {
                             defer { isSubmitting = false }
-                            await onSubmit(trailing, minLock, key)
-                            dismiss()
+                            // Keep the sheet open on failure so the user can correct
+                            // input and retry under the same idempotency key.
+                            if await onSubmit(trailing, minLock, key) {
+                                dismiss()
+                            }
                         }
                     }
                     .disabled(!canSubmit)

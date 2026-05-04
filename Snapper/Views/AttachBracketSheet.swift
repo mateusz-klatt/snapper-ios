@@ -18,7 +18,7 @@ import os
 /// HTTP 400.
 struct AttachBracketSheet: View {
     let position: PositionSnapshot
-    let onSubmit: (Double?, Double?, String) async -> Void
+    let onSubmit: (Double?, Double?, String) async -> Bool
 
     @Environment(\.dismiss) private var dismiss
     @State private var slPriceText: String = ""
@@ -99,8 +99,11 @@ struct AttachBracketSheet: View {
                         isSubmitting = true
                         Task {
                             defer { isSubmitting = false }
-                            await onSubmit(sl, tp, key)
-                            dismiss()
+                            // Keep the sheet open on failure so the user can correct
+                            // input and retry under the same idempotency key.
+                            if await onSubmit(sl, tp, key) {
+                                dismiss()
+                            }
                         }
                     }
                     .disabled(!canSubmit)
