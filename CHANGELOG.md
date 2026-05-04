@@ -6,6 +6,23 @@ uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+## [0.1.2] — 2026-05-05
+
+Re-release to redirect future TestFlight builds back to the canonical
+`1.0` version group. v0.1.1's MARKETING_VERSION-from-tag patcher created
+a separate "0.1.1" tester group that required manual tester management;
+v0.1.1 already removed the patcher, but the v0.1.1 build itself had
+already shipped to the orphan group. v0.1.2 is the first build cut from
+the cleaned-up release pipeline — no code changes since v0.1.1 beyond
+the patcher removal that v0.1.1 actually included in source.
+
+### Fixed
+
+- `ci_post_clone.sh` no longer derives `MARKETING_VERSION` from `CI_TAG`
+  (that change shipped in v0.1.1 source but didn't land in TestFlight
+  until this release). All Xcode Cloud builds now land in the same
+  marketing-version group, so testers carry over release-to-release.
+
 ## [0.1.1] — 2026-05-05
 
 First Xcode Cloud release pipeline. Tooling-only changes; no app behaviour
@@ -142,6 +159,7 @@ v0.2.0 backlog: CSRF header on iOS mutating REST requests,
 public-side type regeneration script, fork-PR Sonar handling, and
 the SwiftUI coverage story.
 
-[Unreleased]: https://github.com/mateusz-klatt/snapper-ios/compare/v0.1.1...HEAD
+[Unreleased]: https://github.com/mateusz-klatt/snapper-ios/compare/v0.1.2...HEAD
+[0.1.2]: https://github.com/mateusz-klatt/snapper-ios/releases/tag/v0.1.2
 [0.1.1]: https://github.com/mateusz-klatt/snapper-ios/releases/tag/v0.1.1
 [0.1.0]: https://github.com/mateusz-klatt/snapper-ios/releases/tag/v0.1.0
