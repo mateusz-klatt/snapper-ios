@@ -252,14 +252,16 @@ struct OrdersView: View {
         }
     }
 
-    private func submitNewOrder(body: CreateOrderBody) async {
+    private func submitNewOrder(body: CreateOrderBody) async -> Bool {
         do {
             let command = NewOrderSheet.makeCommand(body: body)
             _ = try await APIClient.shared.createOrder(command: command)
             await load()
+            return true
         } catch {
             logger.error("Failed to submit new order: \(error.localizedDescription)")
             submitError = "Couldn't submit the order. Try again."
+            return false
         }
     }
 

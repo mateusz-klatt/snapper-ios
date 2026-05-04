@@ -20,7 +20,7 @@ struct NewOrderSheet: View {
     let exchanges: [String]
     let walletPublicId: String
     let walletIsPaper: Bool
-    let onSubmit: (CreateOrderBody) async -> Void
+    let onSubmit: (CreateOrderBody) async -> Bool
 
     @Environment(\.dismiss) private var dismiss
 
@@ -55,7 +55,7 @@ struct NewOrderSheet: View {
         walletPublicId: String,
         walletIsPaper: Bool,
         defaultExchange: String? = nil,
-        onSubmit: @escaping (CreateOrderBody) async -> Void
+        onSubmit: @escaping (CreateOrderBody) async -> Bool
     ) {
         self.exchanges = exchanges
         self.walletPublicId = walletPublicId
@@ -185,8 +185,11 @@ struct NewOrderSheet: View {
                         isSubmitting = true
                         Task {
                             defer { isSubmitting = false }
-                            await onSubmit(body)
-                            dismiss()
+                            // Keep the sheet open on failure so the user can correct
+                            // input and retry under the same idempotency key.
+                            if await onSubmit(body) {
+                                dismiss()
+                            }
                         }
                     }
                     .disabled(!canSubmit)

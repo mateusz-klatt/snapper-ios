@@ -229,18 +229,20 @@ struct PositionsView: View {
         }
     }
 
-    private func submitMarketReduce(position: PositionSnapshot, quantity: Double) async {
+    private func submitMarketReduce(position: PositionSnapshot, quantity: Double) async -> Bool {
         guard let command = Self.makeReduceCommand(position: position, quantity: quantity) else {
             logger.error("Refusing to submit reduce/close: position missing instrument or wallet public id")
             submitError = "Position is missing the wallet or instrument identifier the backend requires. Try refreshing the positions list."
-            return
+            return false
         }
         do {
             _ = try await APIClient.shared.createOrder(command: command)
             await load()
+            return true
         } catch {
             logger.error("Failed to submit reduce/close: \(error.localizedDescription)")
             submitError = "Couldn't submit the order. Try again."
+            return false
         }
     }
 
@@ -263,10 +265,10 @@ struct PositionsView: View {
         slPrice: Double?,
         tpPrice: Double?,
         idempotencyKey: String
-    ) async {
+    ) async -> Bool {
         guard let cycleId = position.positionCyclePublicId else {
             submitError = "Position has no active cycle to attach a bracket to."
-            return
+            return false
         }
         do {
             let command = AttachBracketSheet.makeCommand(
@@ -277,9 +279,11 @@ struct PositionsView: View {
             )
             _ = try await APIClient.shared.createBracket(command: command)
             await load()
+            return true
         } catch {
             logger.error("Failed to submit bracket: \(error.localizedDescription)")
             submitError = "Couldn't attach bracket. Try again."
+            return false
         }
     }
 
@@ -288,10 +292,10 @@ struct PositionsView: View {
         trailingPct: Double,
         minLockPct: Double?,
         idempotencyKey: String
-    ) async {
+    ) async -> Bool {
         guard let cycleId = position.positionCyclePublicId else {
             submitError = "Position has no active cycle to attach a trailing stop to."
-            return
+            return false
         }
         do {
             let command = AttachTrailingStopSheet.makeCommand(
@@ -302,9 +306,11 @@ struct PositionsView: View {
             )
             _ = try await APIClient.shared.createTrailingStop(command: command)
             await load()
+            return true
         } catch {
             logger.error("Failed to submit trailing stop: \(error.localizedDescription)")
             submitError = "Couldn't attach trailing stop. Try again."
+            return false
         }
     }
 
@@ -371,7 +377,7 @@ struct PositionsView: View {
 /// surface.
 struct ReducePositionView: View {
     let position: PositionSnapshot
-    let onSubmit: (Double) async -> Void
+    let onSubmit: (Double) async -> Bool
 
     @Environment(\.dismiss) private var dismiss
     @State private var quantity: Double
@@ -379,7 +385,7 @@ struct ReducePositionView: View {
 
     init(
         position: PositionSnapshot,
-        onSubmit: @escaping (Double) async -> Void
+        onSubmit: @escaping (Double) async -> Bool
     ) {
         self.position = position
         self.onSubmit = onSubmit
@@ -441,9 +447,13 @@ struct ReducePositionView: View {
                     Button("Submit") {
                         Task {
                             isSubmitting = true
-                            await onSubmit(quantity)
+                            // Keep the sheet open on failure so the user can revise the
+                            // reduce quantity and retry without losing slider position.
+                            let succeeded = await onSubmit(quantity)
                             isSubmitting = false
-                            dismiss()
+                            if succeeded {
+                                dismiss()
+                            }
                         }
                     }
                     .disabled(quantity <= 0 || isSubmitting)
