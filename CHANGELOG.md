@@ -6,22 +6,44 @@ uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+## [0.1.1] — 2026-05-05
+
+First Xcode Cloud release pipeline. Tooling-only changes; no app behaviour
+shifts since v0.1.0.
+
 ### Added
 
 - `ci_scripts/ci_post_clone.sh` — Apple-standard hook that overlays
-  signing identity, bundle id, backend URL, and a monotonic build
-  number onto the cloned tree from secret Workflow environment
-  variables in App Store Connect. Lets the public source ship with
-  neutral defaults (`com.example.snapper`, no `DEVELOPMENT_TEAM`,
-  `localhost:8000`) while Xcode Cloud builds Release / TestFlight
-  with production values that never enter the repo.
+  signing identity, bundle id, backend URL, and the build number onto
+  the cloned tree from secret Workflow environment variables in App
+  Store Connect. Lets the public source keep neutral defaults
+  (`com.example.snapper`, no `DEVELOPMENT_TEAM`, `localhost:8000`)
+  while Xcode Cloud builds Release / TestFlight with production values
+  that never enter the repo.
 - `docs/architecture.md` — "Release pipeline" section documenting the
-  GitHub Actions + Xcode Cloud split (GHA gates push/PR, Xcode Cloud
+  GitHub Actions + Xcode Cloud split (GHA gates push / PR, Xcode Cloud
   handles tag-driven Release + TestFlight upload).
 - `docs/known-limitations.md` — explanation of the ~38% SonarCloud
   line coverage (SwiftUI body code dominates LoC; XCTest cannot enter
   it without a snapshot-testing SPM dependency, deliberately off the
   roadmap). Service / view-model layer is at 47-100%.
+- `CHANGELOG.md` (this file) following Keep a Changelog 1.1.0.
+
+### Fixed
+
+- `ci_post_clone.sh` jumps to `$CI_PRIMARY_REPOSITORY_PATH` before
+  patching, so subsequent `sed` / `plutil` / `xcodegen` calls find
+  files at the repo root instead of `ci_scripts/`.
+- Build number substitution dropped its hand-rolled "+9" offset in
+  favour of using `CI_BUILD_NUMBER` directly. The starting value
+  lives at App Store Connect → Xcode Cloud → Settings → Build Number,
+  set once to clear the last private-monorepo TestFlight build.
+- Marketing version is no longer derived from `CI_TAG`. TestFlight
+  groups builds per `CFBundleShortVersionString`, so binding the
+  marketing version to release tags created a new tester group every
+  release. The patcher now leaves `MARKETING_VERSION` at whatever
+  `project.yml` ships; bumping it is an explicit maintainer edit
+  intended for user-visible releases.
 
 ## [0.1.0] — 2026-05-04
 
@@ -120,5 +142,6 @@ v0.2.0 backlog: CSRF header on iOS mutating REST requests,
 public-side type regeneration script, fork-PR Sonar handling, and
 the SwiftUI coverage story.
 
-[Unreleased]: https://github.com/mateusz-klatt/snapper-ios/compare/v0.1.0...HEAD
+[Unreleased]: https://github.com/mateusz-klatt/snapper-ios/compare/v0.1.1...HEAD
+[0.1.1]: https://github.com/mateusz-klatt/snapper-ios/releases/tag/v0.1.1
 [0.1.0]: https://github.com/mateusz-klatt/snapper-ios/releases/tag/v0.1.0
