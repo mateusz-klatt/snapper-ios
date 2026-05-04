@@ -252,6 +252,7 @@ struct OrdersView: View {
         }
     }
 
+    @discardableResult
     private func submitNewOrder(body: CreateOrderBody) async -> Bool {
         do {
             let command = NewOrderSheet.makeCommand(body: body)

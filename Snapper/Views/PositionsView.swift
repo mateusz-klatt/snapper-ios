@@ -229,6 +229,7 @@ struct PositionsView: View {
         }
     }
 
+    @discardableResult
     private func submitMarketReduce(position: PositionSnapshot, quantity: Double) async -> Bool {
         guard let command = Self.makeReduceCommand(position: position, quantity: quantity) else {
             logger.error("Refusing to submit reduce/close: position missing instrument or wallet public id")
@@ -260,6 +261,7 @@ struct PositionsView: View {
         return true
     }
 
+    @discardableResult
     private func submitBracket(
         position: PositionSnapshot,
         slPrice: Double?,
@@ -287,6 +289,7 @@ struct PositionsView: View {
         }
     }
 
+    @discardableResult
     private func submitTrailingStop(
         position: PositionSnapshot,
         trailingPct: Double,
