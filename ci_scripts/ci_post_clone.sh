@@ -15,8 +15,10 @@
 #   SNAPPER_BACKEND_URL        — production backend (https://...)
 #
 # Apple-injected variables this script uses:
-#   CI_BUILD_NUMBER  — per-workflow, monotonic from 1 (offset to clear the
-#                       last private-monorepo TestFlight build number)
+#   CI_BUILD_NUMBER  — Xcode Cloud's per-product build number. Apple lets
+#                       you set the starting value at App Store Connect ->
+#                       Xcode Cloud -> Settings -> Build Number, so this
+#                       script just substitutes whatever Apple supplies.
 #   CI_TAG           — git tag if the workflow was triggered by a tag push;
 #                       used as MARKETING_VERSION (CFBundleShortVersionString)
 #
@@ -42,11 +44,10 @@ brew install xcodegen
 : "${SNAPPER_BACKEND_URL:?env var required}"
 
 # --- Build number ---
-# Keep monotonic across the public-extraction boundary. The private monorepo
-# era ended at TestFlight build 9, so offset by 9.
-PRIVATE_BUILD_OFFSET=9
-NEXT_BUILD=$((CI_BUILD_NUMBER + PRIVATE_BUILD_OFFSET))
-sed -i '' "s/CURRENT_PROJECT_VERSION: \"1\"/CURRENT_PROJECT_VERSION: \"$NEXT_BUILD\"/" project.yml
+# Apple controls the starting value via App Store Connect -> Xcode Cloud ->
+# Settings -> Build Number. Substitute whatever CI_BUILD_NUMBER Apple
+# injects; nothing for this script to compute.
+sed -i '' "s/CURRENT_PROJECT_VERSION: \"1\"/CURRENT_PROJECT_VERSION: \"$CI_BUILD_NUMBER\"/" project.yml
 
 # --- Marketing version from tag (vX.Y.Z → X.Y.Z) ---
 if [ -n "${CI_TAG:-}" ]; then
@@ -73,4 +74,4 @@ plutil -replace BaseURL -string "$SNAPPER_BACKEND_URL" Snapper/Config/Configurat
 # --- Regenerate Xcode project from the patched project.yml ---
 xcodegen generate
 
-echo "ci_post_clone: ready — bundle=$SNAPPER_BUNDLE_IDENTIFIER team=$SNAPPER_DEVELOPMENT_TEAM build=$NEXT_BUILD ver=${CI_TAG:-source-default}"
+echo "ci_post_clone: ready — bundle=$SNAPPER_BUNDLE_IDENTIFIER team=$SNAPPER_DEVELOPMENT_TEAM build=$CI_BUILD_NUMBER ver=${CI_TAG:-source-default}"
