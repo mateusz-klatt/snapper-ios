@@ -66,3 +66,33 @@ See [`known-limitations.md`](known-limitations.md) for the CSRF header gap on iO
 - **XcodeGen** (`project.yml`) is the source of truth. The generated `Snapper.xcodeproj` is `.gitignore`'d — every contributor regenerates it locally, so signing identities and per-developer Xcode settings stay out of the tree.
 - `Makefile` is the public surface (`make build`, `make test`, `make coverage`, `make archive`). CI uses the same Make targets the maintainer uses locally.
 - Zero Swift Package Manager dependencies — everything runs on `Foundation` / `SwiftUI` / `Combine`. Keeps the supply chain trivial to audit.
+
+## Release pipeline
+
+Two CI surfaces collaborate, each playing the role it is best suited for:
+
+### GitHub Actions (`macos-26`)
+
+- `ci.yml` — `make build && make test` on every push to `master` and every PR. Unsigned simulator build; runs in ~5-7 minutes.
+- `gitleaks.yml` — secret scan on push / PR / weekly cron.
+- `sonarcloud.yml` — coverage scan via Xcode `xccov` → SonarCloud generic XML.
+
+This is the **gate**: nothing reaches `master` without these green.
+
+### Xcode Cloud (Apple-hosted)
+
+Triggered by **tag push matching `v*`**. Used only for the release / TestFlight path. Apple's `ci_scripts/ci_post_clone.sh` hook (in this repo under `ci_scripts/`) overlays maintainer-only values from secret Workflow environment variables onto the cloned tree before `xcodegen generate`:
+
+- `SNAPPER_DEVELOPMENT_TEAM` — Apple Developer team id used for signing
+- `SNAPPER_BUNDLE_IDENTIFIER` — production bundle id registered in App Store Connect
+- `SNAPPER_BACKEND_URL` — production backend the released app talks to
+- `MARKETING_VERSION` derived from the git tag (`v0.1.1` → `0.1.1`)
+- `CURRENT_PROJECT_VERSION` = Apple's `CI_BUILD_NUMBER` + 9 (offset clears the last private-monorepo TestFlight build to keep numbers monotonic across the extraction boundary)
+
+The Workflow runs **Archive (Release)** + **TestFlight upload**, in that order. Tests are not duplicated here — GitHub Actions already gates them on push/PR, and Xcode Cloud's compute minutes are limited to 25 hours / month on the Apple Developer Program.
+
+### Why split
+
+- GHA on `macos-26` is free for public repos and runs the build+test gate cheaply.
+- Xcode Cloud handles signing, provisioning, and TestFlight upload natively without exposing any signing identities to a third-party CI.
+- Each system does what it is best at; secrets stay in the system that needs them. Forks can build locally for the simulator without any Apple Developer artefacts.

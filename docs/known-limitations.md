@@ -33,3 +33,17 @@ The maintainer's TestFlight bundle id and team live outside the public source tr
 ## iOS deployment target lags Apple's latest
 
 The deployment target is **iOS 26.2** to match the SDK shipped with Xcode 26.2 on GitHub Actions' `macos-26` runner image. Newer iOS-26.x features are unavailable until either the runner image upgrades or the project moves to `@available` conditionals.
+
+## SonarCloud line coverage at ~35-40%
+
+XCTest does not exercise SwiftUI `body` code, and SwiftUI views are a large fraction of the LoC count in this app. The SonarCloud project reports overall coverage around 38% with line coverage around 35% and branch coverage around 57% — the testable surface (services, view models, static helpers in views) sits at roughly:
+
+| Layer | Coverage | Why |
+|---|---|---|
+| `EnvelopeMinter`, `AppState`, `LoginViewModel`, `NavigationCoordinator` | 86-100% | Pure logic, no UI |
+| `WebSocketManager`, `DeviceRegistrationService`, `AuthService`, `APIClient` | 47-74% | Real `MockURLProtocol` / `FakeWebSocketTask` round-trips |
+| `*View.swift` (SwiftUI `body`) | 0-32% | XCTest cannot enter the SwiftUI render path; only static helpers (`PositionsView.canSubmitReduce`, `NewOrderSheet.canSubmit`, etc.) get hit |
+
+This is not a missing CI step — `make coverage` runs in the SonarCloud workflow, the xccov report is produced, the scanner uploads it. The number is just what the test harness can reach without a snapshot-testing dependency.
+
+**Plan**: v0.2.0 will hoist SwiftUI body logic into ViewModels (the existing `LoginViewModel` is the template) so the same tests catch more lines. A snapshot-testing SPM dependency is intentionally not on the roadmap — keeping the project zero-SPM-dependency is a deliberate portfolio property.
