@@ -6,6 +6,46 @@ uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+## [0.1.3] — 2026-05-05
+
+Quick-wins pass after multi-model code review of v0.1.2. Hardening + observability fixes; no behaviour changes for end users.
+
+### Security
+
+- All GitHub Actions in `.github/workflows/` now reference immutable
+  commit SHAs instead of mutable tags (`@v6`, `@v2`, `@v8.0.0`). Closes
+  the supply-chain finding flagged by 6/6 reviewers.
+  Pinned: `actions/checkout@de0fac2e` (v6.0.2),
+  `gitleaks/gitleaks-action@ff98106e` (v2.3.9),
+  `SonarSource/sonarqube-scan-action@59db25f3` (v8.0.0).
+- `Makefile`'s `coverage` target now verifies the SHA-256 of the
+  vendored `xccov-to-sonarqube-generic.sh` before executing it, so a
+  tampered script can't run against TestFlight artefacts.
+- `ci_scripts/ci_post_clone.sh` no longer echoes secret-classified
+  values (`SNAPPER_BUNDLE_IDENTIFIER`, `SNAPPER_DEVELOPMENT_TEAM`) at
+  the end of its run. The success message now reports only the build
+  number and tag.
+
+### Fixed
+
+- `DeviceRegistrationService` retry loop off-by-one: the `60s` final
+  delay in `retryDelaysSeconds = [1, 4, 16, 60]` was unreachable
+  because the guard used `<` instead of `<=`. Total retry budget now
+  matches the documented "~80s upper bound" (1 + 4 + 16 + 60 = 81s).
+- `AuthService.logoutFromServer` no longer swallows network errors
+  with `try?`. Failures are logged at `.warning` so an oncall can
+  correlate "stale session on next login" reports; local state is
+  still cleared regardless.
+- `WebSocketManager` typed-frame decode failures (trade, order_event,
+  order_cancel, heartbeat, user_deactivated) escalated from `.debug`
+  to `.warning` with the offending frame size attached. Protocol
+  drift between iOS and the backend now produces visible telemetry.
+
+### Changed
+
+- `README.md` Status section now references the v0.1.x line and
+  points readers at `CHANGELOG.md` for the per-release breakdown.
+
 ## [0.1.2] — 2026-05-05
 
 Re-release to redirect future TestFlight builds back to the canonical
@@ -159,7 +199,8 @@ v0.2.0 backlog: CSRF header on iOS mutating REST requests,
 public-side type regeneration script, fork-PR Sonar handling, and
 the SwiftUI coverage story.
 
-[Unreleased]: https://github.com/mateusz-klatt/snapper-ios/compare/v0.1.2...HEAD
+[Unreleased]: https://github.com/mateusz-klatt/snapper-ios/compare/v0.1.3...HEAD
+[0.1.3]: https://github.com/mateusz-klatt/snapper-ios/releases/tag/v0.1.3
 [0.1.2]: https://github.com/mateusz-klatt/snapper-ios/releases/tag/v0.1.2
 [0.1.1]: https://github.com/mateusz-klatt/snapper-ios/releases/tag/v0.1.1
 [0.1.0]: https://github.com/mateusz-klatt/snapper-ios/releases/tag/v0.1.0

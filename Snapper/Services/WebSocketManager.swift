@@ -330,35 +330,35 @@ class WebSocketManager: ObservableObject {
             if let decoded = try? decoder.decode(TradeData.self, from: data) {
                 state.lastTrade = decoded
             } else {
-                logger.debug("WS trade frame failed to decode")
+                logger.warning("WS trade frame decode failed (\(data.count) bytes)")
             }
         case "order_event":
             if let decoded = try? decoder.decode(OrderEventData.self, from: data) {
                 state.lastOrderEvent = decoded
             } else {
-                logger.debug("WS order_event frame failed to decode")
+                logger.warning("WS order_event frame decode failed (\(data.count) bytes)")
             }
         case "order_cancel":
             if let decoded = try? decoder.decode(OrderCancelData.self, from: data) {
                 state.lastOrderCancel = decoded
             } else {
-                logger.debug("WS order_cancel frame failed to decode")
+                logger.warning("WS order_cancel frame decode failed (\(data.count) bytes)")
             }
         case "heartbeat":
             if let decoded = try? decoder.decode(HeartbeatData.self, from: data) {
                 state.lastHeartbeat = decoded
                 state.lastHeartbeatAt = Date()
             } else {
-                logger.debug("WS heartbeat frame failed to decode")
+                logger.warning("WS heartbeat frame decode failed (\(data.count) bytes)")
             }
         case "user_deactivated":
             if let decoded = try? decoder.decode(UserDeactivatedData.self, from: data) {
                 state.lastUserDeactivated = decoded
             } else {
-                logger.debug("WS user_deactivated frame failed to decode")
+                logger.warning("WS user_deactivated frame decode failed (\(data.count) bytes)")
             }
         default:
-            logger.debug("WS frame type=\(type, privacy: .public) not bound in Plan 1")
+            logger.debug("WS frame type=\(type, privacy: .public) carries no Combine binding yet")
         }
     }
 

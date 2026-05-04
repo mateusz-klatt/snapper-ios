@@ -99,6 +99,7 @@ class AuthService: ObservableObject {
 
     private func logoutFromServer() async {
         guard let url = URL(string: "\(AppConfig.apiBaseURL)\(AppConfig.Endpoints.logout)") else {
+            logger.warning("Logout aborted: invalid URL")
             return
         }
 
@@ -111,7 +112,15 @@ class AuthService: ObservableObject {
         // free to override via its own configuration.
         request.timeoutInterval = 10
 
-        _ = try? await session.data(for: request)
+        do {
+            _ = try await session.data(for: request)
+        } catch {
+            // Network-level logout failure is non-fatal: local session is
+            // still cleared in `logout()`, but server-side blacklist may
+            // not have run. Log loudly so an oncall reading the device
+            // log can correlate "stale session on next login" reports.
+            logger.warning("Server-side logout failed (local state still cleared): \(error.localizedDescription, privacy: .public)")
+        }
     }
 
     private static let roleHierarchy: [UserRole: Int] = [

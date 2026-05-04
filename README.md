@@ -4,7 +4,7 @@ Native iOS client for the [Snapper](https://github.com/mateusz-klatt/snapper) tr
 
 ## Status
 
-- **v0.1.0** — Slice 1: order entry, cancel, brackets, trailing stops, alerts, push notifications, wallet picker.
+- **v0.1.x** — Slice 1: order entry, cancel, brackets, trailing stops, alerts, push notifications, wallet picker. See [`CHANGELOG.md`](CHANGELOG.md) for the per-release breakdown.
 - Public source mirror; the maintainer owns the App Store / TestFlight pipeline. Forks build for the simulator out of the box.
 
 ## Requirements

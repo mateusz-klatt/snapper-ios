@@ -188,11 +188,11 @@ actor DeviceRegistrationService {
             let message = error.localizedDescription
             status = .failed(attempt: attempt, message: message)
             logger.error("Device registration failed (attempt \(attempt)): \(error)")
-            if attempt < Self.retryDelaysSeconds.count {
+            if attempt <= Self.retryDelaysSeconds.count {
                 let delay = Self.retryDelaysSeconds[attempt - 1]
                 scheduleRetry(after: delay, nextAttempt: attempt + 1)
             } else {
-                logger.error("Device registration giving up after \(attempt) attempts; user can retry from Settings")
+                logger.error("Device registration giving up after \(attempt - 1) attempts; user can retry from Settings")
             }
         }
     }

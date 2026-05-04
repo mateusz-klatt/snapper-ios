@@ -79,4 +79,6 @@ plutil -replace BaseURL -string "$SNAPPER_BACKEND_URL" Snapper/Config/Configurat
 # --- Regenerate Xcode project from the patched project.yml ---
 xcodegen generate
 
-echo "ci_post_clone: ready — bundle=$SNAPPER_BUNDLE_IDENTIFIER team=$SNAPPER_DEVELOPMENT_TEAM build=$CI_BUILD_NUMBER tag=${CI_TAG:-none}"
+# Avoid echoing secret-classified inputs (bundle id / team) — they appear
+# verbatim in Apple's build logs even though the env vars are flagged Secret.
+echo "ci_post_clone: ready — build=$CI_BUILD_NUMBER tag=${CI_TAG:-none}"
