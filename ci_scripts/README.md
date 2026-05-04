@@ -25,8 +25,9 @@ Mark each as **Secret** so Apple does not echo the value into build logs.
 
 ## Apple-injected variables this script reads
 
-- `CI_BUILD_NUMBER` — Xcode Cloud's per-product build number. The starting value lives at App Store Connect → Apps → Snapper → Xcode Cloud → Settings → Build Number; Xcode Cloud increments from there. The script just substitutes whatever Apple supplies.
-- `CI_TAG` — populated when the workflow is triggered by a git tag push (e.g. `v0.1.1`). The script strips the leading `v` and uses the rest as `MARKETING_VERSION` (i.e. `CFBundleShortVersionString`).
+- `CI_BUILD_NUMBER` — Xcode Cloud's per-product build number. The starting value lives at App Store Connect → Apps → Snapper → Xcode Cloud → Settings → Build Number; Xcode Cloud increments from there. The script substitutes whatever Apple supplies into `CURRENT_PROJECT_VERSION`.
+
+`MARKETING_VERSION` (CFBundleShortVersionString) is **not** derived from the git tag. Apple groups TestFlight builds per marketing version, so deriving it from `CI_TAG` would create a fresh tester group on every release and force the maintainer to re-add testers each time. Bumping marketing version is an explicit edit in `project.yml`, made when the maintainer intends a user-visible release. Git tags still drive the release flow + CHANGELOG narrative; the two version concepts simply do not collapse.
 
 ## Forks running their own Xcode Cloud
 

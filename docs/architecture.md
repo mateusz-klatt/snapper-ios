@@ -86,8 +86,9 @@ Triggered by **tag push matching `v*`**. Used only for the release / TestFlight 
 - `SNAPPER_DEVELOPMENT_TEAM` — Apple Developer team id used for signing
 - `SNAPPER_BUNDLE_IDENTIFIER` — production bundle id registered in App Store Connect
 - `SNAPPER_BACKEND_URL` — production backend the released app talks to
-- `MARKETING_VERSION` derived from the git tag (`v0.1.1` → `0.1.1`)
 - `CURRENT_PROJECT_VERSION` = Apple's `CI_BUILD_NUMBER` (the starting value lives at App Store Connect → Xcode Cloud → Settings → Build Number, set once to clear the last private-monorepo TestFlight build; Xcode Cloud auto-increments from there)
+
+`MARKETING_VERSION` (CFBundleShortVersionString) is **not** derived from the git tag. TestFlight groups builds per marketing version, so binding it to release tags would scatter testers across one group per tag. The git tag drives release narrative (CHANGELOG entry, GitHub Release page); the marketing version stays at whatever's committed in `project.yml` until the maintainer intentionally bumps it for a user-visible release.
 
 The Workflow runs **Archive (Release)** + **TestFlight upload**, in that order. Tests are not duplicated here — GitHub Actions already gates them on push/PR, and Xcode Cloud's compute minutes are limited to 25 hours / month on the Apple Developer Program.
 

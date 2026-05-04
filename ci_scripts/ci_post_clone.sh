@@ -19,8 +19,11 @@
 #                       you set the starting value at App Store Connect ->
 #                       Xcode Cloud -> Settings -> Build Number, so this
 #                       script just substitutes whatever Apple supplies.
-#   CI_TAG           — git tag if the workflow was triggered by a tag push;
-#                       used as MARKETING_VERSION (CFBundleShortVersionString)
+#
+# Notably NOT used: CI_TAG. MARKETING_VERSION (CFBundleShortVersionString)
+# stays at the value committed in project.yml so all TestFlight builds land
+# in the same tester group; bumping marketing version is an explicit
+# maintainer decision in source, not a side effect of release tagging.
 #
 # Local development is unaffected: this script never runs locally, and the
 # committed project.yml / Configuration.plist values are the defaults a
@@ -49,11 +52,13 @@ brew install xcodegen
 # injects; nothing for this script to compute.
 sed -i '' "s/CURRENT_PROJECT_VERSION: \"1\"/CURRENT_PROJECT_VERSION: \"$CI_BUILD_NUMBER\"/" project.yml
 
-# --- Marketing version from tag (vX.Y.Z → X.Y.Z) ---
-if [ -n "${CI_TAG:-}" ]; then
-  MV="${CI_TAG#v}"
-  sed -i '' "s/MARKETING_VERSION: \"1.0\"/MARKETING_VERSION: \"$MV\"/" project.yml
-fi
+# MARKETING_VERSION is intentionally NOT patched from CI_TAG. Apple groups
+# TestFlight builds per CFBundleShortVersionString, so tagging v0.1.1 ->
+# v0.1.2 -> v0.2.0 would create a new tester group on every release and the
+# maintainer would have to re-add testers each time. The repository's git
+# tags drive the release / CHANGELOG narrative; MARKETING_VERSION stays at
+# the value committed in project.yml until the maintainer intentionally
+# bumps it (e.g. moving to a new App Store-visible major).
 
 # --- Bundle id ---
 # Substitution propagates to both targets (Snapper + SnapperTests) — the test
@@ -74,4 +79,4 @@ plutil -replace BaseURL -string "$SNAPPER_BACKEND_URL" Snapper/Config/Configurat
 # --- Regenerate Xcode project from the patched project.yml ---
 xcodegen generate
 
-echo "ci_post_clone: ready — bundle=$SNAPPER_BUNDLE_IDENTIFIER team=$SNAPPER_DEVELOPMENT_TEAM build=$CI_BUILD_NUMBER ver=${CI_TAG:-source-default}"
+echo "ci_post_clone: ready — bundle=$SNAPPER_BUNDLE_IDENTIFIER team=$SNAPPER_DEVELOPMENT_TEAM build=$CI_BUILD_NUMBER tag=${CI_TAG:-none}"
