@@ -28,6 +28,12 @@ set -euo pipefail
 
 echo "ci_post_clone: starting…"
 
+# Apple invokes this script with cwd=ci_scripts/. All path-relative work
+# (project.yml, Snapper/Config/Configuration.plist, xcodegen output) needs
+# repo root, so jump there explicitly. CI_PRIMARY_REPOSITORY_PATH is set
+# by Apple to the cloned repo's root.
+cd "$CI_PRIMARY_REPOSITORY_PATH"
+
 brew install xcodegen
 
 # --- Required secret env vars must exist ---
