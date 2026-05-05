@@ -39,7 +39,7 @@ final class NotificationPrefsViewTests: XCTestCase {
 
     func testAlertTypesMatchBackendCanonicalSet() {
         XCTAssertEqual(
-            Set(NotificationPrefsView.alertTypes),
+            Set(NotificationPrefsViewModel.alertTypes),
             Set([
                 "order_fill_full",
                 "order_rejected",
@@ -51,8 +51,8 @@ final class NotificationPrefsViewTests: XCTestCase {
     }
 
     func testDisplayNameCoversEveryCanonicalAlertType() {
-        for alertType in NotificationPrefsView.alertTypes {
-            let label = NotificationPrefsView.displayName(for: alertType)
+        for alertType in NotificationPrefsViewModel.alertTypes {
+            let label = NotificationPrefsViewModel.displayName(for: alertType)
             XCTAssertNotEqual(
                 label,
                 alertType,
@@ -60,47 +60,47 @@ final class NotificationPrefsViewTests: XCTestCase {
             )
         }
         XCTAssertEqual(
-            NotificationPrefsView.displayName(for: "unknown_type"),
+            NotificationPrefsViewModel.displayName(for: "unknown_type"),
             "unknown_type",
             "Unknown alert types fall through to the raw value so a backend addition is visible without a UI patch."
         )
     }
 
     func testPriorityDisplayNameCapitalisesFirstLetter() {
-        XCTAssertEqual(NotificationPrefsView.priorityDisplayName(for: "low"), "Low")
-        XCTAssertEqual(NotificationPrefsView.priorityDisplayName(for: "medium"), "Medium")
-        XCTAssertEqual(NotificationPrefsView.priorityDisplayName(for: "high"), "High")
+        XCTAssertEqual(NotificationPrefsViewModel.priorityDisplayName(for: "low"), "Low")
+        XCTAssertEqual(NotificationPrefsViewModel.priorityDisplayName(for: "medium"), "Medium")
+        XCTAssertEqual(NotificationPrefsViewModel.priorityDisplayName(for: "high"), "High")
     }
 
     func testScopeLabelCoversEveryScopeShape() {
         let global = makeDevicePref(publicId: "p-1", alertType: "order_fill_full")
-        XCTAssertEqual(NotificationPrefsView.scopeLabel(for: global), "Device-global")
+        XCTAssertEqual(NotificationPrefsViewModel.scopeLabel(for: global), "Device-global")
 
         let walletScoped = makeDevicePref(
             publicId: "p-2",
             alertType: "order_fill_full",
             walletPublicId: "wallet-abcdef0123456789"
         )
-        XCTAssertTrue(NotificationPrefsView.scopeLabel(for: walletScoped).hasPrefix("Wallet "))
+        XCTAssertTrue(NotificationPrefsViewModel.scopeLabel(for: walletScoped).hasPrefix("Wallet "))
 
         let operatorScoped = makeDevicePref(
             publicId: "p-3",
             alertType: "order_fill_full",
             operatorPublicId: "operator-1234567890"
         )
-        XCTAssertTrue(NotificationPrefsView.scopeLabel(for: operatorScoped).hasPrefix("Operator "))
+        XCTAssertTrue(NotificationPrefsViewModel.scopeLabel(for: operatorScoped).hasPrefix("Operator "))
     }
 
     func testFormatMinutesProducesHHMM() {
-        XCTAssertEqual(NotificationPrefsView.formatMinutes(0), "00:00")
-        XCTAssertEqual(NotificationPrefsView.formatMinutes(60), "01:00")
-        XCTAssertEqual(NotificationPrefsView.formatMinutes(22 * 60 + 30), "22:30")
-        XCTAssertEqual(NotificationPrefsView.formatMinutes(1439), "23:59")
+        XCTAssertEqual(NotificationPrefsViewModel.formatMinutes(0), "00:00")
+        XCTAssertEqual(NotificationPrefsViewModel.formatMinutes(60), "01:00")
+        XCTAssertEqual(NotificationPrefsViewModel.formatMinutes(22 * 60 + 30), "22:30")
+        XCTAssertEqual(NotificationPrefsViewModel.formatMinutes(1439), "23:59")
     }
 
     func testFormatMinutesOutOfRangeFallsThroughToRawInteger() {
-        XCTAssertEqual(NotificationPrefsView.formatMinutes(-1), "-1")
-        XCTAssertEqual(NotificationPrefsView.formatMinutes(1440), "1440")
+        XCTAssertEqual(NotificationPrefsViewModel.formatMinutes(-1), "-1")
+        XCTAssertEqual(NotificationPrefsViewModel.formatMinutes(1440), "1440")
     }
 
     func testSummaryLabelFormat() {
@@ -112,7 +112,7 @@ final class NotificationPrefsViewTests: XCTestCase {
             quietHoursStartMin: 22 * 60,
             quietHoursEndMin: 7 * 60
         )
-        let summary = NotificationPrefsView.summaryLabel(for: live)
+        let summary = NotificationPrefsViewModel.summaryLabel(for: live)
         XCTAssertTrue(summary.contains("Enabled"))
         XCTAssertTrue(summary.contains("min high"))
         XCTAssertTrue(summary.contains("quiet 22:00–07:00"))
@@ -123,7 +123,7 @@ final class NotificationPrefsViewTests: XCTestCase {
             enabled: false,
             minPriority: "low"
         )
-        XCTAssertTrue(NotificationPrefsView.summaryLabel(for: muted).contains("Muted"))
+        XCTAssertTrue(NotificationPrefsViewModel.summaryLabel(for: muted).contains("Muted"))
     }
 
     /// Past ``muteUntil`` is not surfaced — only an active mute is
@@ -134,7 +134,7 @@ final class NotificationPrefsViewTests: XCTestCase {
             alertType: "order_fill_full",
             muteUntil: Date(timeIntervalSince1970: 1_500_000_000)
         )
-        XCTAssertFalse(NotificationPrefsView.summaryLabel(for: pastMute).contains("muted until"))
+        XCTAssertFalse(NotificationPrefsViewModel.summaryLabel(for: pastMute).contains("muted until"))
     }
 
     private static let fixedProvenance = EnvelopeMinter.Provenance(
@@ -146,7 +146,7 @@ final class NotificationPrefsViewTests: XCTestCase {
     )
 
     func testMakeDefaultCommandShape() {
-        let command = NotificationPrefsView.makeDefaultCommand(
+        let command = NotificationPrefsViewModel.makeDefaultCommand(
             alertType: "order_fill_full",
             enabled: false,
             minPriority: "high",

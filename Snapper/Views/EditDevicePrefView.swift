@@ -85,7 +85,7 @@ struct EditDevicePrefView: View {
 
         switch mode {
         case .create:
-            _alertType = State(initialValue: NotificationPrefsView.alertTypes[0])
+            _alertType = State(initialValue: NotificationPrefsViewModel.alertTypes[0])
             _scopeKind = State(initialValue: .deviceGlobal)
             _selectedOperatorId = State(initialValue: nil)
             _selectedWalletId = State(initialValue: nil)
@@ -132,7 +132,7 @@ struct EditDevicePrefView: View {
                 Section("Alert") {
                     if isAlertTypeLocked {
                         HStack {
-                            Text(NotificationPrefsView.displayName(for: alertType))
+                            Text(NotificationPrefsViewModel.displayName(for: alertType))
                             Spacer()
                             Text("locked")
                                 .font(.caption)
@@ -140,8 +140,8 @@ struct EditDevicePrefView: View {
                         }
                     } else {
                         Picker("Type", selection: $alertType) {
-                            ForEach(NotificationPrefsView.alertTypes, id: \.self) { type in
-                                Text(NotificationPrefsView.displayName(for: type)).tag(type)
+                            ForEach(NotificationPrefsViewModel.alertTypes, id: \.self) { type in
+                                Text(NotificationPrefsViewModel.displayName(for: type)).tag(type)
                             }
                         }
                     }
@@ -201,8 +201,8 @@ struct EditDevicePrefView: View {
                 Section {
                     Toggle("Enabled", isOn: $enabled)
                     Picker("Minimum priority", selection: $minPriority) {
-                        ForEach(NotificationPrefsView.priorityValues, id: \.self) { priority in
-                            Text(NotificationPrefsView.priorityDisplayName(for: priority))
+                        ForEach(NotificationPrefsViewModel.priorityValues, id: \.self) { priority in
+                            Text(NotificationPrefsViewModel.priorityDisplayName(for: priority))
                                 .tag(priority)
                         }
                     }
