@@ -64,7 +64,7 @@ final class PositionsViewTests: XCTestCase {
         let walletB = makePosition(publicId: "p-b", walletPublicId: "wallet-b")
         let orphan = makePosition(publicId: "p-orphan", walletPublicId: nil)
 
-        let scoped = PositionsView.filter(
+        let scoped = PositionsViewModel.filter(
             positions: [walletA, walletB, orphan],
             selectedWalletPublicId: "wallet-a"
         )
@@ -76,7 +76,7 @@ final class PositionsViewTests: XCTestCase {
         let walletA = makePosition(publicId: "p-a", walletPublicId: "wallet-a")
         let walletB = makePosition(publicId: "p-b", walletPublicId: "wallet-b")
 
-        let unscoped = PositionsView.filter(
+        let unscoped = PositionsViewModel.filter(
             positions: [walletA, walletB],
             selectedWalletPublicId: nil
         )
@@ -85,15 +85,15 @@ final class PositionsViewTests: XCTestCase {
     }
 
     func testWalletMatchesPolicyMirrorsOrdersView() {
-        XCTAssertTrue(PositionsView.walletMatches(rowWalletId: nil, selected: "wallet-a"))
-        XCTAssertTrue(PositionsView.walletMatches(rowWalletId: "wallet-a", selected: nil))
-        XCTAssertTrue(PositionsView.walletMatches(rowWalletId: "wallet-a", selected: "wallet-a"))
-        XCTAssertFalse(PositionsView.walletMatches(rowWalletId: "wallet-b", selected: "wallet-a"))
+        XCTAssertTrue(PositionsViewModel.walletMatches(rowWalletId: nil, selected: "wallet-a"))
+        XCTAssertTrue(PositionsViewModel.walletMatches(rowWalletId: "wallet-a", selected: nil))
+        XCTAssertTrue(PositionsViewModel.walletMatches(rowWalletId: "wallet-a", selected: "wallet-a"))
+        XCTAssertFalse(PositionsViewModel.walletMatches(rowWalletId: "wallet-b", selected: "wallet-a"))
     }
 
     func testMakeReduceCommandLongPositionFiresSell() {
         let position = makePosition(publicId: "p-1", walletPublicId: "wallet-a", quantity: 0.5)
-        let command = PositionsView.makeReduceCommand(
+        let command = PositionsViewModel.makeReduceCommand(
             position: position,
             quantity: 0.25,
             provenance: Self.fixedProvenance
@@ -112,7 +112,7 @@ final class PositionsViewTests: XCTestCase {
 
     func testMakeReduceCommandShortPositionFiresBuy() {
         let position = makePosition(publicId: "p-2", walletPublicId: "wallet-a", quantity: -1.0)
-        let command = PositionsView.makeReduceCommand(
+        let command = PositionsViewModel.makeReduceCommand(
             position: position,
             quantity: 1.0,
             provenance: Self.fixedProvenance
@@ -129,7 +129,7 @@ final class PositionsViewTests: XCTestCase {
 
     func testMakeReduceCommandFullCloseHandlesNegativeQuantityAbsolutely() {
         let position = makePosition(publicId: "p-3", walletPublicId: "wallet-a", quantity: -2.5)
-        let command = PositionsView.makeReduceCommand(
+        let command = PositionsViewModel.makeReduceCommand(
             position: position,
             quantity: 2.5,
             provenance: Self.fixedProvenance
@@ -146,7 +146,7 @@ final class PositionsViewTests: XCTestCase {
     /// monotonic ``sequence_id``.
     func testMakeReduceCommandStampsInjectedProvenance() {
         let position = makePosition(publicId: "p-4", walletPublicId: "wallet-a", quantity: 1.0)
-        let command = PositionsView.makeReduceCommand(
+        let command = PositionsViewModel.makeReduceCommand(
             position: position,
             quantity: 1.0,
             provenance: Self.fixedProvenance
@@ -166,7 +166,7 @@ final class PositionsViewTests: XCTestCase {
     /// the user instead of firing a malformed request.
     func testMakeReduceCommandReturnsNilWhenWalletIdMissing() {
         let position = makePosition(publicId: "p-5", walletPublicId: nil, quantity: 1.0)
-        let command = PositionsView.makeReduceCommand(
+        let command = PositionsViewModel.makeReduceCommand(
             position: position,
             quantity: 1.0,
             provenance: Self.fixedProvenance
@@ -177,8 +177,8 @@ final class PositionsViewTests: XCTestCase {
     func testCanSubmitReduceRequiresBothIds() {
         let ok = makePosition(publicId: "p-ok", walletPublicId: "wallet-a", quantity: 1.0)
         let missingWallet = makePosition(publicId: "p-mw", walletPublicId: nil, quantity: 1.0)
-        XCTAssertTrue(PositionsView.canSubmitReduce(position: ok))
-        XCTAssertFalse(PositionsView.canSubmitReduce(position: missingWallet))
+        XCTAssertTrue(PositionsViewModel.canSubmitReduce(position: ok))
+        XCTAssertFalse(PositionsViewModel.canSubmitReduce(position: missingWallet))
     }
 
     /// Surface-load-errors branch (PR #2): a refresh failure on top
@@ -186,7 +186,7 @@ final class PositionsViewTests: XCTestCase {
     /// instead of the "No positions" empty state.
     func testShouldShowLoadErrorWhenEmptyAndLoadFailed() {
         XCTAssertTrue(
-            PositionsView.shouldShowLoadError(
+            PositionsViewModel.shouldShowLoadError(
                 filteredCount: 0,
                 loadError: .httpError(503),
                 isLoading: false
@@ -199,7 +199,7 @@ final class PositionsViewTests: XCTestCase {
     /// the user is already trading against.
     func testShouldNotShowLoadErrorWhenListNonEmpty() {
         XCTAssertFalse(
-            PositionsView.shouldShowLoadError(
+            PositionsViewModel.shouldShowLoadError(
                 filteredCount: 3,
                 loadError: .invalidResponse,
                 isLoading: false
@@ -212,7 +212,7 @@ final class PositionsViewTests: XCTestCase {
     /// settles.
     func testShouldNotShowLoadErrorWhileLoading() {
         XCTAssertFalse(
-            PositionsView.shouldShowLoadError(
+            PositionsViewModel.shouldShowLoadError(
                 filteredCount: 0,
                 loadError: .invalidResponse,
                 isLoading: true
@@ -222,7 +222,7 @@ final class PositionsViewTests: XCTestCase {
 
     func testShouldNotShowLoadErrorWhenNoError() {
         XCTAssertFalse(
-            PositionsView.shouldShowLoadError(
+            PositionsViewModel.shouldShowLoadError(
                 filteredCount: 0,
                 loadError: nil,
                 isLoading: false

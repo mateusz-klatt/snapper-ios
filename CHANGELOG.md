@@ -70,6 +70,27 @@ binders.
   `AppState.shared`. Establishes the AppState init-injection
   pattern that subsequent VMs (`OrdersViewModel`,
   `PositionsViewModel`) reuse.
+- **`PositionsView` MVVM extraction — `PositionsViewModel`** at
+  `Snapper/ViewModels/PositionsViewModel.swift`. The View shrinks
+  from a 581-line state-and-async holder to a thin List binder
+  (~310 lines, including the inline `ReducePositionView` +
+  `PositionCard` definitions). The VM owns `positions`,
+  `isLoading`, `loadError`, `submitError`, `load()`, the four
+  submit flows (`submitMarketReduce`, `submitBracket`,
+  `submitTrailingStop`), the `filteredPositions` derived
+  collection, and the static helpers (`filter`, `walletMatches`,
+  `canSubmitReduce`, `shouldShowLoadError`, `makeReduceCommand`).
+  Sheet/alert presentation flags (`actionSheetPosition`,
+  `reduceModalPosition`, `bracketModalPosition`,
+  `trailingStopModalPosition`, `pendingClosePosition`) stay as
+  `@State` in the View per Q3. 16 new VM tests cover load happy /
+  failure / sticky-error recovery, submitMarketReduce success /
+  missing-id refusal / API failure, submitBracket success /
+  no-cycle refusal / API failure, submitTrailingStop success /
+  no-cycle refusal / API failure, filteredPositions
+  wallet-scoping. Cross-file callsites in `HomeView`,
+  `PositionsViewTests`, `HomeViewTests` retargeted from
+  `PositionsView.X` to `PositionsViewModel.X` via mechanical sed.
 - **`OrdersView` MVVM extraction — `OrdersViewModel`** at
   `Snapper/ViewModels/OrdersViewModel.swift`. The View shrinks
   from a 465-line state-and-async holder to a thin Picker / List
@@ -121,9 +142,9 @@ binders.
 
 ### Tests
 
-- Test count: 205 (post-foundations) → 280 (+21 NewOrderSheet
+- Test count: 205 (post-foundations) → 296 (+21 NewOrderSheet
   pilot, +14 WalletPicker, +11 AttachBracket, +12 AttachTrailing,
-  +17 OrdersView).
+  +17 OrdersView, +16 PositionsView).
   New tests live under `SnapperTests/ViewModels/` and cover
   load / failure / race / submit / re-entry / idempotency /
   AppState mutation branches against the lock-protected

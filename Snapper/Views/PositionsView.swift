@@ -1,9 +1,8 @@
 import SwiftUI
-import os
 
-/// Wrapper that pairs a ``PositionSnapshot`` with an ``Identifiable``
-/// conformance for SwiftUI ``sheet(item:)`` driving without
-/// retroactively conforming the generated ``PositionData`` type.
+/// Wrapper that pairs a `PositionSnapshot` with an `Identifiable`
+/// conformance for SwiftUI `sheet(item:)` driving without
+/// retroactively conforming the generated `PositionData` type.
 private struct IdentifiedPosition: Identifiable {
     let position: PositionSnapshot
 
@@ -12,95 +11,68 @@ private struct IdentifiedPosition: Identifiable {
 
 /// Positions list with reduce / close actions (iOS-Position-Mutations).
 ///
-/// Wallet scoping: backend exposes ``wallet_public_id`` on the
-/// ``PositionData`` projection, so the list narrows to
-/// ``AppState.selectedWalletPublicId`` whenever a wallet is picked.
-/// Rows whose ``walletPublicId`` is ``nil`` (legacy / pre-projection
-/// rows) pass through so the UI never silently drops data — mirrors
-/// the policy ``OrdersViewModel.walletMatches`` uses for the same edge.
-///
-/// Mutations: tap a row to open an ActionSheet with two options.
-///
-/// - "Close position": confirms then submits a reduce-only market
-///   order with the full ``abs(position.quantity)`` against the
-///   opposite side.
-/// - "Reduce position": opens ``ReducePositionView`` with a slider
-///   bounded by the absolute quantity. Submits a reduce-only
-///   market order with the chosen partial size.
-///
-/// Both actions go through the existing ``POST /api/orders`` route
-/// with ``reduceOnly=true`` — no new backend route. After submit the
-/// list refetches so the resulting (smaller / zero) position
-/// reflects in the UI on the next bus tick.
+/// Refactored to MVVM in v0.3.1 — data, async I/O, and the four
+/// submit flows live in `PositionsViewModel`. The View binds
+/// sheet/alert presentation flags via `@State`.
 struct PositionsView: View {
+
     @Environment(AppState.self) private var appState
     @EnvironmentObject private var authService: AuthService
-    @State private var positions: [PositionSnapshot] = []
-    @State private var isLoading = false
-    @State private var loadError: APIError?
+    @State private var viewModel: PositionsViewModel?
+
     @State private var actionSheetPosition: PositionSnapshot?
     @State private var reduceModalPosition: IdentifiedPosition?
     @State private var bracketModalPosition: IdentifiedPosition?
     @State private var trailingStopModalPosition: IdentifiedPosition?
     @State private var pendingClosePosition: PositionSnapshot?
-    @State private var submitError: String?
-
-    private let logger = Logger(
-        subsystem: Bundle.main.bundleIdentifier ?? "Snapper",
-        category: "PositionsView"
-    )
 
     var body: some View {
         NavigationStack {
             Group {
-                if isLoading && filteredPositions.isEmpty {
-                    ProgressView("Loading positions…")
-                } else if Self.shouldShowLoadError(
-                    filteredCount: filteredPositions.count,
-                    loadError: loadError,
-                    isLoading: isLoading
-                ), let loadError {
-                    ContentUnavailableView(
-                        "Couldn't load positions",
-                        systemImage: "exclamationmark.triangle",
-                        description: Text(loadError.localizedDescription)
-                    )
-                    .overlay(alignment: .bottom) {
-                        Button("Retry") {
-                            Task { await load() }
+                if let viewModel {
+                    if viewModel.isLoading && viewModel.filteredPositions.isEmpty {
+                        ProgressView("Loading positions…")
+                    } else if PositionsViewModel.shouldShowLoadError(
+                        filteredCount: viewModel.filteredPositions.count,
+                        loadError: viewModel.loadError,
+                        isLoading: viewModel.isLoading
+                    ), let loadError = viewModel.loadError {
+                        ContentUnavailableView(
+                            "Couldn't load positions",
+                            systemImage: "exclamationmark.triangle",
+                            description: Text(loadError.localizedDescription)
+                        )
+                        .overlay(alignment: .bottom) {
+                            Button("Retry") {
+                                Task { await viewModel.load() }
+                            }
+                            .buttonStyle(.borderedProminent)
+                            .padding()
                         }
-                        .buttonStyle(.borderedProminent)
-                        .padding()
-                    }
-                } else if filteredPositions.isEmpty {
-                    ContentUnavailableView(
-                        "No positions",
-                        systemImage: "chart.line.flattrend.xyaxis",
-                        description: Text("Open positions will appear here.")
-                    )
-                } else {
-                    List(filteredPositions, id: \.publicId) { position in
-                        if authService.hasPermission(.managePositions) {
-                            Button {
-                                actionSheetPosition = position
-                            } label: {
+                    } else if viewModel.filteredPositions.isEmpty {
+                        ContentUnavailableView(
+                            "No positions",
+                            systemImage: "chart.line.flattrend.xyaxis",
+                            description: Text("Open positions will appear here.")
+                        )
+                    } else {
+                        List(viewModel.filteredPositions, id: \.publicId) { position in
+                            if authService.hasPermission(.managePositions) {
+                                Button {
+                                    actionSheetPosition = position
+                                } label: {
+                                    PositionCard(position: position)
+                                }
+                                .buttonStyle(.plain)
+                            } else {
                                 PositionCard(position: position)
                             }
-                            .buttonStyle(.plain)
-                        } else {
-                            // Viewer / read-only roles: row stays
-                            // visible but does not surface the
-                            // close / reduce / bracket / trailing
-                            // action sheet (every option in the
-                            // sheet would 403 against the backend
-                            // capability guard).
-                            PositionCard(position: position)
                         }
+                        .listStyle(.insetGrouped)
+                        .scrollContentBackground(.hidden)
+                        .background(Color.bgBase)
+                        .refreshable { await viewModel.load() }
                     }
-                    .listStyle(.insetGrouped)
-                    .scrollContentBackground(.hidden)
-                    .background(Color.bgBase)
-                    .refreshable { await load() }
                 }
             }
             .navigationTitle("Positions")
@@ -111,7 +83,10 @@ struct PositionsView: View {
             }
         }
         .task(id: appState.selectedWalletPublicId) {
-            await load()
+            if viewModel == nil {
+                viewModel = PositionsViewModel(appState: appState)
+            }
+            await viewModel?.load()
         }
         .confirmationDialog(
             actionSheetPosition.map { "\($0.instrument) on \($0.exchange)" } ?? "",
@@ -121,17 +96,8 @@ struct PositionsView: View {
             ),
             presenting: actionSheetPosition
         ) { position in
-            // All four trading actions are gated by `managePositions`
-            // — viewers (read-only role) skip straight to Cancel so
-            // the action sheet doesn't surface buttons that would
-            // 403 against the backend `manage:positions` (close /
-            // reduce / attach bracket) and `create:orders` (the
-            // reduce-only market order under the hood) capability
-            // guards. The Cancel option below stays visible
-            // regardless so the sheet always has a dismissal
-            // affordance.
             if authService.hasPermission(.managePositions) {
-                if Self.canSubmitReduce(position: position) {
+                if PositionsViewModel.canSubmitReduce(position: position) {
                     Button("Close position", role: .destructive) {
                         pendingClosePosition = position
                     }
@@ -165,7 +131,7 @@ struct PositionsView: View {
             presenting: pendingClosePosition
         ) { position in
             Button("Close", role: .destructive) {
-                Task { await submitMarketReduce(position: position, quantity: abs(position.quantity)) }
+                Task { await viewModel?.submitMarketReduce(position: position, quantity: abs(position.quantity)) }
             }
             Button("Cancel", role: .cancel) {
                 pendingClosePosition = nil
@@ -179,7 +145,7 @@ struct PositionsView: View {
             ReducePositionView(
                 position: wrapper.position,
                 onSubmit: { quantity in
-                    await submitMarketReduce(position: wrapper.position, quantity: quantity)
+                    await viewModel?.submitMarketReduce(position: wrapper.position, quantity: quantity) ?? false
                 }
             )
         }
@@ -187,12 +153,12 @@ struct PositionsView: View {
             AttachBracketSheet(
                 position: wrapper.position,
                 onSubmit: { slPrice, tpPrice, idempotencyKey in
-                    await submitBracket(
+                    await viewModel?.submitBracket(
                         position: wrapper.position,
                         slPrice: slPrice,
                         tpPrice: tpPrice,
                         idempotencyKey: idempotencyKey
-                    )
+                    ) ?? false
                 }
             )
         }
@@ -200,240 +166,32 @@ struct PositionsView: View {
             AttachTrailingStopSheet(
                 position: wrapper.position,
                 onSubmit: { trailingPct, minLockPct, idempotencyKey in
-                    await submitTrailingStop(
+                    await viewModel?.submitTrailingStop(
                         position: wrapper.position,
                         trailingPct: trailingPct,
                         minLockPct: minLockPct,
                         idempotencyKey: idempotencyKey
-                    )
+                    ) ?? false
                 }
             )
         }
         .alert(
             "Submission failed",
             isPresented: Binding(
-                get: { submitError != nil },
-                set: { if !$0 { submitError = nil } }
+                get: { viewModel?.submitError != nil },
+                set: { if !$0 { viewModel?.submitError = nil } }
             ),
-            presenting: submitError
+            presenting: viewModel?.submitError
         ) { _ in
             Button("OK", role: .cancel) {
-                submitError = nil
+                viewModel?.submitError = nil
             }
         } message: { error in
             Text(error)
         }
     }
-
-    var filteredPositions: [PositionSnapshot] {
-        return Self.filter(
-            positions: positions,
-            selectedWalletPublicId: appState.selectedWalletPublicId
-        )
-    }
-
-    /// Pure wallet-match helper extracted for unit testing — mirrors
-    /// the policy in ``OrdersViewModel.walletMatches``: ``nil`` selection
-    /// passes through every row, and ``nil`` row-side wallet passes
-    /// through so legacy / system rows are never silently dropped.
-    static func walletMatches(rowWalletId: String?, selected: String?) -> Bool {
-        guard let selected else { return true }
-        guard let rowWalletId else { return true }
-        return rowWalletId == selected
-    }
-
-    static func filter(
-        positions: [PositionSnapshot],
-        selectedWalletPublicId: String?
-    ) -> [PositionSnapshot] {
-        return positions.filter { position in
-            walletMatches(
-                rowWalletId: position.walletPublicId,
-                selected: selectedWalletPublicId
-            )
-        }
-    }
-
-    /// Decision helper for the error-state branch — returns ``true``
-    /// when the body should render the "couldn't load" variant
-    /// instead of either the generic empty state or the cached list.
-    /// We only surface the error variant when there is nothing else
-    /// to show: a refresh failure on top of cached rows would
-    /// otherwise hide live data behind a full-screen error.
-    static func shouldShowLoadError(
-        filteredCount: Int,
-        loadError: APIError?,
-        isLoading: Bool
-    ) -> Bool {
-        guard !isLoading else { return false }
-        guard loadError != nil else { return false }
-        return filteredCount == 0
-    }
-
-    private func load() async {
-        isLoading = true
-        defer { isLoading = false }
-        do {
-            positions = try await APIClient.shared.fetchPositions()
-            loadError = nil
-        } catch let error as APIError {
-            loadError = error
-            logger.error("Failed to fetch positions: \(error.localizedDescription)")
-        } catch {
-            loadError = .invalidResponse
-            logger.error("Failed to fetch positions: \(error.localizedDescription)")
-        }
-    }
-
-    @discardableResult
-    private func submitMarketReduce(position: PositionSnapshot, quantity: Double) async -> Bool {
-        guard let command = Self.makeReduceCommand(position: position, quantity: quantity) else {
-            logger.error("Refusing to submit reduce/close: position missing instrument or wallet public id")
-            submitError = "Position is missing the wallet or instrument identifier the backend requires. Try refreshing the positions list."
-            return false
-        }
-        do {
-            _ = try await APIClient.shared.createOrder(command: command)
-            await load()
-            return true
-        } catch {
-            logger.error("Failed to submit reduce/close: \(error.localizedDescription)")
-            submitError = "Couldn't submit the order. Try again."
-            return false
-        }
-    }
-
-    /// Reduce / close eligibility: backend rejects ``CreateOrderBody``
-    /// with empty ``instrumentPublicId`` or ``walletPublicId`` so the
-    /// UI must hide the trading actions for legacy / system rows that
-    /// arrive without those ids.
-    static func canSubmitReduce(position: PositionSnapshot) -> Bool {
-        guard
-            let walletId = position.walletPublicId, !walletId.isEmpty,
-            let instrumentId = position.instrumentPublicId, !instrumentId.isEmpty
-        else {
-            return false
-        }
-        return true
-    }
-
-    @discardableResult
-    private func submitBracket(
-        position: PositionSnapshot,
-        slPrice: Double?,
-        tpPrice: Double?,
-        idempotencyKey: String
-    ) async -> Bool {
-        guard let cycleId = position.positionCyclePublicId else {
-            submitError = "Position has no active cycle to attach a bracket to."
-            return false
-        }
-        do {
-            let command = AttachBracketSheetViewModel.makeCommand(
-                positionCyclePublicId: cycleId,
-                slPrice: slPrice,
-                tpPrice: tpPrice,
-                idempotencyKey: idempotencyKey
-            )
-            _ = try await APIClient.shared.createBracket(command: command)
-            await load()
-            return true
-        } catch {
-            logger.error("Failed to submit bracket: \(error.localizedDescription)")
-            submitError = "Couldn't attach bracket. Try again."
-            return false
-        }
-    }
-
-    @discardableResult
-    private func submitTrailingStop(
-        position: PositionSnapshot,
-        trailingPct: Double,
-        minLockPct: Double?,
-        idempotencyKey: String
-    ) async -> Bool {
-        guard let cycleId = position.positionCyclePublicId else {
-            submitError = "Position has no active cycle to attach a trailing stop to."
-            return false
-        }
-        do {
-            let command = AttachTrailingStopSheetViewModel.makeCommand(
-                positionCyclePublicId: cycleId,
-                trailingPct: trailingPct,
-                minLockPct: minLockPct,
-                idempotencyKey: idempotencyKey
-            )
-            _ = try await APIClient.shared.createTrailingStop(command: command)
-            await load()
-            return true
-        } catch {
-            logger.error("Failed to submit trailing stop: \(error.localizedDescription)")
-            submitError = "Couldn't attach trailing stop. Try again."
-            return false
-        }
-    }
-
-    /// Build the iOS-side ``CreateOrderCommand`` envelope for a
-    /// reduce-only market order on the given position.
-    ///
-    /// The order side is the opposite of the position direction:
-    /// long position (positive quantity) -> ``"sell"``; short
-    /// (negative) -> ``"buy"``. ``reduceOnly`` is always true so a
-    /// venue cannot accidentally flip the position into the
-    /// opposite direction.
-    @MainActor
-    static func makeReduceCommand(
-        position: PositionSnapshot,
-        quantity: Double,
-        provenance: EnvelopeMinter.Provenance? = nil
-    ) -> CreateOrderCommand? {
-        guard
-            let walletId = position.walletPublicId, !walletId.isEmpty,
-            let instrumentId = position.instrumentPublicId, !instrumentId.isEmpty
-        else {
-            return nil
-        }
-        let envelope = provenance ?? EnvelopeMinter.shared.next(.control)
-        let side: String = position.quantity > 0 ? "sell" : "buy"
-        return CreateOrderCommand(
-            type: "create_order_command",
-            sequenceId: envelope.sequenceId,
-            publicId: envelope.publicId,
-            timestamp: envelope.timestamp,
-            sessionId: envelope.sessionId,
-            topic: nil,
-            payload: CreateOrderBody(
-                instrument: position.instrument,
-                instrumentPublicId: instrumentId,
-                exchange: position.exchange,
-                mode: position.mode,
-                side: side,
-                orderType: "market",
-                quantity: quantity,
-                price: nil,
-                stopPrice: nil,
-                timeInForce: "GTC",
-                postOnly: false,
-                leverage: nil,
-                reduceOnly: true,
-                walletPublicId: walletId,
-                operatorPublicId: nil,
-                idempotencyKey: nil,
-                aiReviewPublicId: nil
-            )
-        )
-    }
 }
 
-/// Modal sheet for partial-reduce of a position
-/// (iOS-Position-Mutations).
-///
-/// Renders a slider bounded by ``[0, abs(position.quantity)]`` plus
-/// preset buttons (25/50/75/100 %) for fast common reductions. The
-/// ``onSubmit`` closure is fired with the chosen quantity and
-/// dismisses the sheet on success — the parent ``PositionsView``
-/// handles the actual ``APIClient.createOrder`` round trip + error
-/// surface.
 struct ReducePositionView: View {
     let position: PositionSnapshot
     let onSubmit: (Double) async -> Bool
@@ -506,8 +264,6 @@ struct ReducePositionView: View {
                     Button("Submit") {
                         Task {
                             isSubmitting = true
-                            // Keep the sheet open on failure so the user can revise the
-                            // reduce quantity and retry without losing slider position.
                             let succeeded = await onSubmit(quantity)
                             isSubmitting = false
                             if succeeded {
@@ -527,7 +283,6 @@ struct ReducePositionView: View {
     }
 }
 
-/// Single-row presentation of a ``PositionData`` projection.
 struct PositionCard: View {
     let position: PositionSnapshot
 
@@ -553,8 +308,6 @@ struct PositionCard: View {
         .padding(.vertical, 4)
     }
 
-    /// Pure helper used both in the body and unit tests so the
-    /// quantity → side derivation has explicit coverage.
     static func direction(for quantity: Double) -> String {
         if quantity > 0 { return "Long" }
         if quantity < 0 { return "Short" }

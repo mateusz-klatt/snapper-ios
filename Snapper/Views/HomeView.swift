@@ -73,7 +73,7 @@ struct HomeView: View {
     /// filter so a wallet selection in the toolbar propagates to
     /// Home's "Open Positions" counter and detail card.
     var filteredPositions: [PositionSnapshot] {
-        return PositionsView.filter(
+        return PositionsViewModel.filter(
             positions: positions,
             selectedWalletPublicId: appState.selectedWalletPublicId
         )
