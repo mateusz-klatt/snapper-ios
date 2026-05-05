@@ -66,4 +66,54 @@ final class WalletPickerTests: XCTestCase {
             "Paper wallets must surface the (paper) suffix to mirror backend (label, is_paper) disambiguation."
         )
     }
+
+    /// Surface-load-errors branch (PR #2): when the wallet fetch
+    /// fails before any wallet is cached, the menu opens to a
+    /// "couldn't load" prompt with retry instead of an empty
+    /// list of selectable rows.
+    func testShouldShowLoadErrorWhenEmptyAndFailed() {
+        XCTAssertTrue(
+            WalletPicker.shouldShowLoadError(
+                wallets: [],
+                loadError: .invalidResponse
+            )
+        )
+    }
+
+    /// Cached wallets keep the menu functional even after a refresh
+    /// blip — the picker stays usable and the next successful load
+    /// clears the error.
+    func testShouldNotShowLoadErrorWhenWalletsCached() {
+        let cached = makeWallet(publicId: "p-cache", label: "main", isPaper: false)
+        XCTAssertFalse(
+            WalletPicker.shouldShowLoadError(
+                wallets: [cached],
+                loadError: .httpError(503)
+            )
+        )
+    }
+
+    func testShouldNotShowLoadErrorWhenNoError() {
+        XCTAssertFalse(
+            WalletPicker.shouldShowLoadError(
+                wallets: [],
+                loadError: nil
+            )
+        )
+    }
+
+    /// Toolbar capsule label — the failure mode label collapses to
+    /// a short prompt so the user sees an actionable signal instead
+    /// of a stuck "Loading wallets…" string after the fetch settled
+    /// with an error.
+    func testCurrentLabelFallsBackToWalletsUnavailableOnError() {
+        XCTAssertEqual(
+            WalletPicker.currentLabel(
+                wallets: [],
+                selected: nil,
+                loadError: .httpError(503)
+            ),
+            "Wallets unavailable"
+        )
+    }
 }

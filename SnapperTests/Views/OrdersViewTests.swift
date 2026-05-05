@@ -148,4 +148,47 @@ final class OrdersViewTests: XCTestCase {
 
         XCTAssertEqual(unscoped.count, 3)
     }
+
+    /// Surface-load-errors branch (PR #2): the orders list prepends
+    /// a "Couldn't load" Section when the most recent fetch failed.
+    func testShouldShowLoadErrorWhenErrorMessageSet() {
+        XCTAssertTrue(
+            OrdersView.shouldShowLoadError(
+                errorMessage: "Network unavailable",
+                isLoading: false
+            )
+        )
+    }
+
+    /// Mid-load suppression — the spinner state owns the screen, no
+    /// stale error banner flashes above an active fetch.
+    func testShouldNotShowLoadErrorWhileLoading() {
+        XCTAssertFalse(
+            OrdersView.shouldShowLoadError(
+                errorMessage: "Network unavailable",
+                isLoading: true
+            )
+        )
+    }
+
+    func testShouldNotShowLoadErrorWhenNil() {
+        XCTAssertFalse(
+            OrdersView.shouldShowLoadError(
+                errorMessage: nil,
+                isLoading: false
+            )
+        )
+    }
+
+    /// Empty-string defensiveness — the catch block sets
+    /// ``error.localizedDescription`` which can theoretically be
+    /// empty, in which case the banner has nothing to show.
+    func testShouldNotShowLoadErrorOnEmptyString() {
+        XCTAssertFalse(
+            OrdersView.shouldShowLoadError(
+                errorMessage: "",
+                isLoading: false
+            )
+        )
+    }
 }

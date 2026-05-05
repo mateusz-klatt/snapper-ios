@@ -45,6 +45,29 @@ struct OrdersView: View {
                 .padding()
 
                 List {
+                    if Self.shouldShowLoadError(
+                        errorMessage: errorMessage,
+                        isLoading: isLoading
+                    ), let errorMessage {
+                        Section {
+                            HStack(alignment: .top, spacing: 8) {
+                                Image(systemName: "exclamationmark.triangle")
+                                    .foregroundStyle(.orange)
+                                VStack(alignment: .leading, spacing: 2) {
+                                    Text("Couldn't load orders")
+                                        .font(.subheadline.weight(.semibold))
+                                    Text(errorMessage)
+                                        .font(.caption)
+                                        .foregroundStyle(.secondary)
+                                }
+                                Spacer()
+                                Button("Retry") {
+                                    Task { await load() }
+                                }
+                                .buttonStyle(.bordered)
+                            }
+                        }
+                    }
                     switch segment {
                     case .open:
                         ForEach(filteredOpen, id: \.publicId) { order in
@@ -231,6 +254,20 @@ struct OrdersView: View {
         }
     }
 
+    /// Decision helper for the error banner — returns ``true`` when
+    /// the orders list should prepend the "couldn't load" Section.
+    /// Suppressed mid-load so the user does not see a stale error
+    /// flash above an active spinner; surfaces the moment the load
+    /// settles with an unresolved error.
+    static func shouldShowLoadError(
+        errorMessage: String?,
+        isLoading: Bool
+    ) -> Bool {
+        guard !isLoading else { return false }
+        guard let errorMessage else { return false }
+        return !errorMessage.isEmpty
+    }
+
     private func load() async {
         isLoading = true
         defer { isLoading = false }
@@ -240,6 +277,7 @@ struct OrdersView: View {
 
         do {
             orders = try await ordersResult
+            errorMessage = nil
         } catch {
             logger.error("Failed to fetch orders: \(error)")
             errorMessage = error.localizedDescription
