@@ -53,15 +53,21 @@ final class NotificationPrefsViewModel {
         loadError = nil
 
         let resolvedDeviceId = await deviceIdProvider()
-        devicePublicId = resolvedDeviceId
+        // Treat empty-string device id as "not registered" — the
+        // View only nil-checks, so storing "" would render as a
+        // registered device and let the user fire `updateDevicePref`
+        // with an invalid `/devices//prefs` path segment.
+        let normalizedDeviceId: String? = (resolvedDeviceId?.isEmpty == false) ? resolvedDeviceId : nil
+        devicePublicId = normalizedDeviceId
 
         // Fan out alert-defaults + device-prefs concurrently. The
         // device-prefs call requires the resolved device id; if the
-        // device isn't registered (`nil`), skip the device-prefs
-        // fetch entirely and surface only the alert defaults.
+        // device isn't registered (`nil` after normalization), skip
+        // the device-prefs fetch entirely and surface only the alert
+        // defaults.
         async let defaultsResult = api.fetchAlertDefaults()
         async let prefsResult: DeviceAlertPrefListResponse? = {
-            guard let id = resolvedDeviceId, !id.isEmpty else { return nil }
+            guard let id = normalizedDeviceId else { return nil }
             return try await api.fetchDevicePrefs(devicePublicId: id)
         }()
 

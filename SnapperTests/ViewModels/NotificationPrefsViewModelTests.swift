@@ -172,6 +172,63 @@ final class NotificationPrefsViewModelTests: XCTestCase {
         XCTAssertEqual(viewModel.defaults.count, 1)
     }
 
+    /// Empty-string device id leak guard: a `deviceIdProvider`
+    /// that returns `""` (e.g. a half-resolved registration state)
+    /// must NOT be stored in `devicePublicId`, otherwise the View
+    /// would render the device as "registered" and let the user
+    /// fire `updateDevicePref` against `/devices//prefs` — an
+    /// invalid path segment that would 404 at the backend. The VM
+    /// normalizes empty to nil.
+    func testLoadNormalizesEmptyDeviceIdToNil() async {
+        let viewModel = makeViewModel(deviceId: "")
+        let defaultsResp = makeDefaultsResponse([makeAlertDefault()])
+        mockAPI.fetchAlertDefaultsHandler = { defaultsResp }
+        let calls = NotifPrefsCallCounter()
+        mockAPI.fetchDevicePrefsHandler = { _ in
+            await calls.increment()
+            throw APIError.invalidResponse
+        }
+        await viewModel.load()
+        let count = await calls.count
+        XCTAssertEqual(count, 0, "Empty device id must NOT trigger device-prefs fetch")
+        XCTAssertNil(
+            viewModel.devicePublicId,
+            "Empty device id must normalize to nil so the View doesn't render an invalid registered state"
+        )
+    }
+
+    /// Q9b regression guard: the alert-defaults + device-prefs
+    /// fetches must run CONCURRENTLY (`async let` fan-out), not
+    /// sequentially. Both handlers sleep for N ms; if the load
+    /// is parallel, total wall-clock time ≈ N ms; if it regressed
+    /// to sequential, total time ≈ 2N ms. The test asserts the
+    /// parallel envelope so a future refactor that accidentally
+    /// awaits one before starting the other fails loudly.
+    func testLoadFiresAlertDefaultsAndDevicePrefsConcurrently() async {
+        let viewModel = makeViewModel()
+        let defaultsResp = makeDefaultsResponse([makeAlertDefault()])
+        let prefsResp = makePrefsResponse([])
+        mockAPI.fetchAlertDefaultsHandler = {
+            try await Task.sleep(nanoseconds: 100_000_000)  // 100 ms
+            return defaultsResp
+        }
+        mockAPI.fetchDevicePrefsHandler = { _ in
+            try await Task.sleep(nanoseconds: 100_000_000)  // 100 ms
+            return prefsResp
+        }
+        let started = Date()
+        await viewModel.load()
+        let elapsedMs = Date().timeIntervalSince(started) * 1000
+        // Sequential would be ≥200 ms (two 100-ms sleeps stacked).
+        // Parallel is ≈100 ms; allow 50 ms slack for actor hop +
+        // CI noise but stay well under the 200 ms regression line.
+        XCTAssertLessThan(
+            elapsedMs,
+            180,
+            "load() must fan out async let — sequential would be ≥200ms; got \(elapsedMs)ms"
+        )
+    }
+
     func testLoadAlertDefaultsFailureStampsLoadError() async {
         let viewModel = makeViewModel()
         let prefsResp = makePrefsResponse([])
