@@ -1,39 +1,53 @@
 import Foundation
-import Combine
 
+/// LoginView's MVVM seam — wraps `AuthService` so the form's
+/// `username / password / isLoading` state is testable in isolation.
+///
+/// Migrated to `@Observable` in v0.3.1 (see
+/// `proprietary/plans/plan_2026_05_05_ios_v0_3_1_mvvm_extraction.md`).
+/// `AuthService` itself stays `ObservableObject` for now — the
+/// `SnapperApp` root and several other services bind to it via
+/// `@StateObject`, and migrating it sits outside this PR's scope.
+///
+/// `errorMessage` and `isAuthenticated` are computed passthroughs to
+/// the underlying `AuthService` so tests keep their existing
+/// assertions without needing Combine bridging. The View observes
+/// the VM through `@State` (iOS 17+ `@Observable` integration) and
+/// implicitly observes `AuthService` through the parent `@StateObject`
+/// in `SnapperApp`, so passthrough reads stay reactive.
 @MainActor
-class LoginViewModel: ObservableObject {
-    @Published var username = ""
-    @Published var password = ""
-    @Published var isLoading = false
-    @Published var errorMessage: String?
-    @Published var isAuthenticated = false
+@Observable
+final class LoginViewModel {
+
+    var username = ""
+    var password = ""
+    var isLoading = false
 
     private let authService: AuthService
-    private var cancellables = Set<AnyCancellable>()
 
     init(authService: AuthService = .shared) {
         self.authService = authService
-
-        authService.$isAuthenticated
-            .assign(to: &$isAuthenticated)
-
-        authService.$errorMessage
-            .assign(to: &$errorMessage)
     }
 
     var isLoginEnabled: Bool {
-        !username.isEmpty && !password.isEmpty && !isLoading
+        return !username.isEmpty && !password.isEmpty && !isLoading
+    }
+
+    var errorMessage: String? {
+        return authService.errorMessage
+    }
+
+    var isAuthenticated: Bool {
+        return authService.isAuthenticated
     }
 
     func login() async {
         isLoading = true
-        errorMessage = nil
 
         await authService.login(username: username, password: password)
 
         // Clear the plaintext password from memory once the login
-        // request resolves — `@Published` properties stay live for
+        // request resolves — `@Observable` properties stay live for
         // the view's lifetime otherwise, leaving the password
         // observable to anything holding the view model. The
         // privacy policy promises this clear; AuthService has the
