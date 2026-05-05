@@ -33,7 +33,7 @@ The app processes the following categories of data **on your device** so it can 
 ### Authentication credentials
 
 - **What:** username, password (during the login form), and the session tokens / cookies (`access_token`, `refresh_token`, `ws_token`, `csrf_token`) returned by your backend.
-- **How stored:** the backend's HTTP session cookies are managed by the system `URLSession` cookie storage (`HTTPCookieStorage.shared`), which iOS encrypts at rest as part of the app sandbox. The short-lived WebSocket token is held in memory only — never written to disk. The plaintext password is held in memory inside `LoginViewModel` for the duration of the login flow and is released when the view is torn down (typically when the user logs in or backgrounds the app for long enough that iOS reclaims the view).
+- **How stored:** the backend's HTTP session cookies are accepted and replayed by the system `URLSession` (the app uses `URLSession.shared` and lets iOS handle cookie storage). The short-lived WebSocket token is held in memory only — never written to disk by the app. The plaintext password is held in memory inside `LoginViewModel` only for the duration of the login request — `LoginViewModel.login()` overwrites it with an empty string the moment the login call resolves (success or failure), so it does not persist for the rest of the session.
 - **Where it goes:** sent to your backend (the URL you configured) over HTTPS during login and refresh requests. Never sent anywhere else.
 
 ### Trade-related data
@@ -51,7 +51,8 @@ The app processes the following categories of data **on your device** so it can 
 ### Device identifier (IDFV)
 
 - **What:** Apple's `identifierForVendor` — a UUID that identifies *your* device for *this* developer (Mateusz Klatt). Different developer = different IDFV. Resets if you uninstall every app from this developer.
-- **Why:** the backend uses it as a stable per-device key to disambiguate multiple installs (e.g. iPhone + iPad would be two separate device rows). This is the standard Apple-recommended privacy-friendly device identifier — see [Apple's "Identifying a device" docs](https://developer.apple.com/documentation/uikit/uidevice/identifierforvendor).
+- **Why:** the backend uses it as a per-device key to disambiguate multiple installs (e.g. iPhone + iPad would be two separate device rows). This is the standard Apple-recommended privacy-friendly device identifier — see [Apple's "Identifying a device" docs](https://developer.apple.com/documentation/uikit/uidevice/identifierforvendor).
+- **Fallback:** in the rare case where iOS returns no `identifierForVendor` (e.g. very early in the launch lifecycle, before the system has assigned one), the app generates a fresh random `UUID()` as a one-shot replacement for that registration call. That fallback id is NOT stable across launches — a subsequent registration would generate a new one — so the backend may see your device as a new row in that edge case. The IDFV path is the steady-state behavior on every supported device.
 - **How stored:** held in memory + sent to your backend with each device-registration call.
 - **Where it goes:** to your own backend only.
 - **Disclosed in `PrivacyInfo.xcprivacy`** as `NSPrivacyCollectedDataTypeDeviceID` with purpose `AppFunctionality` and `Tracking = false`.

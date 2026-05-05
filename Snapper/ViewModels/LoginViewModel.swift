@@ -32,6 +32,14 @@ class LoginViewModel: ObservableObject {
 
         await authService.login(username: username, password: password)
 
+        // Clear the plaintext password from memory once the login
+        // request resolves — `@Published` properties stay live for
+        // the view's lifetime otherwise, leaving the password
+        // observable to anything holding the view model. The
+        // privacy policy promises this clear; AuthService has the
+        // session-establishing tokens / cookies it needs, so the
+        // password is no longer required.
+        password = ""
         isLoading = false
     }
 }
