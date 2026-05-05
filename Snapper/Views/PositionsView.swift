@@ -54,6 +54,23 @@ struct PositionsView: View {
             Group {
                 if isLoading && filteredPositions.isEmpty {
                     ProgressView("Loading positions…")
+                } else if Self.shouldShowLoadError(
+                    filteredCount: filteredPositions.count,
+                    loadError: loadError,
+                    isLoading: isLoading
+                ), let loadError {
+                    ContentUnavailableView(
+                        "Couldn't load positions",
+                        systemImage: "exclamationmark.triangle",
+                        description: Text(loadError.localizedDescription)
+                    )
+                    .overlay(alignment: .bottom) {
+                        Button("Retry") {
+                            Task { await load() }
+                        }
+                        .buttonStyle(.borderedProminent)
+                        .padding()
+                    }
                 } else if filteredPositions.isEmpty {
                     ContentUnavailableView(
                         "No positions",
@@ -215,11 +232,28 @@ struct PositionsView: View {
         }
     }
 
+    /// Decision helper for the error-state branch — returns ``true``
+    /// when the body should render the "couldn't load" variant
+    /// instead of either the generic empty state or the cached list.
+    /// We only surface the error variant when there is nothing else
+    /// to show: a refresh failure on top of cached rows would
+    /// otherwise hide live data behind a full-screen error.
+    static func shouldShowLoadError(
+        filteredCount: Int,
+        loadError: APIError?,
+        isLoading: Bool
+    ) -> Bool {
+        guard !isLoading else { return false }
+        guard loadError != nil else { return false }
+        return filteredCount == 0
+    }
+
     private func load() async {
         isLoading = true
         defer { isLoading = false }
         do {
             positions = try await APIClient.shared.fetchPositions()
+            loadError = nil
         } catch let error as APIError {
             loadError = error
             logger.error("Failed to fetch positions: \(error.localizedDescription)")

@@ -180,4 +180,53 @@ final class PositionsViewTests: XCTestCase {
         XCTAssertTrue(PositionsView.canSubmitReduce(position: ok))
         XCTAssertFalse(PositionsView.canSubmitReduce(position: missingWallet))
     }
+
+    /// Surface-load-errors branch (PR #2): a refresh failure on top
+    /// of an empty list must surface an actionable error variant
+    /// instead of the "No positions" empty state.
+    func testShouldShowLoadErrorWhenEmptyAndLoadFailed() {
+        XCTAssertTrue(
+            PositionsView.shouldShowLoadError(
+                filteredCount: 0,
+                loadError: .httpError(503),
+                isLoading: false
+            )
+        )
+    }
+
+    /// Cached rows take priority over the error variant — surfacing
+    /// a full-screen error on top of live data would hide positions
+    /// the user is already trading against.
+    func testShouldNotShowLoadErrorWhenListNonEmpty() {
+        XCTAssertFalse(
+            PositionsView.shouldShowLoadError(
+                filteredCount: 3,
+                loadError: .invalidResponse,
+                isLoading: false
+            )
+        )
+    }
+
+    /// Mid-load suppression — the spinner is the canonical waiting
+    /// state, the error branch only takes over after the load
+    /// settles.
+    func testShouldNotShowLoadErrorWhileLoading() {
+        XCTAssertFalse(
+            PositionsView.shouldShowLoadError(
+                filteredCount: 0,
+                loadError: .invalidResponse,
+                isLoading: true
+            )
+        )
+    }
+
+    func testShouldNotShowLoadErrorWhenNoError() {
+        XCTAssertFalse(
+            PositionsView.shouldShowLoadError(
+                filteredCount: 0,
+                loadError: nil,
+                isLoading: false
+            )
+        )
+    }
 }

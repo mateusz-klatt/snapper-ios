@@ -148,4 +148,81 @@ final class OrdersViewTests: XCTestCase {
 
         XCTAssertEqual(unscoped.count, 3)
     }
+
+    /// Surface-load-errors branch (PR #2): the orders list prepends
+    /// a "Couldn't load" Section when the most recent fetch failed.
+    func testShouldShowLoadErrorWhenErrorMessageSet() {
+        XCTAssertTrue(
+            OrdersView.shouldShowLoadError(
+                errorMessage: "Network unavailable",
+                isLoading: false
+            )
+        )
+    }
+
+    /// Mid-load suppression — the spinner state owns the screen, no
+    /// stale error banner flashes above an active fetch.
+    func testShouldNotShowLoadErrorWhileLoading() {
+        XCTAssertFalse(
+            OrdersView.shouldShowLoadError(
+                errorMessage: "Network unavailable",
+                isLoading: true
+            )
+        )
+    }
+
+    func testShouldNotShowLoadErrorWhenNil() {
+        XCTAssertFalse(
+            OrdersView.shouldShowLoadError(
+                errorMessage: nil,
+                isLoading: false
+            )
+        )
+    }
+
+    /// Empty-string defensiveness — the catch block sets
+    /// ``error.localizedDescription`` which can theoretically be
+    /// empty, in which case the banner has nothing to show.
+    func testShouldNotShowLoadErrorOnEmptyString() {
+        XCTAssertFalse(
+            OrdersView.shouldShowLoadError(
+                errorMessage: "",
+                isLoading: false
+            )
+        )
+    }
+
+    /// Loading-placeholder branch (PR #2 fix-up): when isLoading
+    /// suppresses the error banner and the active segment has no
+    /// rows, a "Loading…" placeholder replaces the blank list the
+    /// user would otherwise stare at after tapping Retry.
+    func testShouldShowLoadingPlaceholderWhenLoadingAndEmpty() {
+        XCTAssertTrue(
+            OrdersView.shouldShowLoadingPlaceholder(
+                isLoading: true,
+                activeSegmentIsEmpty: true
+            )
+        )
+    }
+
+    /// Cached rows take priority — re-fetching while the user has
+    /// existing data on screen leaves the list visible instead of
+    /// pushing a placeholder above their working data.
+    func testShouldNotShowLoadingPlaceholderWhenSegmentHasData() {
+        XCTAssertFalse(
+            OrdersView.shouldShowLoadingPlaceholder(
+                isLoading: true,
+                activeSegmentIsEmpty: false
+            )
+        )
+    }
+
+    func testShouldNotShowLoadingPlaceholderWhenIdle() {
+        XCTAssertFalse(
+            OrdersView.shouldShowLoadingPlaceholder(
+                isLoading: false,
+                activeSegmentIsEmpty: true
+            )
+        )
+    }
 }

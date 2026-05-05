@@ -45,6 +45,41 @@ struct OrdersView: View {
                 .padding()
 
                 List {
+                    if Self.shouldShowLoadingPlaceholder(
+                        isLoading: isLoading,
+                        activeSegmentIsEmpty: activeSegmentIsEmpty
+                    ) {
+                        Section {
+                            HStack(spacing: 8) {
+                                ProgressView()
+                                Text("Loading…")
+                                    .font(.subheadline)
+                                    .foregroundStyle(.secondary)
+                            }
+                        }
+                    } else if Self.shouldShowLoadError(
+                        errorMessage: errorMessage,
+                        isLoading: isLoading
+                    ), let errorMessage {
+                        Section {
+                            HStack(alignment: .top, spacing: 8) {
+                                Image(systemName: "exclamationmark.triangle")
+                                    .foregroundStyle(.orange)
+                                VStack(alignment: .leading, spacing: 2) {
+                                    Text("Couldn't load")
+                                        .font(.subheadline.weight(.semibold))
+                                    Text(errorMessage)
+                                        .font(.caption)
+                                        .foregroundStyle(.secondary)
+                                }
+                                Spacer()
+                                Button("Retry") {
+                                    Task { await load() }
+                                }
+                                .buttonStyle(.bordered)
+                            }
+                        }
+                    }
                     switch segment {
                     case .open:
                         ForEach(filteredOpen, id: \.publicId) { order in
@@ -181,6 +216,18 @@ struct OrdersView: View {
         )
     }
 
+    /// True when the visible segment has no rows after filtering.
+    /// Used to drive the "Loading…" placeholder so a Retry tap on
+    /// an empty failure state shows progress feedback instead of a
+    /// blank list while the request is in flight.
+    var activeSegmentIsEmpty: Bool {
+        switch segment {
+        case .open: return filteredOpen.isEmpty
+        case .recent: return filteredRecent.isEmpty
+        case .fills: return filteredFills.isEmpty
+        }
+    }
+
     /// Backend-canonical "open" lifecycle states. Values mirror
     /// ``snapper.core.types.OrderStatusEnum`` members that have not
     /// reached a terminal state (``filled``, ``cancelled``,
@@ -231,6 +278,33 @@ struct OrdersView: View {
         }
     }
 
+    /// Decision helper for the error banner — returns ``true`` when
+    /// the orders list should prepend the "couldn't load" Section.
+    /// Suppressed mid-load so the user does not see a stale error
+    /// flash above an active spinner; surfaces the moment the load
+    /// settles with an unresolved error.
+    static func shouldShowLoadError(
+        errorMessage: String?,
+        isLoading: Bool
+    ) -> Bool {
+        guard !isLoading else { return false }
+        guard let errorMessage else { return false }
+        return !errorMessage.isEmpty
+    }
+
+    /// Decision helper for the in-list "Loading…" placeholder. The
+    /// banner suppresses itself while ``isLoading`` so a Retry tap
+    /// on an empty failure leaves the user staring at a blank list
+    /// without this placeholder. We only surface the placeholder
+    /// when the active segment has nothing to render — once any
+    /// rows are present the cached data covers the loading window.
+    static func shouldShowLoadingPlaceholder(
+        isLoading: Bool,
+        activeSegmentIsEmpty: Bool
+    ) -> Bool {
+        return isLoading && activeSegmentIsEmpty
+    }
+
     private func load() async {
         isLoading = true
         defer { isLoading = false }
@@ -238,18 +312,25 @@ struct OrdersView: View {
         async let ordersResult = APIClient.shared.fetchOrders()
         async let executionsResult = APIClient.shared.fetchExecutions()
 
+        // Capture both results before mutating errorMessage so a
+        // partial failure on either fetch surfaces — the Fills
+        // segment was previously hiding executions failures because
+        // only fetchOrders' catch was wired up.
+        var encounteredError: String?
         do {
             orders = try await ordersResult
         } catch {
             logger.error("Failed to fetch orders: \(error)")
-            errorMessage = error.localizedDescription
+            encounteredError = error.localizedDescription
         }
 
         do {
             executions = try await executionsResult
         } catch {
             logger.error("Failed to fetch executions: \(error)")
+            encounteredError = encounteredError ?? error.localizedDescription
         }
+        errorMessage = encounteredError
     }
 
     @discardableResult
