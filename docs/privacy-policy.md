@@ -1,9 +1,8 @@
----
-title: Privacy Policy
-permalink: /privacy-policy/
----
-
 # Snapper iOS — Privacy Policy
+
+> **Canonical published version:** [snapper.ch/privacy-policy.html](https://snapper.ch/privacy-policy.html)
+>
+> This markdown file is the source-of-truth for developers reading the iOS repo. The Apple App Store submission references the published HTML at the URL above.
 
 **Effective date:** 2026-05-05
 **Last updated:** 2026-05-05
