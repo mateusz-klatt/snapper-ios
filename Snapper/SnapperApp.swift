@@ -63,12 +63,17 @@ struct SnapperApp: App {
 
     /// Login flips `isAuthenticated` to true while the app is already
     /// `.active` — scenePhase doesn't fire, so we need a second
-    /// observer to kick the WS connect. Logout is the mirror case.
+    /// observer to kick the WS connect AND the durable APNs
+    /// re-registration. Without the registration call here, a user
+    /// who logs out and logs back in without ever backgrounding the
+    /// app stays stuck in `.awaitingToken` until the next
+    /// background→active cycle. Logout is the mirror case;
     /// `disconnect()` is idempotent so the compound "logout +
     /// background" path is safe.
     private func handleAuthChange(_ isAuth: Bool) {
         if isAuth {
             webSocketManager.connect()
+            Task { await notificationService.refreshAuthorizationStatus() }
         } else {
             webSocketManager.disconnect()
         }

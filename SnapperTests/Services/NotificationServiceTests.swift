@@ -60,6 +60,20 @@ final class NotificationServiceTests: XCTestCase {
         )
     }
 
+    /// .ephemeral (App Clips push grant) must also count as
+    /// granted so the durable-registration decision aligns with
+    /// ``isAuthorized`` / SettingsView — without this, an ephemeral
+    /// + logged-in user never re-fires registration and stays
+    /// stuck in ``.awaitingToken``.
+    func testShouldFireDurableRegistrationEphemeralAndLoggedIn() {
+        XCTAssertTrue(
+            NotificationService.shouldFireDurableRegistration(
+                authorizationStatus: .ephemeral,
+                isLoggedIn: true
+            )
+        )
+    }
+
     /// Logged-out user must NOT trigger registration — the device
     /// row would lack a backend session to bind to and the
     /// register call would 401.

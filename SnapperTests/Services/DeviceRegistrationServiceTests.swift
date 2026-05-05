@@ -158,6 +158,46 @@ final class DeviceRegistrationServiceTests: XCTestCase {
         )
     }
 
+    /// Actor-re-entrancy race (PR #5 fix-up): a registration response
+    /// that lands AFTER ``onLogout()`` ran must NOT re-populate
+    /// ``lastRegisteredDevicePublicId``. Actors are re-entrant across
+    /// ``await``, so the in-flight ``apiClient.registerDevice`` hop
+    /// can resume after logout took the actor turn — without an
+    /// ``isLoggedIn`` re-check inside ``register()``, the response
+    /// would re-stamp the cached id for a session the user already
+    /// signed out of.
+    func testLogoutDuringRegisterDropsTheResponse() async {
+        let service = DeviceRegistrationService(apiClient: apiClient)
+        let token = Data([0x42])
+
+        MockURLProtocol.requestHandler = { _ in
+            // Hold the URLProtocol thread long enough for onLogout()
+            // to run and take the actor turn before the response
+            // resolves.
+            Thread.sleep(forTimeInterval: 0.2)
+            return MockURLProtocol.jsonResponse(statusCode: 200, json: _deviceResponseJSON)
+        }
+
+        await service.onLogin()
+        // Fire register; the inner await holds for ~200 ms.
+        let registerTask = Task { await service.onTokenReceived(token) }
+
+        // Yield long enough for the URLProtocol thread to hit the
+        // sleep, then fire logout while register is in flight.
+        try? await Task.sleep(nanoseconds: 50_000_000)
+        await service.onLogout()
+
+        // Drain the register Task so the test observes the
+        // post-response actor state.
+        await registerTask.value
+
+        let pid = await service.currentDevicePublicId()
+        XCTAssertNil(
+            pid,
+            "register() must drop the response on the floor when isLoggedIn flipped to false during the await — without this guard the response would re-populate lastRegisteredDevicePublicId for a torn-down session."
+        )
+    }
+
     /// Backend 500 error does NOT raise; next attempt re-tries cleanly.
     func testRegistrationServerErrorIsSwallowed() async {
         let service = DeviceRegistrationService(apiClient: apiClient)
