@@ -59,7 +59,7 @@ final class NewOrderSheetTests: XCTestCase {
             symbol: "BTC-USD",
             exchange: "kraken_futures"
         )
-        let bodySpot = NewOrderSheet.buildBody(
+        let bodySpot = NewOrderSheetViewModel.buildBody(
             instrument: krakenSpot,
             selectedExchange: "kraken",
             walletPublicId: "w", walletIsPaper: false,
@@ -68,7 +68,7 @@ final class NewOrderSheetTests: XCTestCase {
             leverageText: "", reduceOnly: false,
             idempotencyKey: Self.testIdempotencyKey
         )
-        let bodyFutures = NewOrderSheet.buildBody(
+        let bodyFutures = NewOrderSheetViewModel.buildBody(
             instrument: krakenFutures,
             selectedExchange: "kraken_futures",
             walletPublicId: "w", walletIsPaper: false,
@@ -91,7 +91,7 @@ final class NewOrderSheetTests: XCTestCase {
     /// venue's name is the worst case the original symbol-keyed bug
     /// could produce.
     func testBuildBodyRejectsExchangeMismatch() {
-        XCTAssertNil(NewOrderSheet.buildBody(
+        XCTAssertNil(NewOrderSheetViewModel.buildBody(
             instrument: Self.makeInstrument(exchange: "kraken"),
             selectedExchange: "kraken_futures",
             walletPublicId: "w", walletIsPaper: false,
@@ -105,17 +105,17 @@ final class NewOrderSheetTests: XCTestCase {
     /// `needsPrice` mirrors the frontend rule at
     /// `NewOrderModal.tsx:114` — limit + stop_limit require a price.
     func testNeedsPriceFollowsBackendOrderTypes() {
-        XCTAssertTrue(NewOrderSheet.needsPrice(orderType: "limit"))
-        XCTAssertTrue(NewOrderSheet.needsPrice(orderType: "stop_limit"))
-        XCTAssertFalse(NewOrderSheet.needsPrice(orderType: "market"))
-        XCTAssertFalse(NewOrderSheet.needsPrice(orderType: "stop"))
+        XCTAssertTrue(NewOrderSheetViewModel.needsPrice(orderType: "limit"))
+        XCTAssertTrue(NewOrderSheetViewModel.needsPrice(orderType: "stop_limit"))
+        XCTAssertFalse(NewOrderSheetViewModel.needsPrice(orderType: "market"))
+        XCTAssertFalse(NewOrderSheetViewModel.needsPrice(orderType: "stop"))
     }
 
     func testNeedsStopPriceFollowsBackendOrderTypes() {
-        XCTAssertTrue(NewOrderSheet.needsStopPrice(orderType: "stop"))
-        XCTAssertTrue(NewOrderSheet.needsStopPrice(orderType: "stop_limit"))
-        XCTAssertFalse(NewOrderSheet.needsStopPrice(orderType: "limit"))
-        XCTAssertFalse(NewOrderSheet.needsStopPrice(orderType: "market"))
+        XCTAssertTrue(NewOrderSheetViewModel.needsStopPrice(orderType: "stop"))
+        XCTAssertTrue(NewOrderSheetViewModel.needsStopPrice(orderType: "stop_limit"))
+        XCTAssertFalse(NewOrderSheetViewModel.needsStopPrice(orderType: "limit"))
+        XCTAssertFalse(NewOrderSheetViewModel.needsStopPrice(orderType: "market"))
     }
 
     /// Submit gate: instrument must be tradable, exchange must
@@ -125,7 +125,7 @@ final class NewOrderSheetTests: XCTestCase {
     /// the SwiftUI Form so the caller cannot fire requests that
     /// the backend would 422.
     func testCanSubmitRejectsMissingInstrument() {
-        XCTAssertFalse(NewOrderSheet.canSubmit(
+        XCTAssertFalse(NewOrderSheetViewModel.canSubmit(
             instrument: nil,
             selectedExchange: "kraken",
             isLoadingInstruments: false,
@@ -136,7 +136,7 @@ final class NewOrderSheetTests: XCTestCase {
     }
 
     func testCanSubmitRejectsMarketDataOnlyInstrument() {
-        XCTAssertFalse(NewOrderSheet.canSubmit(
+        XCTAssertFalse(NewOrderSheetViewModel.canSubmit(
             instrument: Self.makeInstrument(canTrade: false),
             selectedExchange: "kraken",
             isLoadingInstruments: false,
@@ -147,7 +147,7 @@ final class NewOrderSheetTests: XCTestCase {
     }
 
     func testCanSubmitRejectsExchangeMismatch() {
-        XCTAssertFalse(NewOrderSheet.canSubmit(
+        XCTAssertFalse(NewOrderSheetViewModel.canSubmit(
             instrument: Self.makeInstrument(exchange: "kraken"),
             selectedExchange: "kraken_futures",
             isLoadingInstruments: false,
@@ -162,7 +162,7 @@ final class NewOrderSheetTests: XCTestCase {
     /// fire the previously-selected instrument under a new
     /// exchange's name.
     func testCanSubmitBlockedWhileInstrumentsLoading() {
-        XCTAssertFalse(NewOrderSheet.canSubmit(
+        XCTAssertFalse(NewOrderSheetViewModel.canSubmit(
             instrument: Self.makeInstrument(),
             selectedExchange: "kraken",
             isLoadingInstruments: true,
@@ -174,14 +174,14 @@ final class NewOrderSheetTests: XCTestCase {
 
     func testCanSubmitRejectsZeroOrMissingQuantity() {
         let instrument = Self.makeInstrument()
-        XCTAssertFalse(NewOrderSheet.canSubmit(
+        XCTAssertFalse(NewOrderSheetViewModel.canSubmit(
             instrument: instrument,
             selectedExchange: "kraken",
             isLoadingInstruments: false,
             quantityText: "", priceText: "", stopPriceText: "",
             orderType: "market", isSubmitting: false
         ))
-        XCTAssertFalse(NewOrderSheet.canSubmit(
+        XCTAssertFalse(NewOrderSheetViewModel.canSubmit(
             instrument: instrument,
             selectedExchange: "kraken",
             isLoadingInstruments: false,
@@ -192,14 +192,14 @@ final class NewOrderSheetTests: XCTestCase {
 
     func testCanSubmitRequiresPriceForLimit() {
         let instrument = Self.makeInstrument()
-        XCTAssertFalse(NewOrderSheet.canSubmit(
+        XCTAssertFalse(NewOrderSheetViewModel.canSubmit(
             instrument: instrument,
             selectedExchange: "kraken",
             isLoadingInstruments: false,
             quantityText: "1", priceText: "", stopPriceText: "",
             orderType: "limit", isSubmitting: false
         ))
-        XCTAssertTrue(NewOrderSheet.canSubmit(
+        XCTAssertTrue(NewOrderSheetViewModel.canSubmit(
             instrument: instrument,
             selectedExchange: "kraken",
             isLoadingInstruments: false,
@@ -210,14 +210,14 @@ final class NewOrderSheetTests: XCTestCase {
 
     func testCanSubmitRequiresStopPriceForStopLimit() {
         let instrument = Self.makeInstrument()
-        XCTAssertFalse(NewOrderSheet.canSubmit(
+        XCTAssertFalse(NewOrderSheetViewModel.canSubmit(
             instrument: instrument,
             selectedExchange: "kraken",
             isLoadingInstruments: false,
             quantityText: "1", priceText: "100", stopPriceText: "",
             orderType: "stop_limit", isSubmitting: false
         ))
-        XCTAssertTrue(NewOrderSheet.canSubmit(
+        XCTAssertTrue(NewOrderSheetViewModel.canSubmit(
             instrument: instrument,
             selectedExchange: "kraken",
             isLoadingInstruments: false,
@@ -228,7 +228,7 @@ final class NewOrderSheetTests: XCTestCase {
 
     func testCanSubmitMarketOrderJustNeedsQuantity() {
         let instrument = Self.makeInstrument()
-        XCTAssertTrue(NewOrderSheet.canSubmit(
+        XCTAssertTrue(NewOrderSheetViewModel.canSubmit(
             instrument: instrument,
             selectedExchange: "kraken",
             isLoadingInstruments: false,
@@ -244,7 +244,7 @@ final class NewOrderSheetTests: XCTestCase {
     /// (avoids ambiguous "use venue defaults" semantics on the
     /// server side).
     func testBuildBodyPropagatesPickerSelectionsAndParsedNumbers() {
-        let body = NewOrderSheet.buildBody(
+        let body = NewOrderSheetViewModel.buildBody(
             instrument: Self.makeInstrument(),
             selectedExchange: "kraken",
             walletPublicId: "wallet-9",
@@ -277,7 +277,7 @@ final class NewOrderSheetTests: XCTestCase {
     }
 
     func testBuildBodyReturnsNilWhenGateFails() {
-        XCTAssertNil(NewOrderSheet.buildBody(
+        XCTAssertNil(NewOrderSheetViewModel.buildBody(
             instrument: Self.makeInstrument(canTrade: false),
             selectedExchange: "kraken",
             walletPublicId: "wallet-9",
@@ -294,7 +294,7 @@ final class NewOrderSheetTests: XCTestCase {
     /// ``CreateOrderBody.mode`` default of ``"live"`` cannot route
     /// real money on a paper-wallet user's behalf.
     func testBuildBodyForPaperWalletStampsPaperMode() {
-        let body = NewOrderSheet.buildBody(
+        let body = NewOrderSheetViewModel.buildBody(
             instrument: Self.makeInstrument(),
             selectedExchange: "kraken",
             walletPublicId: "paper-wallet",
@@ -308,7 +308,7 @@ final class NewOrderSheetTests: XCTestCase {
     }
 
     func testBuildBodyForLiveWalletStampsLiveMode() {
-        let body = NewOrderSheet.buildBody(
+        let body = NewOrderSheetViewModel.buildBody(
             instrument: Self.makeInstrument(),
             selectedExchange: "kraken",
             walletPublicId: "live-wallet",
@@ -325,7 +325,7 @@ final class NewOrderSheetTests: XCTestCase {
     /// outbound body so a network retry collides with the server's
     /// dedup index instead of creating a duplicate live order.
     func testBuildBodyPropagatesIdempotencyKey() {
-        let body = NewOrderSheet.buildBody(
+        let body = NewOrderSheetViewModel.buildBody(
             instrument: Self.makeInstrument(),
             selectedExchange: "kraken",
             walletPublicId: "w", walletIsPaper: false,
@@ -357,7 +357,7 @@ final class NewOrderSheetTests: XCTestCase {
             idempotencyKey: nil,
             aiReviewPublicId: nil
         )
-        let command = NewOrderSheet.makeCommand(body: body, provenance: Self.fixedProvenance)
+        let command = NewOrderSheetViewModel.makeCommand(body: body, provenance: Self.fixedProvenance)
         XCTAssertEqual(command.type, "create_order_command")
         XCTAssertEqual(command.sessionId, "session-test")
         XCTAssertEqual(command.sequenceId, 27)

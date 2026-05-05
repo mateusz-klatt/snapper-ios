@@ -343,7 +343,7 @@ struct OrdersView: View {
     @discardableResult
     private func submitNewOrder(body: CreateOrderBody) async -> Bool {
         do {
-            let command = NewOrderSheet.makeCommand(body: body)
+            let command = NewOrderSheetViewModel.makeCommand(body: body)
             _ = try await APIClient.shared.createOrder(command: command)
             await load()
             return true
