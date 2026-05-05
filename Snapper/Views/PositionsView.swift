@@ -34,6 +34,7 @@ private struct IdentifiedPosition: Identifiable {
 /// reflects in the UI on the next bus tick.
 struct PositionsView: View {
     @Environment(AppState.self) private var appState
+    @EnvironmentObject private var authService: AuthService
     @State private var positions: [PositionSnapshot] = []
     @State private var isLoading = false
     @State private var loadError: APIError?
@@ -79,12 +80,22 @@ struct PositionsView: View {
                     )
                 } else {
                     List(filteredPositions, id: \.publicId) { position in
-                        Button {
-                            actionSheetPosition = position
-                        } label: {
+                        if authService.hasPermission(.managePositions) {
+                            Button {
+                                actionSheetPosition = position
+                            } label: {
+                                PositionCard(position: position)
+                            }
+                            .buttonStyle(.plain)
+                        } else {
+                            // Viewer / read-only roles: row stays
+                            // visible but does not surface the
+                            // close / reduce / bracket / trailing
+                            // action sheet (every option in the
+                            // sheet would 403 against the backend
+                            // capability guard).
                             PositionCard(position: position)
                         }
-                        .buttonStyle(.plain)
                     }
                     .listStyle(.insetGrouped)
                     .scrollContentBackground(.hidden)
@@ -110,20 +121,31 @@ struct PositionsView: View {
             ),
             presenting: actionSheetPosition
         ) { position in
-            if Self.canSubmitReduce(position: position) {
-                Button("Close position", role: .destructive) {
-                    pendingClosePosition = position
+            // All four trading actions are gated by `managePositions`
+            // — viewers (read-only role) skip straight to Cancel so
+            // the action sheet doesn't surface buttons that would
+            // 403 against the backend `manage:positions` (close /
+            // reduce / attach bracket) and `create:orders` (the
+            // reduce-only market order under the hood) capability
+            // guards. The Cancel option below stays visible
+            // regardless so the sheet always has a dismissal
+            // affordance.
+            if authService.hasPermission(.managePositions) {
+                if Self.canSubmitReduce(position: position) {
+                    Button("Close position", role: .destructive) {
+                        pendingClosePosition = position
+                    }
+                    Button("Reduce position") {
+                        reduceModalPosition = IdentifiedPosition(position: position)
+                    }
                 }
-                Button("Reduce position") {
-                    reduceModalPosition = IdentifiedPosition(position: position)
-                }
-            }
-            if position.positionCyclePublicId != nil {
-                Button("Attach SL / TP") {
-                    bracketModalPosition = IdentifiedPosition(position: position)
-                }
-                Button("Attach trailing stop") {
-                    trailingStopModalPosition = IdentifiedPosition(position: position)
+                if position.positionCyclePublicId != nil {
+                    Button("Attach SL / TP") {
+                        bracketModalPosition = IdentifiedPosition(position: position)
+                    }
+                    Button("Attach trailing stop") {
+                        trailingStopModalPosition = IdentifiedPosition(position: position)
+                    }
                 }
             }
             Button("Cancel", role: .cancel) {
@@ -554,5 +576,6 @@ struct PositionsView_Previews: PreviewProvider {
     static var previews: some View {
         PositionsView()
             .environment(AppState.shared)
+            .environmentObject(AuthService.shared)
     }
 }
