@@ -283,11 +283,22 @@ struct NotificationPrefsView: View {
         }
     }
 
+    /// Optimistic-update + revert-on-failure (PR #4):
+    ///
+    /// The user toggles ``enabled`` or changes ``minPriority`` →
+    /// ``AlertDefaultRow`` fires this method. We attempt the PATCH
+    /// against the backend; on success the parent ``defaults``
+    /// dict updates and the row stays at its tapped value. On
+    /// failure we return ``false`` so the row reverts its local
+    /// ``@State`` to the pre-tap value — without this signal the
+    /// row would stay visually flipped while the server-side
+    /// truth still reads the prior state.
+    @discardableResult
     private func mutateDefault(
         alertType: String,
         enabled: Bool,
         minPriority: String
-    ) async {
+    ) async -> Bool {
         inflightAlertTypes.insert(alertType)
         defer { inflightAlertTypes.remove(alertType) }
 
@@ -299,9 +310,11 @@ struct NotificationPrefsView: View {
         do {
             let response = try await APIClient.shared.updateAlertDefault(command: command)
             defaults[alertType] = response.payload
+            return true
         } catch {
             logger.error("Failed to update alert default for \(alertType): \(error)")
             loadError = "Couldn't save preference. Try again."
+            return false
         }
     }
 }
@@ -310,7 +323,7 @@ private struct AlertDefaultRow: View {
     let alertType: String
     let existing: UserAlertDefaultInfo?
     let isInflight: Bool
-    let onChange: (Bool, String) async -> Void
+    let onChange: (Bool, String) async -> Bool
 
     @State private var enabled: Bool
     @State private var minPriority: String
@@ -319,7 +332,7 @@ private struct AlertDefaultRow: View {
         alertType: String,
         existing: UserAlertDefaultInfo?,
         isInflight: Bool,
-        onChange: @escaping (Bool, String) async -> Void
+        onChange: @escaping (Bool, String) async -> Bool
     ) {
         self.alertType = alertType
         self.existing = existing
@@ -341,10 +354,22 @@ private struct AlertDefaultRow: View {
             }
             Toggle("Enabled", isOn: $enabled)
                 .disabled(isInflight)
-                .onChange(of: enabled) { _, newValue in
+                .onChange(of: enabled) { oldValue, newValue in
                     let baseline = existing?.enabled ?? true
                     guard newValue != baseline else { return }
-                    Task { await onChange(newValue, minPriority) }
+                    let priorMinPriority = minPriority
+                    Task {
+                        let succeeded = await onChange(newValue, minPriority)
+                        // Revert optimistic toggle if the PATCH failed
+                        // — the server-side truth still reads the
+                        // baseline, and without this rollback the row
+                        // would stay visually flipped while the user
+                        // believes their tap was saved.
+                        if !succeeded {
+                            enabled = oldValue
+                            minPriority = priorMinPriority
+                        }
+                    }
                 }
             Picker("Minimum priority", selection: $minPriority) {
                 ForEach(NotificationPrefsView.priorityValues, id: \.self) { priority in
@@ -353,10 +378,17 @@ private struct AlertDefaultRow: View {
             }
             .pickerStyle(.segmented)
             .disabled(isInflight)
-            .onChange(of: minPriority) { _, newValue in
+            .onChange(of: minPriority) { oldValue, newValue in
                 let baseline = existing?.minPriority ?? "medium"
                 guard newValue != baseline else { return }
-                Task { await onChange(enabled, newValue) }
+                let priorEnabled = enabled
+                Task {
+                    let succeeded = await onChange(enabled, newValue)
+                    if !succeeded {
+                        minPriority = oldValue
+                        enabled = priorEnabled
+                    }
+                }
             }
         }
         .padding(.vertical, 4)
