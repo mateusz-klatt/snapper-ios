@@ -44,6 +44,40 @@ binders.
   test contract stays identical. `LoginView` switches from
   `@StateObject` to `@State` accordingly. `AuthService` itself
   stays `ObservableObject` for now — out of scope for this PR.
+- **`NewOrderSheet` MVVM pilot — extracted `NewOrderSheetViewModel`**
+  at `Snapper/ViewModels/NewOrderSheetViewModel.swift`. The View
+  shrinks from a 395-line state-and-async holder to a thin form
+  binder (~150 lines). The VM owns: form fields (exchange /
+  instrument / side / order type / quantity / price / stop price /
+  leverage / reduce-only), the `availableInstruments` cache,
+  `isLoadingInstruments` / `isSubmitting` / `loadError` flags, the
+  per-presentation `idempotencyKey`, the race-safe
+  `loadInstruments()` async, the form-validation `canSubmit`
+  computed, the `buildBody()` builder, and the `submit(via:)`
+  re-entry-guarded submit that wraps the parent-injected
+  `onSubmit` closure. Tests extracted into
+  `SnapperTests/ViewModels/NewOrderSheetViewModelTests.swift` (21
+  new instance / async / race / idempotency tests) plus the
+  existing static-helper coverage in `Views/NewOrderSheetTests.swift`
+  ported from `NewOrderSheet.X` to `NewOrderSheetViewModel.X`.
+
+### Fixed
+
+- **`NewOrderSheet.loadError` no longer sticky after a successful
+  retry.** The pre-MVVM body never reset `loadError` on the
+  recovery path, so a successful retry left the error banner
+  visible until the user dismissed the sheet. The new VM clears
+  the slot whenever a fresh `fetchInstruments` succeeds.
+  Regression covered by
+  `testLoadInstrumentsClearsLoadErrorOnRecovery`.
+
+### Tests
+
+- Test count: 205 (post-PR #13 foundations) → 226 (+21 PR #2
+  pilot). All new tests under
+  `SnapperTests/ViewModels/NewOrderSheetViewModelTests.swift`
+  cover load / failure / race / submit / re-entry / idempotency
+  branches against the lock-protected `MockAPIClient`.
 
 ## [0.3.0] — 2026-05-05
 
