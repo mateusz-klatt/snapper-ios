@@ -79,18 +79,23 @@ struct HomeView: View {
         )
     }
 
-    /// Wallet-scoped order list (every wallet status, newest-first
-    /// up to the 5-row Recent slice). Reuses
-    /// ``OrdersView.walletMatches`` so the policy on legacy /
-    /// system rows (``walletPublicId == nil`` passes through) is
-    /// identical across the Home + Orders surfaces.
+    /// Wallet-scoped order list, newest-first by ``createdAt``.
+    /// Delegates to ``OrdersView.filterRecent`` so the Home
+    /// "Recent Orders" card and the Orders tab "Recent" segment
+    /// agree on BOTH the wallet predicate AND the ordering — the
+    /// API payload is not guaranteed to arrive sorted, so a plain
+    /// wallet-filter would surface older rows ahead of newer ones
+    /// whenever the response wasn't already newest-first.
+    ///
+    /// The Home view's rendering path slices the first 5 rows;
+    /// this property hands ``filterRecent`` the canonical 50-row
+    /// paging cap so the in-memory sort window stays bounded
+    /// regardless of how large the unfiltered list grows.
     var filteredOrders: [OrderStatus] {
-        return orders.filter { order in
-            OrdersView.walletMatches(
-                rowWalletId: order.walletPublicId,
-                selected: appState.selectedWalletPublicId
-            )
-        }
+        return OrdersView.filterRecent(
+            orders: orders,
+            selectedWalletPublicId: appState.selectedWalletPublicId
+        )
     }
 
     /// Wallet-scoped active-order subset for the Home stat card.

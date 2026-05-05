@@ -161,4 +161,71 @@ final class HomeViewTests: XCTestCase {
 
         XCTAssertEqual(active.count, 2)
     }
+
+    private func makeOrderAtOffset(
+        publicId: String,
+        walletPublicId: String?,
+        createdAtOffset: TimeInterval
+    ) -> OrderStatus {
+        return OrderData(
+            type: "order_data",
+            sequenceId: 1,
+            publicId: publicId,
+            timestamp: Self.baseTimestamp,
+            sessionId: "session-home-test",
+            topic: nil,
+            exchangeOrderId: nil,
+            clientOrderId: "cli-\(publicId)",
+            instrument: "BTCUSD",
+            exchange: "kraken",
+            mode: nil,
+            side: "buy",
+            status: "open",
+            orderType: "limit",
+            size: 1.0,
+            filledSize: 0.0,
+            price: 50_000.0,
+            averagePrice: nil,
+            reason: nil,
+            timeInForce: nil,
+            error: nil,
+            createdAt: Self.baseTimestamp.addingTimeInterval(createdAtOffset),
+            updatedAt: nil,
+            leverage: nil,
+            reduceOnly: nil,
+            walletPublicId: walletPublicId,
+            operatorPublicId: nil,
+            userPublicId: nil,
+            planPublicId: nil
+        )
+    }
+
+    /// Recent-Orders ordering (PR #6 fix-up): the Home
+    /// recent-orders card delegates to ``OrdersView.filterRecent``
+    /// so the wallet-scoped slice arrives newest-first by
+    /// ``createdAt`` regardless of the API payload order — without
+    /// that delegation a plain wallet-filter would surface older
+    /// rows ahead of newer ones whenever the response wasn't
+    /// already sorted server-side.
+    func testFilteredOrdersDelegatesToFilterRecentForNewestFirstSlice() {
+        let walletA = "wallet-a"
+        let unsorted = [
+            makeOrderAtOffset(publicId: "old", walletPublicId: walletA, createdAtOffset: 0),
+            makeOrderAtOffset(publicId: "newest", walletPublicId: walletA, createdAtOffset: 100),
+            makeOrderAtOffset(publicId: "mid", walletPublicId: walletA, createdAtOffset: 50),
+            makeOrderAtOffset(publicId: "other-wallet", walletPublicId: "wallet-b", createdAtOffset: 200),
+        ]
+
+        let recent = OrdersView.filterRecent(
+            orders: unsorted,
+            selectedWalletPublicId: walletA,
+            limit: 50
+        )
+
+        XCTAssertEqual(
+            recent.map(\.publicId),
+            ["newest", "mid", "old"],
+            "Home filteredOrders delegates to OrdersView.filterRecent which sorts createdAt-descending; wallet-b drops, walletA rows surface newest-first."
+        )
+    }
 }
