@@ -108,17 +108,26 @@ actor DeviceRegistrationService {
         }
     }
 
-    /// Clear login state + forget the pending token.
+    /// Clear login state + forget the pending token AND the cached
+    /// public_id of the most recently registered device.
     ///
     /// Called from `AuthService.logout` before the session is torn
     /// down. The backend-side device row is NOT deleted on logout
     /// (the user may log back in on the same device within minutes);
     /// deletion happens on explicit user-initiated unregister via
     /// `DELETE /api/devices/{public_id}` (covered by iOS-5 Settings).
+    ///
+    /// `lastRegisteredDevicePublicId` is cleared to prevent a
+    /// cross-user leak: if user A registered, then logged out, then
+    /// user B logged in on the same device, `currentDevicePublicId()`
+    /// would briefly surface A's public_id until B's register cycle
+    /// completes — which would mis-route any settings UI keyed off
+    /// the cached id during that window.
     func onLogout() {
         cancelPendingRetry()
         isLoggedIn = false
         pendingToken = nil
+        lastRegisteredDevicePublicId = nil
         status = .idle
     }
 

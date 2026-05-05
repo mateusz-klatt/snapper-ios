@@ -37,11 +37,20 @@ struct SnapperApp: App {
     /// Connect on foreground / disconnect on background. Matches the
     /// iOS lifecycle: the socket must not hold the radio while the
     /// app is suspended.
+    ///
+    /// On `.active` we also re-poll notification authorization so an
+    /// already-authorized + logged-in user gets a fresh APNs token
+    /// delivered through `AppDelegate` (the system only fires
+    /// `didRegisterForRemoteNotifications…` in response to a fresh
+    /// `registerForRemoteNotifications()` call — without this hook a
+    /// cold-relaunch leaves `DeviceRegistrationService` stuck in
+    /// `.awaitingToken` forever).
     private func handleScenePhase(_ phase: ScenePhase) {
         switch phase {
         case .active:
             if authService.isAuthenticated {
                 webSocketManager.connect()
+                Task { await notificationService.refreshAuthorizationStatus() }
             }
         case .background:
             webSocketManager.disconnect()

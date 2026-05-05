@@ -131,6 +131,33 @@ final class DeviceRegistrationServiceTests: XCTestCase {
         XCTAssertEqual(afterLogoutCalls, 0, "no re-registration after logout cleared the token")
     }
 
+    /// Cross-user-leak guard (PR #5): logout must clear the cached
+    /// `lastRegisteredDevicePublicId` so a subsequent user logging
+    /// in on the same device cannot transiently surface the prior
+    /// user's device id via `currentDevicePublicId()` between
+    /// `onLogout()` and the next successful register cycle.
+    func testLogoutClearsLastRegisteredDevicePublicId() async {
+        let service = DeviceRegistrationService(apiClient: apiClient)
+        let token = Data([0x01])
+
+        MockURLProtocol.requestHandler = { _ in
+            return MockURLProtocol.jsonResponse(statusCode: 200, json: _deviceResponseJSON)
+        }
+
+        await service.onLogin()
+        await service.onTokenReceived(token)
+        let pidBeforeLogout = await service.currentDevicePublicId()
+        XCTAssertEqual(pidBeforeLogout, "dev-registered-pid")
+
+        await service.onLogout()
+
+        let pidAfterLogout = await service.currentDevicePublicId()
+        XCTAssertNil(
+            pidAfterLogout,
+            "lastRegisteredDevicePublicId must clear on logout to prevent cross-user leak when a different user logs in on the same device."
+        )
+    }
+
     /// Backend 500 error does NOT raise; next attempt re-tries cleanly.
     func testRegistrationServerErrorIsSwallowed() async {
         let service = DeviceRegistrationService(apiClient: apiClient)
