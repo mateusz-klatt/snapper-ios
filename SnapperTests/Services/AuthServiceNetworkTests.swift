@@ -258,6 +258,79 @@ final class AuthServiceNetworkTests: XCTestCase {
         )
     }
 
+    /// Logout-during-refresh race (PR #3 fix-up): a logout that
+    /// fires while a refresh is in flight must NOT let the
+    /// refresh's freshly-minted ws_token re-stamp ``wsToken`` after
+    /// the local session is torn down. The ``Task.isCancelled``
+    /// gate protects the slot write so a stale refresh response
+    /// is dropped on the floor — without this, the next login on
+    /// the same install would bind to the prior session's identity
+    /// for the lifetime of the leaked token.
+    func testLogoutDuringRefreshDropsTheRefreshedToken() async throws {
+        MockURLProtocol.requestHandler = { request in
+            // Hold the URLProtocol thread long enough for logout to
+            // run and cancel the refresh task. 200 ms is generous —
+            // logout's local mutations are sub-millisecond.
+            Thread.sleep(forTimeInterval: 0.2)
+
+            let response = HTTPURLResponse(
+                url: request.url!,
+                statusCode: 200,
+                httpVersion: nil,
+                headerFields: [AppConfig.HTTPHeader.contentType: AppConfig.ContentType.json]
+            )!
+            let json: [String: Any] = [
+                "sequence_id": 1,
+                "public_id": "01961234-5678-7000-8000-000000000400",
+                "timestamp": "2025-11-22T11:00:00Z",
+                "session_id": "session-r3",
+                "payload": [
+                    "sequence_id": 1,
+                    "public_id": "01961234-5678-7000-8000-000000000401",
+                    "timestamp": "2025-11-22T11:00:00Z",
+                    "session_id": "session-r3",
+                    "message": "Token refreshed",
+                    "ws_token": "post-logout-token",
+                    "ws_token_exp": "2025-11-22T11:15:00Z",
+                    "csrf_token": "csrf",
+                    "user": [
+                        "sequence_id": 1,
+                        "public_id": "01961234-5678-7000-8000-000000000402",
+                        "timestamp": "2025-01-01T00:00:00Z",
+                        "session_id": "session-r3",
+                        "username": "alice",
+                        "email": "alice@example.com",
+                        "role": "viewer",
+                        "is_active": true,
+                        "created_at": "2025-01-01T00:00:00Z"
+                    ]
+                ]
+            ]
+            let data = try JSONSerialization.data(withJSONObject: json)
+            return (response, data)
+        }
+
+        let refreshTask = Task { @MainActor in
+            await self.authService.fetchFreshWsToken()
+        }
+
+        // Yield long enough for the refresh task to enter the
+        // URLProtocol sleep window, then fire logout.
+        try await Task.sleep(nanoseconds: 50_000_000)
+        await authService.logout()
+
+        let refreshResult = await refreshTask.value
+
+        XCTAssertNil(
+            refreshResult,
+            "fetchFreshWsToken must return nil when logout cancels the in-flight refresh."
+        )
+        XCTAssertNil(
+            authService.getWsToken(),
+            "wsToken must NOT be re-populated by a refresh response that landed after logout — that would bind the next login to the prior session's identity."
+        )
+    }
+
     /// After a refresh completes, the in-flight slot is cleared so
     /// the next refresh window starts fresh. A naive implementation
     /// that latched the slot would wedge the app — every subsequent

@@ -103,6 +103,16 @@ class AuthService: ObservableObject {
     }()
 
     func logout() async {
+        // Cancel any in-flight refresh BEFORE tearing down local
+        // session state — without this, ``performRefresh()`` can
+        // resolve after logout completes and re-stamp ``wsToken``
+        // with a value bound to a session the user has just signed
+        // out of. The stale token would be picked up by the next
+        // WS reconnect (or REST 401 retry) and bind the next
+        // session to the prior identity for that token's lifetime.
+        refreshTask?.cancel()
+        refreshTask = nil
+
         await DeviceRegistrationService.shared().onLogout()
         await logoutFromServer()
         wsToken = nil
@@ -180,7 +190,19 @@ class AuthService: ObservableObject {
         let task = Task<String?, Never> { @MainActor [weak self] in
             guard let self else { return nil }
             defer { self.refreshTask = nil }
-            return await self.performRefresh()
+            let freshToken = await self.performRefresh()
+            // Bail out before the slot write if logout cancelled
+            // the task while the refresh was in flight — applying
+            // a freshly-minted token to a torn-down session would
+            // bind the next login to the prior session's
+            // backend-side state for that token's lifetime.
+            if Task.isCancelled {
+                return nil
+            }
+            if let freshToken {
+                self.wsToken = freshToken
+            }
+            return freshToken
         }
         refreshTask = task
         return await task.value
@@ -188,6 +210,9 @@ class AuthService: ObservableObject {
 
     /// Bare refresh request — never call this directly; go through
     /// ``fetchFreshWsToken()`` so concurrent callers coalesce.
+    /// The slot owner (``fetchFreshWsToken``) is responsible for
+    /// writing ``wsToken`` AFTER a ``Task.isCancelled`` check, so
+    /// this helper deliberately does NOT touch member state.
     private func performRefresh() async -> String? {
         guard let url = URL(string: "\(AppConfig.apiBaseURL)\(AppConfig.Endpoints.refresh)") else {
             return nil
@@ -212,7 +237,6 @@ class AuthService: ObservableObject {
             let decoder = JSONDecoder()
             decoder.dateDecodingStrategy = .iso8601
             let refreshResponse = try decoder.decode(RefreshResponse.self, from: data)
-            wsToken = refreshResponse.payload.wsToken
             return refreshResponse.payload.wsToken
         } catch {
             logger.error("Failed to fetch fresh ws_token: \(error)")
