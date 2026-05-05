@@ -1,9 +1,9 @@
 # Architecture: MVVM seams in snapper-ios
 
-Adopted in v0.3.1 as a coverage-driven refactor. Synthesized from a
-2-model architect consensus (Codex 5.4 + Copilot 5.4) — the full
-plan + tradeoff record lives in
-`proprietary/plans/plan_2026_05_05_ios_v0_3_1_mvvm_extraction.md`.
+Adopted in v0.3.1 as a coverage-driven refactor. The View / VM
+split, mocking strategy, and concurrency rules are captured below;
+each release-critical file lands its own PR following the same
+shape.
 
 ## The split
 
@@ -58,7 +58,7 @@ final class XxxViewModel {
 
 | Surface | Mock pattern |
 |---|---|
-| ViewModel tests | Inject `MockAPIClient` — closure-overridable struct conforming to `APIClientProtocol`. Default behavior: throw `APIError.invalidResponse` so unconfigured calls fail loudly. |
+| ViewModel tests | Inject `MockAPIClient` — closure-overridable class conforming to `APIClientProtocol`. Lock-protected handler slots so concurrent VM calls (`async let` fan-out) don't race. Default behavior: throw `APIError.invalidResponse` so unconfigured calls fail loudly. |
 | Service-stack tests (`APIClientNetworkTests` etc.) | Keep `URLProtocol` interception against the concrete `APIClient` to verify JSON encode / decode contract end-to-end. |
 | Auth seam | `AuthRefreshing` protocol (legacy, in `Services/Protocols.swift`); `AuthService` is the production conformer. |
 

@@ -7,9 +7,9 @@ uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 ## [Unreleased]
 
 MVVM extraction trajectory toward global ≥80% unit-test coverage —
-synthesized from 2-model architect consensus (Codex 5.4 + Copilot
-5.4). Plan: `proprietary/plans/plan_2026_05_05_ios_v0_3_1_mvvm_extraction.md`.
-Baseline at v0.3.0: **66.5% global** (5758/8660 lines). The release-
+the architecture rules + concurrency / mocking conventions live in
+`docs/architecture-mvvm.md`. Baseline at v0.3.0: **66.5% global**
+(5758/8660 lines). The release-
 critical Views are the bulk of the gap (PositionsView 15.6%,
 OrdersView 10.6%, NewOrderSheet 26.4%, NotificationPrefsView 21.1%,
 WalletPicker 23.8%, attach sheets ~25%); v0.3.1 closes them by

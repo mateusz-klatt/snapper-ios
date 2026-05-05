@@ -2,8 +2,8 @@ import Foundation
 
 /// Protocol seam over `APIClient` for ViewModel-level test injection.
 ///
-/// Established in iOS v0.3.1 as part of the MVVM extraction (see
-/// `proprietary/plans/plan_2026_05_05_ios_v0_3_1_mvvm_extraction.md`).
+/// Established in iOS v0.3.1 as part of the MVVM extraction —
+/// see `docs/architecture-mvvm.md` for the design rules.
 /// Every release-critical ViewModel takes an `APIClientProtocol` via
 /// init so tests can inject a deterministic `MockAPIClient` without
 /// going through the URL stack. The existing `APIClientNetworkTests`

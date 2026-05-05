@@ -1,7 +1,8 @@
 import Foundation
 @testable import Snapper
 
-/// Closure-overridable test double for `APIClientProtocol`.
+/// Lock-protected, closure-overridable test double for
+/// `APIClientProtocol`.
 ///
 /// Established in iOS v0.3.1 alongside the MVVM extraction so VM
 /// tests can drive every async branch without going through the URL
@@ -10,12 +11,17 @@ import Foundation
 /// which calls they care about, and any unexpected method call fails
 /// loudly instead of silently returning junk.
 ///
-/// `actor`-backed slot mutation lets tests record call counts /
-/// arguments across concurrent `async let` fan-out without a data
-/// race. The protocol signatures themselves stay `nonisolated` to
-/// match `APIClientProtocol`'s `Sendable` shape.
+/// Concurrency: `final class @unchecked Sendable` with an
+/// `NSLock`-protected backing storage. Reads + writes of every
+/// handler slot go through `withLock`, so a ViewModel that fans out
+/// via `async let` (e.g. `OrdersViewModel.load()` calling
+/// `fetchOrders` + `fetchExecutions` in parallel) cannot race the
+/// mock's handler reads. Tests typically configure handlers
+/// up-front + leave them static for the rest of the test, but the
+/// lock keeps mid-test reconfiguration race-free as well.
 ///
 /// Pattern:
+///
 ///     let mock = MockAPIClient()
 ///     mock.fetchPositionsHandler = { [PositionSnapshot.fixture] }
 ///     let viewModel = PositionsViewModel(api: mock, appState: AppState())
@@ -23,71 +29,175 @@ import Foundation
 ///     XCTAssertEqual(viewModel.positions.count, 1)
 final class MockAPIClient: APIClientProtocol, @unchecked Sendable {
 
-    // MARK: - Handler slots
+    // MARK: - Backing storage
 
-    var fetchOrdersHandler: @Sendable () async throws -> [OrderStatus] = {
-        throw APIError.invalidResponse
-    }
-    var fetchPositionsHandler: @Sendable () async throws -> [PositionSnapshot] = {
-        throw APIError.invalidResponse
-    }
-    var fetchSignalsHandler: @Sendable () async throws -> [TradingSignal] = {
-        throw APIError.invalidResponse
-    }
-    var fetchExecutionsHandler: @Sendable () async throws -> [ExecutionRecord] = {
-        throw APIError.invalidResponse
-    }
-    var fetchWalletsHandler: @Sendable () async throws -> [WalletInfo] = {
-        throw APIError.invalidResponse
-    }
-    var fetchOperatorsHandler: @Sendable () async throws -> [OperatorInfo] = {
-        throw APIError.invalidResponse
+    /// All mutable handler closures live in a single struct guarded
+    /// by `lock`. Generic `read(_:)` / `write(_:_:)` keypath helpers
+    /// keep the per-slot getter / setter boilerplate to one line each.
+    private struct HandlerStorage {
+
+        var fetchOrders: @Sendable () async throws -> [OrderStatus] = {
+            throw APIError.invalidResponse
+        }
+        var fetchPositions: @Sendable () async throws -> [PositionSnapshot] = {
+            throw APIError.invalidResponse
+        }
+        var fetchSignals: @Sendable () async throws -> [TradingSignal] = {
+            throw APIError.invalidResponse
+        }
+        var fetchExecutions: @Sendable () async throws -> [ExecutionRecord] = {
+            throw APIError.invalidResponse
+        }
+        var fetchWallets: @Sendable () async throws -> [WalletInfo] = {
+            throw APIError.invalidResponse
+        }
+        var fetchOperators: @Sendable () async throws -> [OperatorInfo] = {
+            throw APIError.invalidResponse
+        }
+
+        var createOrder: @Sendable (CreateOrderCommand) async throws -> ExecutionPlanResponse = { _ in
+            throw APIError.invalidResponse
+        }
+        var cancelOrder: @Sendable (String, String?) async throws -> ExecutionPlanResponse = { _, _ in
+            throw APIError.invalidResponse
+        }
+        var createBracket: @Sendable (BracketCreateCommand) async throws -> ExecutionPlanResponse = { _ in
+            throw APIError.invalidResponse
+        }
+        var createTrailingStop: @Sendable (TrailingStopCreateCommand) async throws -> ExecutionPlanResponse = { _ in
+            throw APIError.invalidResponse
+        }
+
+        var fetchInstruments: @Sendable (String) async throws -> [InstrumentDetailData] = { _ in
+            throw APIError.invalidResponse
+        }
+        var fetchSystemStatus: @Sendable () async throws -> SystemStatus = {
+            throw APIError.invalidResponse
+        }
+        var fetchHealth: @Sendable () async throws -> HealthCheckResponse = {
+            throw APIError.invalidResponse
+        }
+
+        var registerDevice: @Sendable (RegisterDeviceCommand) async throws -> NotificationDeviceResponse = { _ in
+            throw APIError.invalidResponse
+        }
+
+        var fetchAlertHistory: @Sendable (Int?, String?) async throws -> AlertHistoryResponse = { _, _ in
+            throw APIError.invalidResponse
+        }
+        var fetchAlert: @Sendable (String) async throws -> AlertEventResponse = { _ in
+            throw APIError.invalidResponse
+        }
+        var fetchDevicePrefs: @Sendable (String) async throws -> DeviceAlertPrefListResponse = { _ in
+            throw APIError.invalidResponse
+        }
+        var updateDevicePref: @Sendable (String, UpdateDevicePrefCommand) async throws -> DeviceAlertPrefResponse = { _, _ in
+            throw APIError.invalidResponse
+        }
+        var fetchAlertDefaults: @Sendable () async throws -> UserAlertDefaultListResponse = {
+            throw APIError.invalidResponse
+        }
+        var updateAlertDefault: @Sendable (UpdateUserAlertDefaultCommand) async throws -> UserAlertDefaultResponse = { _ in
+            throw APIError.invalidResponse
+        }
     }
 
-    var createOrderHandler: @Sendable (CreateOrderCommand) async throws -> ExecutionPlanResponse = { _ in
-        throw APIError.invalidResponse
-    }
-    var cancelOrderHandler: @Sendable (String, String?) async throws -> ExecutionPlanResponse = { _, _ in
-        throw APIError.invalidResponse
-    }
-    var createBracketHandler: @Sendable (BracketCreateCommand) async throws -> ExecutionPlanResponse = { _ in
-        throw APIError.invalidResponse
-    }
-    var createTrailingStopHandler: @Sendable (TrailingStopCreateCommand) async throws -> ExecutionPlanResponse = { _ in
-        throw APIError.invalidResponse
+    private let lock = NSLock()
+    private var storage = HandlerStorage()
+
+    private func read<T>(_ keyPath: KeyPath<HandlerStorage, T>) -> T {
+        return lock.withLock { storage[keyPath: keyPath] }
     }
 
-    var fetchInstrumentsHandler: @Sendable (String) async throws -> [InstrumentDetailData] = { _ in
-        throw APIError.invalidResponse
-    }
-    var fetchSystemStatusHandler: @Sendable () async throws -> SystemStatus = {
-        throw APIError.invalidResponse
-    }
-    var fetchHealthHandler: @Sendable () async throws -> HealthCheckResponse = {
-        throw APIError.invalidResponse
+    private func write<T>(_ keyPath: WritableKeyPath<HandlerStorage, T>, _ value: T) {
+        lock.withLock { storage[keyPath: keyPath] = value }
     }
 
-    var registerDeviceHandler: @Sendable (RegisterDeviceCommand) async throws -> NotificationDeviceResponse = { _ in
-        throw APIError.invalidResponse
+    // MARK: - Handler accessors (test-facing)
+
+    var fetchOrdersHandler: @Sendable () async throws -> [OrderStatus] {
+        get { read(\.fetchOrders) }
+        set { write(\.fetchOrders, newValue) }
+    }
+    var fetchPositionsHandler: @Sendable () async throws -> [PositionSnapshot] {
+        get { read(\.fetchPositions) }
+        set { write(\.fetchPositions, newValue) }
+    }
+    var fetchSignalsHandler: @Sendable () async throws -> [TradingSignal] {
+        get { read(\.fetchSignals) }
+        set { write(\.fetchSignals, newValue) }
+    }
+    var fetchExecutionsHandler: @Sendable () async throws -> [ExecutionRecord] {
+        get { read(\.fetchExecutions) }
+        set { write(\.fetchExecutions, newValue) }
+    }
+    var fetchWalletsHandler: @Sendable () async throws -> [WalletInfo] {
+        get { read(\.fetchWallets) }
+        set { write(\.fetchWallets, newValue) }
+    }
+    var fetchOperatorsHandler: @Sendable () async throws -> [OperatorInfo] {
+        get { read(\.fetchOperators) }
+        set { write(\.fetchOperators, newValue) }
     }
 
-    var fetchAlertHistoryHandler: @Sendable (Int?, String?) async throws -> AlertHistoryResponse = { _, _ in
-        throw APIError.invalidResponse
+    var createOrderHandler: @Sendable (CreateOrderCommand) async throws -> ExecutionPlanResponse {
+        get { read(\.createOrder) }
+        set { write(\.createOrder, newValue) }
     }
-    var fetchAlertHandler: @Sendable (String) async throws -> AlertEventResponse = { _ in
-        throw APIError.invalidResponse
+    var cancelOrderHandler: @Sendable (String, String?) async throws -> ExecutionPlanResponse {
+        get { read(\.cancelOrder) }
+        set { write(\.cancelOrder, newValue) }
     }
-    var fetchDevicePrefsHandler: @Sendable (String) async throws -> DeviceAlertPrefListResponse = { _ in
-        throw APIError.invalidResponse
+    var createBracketHandler: @Sendable (BracketCreateCommand) async throws -> ExecutionPlanResponse {
+        get { read(\.createBracket) }
+        set { write(\.createBracket, newValue) }
     }
-    var updateDevicePrefHandler: @Sendable (String, UpdateDevicePrefCommand) async throws -> DeviceAlertPrefResponse = { _, _ in
-        throw APIError.invalidResponse
+    var createTrailingStopHandler: @Sendable (TrailingStopCreateCommand) async throws -> ExecutionPlanResponse {
+        get { read(\.createTrailingStop) }
+        set { write(\.createTrailingStop, newValue) }
     }
-    var fetchAlertDefaultsHandler: @Sendable () async throws -> UserAlertDefaultListResponse = {
-        throw APIError.invalidResponse
+
+    var fetchInstrumentsHandler: @Sendable (String) async throws -> [InstrumentDetailData] {
+        get { read(\.fetchInstruments) }
+        set { write(\.fetchInstruments, newValue) }
     }
-    var updateAlertDefaultHandler: @Sendable (UpdateUserAlertDefaultCommand) async throws -> UserAlertDefaultResponse = { _ in
-        throw APIError.invalidResponse
+    var fetchSystemStatusHandler: @Sendable () async throws -> SystemStatus {
+        get { read(\.fetchSystemStatus) }
+        set { write(\.fetchSystemStatus, newValue) }
+    }
+    var fetchHealthHandler: @Sendable () async throws -> HealthCheckResponse {
+        get { read(\.fetchHealth) }
+        set { write(\.fetchHealth, newValue) }
+    }
+
+    var registerDeviceHandler: @Sendable (RegisterDeviceCommand) async throws -> NotificationDeviceResponse {
+        get { read(\.registerDevice) }
+        set { write(\.registerDevice, newValue) }
+    }
+
+    var fetchAlertHistoryHandler: @Sendable (Int?, String?) async throws -> AlertHistoryResponse {
+        get { read(\.fetchAlertHistory) }
+        set { write(\.fetchAlertHistory, newValue) }
+    }
+    var fetchAlertHandler: @Sendable (String) async throws -> AlertEventResponse {
+        get { read(\.fetchAlert) }
+        set { write(\.fetchAlert, newValue) }
+    }
+    var fetchDevicePrefsHandler: @Sendable (String) async throws -> DeviceAlertPrefListResponse {
+        get { read(\.fetchDevicePrefs) }
+        set { write(\.fetchDevicePrefs, newValue) }
+    }
+    var updateDevicePrefHandler: @Sendable (String, UpdateDevicePrefCommand) async throws -> DeviceAlertPrefResponse {
+        get { read(\.updateDevicePref) }
+        set { write(\.updateDevicePref, newValue) }
+    }
+    var fetchAlertDefaultsHandler: @Sendable () async throws -> UserAlertDefaultListResponse {
+        get { read(\.fetchAlertDefaults) }
+        set { write(\.fetchAlertDefaults, newValue) }
+    }
+    var updateAlertDefaultHandler: @Sendable (UpdateUserAlertDefaultCommand) async throws -> UserAlertDefaultResponse {
+        get { read(\.updateAlertDefault) }
+        set { write(\.updateAlertDefault, newValue) }
     }
 
     // MARK: - APIClientProtocol

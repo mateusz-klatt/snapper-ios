@@ -1,10 +1,11 @@
 import Foundation
+import Observation
 
 /// LoginView's MVVM seam — wraps `AuthService` so the form's
 /// `username / password / isLoading` state is testable in isolation.
 ///
-/// Migrated to `@Observable` in v0.3.1 (see
-/// `proprietary/plans/plan_2026_05_05_ios_v0_3_1_mvvm_extraction.md`).
+/// Migrated to `@Observable` in v0.3.1 — see `docs/architecture-mvvm.md`
+/// for the View / VM split and the testing rules.
 /// `AuthService` itself stays `ObservableObject` for now — the
 /// `SnapperApp` root and several other services bind to it via
 /// `@StateObject`, and migrating it sits outside this PR's scope.
@@ -43,6 +44,13 @@ final class LoginViewModel {
 
     func login() async {
         isLoading = true
+        // Clear the prior error before firing a retry. `errorMessage`
+        // is now a computed passthrough to AuthService, so without
+        // this reset the previous attempt's error stays visible
+        // until the new request finishes — that's a UX regression
+        // from the pre-`@Observable` flow where the VM held its own
+        // `@Published` slot and zeroed it here on every entry.
+        authService.errorMessage = nil
 
         await authService.login(username: username, password: password)
 
