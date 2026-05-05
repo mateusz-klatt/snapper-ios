@@ -6,6 +6,63 @@ uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+## [0.2.0] — 2026-05-05
+
+Trading-correctness pack: six PRs landed in one session against
+`mateusz-klatt/snapper-ios` master, each accompanied by a Copilot
+code review and a fix-up commit addressing the surfaced findings.
+163 baseline tests grew to 184 across the pack; every PR ran the
+full quality gate locally + on CI before merge.
+
+### Added
+
+- Mutation sheets (`NewOrderSheet`, `AttachBracketSheet`,
+  `AttachTrailingStopSheet`, `ReducePositionView`) keep open on
+  failure so users can retry without losing the form state or
+  the in-sheet idempotency key (#1).
+- Surface load errors in `PositionsView`, `OrdersView`, and
+  `WalletPicker` — a network or 5xx failure now renders a
+  `ContentUnavailableView` (or inline Section / menu prompt)
+  with a Retry button instead of an empty list. `OrdersView`
+  also covers the `fetchExecutions` failure path and shows a
+  "Loading…" placeholder when Retry fires on an empty list (#2).
+- `HomeView` "Open Positions" / "Active Orders" stat counters
+  and Recent Orders card now wallet-scope via the canonical
+  `PositionsView` / `OrdersView` helpers; the Active Orders
+  count uses the full `new|submitted|open|partially_filled`
+  lifecycle set instead of the prior ad-hoc `"open"|"pending"`
+  pair, and Recent Orders inherits `OrdersView.filterRecent`
+  newest-first sorting (#6).
+
+### Fixed
+
+- `AuthService.fetchFreshWsToken` now coalesces concurrent
+  callers into a single in-flight request via a
+  `Task<String?, Never>?` slot. `logout()` cancels the in-flight
+  refresh so a freshly-minted token cannot re-stamp `wsToken`
+  on a session the user just signed out of (#3).
+- `NotificationPrefsView.AlertDefaultRow` reverts its local
+  toggle / picker state when the `updateAlertDefault` PATCH
+  fails. A synchronous `localInflight` `@State` flag closes
+  the re-entry race the parent's `inflightAlertTypes` set
+  could not catch — the row disables the moment a Task is
+  dispatched, eliminating the stale-snapshot rollback window.
+  The success path now also clears the prior `loadError` so the
+  banner does not linger after recovery (#4).
+- `NotificationService.refreshAuthorizationStatus` re-fires
+  `registerForRemoteNotifications()` when an authorized + logged-
+  in user returns to `.active` or logs in — the system only
+  delivers a fresh APNs token in response to an explicit
+  registration call, so cold-relaunch + login-during-active
+  paths previously stayed stuck in `.awaitingToken` forever.
+  `.ephemeral` is now treated as granted alongside `.authorized`
+  / `.provisional` for parity with `isAuthorized` /
+  `SettingsView`. `DeviceRegistrationService.onLogout` clears
+  `lastRegisteredDevicePublicId` to close the cross-user-leak
+  window between logout and the next register cycle, and
+  `register()` re-checks `isLoggedIn` after the await to drop
+  responses that land post-logout (actor re-entrancy guard) (#5).
+
 ## [0.1.3] — 2026-05-05
 
 Quick-wins pass after multi-model code review of v0.1.2. Hardening + observability fixes; no behaviour changes for end users.
