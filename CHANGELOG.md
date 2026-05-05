@@ -173,6 +173,25 @@ binders.
 - Test count: 205 (post-foundations) → 309 (+21 NewOrderSheet
   pilot, +14 WalletPicker, +11 AttachBracket, +12 AttachTrailing,
   +17 OrdersView, +16 PositionsView, +13 NotificationPrefs).
+
+### Coverage
+
+- **Sonar-reportable coverage: 83.8%** at v0.3.1 ship (target was
+  ≥80% global). Layered breakdown:
+  - ViewModels (`Snapper/ViewModels/`): 97.0%
+  - Services (`Snapper/Services/`): 75.8%
+  - Config (`Snapper/Config/`): 68.0%
+  - Models (`Snapper/Models/`, non-generated): 54.5%
+- **Strategy A (Q4 fallback) enacted** in
+  `sonar-project.properties`: SwiftUI chrome excluded from
+  coverage measurement (`Snapper/Views/**`,
+  `Snapper/SnapperApp.swift`, `Snapper/Models/Generated/**`,
+  `SnapperTests/**`). Documented in `docs/architecture-mvvm.md`.
+  The exclusion is principled: post-MVVM, View files are
+  declarative SwiftUI layout (chrome) — every piece of testable
+  business logic lives in `@Observable` ViewModels. View body
+  unit tests would require ViewInspector, which the architect
+  consensus rejected for v0.3.1 (fragile to SwiftUI internals).
   New tests live under `SnapperTests/ViewModels/` and cover
   load / failure / race / submit / re-entry / idempotency /
   AppState mutation branches against the lock-protected
