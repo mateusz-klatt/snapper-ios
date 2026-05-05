@@ -704,6 +704,7 @@ struct BacktestRunData: Codable, Sendable {
     let strategyName: String
     let strategyParams: JsonObject?
     let instrumentPublicId: String
+    let instrument: String?
     let exchange: String
     let timeframe: String
     let startDate: Date
@@ -731,6 +732,7 @@ struct BacktestRunData: Codable, Sendable {
         case strategyName = "strategy_name"
         case strategyParams = "strategy_params"
         case instrumentPublicId = "instrument_public_id"
+        case instrument
         case exchange
         case timeframe
         case startDate = "start_date"
@@ -760,6 +762,7 @@ struct BacktestRunDetailData: Codable, Sendable {
     let strategyName: String
     let strategyParams: JsonObject?
     let instrumentPublicId: String
+    let instrument: String?
     let exchange: String
     let timeframe: String
     let startDate: Date
@@ -788,6 +791,7 @@ struct BacktestRunDetailData: Codable, Sendable {
         case strategyName = "strategy_name"
         case strategyParams = "strategy_params"
         case instrumentPublicId = "instrument_public_id"
+        case instrument
         case exchange
         case timeframe
         case startDate = "start_date"
@@ -2463,6 +2467,8 @@ struct PendingReviewSummaryItem: Codable, Sendable {
     let status: String
     let deadline: Date
     let fanoutAfter: Date
+    let instrument: String?
+    let signalEnvelope: JsonObject?
 
     enum CodingKeys: String, CodingKey {
         case reviewPublicId = "review_public_id"
@@ -2472,6 +2478,8 @@ struct PendingReviewSummaryItem: Codable, Sendable {
         case status
         case deadline
         case fanoutAfter = "fanout_after"
+        case instrument
+        case signalEnvelope = "signal_envelope"
     }
 }
 
@@ -4832,6 +4840,26 @@ struct DelegateDeactivateRequest: Codable, Sendable {
 
 struct DelegateDeactivateBody: Codable, Sendable {
     let reason: String?
+}
+
+struct AiReviewDecisionCommand: Codable, Sendable {
+    let type: String?
+    let sequenceId: Int
+    let publicId: String
+    let timestamp: Date
+    let sessionId: String
+    let topic: String?
+    let payload: AiReviewDecisionRequest
+
+    enum CodingKeys: String, CodingKey {
+        case type
+        case sequenceId = "sequence_id"
+        case publicId = "public_id"
+        case timestamp
+        case sessionId = "session_id"
+        case topic
+        case payload
+    }
 }
 
 struct AiReviewDecisionRequest: Codable, Sendable {
