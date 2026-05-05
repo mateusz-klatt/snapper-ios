@@ -60,6 +60,16 @@ binders.
   new instance / async / race / idempotency tests) plus the
   existing static-helper coverage in `Views/NewOrderSheetTests.swift`
   ported from `NewOrderSheet.X` to `NewOrderSheetViewModel.X`.
+- **`WalletPicker` MVVM extraction — `WalletPickerViewModel`** at
+  `Snapper/ViewModels/WalletPickerViewModel.swift`. Extracted from
+  the toolbar wallet selector. The VM owns `loadError`, the
+  `loadWallets()` async (with logger diagnostics on failure paths),
+  and the `selectWallet(_:)` mutation; the View shrinks to a
+  ~60-line Menu binder. `AppState` is init-injected so tests run
+  against an ephemeral `UserDefaults` instance instead of mutating
+  `AppState.shared`. Establishes the AppState init-injection
+  pattern that subsequent VMs (`OrdersViewModel`,
+  `PositionsViewModel`) reuse.
 
 ### Fixed
 
@@ -73,11 +83,13 @@ binders.
 
 ### Tests
 
-- Test count: 205 (post-foundations) → 226 (+21 NewOrderSheet
-  pilot). All new tests under
-  `SnapperTests/ViewModels/NewOrderSheetViewModelTests.swift`
-  cover load / failure / race / submit / re-entry / idempotency
-  branches against the lock-protected `MockAPIClient`.
+- Test count: 205 (post-foundations) → 240 (+21 NewOrderSheet
+  pilot, +14 WalletPicker). New tests live under
+  `SnapperTests/ViewModels/{NewOrderSheetViewModelTests,WalletPickerViewModelTests}.swift`
+  and cover load / failure / race / submit / re-entry /
+  idempotency / AppState mutation branches against the
+  lock-protected `MockAPIClient` + per-test ephemeral
+  `AppState(userDefaults:)`.
 
 ## [0.3.0] — 2026-05-05
 

@@ -33,23 +33,23 @@ final class WalletPickerTests: XCTestCase {
         let paper = makeWallet(publicId: "p-2", label: "default-paper", isPaper: true)
 
         XCTAssertEqual(
-            WalletPicker.currentLabel(wallets: [], selected: nil),
+            WalletPickerViewModel.currentLabel(wallets: [], selected: nil),
             "Loading wallets..."
         )
         XCTAssertEqual(
-            WalletPicker.currentLabel(wallets: [live, paper], selected: nil),
+            WalletPickerViewModel.currentLabel(wallets: [live, paper], selected: nil),
             "Select wallet"
         )
         XCTAssertEqual(
-            WalletPicker.currentLabel(wallets: [live, paper], selected: "p-1"),
+            WalletPickerViewModel.currentLabel(wallets: [live, paper], selected: "p-1"),
             "default"
         )
         XCTAssertEqual(
-            WalletPicker.currentLabel(wallets: [live, paper], selected: "p-2"),
+            WalletPickerViewModel.currentLabel(wallets: [live, paper], selected: "p-2"),
             "default-paper (paper)"
         )
         XCTAssertEqual(
-            WalletPicker.currentLabel(wallets: [live, paper], selected: "missing"),
+            WalletPickerViewModel.currentLabel(wallets: [live, paper], selected: "missing"),
             "Select wallet",
             "Stale or invalid selection must fall back to the empty-selection prompt."
         )
@@ -59,9 +59,9 @@ final class WalletPickerTests: XCTestCase {
         let live = makeWallet(publicId: "p-3", label: "firm", isPaper: false)
         let paper = makeWallet(publicId: "p-4", label: "firm", isPaper: true)
 
-        XCTAssertEqual(WalletPicker.walletDisplayName(live), "firm")
+        XCTAssertEqual(WalletPickerViewModel.walletDisplayName(live), "firm")
         XCTAssertEqual(
-            WalletPicker.walletDisplayName(paper),
+            WalletPickerViewModel.walletDisplayName(paper),
             "firm (paper)",
             "Paper wallets must surface the (paper) suffix to mirror backend (label, is_paper) disambiguation."
         )
@@ -73,7 +73,7 @@ final class WalletPickerTests: XCTestCase {
     /// list of selectable rows.
     func testShouldShowLoadErrorWhenEmptyAndFailed() {
         XCTAssertTrue(
-            WalletPicker.shouldShowLoadError(
+            WalletPickerViewModel.shouldShowLoadError(
                 wallets: [],
                 loadError: .invalidResponse
             )
@@ -86,7 +86,7 @@ final class WalletPickerTests: XCTestCase {
     func testShouldNotShowLoadErrorWhenWalletsCached() {
         let cached = makeWallet(publicId: "p-cache", label: "main", isPaper: false)
         XCTAssertFalse(
-            WalletPicker.shouldShowLoadError(
+            WalletPickerViewModel.shouldShowLoadError(
                 wallets: [cached],
                 loadError: .httpError(503)
             )
@@ -95,7 +95,7 @@ final class WalletPickerTests: XCTestCase {
 
     func testShouldNotShowLoadErrorWhenNoError() {
         XCTAssertFalse(
-            WalletPicker.shouldShowLoadError(
+            WalletPickerViewModel.shouldShowLoadError(
                 wallets: [],
                 loadError: nil
             )
@@ -108,7 +108,7 @@ final class WalletPickerTests: XCTestCase {
     /// with an error.
     func testCurrentLabelFallsBackToWalletsUnavailableOnError() {
         XCTAssertEqual(
-            WalletPicker.currentLabel(
+            WalletPickerViewModel.currentLabel(
                 wallets: [],
                 selected: nil,
                 loadError: .httpError(503)

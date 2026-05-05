@@ -180,7 +180,7 @@ struct EditDevicePrefView: View {
                             Picker("Wallet", selection: $selectedWalletId) {
                                 Text("Select…").tag(Optional<String>.none)
                                 ForEach(appState.availableWallets, id: \.publicId) { wallet in
-                                    Text(WalletPicker.walletDisplayName(wallet))
+                                    Text(WalletPickerViewModel.walletDisplayName(wallet))
                                         .tag(Optional(wallet.publicId))
                                 }
                             }
