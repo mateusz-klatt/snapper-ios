@@ -460,5 +460,6 @@ struct OrdersView_Previews: PreviewProvider {
     static var previews: some View {
         OrdersView()
             .environment(AppState.shared)
+            .environmentObject(AuthService.shared)
     }
 }

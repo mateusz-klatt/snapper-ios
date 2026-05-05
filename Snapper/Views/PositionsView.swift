@@ -124,10 +124,12 @@ struct PositionsView: View {
             // All four trading actions are gated by `managePositions`
             // — viewers (read-only role) skip straight to Cancel so
             // the action sheet doesn't surface buttons that would
-            // 403 against the backend `cancel:orders` /
-            // `manage:positions` capability guard. The Cancel option
-            // below stays visible regardless so the sheet always has
-            // a dismissal affordance.
+            // 403 against the backend `manage:positions` (close /
+            // reduce / attach bracket) and `create:orders` (the
+            // reduce-only market order under the hood) capability
+            // guards. The Cancel option below stays visible
+            // regardless so the sheet always has a dismissal
+            // affordance.
             if authService.hasPermission(.managePositions) {
                 if Self.canSubmitReduce(position: position) {
                     Button("Close position", role: .destructive) {
@@ -574,5 +576,6 @@ struct PositionsView_Previews: PreviewProvider {
     static var previews: some View {
         PositionsView()
             .environment(AppState.shared)
+            .environmentObject(AuthService.shared)
     }
 }
