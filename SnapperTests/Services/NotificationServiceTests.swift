@@ -110,4 +110,119 @@ final class NotificationServiceTests: XCTestCase {
             )
         )
     }
+
+    // MARK: - Wiring tests (refreshAuthorizationStatus → registerForRemote)
+    //
+    // The pure-helper tests above prove the decision logic. These
+    // tests prove the WIRING — that the result of the decision
+    // helper actually fires the injected `registerForRemote`
+    // closure. They use `_refreshWithStatusForTests` to bypass the
+    // simulator UNUserNotificationCenter (which always reports
+    // .notDetermined) and pin a chosen status directly.
+
+    /// Granted + logged-in path — the durable APNs re-register hook
+    /// fires `registerForRemote()` exactly once. Without this wiring
+    /// guard, a future refactor could swap the decision helper for
+    /// a different gate and silently break the re-register path.
+    func testRefreshFiresRegisterForRemoteWhenAuthorizedAndLoggedIn() {
+        var registerCalls = 0
+        let service = NotificationService(
+            isLoggedIn: { true },
+            registerForRemote: { registerCalls += 1 }
+        )
+
+        service._refreshWithStatusForTests(.authorized)
+
+        XCTAssertEqual(registerCalls, 1)
+        XCTAssertEqual(service.authorizationStatus, .authorized)
+    }
+
+    /// `.provisional` mirrors `.authorized` for the re-register
+    /// decision — quiet-permission users still get a fresh token
+    /// stream after a relaunch.
+    func testRefreshFiresRegisterForRemoteWhenProvisionalAndLoggedIn() {
+        var registerCalls = 0
+        let service = NotificationService(
+            isLoggedIn: { true },
+            registerForRemote: { registerCalls += 1 }
+        )
+
+        service._refreshWithStatusForTests(.provisional)
+
+        XCTAssertEqual(registerCalls, 1)
+    }
+
+    /// Logged-out user must NOT trigger `registerForRemote()` —
+    /// the backend `/api/devices` register call would 401 without
+    /// a session, and worse, the device row could bind to whoever
+    /// was previously logged in if the auth state hadn't fully
+    /// torn down.
+    func testRefreshDoesNotFireRegisterForRemoteWhenLoggedOut() {
+        var registerCalls = 0
+        let service = NotificationService(
+            isLoggedIn: { false },
+            registerForRemote: { registerCalls += 1 }
+        )
+
+        service._refreshWithStatusForTests(.authorized)
+
+        XCTAssertEqual(registerCalls, 0)
+        XCTAssertEqual(
+            service.authorizationStatus,
+            .authorized,
+            "Status is still published for UI even when register-for-remote is suppressed."
+        )
+    }
+
+    /// `.denied` user must NOT be silently re-prompted — even if
+    /// the `registerForRemote()` call is technically harmless
+    /// (system would reject), firing it could obscure the actual
+    /// permission story in logs / observability.
+    func testRefreshDoesNotFireRegisterForRemoteWhenDenied() {
+        var registerCalls = 0
+        let service = NotificationService(
+            isLoggedIn: { true },
+            registerForRemote: { registerCalls += 1 }
+        )
+
+        service._refreshWithStatusForTests(.denied)
+
+        XCTAssertEqual(registerCalls, 0)
+    }
+
+    /// First-launch `.notDetermined` user must NOT be auto-prompted
+    /// by the durable-registration hook — the explicit
+    /// `requestAuthorization()` flow owns the prompt UX.
+    func testRefreshDoesNotFireRegisterForRemoteWhenNotDetermined() {
+        var registerCalls = 0
+        let service = NotificationService(
+            isLoggedIn: { true },
+            registerForRemote: { registerCalls += 1 }
+        )
+
+        service._refreshWithStatusForTests(.notDetermined)
+
+        XCTAssertEqual(registerCalls, 0)
+    }
+
+    /// Repeated calls to the durable-registration hook fire the
+    /// closure each time — the OS-side
+    /// `UIApplication.registerForRemoteNotifications()` call is
+    /// idempotent (Apple guarantees the next available token gets
+    /// re-delivered through `AppDelegate`), so we don't need to
+    /// debounce on our side. This also covers the cold-relaunch +
+    /// foreground scenePhase flow where both hooks fire.
+    func testRefreshFiresRegisterForRemoteEveryCallWhenGated() {
+        var registerCalls = 0
+        let service = NotificationService(
+            isLoggedIn: { true },
+            registerForRemote: { registerCalls += 1 }
+        )
+
+        service._refreshWithStatusForTests(.authorized)
+        service._refreshWithStatusForTests(.authorized)
+        service._refreshWithStatusForTests(.authorized)
+
+        XCTAssertEqual(registerCalls, 3)
+    }
 }

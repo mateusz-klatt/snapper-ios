@@ -144,4 +144,27 @@ final class NotificationService: ObservableObject {
             || authorizationStatus == .provisional
             || authorizationStatus == .ephemeral
     }
+
+    /// Test-only seam: directly drive ``refreshAuthorizationStatus``
+    /// for a chosen post-settings status without going through the
+    /// real ``UNUserNotificationCenter``.
+    ///
+    /// The simulator UNUserNotificationCenter always reports
+    /// ``.notDetermined``, which means the granted-path branch of
+    /// ``refreshAuthorizationStatus`` (the durable APNs re-register
+    /// trigger) cannot be exercised via the public API in tests. This
+    /// helper bypasses the settings read so tests can pin the status
+    /// to ``.authorized`` / ``.provisional`` / ``.ephemeral`` and
+    /// verify that the injected ``registerForRemote`` closure fires
+    /// when ``isLoggedIn`` is also true. Mirrors the
+    /// ``WebSocketManager._setConnectionStateForTests`` pattern.
+    func _refreshWithStatusForTests(_ status: UNAuthorizationStatus) {
+        self.authorizationStatus = status
+        if Self.shouldFireDurableRegistration(
+            authorizationStatus: status,
+            isLoggedIn: isLoggedIn()
+        ) {
+            registerForRemote()
+        }
+    }
 }
