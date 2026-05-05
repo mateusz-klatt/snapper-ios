@@ -73,7 +73,7 @@ binders.
 
 ### Tests
 
-- Test count: 205 (post-PR #13 foundations) → 226 (+21 PR #2
+- Test count: 205 (post-foundations) → 226 (+21 NewOrderSheet
   pilot). All new tests under
   `SnapperTests/ViewModels/NewOrderSheetViewModelTests.swift`
   cover load / failure / race / submit / re-entry / idempotency

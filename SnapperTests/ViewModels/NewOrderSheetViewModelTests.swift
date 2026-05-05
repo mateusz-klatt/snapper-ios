@@ -196,6 +196,37 @@ final class NewOrderSheetViewModelTests: XCTestCase {
         )
     }
 
+    /// Race-guard on the loading flag itself: a stale kraken task
+    /// completing AFTER the user switched to binance must NOT flip
+    /// `isLoadingInstruments` back to `false`, because a fresh
+    /// binance task is presumably in flight and re-enabling Submit
+    /// would let the user fire an order against a venue whose
+    /// instruments aren't loaded yet. Pre-fix-up the `defer` block
+    /// fired unconditionally; now the same exchange-token check
+    /// gates it.
+    func testLoadInstrumentsRaceGuardKeepsLoadingFlagWhenExchangeSwitched() async {
+        let viewModel = makeViewModel(exchanges: ["kraken", "binance"])
+        mockAPI.fetchInstrumentsHandler = { exchange in
+            if exchange == "kraken" {
+                try await Task.sleep(nanoseconds: 50_000_000)
+                return []
+            }
+            return []
+        }
+        let task = Task { await viewModel.loadInstruments() }
+        try? await Task.sleep(nanoseconds: 10_000_000)
+        // Switch to binance; simulate the .task(id:) modifier
+        // firing a fresh in-flight loading state.
+        viewModel.selectedExchange = "binance"
+        viewModel.isLoadingInstruments = true
+        // Stale kraken task completes and runs its defer block.
+        await task.value
+        XCTAssertTrue(
+            viewModel.isLoadingInstruments,
+            "Stale defer must not flip isLoadingInstruments while a fresh task is in flight"
+        )
+    }
+
     /// Race-guard on the error path too: a kraken-side failure must
     /// not leak into the loadError slot once the user is on binance.
     func testLoadInstrumentsRaceGuardDropsStaleFailures() async {

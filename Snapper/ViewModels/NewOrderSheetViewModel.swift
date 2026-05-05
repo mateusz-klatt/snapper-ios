@@ -1,5 +1,6 @@
 import Foundation
 import Observation
+import os
 
 /// ViewModel for `NewOrderSheet` — the first MVVM pilot landed in
 /// v0.3.1. Architecture rules in `docs/architecture-mvvm.md`.
@@ -17,9 +18,12 @@ import Observation
 ///
 /// 1. **Race-safe instrument load.** When the user changes
 ///    `selectedExchange` mid-`await`, the post-await guard drops
-///    the stale fetch's payload so a slow kraken response never
-///    overwrites a fresh binance fetch. Mirrors the bug-reproducing
-///    test below at `testLoadInstrumentsRaceGuardDropsStaleResults`.
+///    the stale fetch's payload AND the `defer` block guards the
+///    `isLoadingInstruments = false` write behind the same exchange
+///    check, so a slow kraken response never overwrites a fresh
+///    binance fetch on either the data side or the loading-flag
+///    side. Mirrors `testLoadInstrumentsRaceGuardDropsStaleSuccessResults`
+///    + `testLoadInstrumentsRaceGuardDropsStaleFailures`.
 ///
 /// 2. **`loadError` clears on recovery.** v0.3.0 had a sticky
 ///    banner: a successful retry after a load failure left
@@ -74,6 +78,11 @@ final class NewOrderSheetViewModel {
     // MARK: - Dependencies
 
     private let api: APIClientProtocol
+
+    private let logger = Logger(
+        subsystem: Bundle.main.bundleIdentifier ?? "Snapper",
+        category: "NewOrderSheetViewModel"
+    )
 
     init(
         exchanges: [String],
@@ -132,7 +141,18 @@ final class NewOrderSheetViewModel {
         }
         availableInstruments = []
         isLoadingInstruments = true
-        defer { isLoadingInstruments = false }
+        // Race-guard the loading-flag write too: a stale task
+        // returning after the user picked a fresh exchange must NOT
+        // flip `isLoadingInstruments` back to `false` and re-enable
+        // Submit while the new task is still in flight. Tying the
+        // defer to the same exchange-token check that gates the
+        // payload writes keeps the loading UI consistent with the
+        // current task.
+        defer {
+            if exchangeBeingLoaded == selectedExchange {
+                isLoadingInstruments = false
+            }
+        }
         do {
             let fetched = try await api.fetchInstruments(exchange: exchangeBeingLoaded)
             // Race-guard: if the user changed exchange while we were
@@ -152,6 +172,13 @@ final class NewOrderSheetViewModel {
                 selectedInstrument = nil
             }
         } catch {
+            // Preserve the device-log diagnostic the pre-MVVM body
+            // emitted so an oncall reading sysdiag can still
+            // correlate "instruments missing" reports with the
+            // underlying error + venue.
+            logger.error(
+                "Failed to load instruments for \(exchangeBeingLoaded, privacy: .public): \(error.localizedDescription, privacy: .public)"
+            )
             // Race-guard the error path too: a failure on the
             // previous exchange must not surface an error banner
             // for the exchange the user has since switched to.
