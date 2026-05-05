@@ -32,8 +32,8 @@ The app processes the following categories of data **on your device** so it can 
 
 ### Authentication credentials
 
-- **What:** username, password (during the login form), and the session tokens (`access_token`, `refresh_token`, `ws_token`, `csrf_token`) returned by your backend.
-- **How stored:** session tokens are kept in iOS Keychain (encrypted at rest by the OS). The plaintext password is never written to disk; it lives only in the `LoginView` form state and is dropped after the login request completes.
+- **What:** username, password (during the login form), and the session tokens / cookies (`access_token`, `refresh_token`, `ws_token`, `csrf_token`) returned by your backend.
+- **How stored:** the backend's HTTP session cookies are managed by the system `URLSession` cookie storage (`HTTPCookieStorage.shared`), which iOS encrypts at rest as part of the app sandbox. The short-lived WebSocket token is held in memory only — never written to disk. The plaintext password is held in memory inside `LoginViewModel` for the duration of the login flow and is released when the view is torn down (typically when the user logs in or backgrounds the app for long enough that iOS reclaims the view).
 - **Where it goes:** sent to your backend (the URL you configured) over HTTPS during login and refresh requests. Never sent anywhere else.
 
 ### Trade-related data
