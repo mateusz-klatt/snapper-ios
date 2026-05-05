@@ -69,20 +69,40 @@ struct MainTabView: View {
                     .tag("settings")
             }
         }
-        .onChange(of: navigationCoordinator.pendingDeepLink) { _, path in
-            if let nextTab = Self.routeDeepLink(
-                path: path,
-                alertsPrefix: AppConfig.Endpoints.alerts,
-                ordersPrefix: AppConfig.Endpoints.orders,
-                positionsPrefix: AppConfig.Endpoints.positions,
-                systemPrefix: AppConfig.Endpoints.system
-            ) {
-                selectedTab = nextTab
-            }
+        .onAppear {
+            // Consume any pending deep-link that landed BEFORE the
+            // tab view existed (e.g. a notification tap while the
+            // user was on the login screen — `pendingDeepLink` is
+            // set by `NavigationCoordinator.handleNotificationTap`
+            // before `MainTabView` mounts after a successful auth
+            // flip in `SnapperApp`). `.onChange` alone misses this
+            // case: SwiftUI does not fire onChange for values that
+            // are already set at first render.
+            consumePendingDeepLink()
+        }
+        .onChange(of: navigationCoordinator.pendingDeepLink) { _, _ in
+            consumePendingDeepLink()
         }
         // WS lifecycle is owned by `SnapperApp` (scenePhase + isAuthenticated
         // observers). Putting connect/disconnect here would kill the
         // socket whenever a modal sheet covered the tab view.
+    }
+
+    /// Read the coordinator's current `pendingDeepLink` and route
+    /// to the matching tab if one applies. Shared between the
+    /// `.onAppear` initial-render path (logged-out tap, login,
+    /// MainTabView mount) and the `.onChange` runtime-update path
+    /// (logged-in tap while MainTabView is already mounted).
+    private func consumePendingDeepLink() {
+        if let nextTab = Self.routeDeepLink(
+            path: navigationCoordinator.pendingDeepLink,
+            alertsPrefix: AppConfig.Endpoints.alerts,
+            ordersPrefix: AppConfig.Endpoints.orders,
+            positionsPrefix: AppConfig.Endpoints.positions,
+            systemPrefix: AppConfig.Endpoints.system
+        ) {
+            selectedTab = nextTab
+        }
     }
 
     /// Deep-link routing path-prefix mapping (post-iOS-3):

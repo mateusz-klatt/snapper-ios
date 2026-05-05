@@ -66,6 +66,36 @@ final class NavigationCoordinatorTests: XCTestCase {
         XCTAssertNil(coordinator.pendingAlertPublicId)
     }
 
+    /// Logged-out deep-link replay regression: a notification tap that
+    /// lands BEFORE ``MainTabView`` mounts (e.g. while the user is on
+    /// ``LoginView``) sets ``pendingDeepLink`` on the coordinator, and
+    /// the value must SURVIVE across non-clearing reads so the tab
+    /// view's ``.onAppear`` hook can still consume it after the auth
+    /// state flips and the tab view mounts. Without this contract,
+    /// ``MainTabView``'s ``.onChange``-only consumption would miss
+    /// the deep-link entirely (SwiftUI does not fire ``.onChange``
+    /// for a value already set at first render).
+    func testPendingDeepLinkSurvivesReadsBeforeExplicitClear() async {
+        let response = _makeResponse(withUserInfo: [
+            "deep_link_path": "/orders/coid-replay",
+            "alert_event_public_id": "alert-replay",
+        ])
+        await coordinator.handleNotificationTap(response)
+
+        // Multiple reads from the consumer (e.g. .onAppear + later
+        // .onChange triggered by an unrelated state update) must all
+        // see the same primed state until clearPendingDeepLink fires.
+        XCTAssertEqual(coordinator.pendingDeepLink, "/orders/coid-replay")
+        XCTAssertEqual(coordinator.pendingAlertPublicId, "alert-replay")
+        XCTAssertEqual(coordinator.pendingDeepLink, "/orders/coid-replay")
+        XCTAssertEqual(coordinator.pendingAlertPublicId, "alert-replay")
+
+        coordinator.clearPendingDeepLink()
+
+        XCTAssertNil(coordinator.pendingDeepLink)
+        XCTAssertNil(coordinator.pendingAlertPublicId)
+    }
+
     private func _makeResponse(withUserInfo userInfo: [AnyHashable: Any]) -> UNNotificationResponse {
         let content = UNMutableNotificationContent()
         content.title = "Test"
