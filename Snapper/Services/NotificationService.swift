@@ -23,6 +23,8 @@ final class NotificationService: ObservableObject {
         category: "Notifications"
     )
     private let notificationCenter: UNUserNotificationCenter
+    private let isLoggedIn: () -> Bool
+    private let registerForRemote: () -> Void
 
     /// Current UNUserNotificationCenter authorization status.
     ///
@@ -31,18 +33,68 @@ final class NotificationService: ObservableObject {
     /// `requestAuthorization()` / `Settings.app` round-trip.
     @Published private(set) var authorizationStatus: UNAuthorizationStatus = .notDetermined
 
-    init(notificationCenter: UNUserNotificationCenter = .current()) {
+    /// Test seam — production wiring keeps the closures pinned to
+    /// ``AuthService.shared`` and ``UIApplication.shared`` so the
+    /// public initializer matches the prior contract. Tests inject
+    /// their own closures to verify the durable-registration path
+    /// without an actual UIApplication round-trip.
+    init(
+        notificationCenter: UNUserNotificationCenter = .current(),
+        isLoggedIn: @escaping () -> Bool = { AuthService.shared.isAuthenticated },
+        registerForRemote: @escaping () -> Void = {
+            UIApplication.shared.registerForRemoteNotifications()
+        }
+    ) {
         self.notificationCenter = notificationCenter
+        self.isLoggedIn = isLoggedIn
+        self.registerForRemote = registerForRemote
     }
 
     /// Read the current authorization status and publish it.
     ///
     /// Called from app launch + from `SettingsView` every time the
     /// screen appears so a permission flipped via Settings.app shows
-    /// up without a restart.
+    /// up without a restart, AND from `SnapperApp.handleScenePhase`
+    /// every time the app returns to `.active` so a cold-relaunch
+    /// of an already-authorized + logged-in user re-fires the APNs
+    /// registration. Without that re-trigger, a user who granted
+    /// permission in a prior session, logged out, then logged back
+    /// in stays stuck in `.awaitingToken` forever — the system
+    /// only delivers a fresh APNs token in response to an explicit
+    /// `registerForRemoteNotifications()` call.
     func refreshAuthorizationStatus() async {
         let settings = await notificationCenter.notificationSettings()
         self.authorizationStatus = settings.authorizationStatus
+
+        if Self.shouldFireDurableRegistration(
+            authorizationStatus: self.authorizationStatus,
+            isLoggedIn: isLoggedIn()
+        ) {
+            registerForRemote()
+        }
+    }
+
+    /// Pure decision helper for the durable-registration branch:
+    /// returns ``true`` iff the user has previously granted
+    /// notification permission AND is currently logged in, in
+    /// which case ``registerForRemoteNotifications()`` must be
+    /// re-fired so a fresh APNs token flows through ``AppDelegate``.
+    /// Extracted out of ``refreshAuthorizationStatus`` so the
+    /// decision is unit-testable without an actual
+    /// ``UNUserNotificationCenter`` round-trip.
+    ///
+    /// ``.ephemeral`` (App Clips push grant) is treated as granted
+    /// for parity with ``isAuthorized`` / ``SettingsView`` — without
+    /// this, an .ephemeral + logged-in user would never re-fire
+    /// registration and stay stuck in ``.awaitingToken``.
+    static func shouldFireDurableRegistration(
+        authorizationStatus: UNAuthorizationStatus,
+        isLoggedIn: Bool
+    ) -> Bool {
+        let granted: Bool = (authorizationStatus == .authorized
+            || authorizationStatus == .provisional
+            || authorizationStatus == .ephemeral)
+        return granted && isLoggedIn
     }
 
     /// Prompt the user for notification permission + register for APNs.
@@ -59,13 +111,19 @@ final class NotificationService: ObservableObject {
     /// `@Published authorizationStatus` field.
     func requestAuthorization() async {
         do {
-            let granted = try await notificationCenter.requestAuthorization(
+            _ = try await notificationCenter.requestAuthorization(
                 options: [.alert, .sound, .badge]
             )
+            // refreshAuthorizationStatus already fires registerForRemote
+            // when the post-grant status is granted AND the user is
+            // logged in, so we let it own the registration call —
+            // routing through the injected closure here too keeps the
+            // grant + durable paths aligned, prevents a back-to-back
+            // double registerForRemoteNotifications() call after the
+            // user accepts the prompt while logged in, and lets tests
+            // assert the call count via the same seam.
             await refreshAuthorizationStatus()
-            if granted {
-                UIApplication.shared.registerForRemoteNotifications()
-            } else {
+            if !isAuthorized {
                 logger.info("User declined notification permission")
             }
         } catch {
@@ -78,8 +136,12 @@ final class NotificationService: ObservableObject {
     ///
     /// Derived from `authorizationStatus` only — a token's presence is
     /// a `DeviceRegistrationService` concern. Kept here as a
-    /// convenience boolean for UI.
+    /// convenience boolean for UI. ``.ephemeral`` is included so the
+    /// flag matches the durable-registration decision in
+    /// ``shouldFireDurableRegistration``.
     var isAuthorized: Bool {
-        authorizationStatus == .authorized || authorizationStatus == .provisional
+        authorizationStatus == .authorized
+            || authorizationStatus == .provisional
+            || authorizationStatus == .ephemeral
     }
 }
