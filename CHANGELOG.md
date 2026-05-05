@@ -6,6 +6,72 @@ uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+## [0.3.0] — 2026-05-05
+
+Release-gate slice — targeted reliability uplift on the notification
+path + privacy policy + a real navigation bug fix. Synthesized from
+multi-model architect consensus (Codex 5.4 / 5.5 / Copilot 5.4) on
+the question "what's the minimum slice between v0.2.0 TestFlight and
+App Store submission?".
+
+### Added
+
+- **NotificationService durable-registration wiring tests.**
+  Covers the gate that re-fires `registerForRemoteNotifications()`
+  after relaunch / login flip when the user previously granted
+  permission, paired with a `#if DEBUG`-gated test seam
+  (`_refreshWithStatusForTests`) that pins the `UNAuthorizationStatus`
+  the simulator always reports as `.notDetermined`. 6 wiring tests:
+  authorized + logged-in / provisional + logged-in / ephemeral +
+  logged-in (fire) and authorized + logged-out / denied + logged-in
+  / notDetermined + logged-in (suppress), plus an idempotency
+  regression for cold-relaunch + scenePhase double-trigger.
+- **`docs/privacy-policy.md`** — markdown source-of-truth for the
+  iOS app's privacy disclosure. Canonical published HTML is on the
+  maintainer's frontend deploy
+  (`snapper-frontend:public/privacy-policy.html`). README links
+  both. The policy describes the actual on-device behaviour: no
+  third-party SDKs, no analytics, no telemetry; data flows only
+  between the device, the user's self-hosted backend, and Apple's
+  APNs (opt-in).
+
+### Fixed
+
+- **Logged-out notification tap silently dropped the deep-link.**
+  When a notification arrived while the user was on `LoginView`,
+  `NavigationCoordinator.handleNotificationTap` set
+  `pendingDeepLink` correctly, but `MainTabView` was not yet
+  mounted (auth gate in `SnapperApp` only mounts it after
+  `authService.isAuthenticated`). Once the user logged in,
+  `MainTabView` mounted but the existing `.onChange(of:
+  pendingDeepLink)` observer did not fire — SwiftUI does not
+  fire `.onChange` for values already set at first render. The
+  deep-link was lost and the user landed on the default tab
+  instead of the alert / order / position the notification
+  pointed at. `MainTabView` now consumes `pendingDeepLink` on
+  `.onAppear` AND `.onChange` via a shared
+  `consumePendingDeepLink()` helper.
+
+### Security
+
+- **`LoginViewModel.password` cleared after login.** Previously
+  the `@Published var password: String = ""` field stayed live
+  for the view's lifetime, so the plaintext password was
+  reachable in memory long after `authService.login()` resolved.
+  `LoginViewModel.login()` now overwrites `password = ""` once
+  the auth call returns (success or failure). Two regression
+  tests pin the contract on both the success + failure paths so
+  a future refactor can't silently drop the clear.
+
+### Tests
+
+- iOS test count: 195 (post-v0.2.0) → 203.
+- `NotificationService` line coverage: ~25% → 60.8%.
+- Whole-app line coverage: 22.7% → ~24%. The remaining
+  unconcovered lines are SwiftUI body chrome that pure-helper
+  extraction cannot reach without a ViewInspector / MVVM rewrite
+  — explicitly out of scope per architect consensus.
+
 ## [0.2.0] — 2026-05-05
 
 Trading-correctness pack: six PRs landed in one session against
