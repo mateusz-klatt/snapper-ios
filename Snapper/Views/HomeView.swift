@@ -36,11 +36,11 @@ struct HomeView: View {
                             .padding()
                     }
 
-                    if !positions.isEmpty {
+                    if !filteredPositions.isEmpty {
                         positionsView
                     }
 
-                    if !orders.isEmpty {
+                    if !filteredOrders.isEmpty {
                         recentOrdersView
                     }
                 }
@@ -67,6 +67,65 @@ struct HomeView: View {
     /// Home layout stays compact when the user has no alerts yet.
     static func firstAlert(from history: AlertHistoryResponse) -> AlertEventInfo? {
         return history.payload.first
+    }
+
+    /// Wallet-scoped position list — mirrors the ``PositionsView``
+    /// filter so a wallet selection in the toolbar propagates to
+    /// Home's "Open Positions" counter and detail card.
+    var filteredPositions: [PositionSnapshot] {
+        return PositionsView.filter(
+            positions: positions,
+            selectedWalletPublicId: appState.selectedWalletPublicId
+        )
+    }
+
+    /// Wallet-scoped order list, newest-first by ``createdAt``.
+    /// Delegates to ``OrdersView.filterRecent`` so the Home
+    /// "Recent Orders" card and the Orders tab "Recent" segment
+    /// agree on BOTH the wallet predicate AND the ordering — the
+    /// API payload is not guaranteed to arrive sorted, so a plain
+    /// wallet-filter would surface older rows ahead of newer ones
+    /// whenever the response wasn't already newest-first.
+    ///
+    /// The Home view's rendering path slices the first 5 rows;
+    /// this property hands ``filterRecent`` the canonical 50-row
+    /// paging cap so the in-memory sort window stays bounded
+    /// regardless of how large the unfiltered list grows.
+    var filteredOrders: [OrderStatus] {
+        return OrdersView.filterRecent(
+            orders: orders,
+            selectedWalletPublicId: appState.selectedWalletPublicId
+        )
+    }
+
+    /// Wallet-scoped active-order subset for the Home stat card.
+    /// Uses the canonical "open lifecycle" set
+    /// (``OrdersView.openStatuses``) instead of the previous ad-hoc
+    /// ``"open"|"pending"`` pair, which under-counted ``new`` /
+    /// ``submitted`` / ``partially_filled`` orders the user could
+    /// still cancel from the Orders tab.
+    var filteredActiveOrders: [OrderStatus] {
+        return Self.filterActiveOrders(
+            orders: orders,
+            selectedWalletPublicId: appState.selectedWalletPublicId
+        )
+    }
+
+    /// Pure helper extracted for unit testing — joins
+    /// ``OrdersView.walletMatches`` and ``OrdersView.isOpen`` so
+    /// the Home counter and the OrdersView "Open" segment stay in
+    /// lockstep on the canonical lifecycle set.
+    static func filterActiveOrders(
+        orders: [OrderStatus],
+        selectedWalletPublicId: String?
+    ) -> [OrderStatus] {
+        return orders.filter { order in
+            OrdersView.walletMatches(
+                rowWalletId: order.walletPublicId,
+                selected: selectedWalletPublicId
+            )
+                && OrdersView.isOpen(status: order.status)
+        }
     }
 
     private func loadLatestAlert() async {
@@ -183,8 +242,8 @@ struct HomeView: View {
             Divider()
 
             LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 16) {
-                statView(title: "Open Positions", value: "\(positions.count)")
-                statView(title: "Active Orders", value: "\(orders.filter { $0.status == "open" || $0.status == "pending" }.count)")
+                statView(title: "Open Positions", value: "\(filteredPositions.count)")
+                statView(title: "Active Orders", value: "\(filteredActiveOrders.count)")
             }
         }
         .padding()
@@ -210,7 +269,7 @@ struct HomeView: View {
             Text("Open Positions")
                 .font(.headline)
 
-            ForEach(positions, id: \.id) { position in
+            ForEach(filteredPositions, id: \.id) { position in
                 HStack {
                     VStack(alignment: .leading, spacing: 4) {
                         Text(position.instrument)
@@ -248,7 +307,7 @@ struct HomeView: View {
             Text("Recent Orders")
                 .font(.headline)
 
-            ForEach(orders.prefix(5), id: \.id) { order in
+            ForEach(filteredOrders.prefix(5), id: \.id) { order in
                 HStack {
                     VStack(alignment: .leading, spacing: 4) {
                         Text(order.instrument)
