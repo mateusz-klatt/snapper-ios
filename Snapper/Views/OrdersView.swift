@@ -1,38 +1,34 @@
 import SwiftUI
-import os
 
 /// Orders + executions list, segmented by lifecycle state (iOS-3).
 ///
+/// Refactored to MVVM in v0.3.1 — data, async I/O, and submit
+/// flows live in `OrdersViewModel`. The View binds segment
+/// selection + sheet/alert presentation flags via `@State`.
+///
 /// Picker tabs:
-/// - Open: orders whose ``status`` is one of the live-lifecycle
-///   members of the backend ``OrderStatusEnum`` (`new`, `submitted`,
+/// - Open: orders whose `status` is one of the live-lifecycle
+///   members of the backend `OrderStatusEnum` (`new`, `submitted`,
 ///   `open`, `partially_filled`).
 /// - Recent: every order the wallet selection grants visibility to,
 ///   newest-first, capped at 50 rows for paging discipline.
-/// - Fills: ``ExecutionData`` rows from ``GET /api/executions``.
+/// - Fills: `ExecutionData` rows from `GET /api/executions`.
 ///
 /// Wallet filter: orders + executions both expose
-/// ``walletPublicId``, so the list is scoped to
-/// ``AppState.selectedWalletPublicId`` whenever a wallet is picked.
-/// Rows whose ``walletPublicId`` is ``nil`` (legacy / system rows
+/// `walletPublicId`, so the list is scoped to
+/// `AppState.selectedWalletPublicId` whenever a wallet is picked.
+/// Rows whose `walletPublicId` is `nil` (legacy / system rows
 /// without an owner) pass through so the UI never silently drops
 /// data.
 struct OrdersView: View {
+
     @Environment(AppState.self) private var appState
     @EnvironmentObject private var authService: AuthService
+    @State private var viewModel: OrdersViewModel?
+
     @State private var segment: OrdersSegment = .open
-    @State private var orders: [OrderStatus] = []
-    @State private var executions: [ExecutionRecord] = []
-    @State private var isLoading = false
-    @State private var errorMessage: String?
     @State private var presentingNewOrder = false
     @State private var pendingCancelOrder: OrderStatus?
-    @State private var submitError: String?
-
-    private let logger = Logger(
-        subsystem: Bundle.main.bundleIdentifier ?? "Snapper",
-        category: "OrdersView"
-    )
 
     var body: some View {
         NavigationStack {
@@ -46,72 +42,74 @@ struct OrdersView: View {
                 .padding()
 
                 List {
-                    if Self.shouldShowLoadingPlaceholder(
-                        isLoading: isLoading,
-                        activeSegmentIsEmpty: activeSegmentIsEmpty
-                    ) {
-                        Section {
-                            HStack(spacing: 8) {
-                                ProgressView()
-                                Text("Loading…")
-                                    .font(.subheadline)
-                                    .foregroundStyle(.secondary)
-                            }
-                        }
-                    } else if Self.shouldShowLoadError(
-                        errorMessage: errorMessage,
-                        isLoading: isLoading
-                    ), let errorMessage {
-                        Section {
-                            HStack(alignment: .top, spacing: 8) {
-                                Image(systemName: "exclamationmark.triangle")
-                                    .foregroundStyle(.orange)
-                                VStack(alignment: .leading, spacing: 2) {
-                                    Text("Couldn't load")
-                                        .font(.subheadline.weight(.semibold))
-                                    Text(errorMessage)
-                                        .font(.caption)
+                    if let viewModel {
+                        if OrdersViewModel.shouldShowLoadingPlaceholder(
+                            isLoading: viewModel.isLoading,
+                            activeSegmentIsEmpty: activeSegmentIsEmpty(viewModel: viewModel)
+                        ) {
+                            Section {
+                                HStack(spacing: 8) {
+                                    ProgressView()
+                                    Text("Loading…")
+                                        .font(.subheadline)
                                         .foregroundStyle(.secondary)
                                 }
-                                Spacer()
-                                Button("Retry") {
-                                    Task { await load() }
-                                }
-                                .buttonStyle(.bordered)
                             }
-                        }
-                    }
-                    switch segment {
-                    case .open:
-                        ForEach(filteredOpen, id: \.publicId) { order in
-                            if authService.hasPermission(.cancelOrders) {
-                                OrderRow(order: order)
-                                    .swipeActions(edge: .trailing, allowsFullSwipe: false) {
-                                        Button(role: .destructive) {
-                                            pendingCancelOrder = order
-                                        } label: {
-                                            Label("Cancel", systemImage: "xmark.circle")
-                                        }
-                                        .disabled(order.planPublicId == nil)
+                        } else if OrdersViewModel.shouldShowLoadError(
+                            errorMessage: viewModel.errorMessage,
+                            isLoading: viewModel.isLoading
+                        ), let errorMessage = viewModel.errorMessage {
+                            Section {
+                                HStack(alignment: .top, spacing: 8) {
+                                    Image(systemName: "exclamationmark.triangle")
+                                        .foregroundStyle(.orange)
+                                    VStack(alignment: .leading, spacing: 2) {
+                                        Text("Couldn't load")
+                                            .font(.subheadline.weight(.semibold))
+                                        Text(errorMessage)
+                                            .font(.caption)
+                                            .foregroundStyle(.secondary)
                                     }
-                            } else {
-                                OrderRow(order: order)
+                                    Spacer()
+                                    Button("Retry") {
+                                        Task { await viewModel.load() }
+                                    }
+                                    .buttonStyle(.bordered)
+                                }
                             }
                         }
-                    case .recent:
-                        ForEach(filteredRecent, id: \.publicId) { order in
-                            OrderRow(order: order)
-                        }
-                    case .fills:
-                        ForEach(filteredFills, id: \.publicId) { execution in
-                            ExecutionRow(execution: execution)
+                        switch segment {
+                        case .open:
+                            ForEach(viewModel.filteredOpen, id: \.publicId) { order in
+                                if authService.hasPermission(.cancelOrders) {
+                                    OrderRow(order: order)
+                                        .swipeActions(edge: .trailing, allowsFullSwipe: false) {
+                                            Button(role: .destructive) {
+                                                pendingCancelOrder = order
+                                            } label: {
+                                                Label("Cancel", systemImage: "xmark.circle")
+                                            }
+                                            .disabled(order.planPublicId == nil)
+                                        }
+                                } else {
+                                    OrderRow(order: order)
+                                }
+                            }
+                        case .recent:
+                            ForEach(viewModel.filteredRecent, id: \.publicId) { order in
+                                OrderRow(order: order)
+                            }
+                        case .fills:
+                            ForEach(viewModel.filteredFills, id: \.publicId) { execution in
+                                ExecutionRow(execution: execution)
+                            }
                         }
                     }
                 }
                 .listStyle(.insetGrouped)
                 .scrollContentBackground(.hidden)
                 .background(Color.bgBase)
-                .refreshable { await load() }
+                .refreshable { await viewModel?.load() }
             }
             .navigationTitle("Orders")
             .toolbar {
@@ -122,22 +120,25 @@ struct OrdersView: View {
                         } label: {
                             Label("New order", systemImage: "plus.circle")
                         }
-                        .disabled(resolvedWallet == nil)
+                        .disabled(viewModel?.resolvedWallet == nil)
                     }
                 }
             }
         }
         .task(id: appState.selectedWalletPublicId) {
-            await load()
+            if viewModel == nil {
+                viewModel = OrdersViewModel(appState: appState)
+            }
+            await viewModel?.load()
         }
         .sheet(isPresented: $presentingNewOrder) {
-            if let wallet = resolvedWallet {
+            if let viewModel, let wallet = viewModel.resolvedWallet {
                 NewOrderSheet(
-                    exchanges: derivedExchanges,
+                    exchanges: viewModel.derivedExchanges,
                     walletPublicId: wallet.publicId,
                     walletIsPaper: wallet.isPaper,
                     onSubmit: { body in
-                        await submitNewOrder(body: body)
+                        await viewModel.submitNewOrder(body: body)
                     }
                 )
             }
@@ -151,7 +152,7 @@ struct OrdersView: View {
             presenting: pendingCancelOrder
         ) { order in
             Button("Cancel order", role: .destructive) {
-                Task { await submitCancel(order: order) }
+                Task { await viewModel?.submitCancel(order: order) }
             }
             Button("Keep open", role: .cancel) {
                 pendingCancelOrder = nil
@@ -162,209 +163,24 @@ struct OrdersView: View {
         .alert(
             "Submission failed",
             isPresented: Binding(
-                get: { submitError != nil },
-                set: { if !$0 { submitError = nil } }
+                get: { viewModel?.submitError != nil },
+                set: { if !$0 { viewModel?.submitError = nil } }
             ),
-            presenting: submitError
+            presenting: viewModel?.submitError
         ) { _ in
             Button("OK", role: .cancel) {
-                submitError = nil
+                viewModel?.submitError = nil
             }
         } message: { error in
             Text(error)
         }
     }
 
-    /// Resolves the user's selected wallet against the live
-    /// ``appState.availableWallets`` cache. A persisted public id
-    /// pointing at a wallet that no longer exists (revoked,
-    /// deleted, scope-handed-over) falls through to ``nil`` so the
-    /// `+` button gate disables instead of presenting a sheet that
-    /// cannot build a valid order body.
-    var resolvedWallet: WalletInfo? {
-        guard let id = appState.selectedWalletPublicId else { return nil }
-        return appState.availableWallets.first { $0.publicId == id }
-    }
-
-    /// Unique exchange identifiers derived from the orders + executions
-    /// already loaded into the view. Backend has no dedicated
-    /// "list venues" endpoint mounted on iOS yet, so the picker
-    /// bootstraps from the data already on screen — falls back to
-    /// `["kraken"]` so the form is still usable on first load.
-    var derivedExchanges: [String] {
-        var seen: Set<String> = []
-        var ordered: [String] = []
-        for value in orders.map(\.exchange) + executions.map(\.exchange) {
-            if seen.insert(value).inserted {
-                ordered.append(value)
-            }
-        }
-        return ordered.isEmpty ? ["kraken"] : ordered
-    }
-
-    var filteredOpen: [OrderStatus] {
-        return Self.filterOpen(
-            orders: orders,
-            selectedWalletPublicId: appState.selectedWalletPublicId
-        )
-    }
-
-    var filteredRecent: [OrderStatus] {
-        return Self.filterRecent(
-            orders: orders,
-            selectedWalletPublicId: appState.selectedWalletPublicId
-        )
-    }
-
-    var filteredFills: [ExecutionRecord] {
-        return Self.filterFills(
-            executions: executions,
-            selectedWalletPublicId: appState.selectedWalletPublicId
-        )
-    }
-
-    /// True when the visible segment has no rows after filtering.
-    /// Used to drive the "Loading…" placeholder so a Retry tap on
-    /// an empty failure state shows progress feedback instead of a
-    /// blank list while the request is in flight.
-    var activeSegmentIsEmpty: Bool {
+    private func activeSegmentIsEmpty(viewModel: OrdersViewModel) -> Bool {
         switch segment {
-        case .open: return filteredOpen.isEmpty
-        case .recent: return filteredRecent.isEmpty
-        case .fills: return filteredFills.isEmpty
-        }
-    }
-
-    /// Backend-canonical "open" lifecycle states. Values mirror
-    /// ``snapper.core.types.OrderStatusEnum`` members that have not
-    /// reached a terminal state (``filled``, ``cancelled``,
-    /// ``rejected``).
-    static let openStatuses: Set<String> = ["new", "submitted", "open", "partially_filled"]
-
-    static func isOpen(status: String) -> Bool {
-        return openStatuses.contains(status)
-    }
-
-    static func walletMatches(rowWalletId: String?, selected: String?) -> Bool {
-        guard let selected else { return true }
-        guard let rowWalletId else { return true }
-        return rowWalletId == selected
-    }
-
-    static func filterOpen(
-        orders: [OrderStatus],
-        selectedWalletPublicId: String?
-    ) -> [OrderStatus] {
-        return orders.filter { order in
-            isOpen(status: order.status)
-                && walletMatches(rowWalletId: order.walletPublicId, selected: selectedWalletPublicId)
-        }
-    }
-
-    static func filterRecent(
-        orders: [OrderStatus],
-        selectedWalletPublicId: String?,
-        limit: Int = 50
-    ) -> [OrderStatus] {
-        let scoped = orders.filter { order in
-            walletMatches(rowWalletId: order.walletPublicId, selected: selectedWalletPublicId)
-        }
-        let sorted = scoped.sorted { $0.createdAt > $1.createdAt }
-        return Array(sorted.prefix(limit))
-    }
-
-    static func filterFills(
-        executions: [ExecutionRecord],
-        selectedWalletPublicId: String?
-    ) -> [ExecutionRecord] {
-        return executions.filter { execution in
-            walletMatches(
-                rowWalletId: execution.walletPublicId,
-                selected: selectedWalletPublicId
-            )
-        }
-    }
-
-    /// Decision helper for the error banner — returns ``true`` when
-    /// the orders list should prepend the "couldn't load" Section.
-    /// Suppressed mid-load so the user does not see a stale error
-    /// flash above an active spinner; surfaces the moment the load
-    /// settles with an unresolved error.
-    static func shouldShowLoadError(
-        errorMessage: String?,
-        isLoading: Bool
-    ) -> Bool {
-        guard !isLoading else { return false }
-        guard let errorMessage else { return false }
-        return !errorMessage.isEmpty
-    }
-
-    /// Decision helper for the in-list "Loading…" placeholder. The
-    /// banner suppresses itself while ``isLoading`` so a Retry tap
-    /// on an empty failure leaves the user staring at a blank list
-    /// without this placeholder. We only surface the placeholder
-    /// when the active segment has nothing to render — once any
-    /// rows are present the cached data covers the loading window.
-    static func shouldShowLoadingPlaceholder(
-        isLoading: Bool,
-        activeSegmentIsEmpty: Bool
-    ) -> Bool {
-        return isLoading && activeSegmentIsEmpty
-    }
-
-    private func load() async {
-        isLoading = true
-        defer { isLoading = false }
-
-        async let ordersResult = APIClient.shared.fetchOrders()
-        async let executionsResult = APIClient.shared.fetchExecutions()
-
-        // Capture both results before mutating errorMessage so a
-        // partial failure on either fetch surfaces — the Fills
-        // segment was previously hiding executions failures because
-        // only fetchOrders' catch was wired up.
-        var encounteredError: String?
-        do {
-            orders = try await ordersResult
-        } catch {
-            logger.error("Failed to fetch orders: \(error)")
-            encounteredError = error.localizedDescription
-        }
-
-        do {
-            executions = try await executionsResult
-        } catch {
-            logger.error("Failed to fetch executions: \(error)")
-            encounteredError = encounteredError ?? error.localizedDescription
-        }
-        errorMessage = encounteredError
-    }
-
-    @discardableResult
-    private func submitNewOrder(body: CreateOrderBody) async -> Bool {
-        do {
-            let command = NewOrderSheetViewModel.makeCommand(body: body)
-            _ = try await APIClient.shared.createOrder(command: command)
-            await load()
-            return true
-        } catch {
-            logger.error("Failed to submit new order: \(error.localizedDescription)")
-            submitError = "Couldn't submit the order. Try again."
-            return false
-        }
-    }
-
-    private func submitCancel(order: OrderStatus) async {
-        guard let planId = order.planPublicId else {
-            submitError = "This order has no execution plan to cancel."
-            return
-        }
-        do {
-            _ = try await APIClient.shared.cancelOrder(planPublicId: planId)
-            await load()
-        } catch {
-            logger.error("Failed to cancel order: \(error.localizedDescription)")
-            submitError = "Couldn't cancel the order. Try again."
+        case .open: return viewModel.filteredOpen.isEmpty
+        case .recent: return viewModel.filteredRecent.isEmpty
+        case .fills: return viewModel.filteredFills.isEmpty
         }
     }
 }

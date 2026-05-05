@@ -70,6 +70,27 @@ binders.
   `AppState.shared`. Establishes the AppState init-injection
   pattern that subsequent VMs (`OrdersViewModel`,
   `PositionsViewModel`) reuse.
+- **`OrdersView` MVVM extraction — `OrdersViewModel`** at
+  `Snapper/ViewModels/OrdersViewModel.swift`. The View shrinks
+  from a 465-line state-and-async holder to a thin Picker / List
+  binder (~210 lines). The VM owns `orders`, `executions`,
+  `isLoading`, `errorMessage`, `submitError`, the parallel
+  `async let` `load()` (with `os.Logger` diagnostics on each
+  partial-failure path), `submitNewOrder(body:)` /
+  `submitCancel(order:)`, derived `filteredOpen` / `filteredRecent`
+  / `filteredFills`, `derivedExchanges`, and `resolvedWallet`.
+  Sheet/alert booleans (`presentingNewOrder`, `pendingCancelOrder`)
+  stay as `@State` in the View per Q3 of the architect consensus.
+  17 new VM tests cover the parallel-load happy + partial-failure
+  paths, submit success/failure, cancel success / no-plan-id /
+  failure, derived collection scoping + sorting + capping, and
+  resolvedWallet branches. Static helpers preserved verbatim
+  (`OrdersViewModel.openStatuses` / `isOpen` / `walletMatches`
+  / `filterOpen` / `filterRecent` / `filterFills`
+  / `shouldShowLoadError` / `shouldShowLoadingPlaceholder`); all
+  callsites in `HomeView`, `PositionsView`, `OrdersViewTests`,
+  `HomeViewTests` retargeted from `OrdersView.X` to
+  `OrdersViewModel.X` via mechanical sed.
 - **Attach-sheet MVVM extraction — `AttachBracketSheetViewModel`
   + `AttachTrailingStopSheetViewModel`** at
   `Snapper/ViewModels/`. Both small sheets converted to the
@@ -100,8 +121,9 @@ binders.
 
 ### Tests
 
-- Test count: 205 (post-foundations) → 263 (+21 NewOrderSheet
-  pilot, +14 WalletPicker, +11 AttachBracket, +12 AttachTrailing).
+- Test count: 205 (post-foundations) → 280 (+21 NewOrderSheet
+  pilot, +14 WalletPicker, +11 AttachBracket, +12 AttachTrailing,
+  +17 OrdersView).
   New tests live under `SnapperTests/ViewModels/` and cover
   load / failure / race / submit / re-entry / idempotency /
   AppState mutation branches against the lock-protected
