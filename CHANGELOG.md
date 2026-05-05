@@ -70,6 +70,23 @@ binders.
   `AppState.shared`. Establishes the AppState init-injection
   pattern that subsequent VMs (`OrdersViewModel`,
   `PositionsViewModel`) reuse.
+- **Attach-sheet MVVM extraction — `AttachBracketSheetViewModel`
+  + `AttachTrailingStopSheetViewModel`** at
+  `Snapper/ViewModels/`. Both small sheets converted to the
+  pilot pattern (despite the v0.3.1 architect consensus
+  initially proposing they stay closure-driven only) so the
+  form-state mutations, parsing, idempotency-key lifecycle, and
+  submit re-entry guard get coverage. Each VM owns the form
+  fields (`slPriceText`/`tpPriceText` and
+  `trailingPctText`/`minLockPctText`), `isSubmitting`, and the
+  per-presentation `idempotencyKey`. The parent-injected
+  `onSubmit` closure stays on the View → parent VM contract
+  unchanged (parent VMs still own the `APIClient.createBracket`
+  / `createTrailingStop` round trip). Static helpers
+  (`parsePrice` / `parsePercent`, `canSubmit`, `makeCommand`)
+  preserved on the new VMs so the existing
+  `AttachBracketSheetTests` / `AttachTrailingStopSheetTests`
+  coverage stays green.
 
 ### Fixed
 
@@ -83,13 +100,12 @@ binders.
 
 ### Tests
 
-- Test count: 205 (post-foundations) → 240 (+21 NewOrderSheet
-  pilot, +14 WalletPicker). New tests live under
-  `SnapperTests/ViewModels/{NewOrderSheetViewModelTests,WalletPickerViewModelTests}.swift`
-  and cover load / failure / race / submit / re-entry /
-  idempotency / AppState mutation branches against the
-  lock-protected `MockAPIClient` + per-test ephemeral
-  `AppState(userDefaults:)`.
+- Test count: 205 (post-foundations) → 263 (+21 NewOrderSheet
+  pilot, +14 WalletPicker, +11 AttachBracket, +12 AttachTrailing).
+  New tests live under `SnapperTests/ViewModels/` and cover
+  load / failure / race / submit / re-entry / idempotency /
+  AppState mutation branches against the lock-protected
+  `MockAPIClient` + per-test ephemeral `AppState(userDefaults:)`.
 
 ## [0.3.0] — 2026-05-05
 

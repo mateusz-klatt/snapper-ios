@@ -19,15 +19,15 @@ final class AttachBracketSheetTests: XCTestCase {
     /// Empty / non-numeric / non-positive collapses to nil so the
     /// caller treats the leg as "not supplied".
     func testParsePriceHandlesLocalisedAndPathologicalInput() {
-        XCTAssertEqual(AttachBracketSheet.parsePrice("100"), 100.0)
-        XCTAssertEqual(AttachBracketSheet.parsePrice("100.5"), 100.5)
-        XCTAssertEqual(AttachBracketSheet.parsePrice("100,5"), 100.5)
-        XCTAssertEqual(AttachBracketSheet.parsePrice("  42 "), 42.0)
-        XCTAssertNil(AttachBracketSheet.parsePrice(""))
-        XCTAssertNil(AttachBracketSheet.parsePrice("   "))
-        XCTAssertNil(AttachBracketSheet.parsePrice("0"))
-        XCTAssertNil(AttachBracketSheet.parsePrice("-5"))
-        XCTAssertNil(AttachBracketSheet.parsePrice("abc"))
+        XCTAssertEqual(AttachBracketSheetViewModel.parsePrice("100"), 100.0)
+        XCTAssertEqual(AttachBracketSheetViewModel.parsePrice("100.5"), 100.5)
+        XCTAssertEqual(AttachBracketSheetViewModel.parsePrice("100,5"), 100.5)
+        XCTAssertEqual(AttachBracketSheetViewModel.parsePrice("  42 "), 42.0)
+        XCTAssertNil(AttachBracketSheetViewModel.parsePrice(""))
+        XCTAssertNil(AttachBracketSheetViewModel.parsePrice("   "))
+        XCTAssertNil(AttachBracketSheetViewModel.parsePrice("0"))
+        XCTAssertNil(AttachBracketSheetViewModel.parsePrice("-5"))
+        XCTAssertNil(AttachBracketSheetViewModel.parsePrice("abc"))
     }
 
     /// Backend `BracketCreateBody` validator requires at least one of
@@ -35,17 +35,17 @@ final class AttachBracketSheetTests: XCTestCase {
     /// constraint so the user cannot fire a request the server will
     /// reject with HTTP 400.
     func testCanSubmitRequiresAtLeastOneLeg() {
-        XCTAssertFalse(AttachBracketSheet.canSubmit(slPrice: nil, tpPrice: nil, isSubmitting: false))
-        XCTAssertTrue(AttachBracketSheet.canSubmit(slPrice: 95, tpPrice: nil, isSubmitting: false))
-        XCTAssertTrue(AttachBracketSheet.canSubmit(slPrice: nil, tpPrice: 110, isSubmitting: false))
-        XCTAssertTrue(AttachBracketSheet.canSubmit(slPrice: 95, tpPrice: 110, isSubmitting: false))
+        XCTAssertFalse(AttachBracketSheetViewModel.canSubmit(slPrice: nil, tpPrice: nil, isSubmitting: false))
+        XCTAssertTrue(AttachBracketSheetViewModel.canSubmit(slPrice: 95, tpPrice: nil, isSubmitting: false))
+        XCTAssertTrue(AttachBracketSheetViewModel.canSubmit(slPrice: nil, tpPrice: 110, isSubmitting: false))
+        XCTAssertTrue(AttachBracketSheetViewModel.canSubmit(slPrice: 95, tpPrice: 110, isSubmitting: false))
     }
 
     /// In-flight submission disables the submit button so a double-tap
     /// cannot duplicate the bracket.
     func testCanSubmitBlocksWhileInFlight() {
         XCTAssertFalse(
-            AttachBracketSheet.canSubmit(slPrice: 95, tpPrice: 110, isSubmitting: true)
+            AttachBracketSheetViewModel.canSubmit(slPrice: 95, tpPrice: 110, isSubmitting: true)
         )
     }
 
@@ -54,7 +54,7 @@ final class AttachBracketSheetTests: XCTestCase {
     /// minter so backend gap detection sees a coherent session
     /// across iOS-originated commands.
     func testMakeCommandEmbedsCycleIdAndProvenance() {
-        let command = AttachBracketSheet.makeCommand(
+        let command = AttachBracketSheetViewModel.makeCommand(
             positionCyclePublicId: "cycle-1",
             slPrice: 95.5,
             tpPrice: 110.0,
