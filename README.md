@@ -67,3 +67,4 @@ The repo intentionally ships with `com.example.snapper` and no hardcoded team â€
 - License: [MIT](LICENSE).
 - Security disclosures: [`SECURITY.md`](SECURITY.md).
 - Architectural deep-dive: [`docs/architecture.md`](docs/architecture.md).
+- Privacy policy (App Store): [`docs/privacy-policy.md`](docs/privacy-policy.md) â€” markdown source-of-truth; canonical published version served from [snapper.ch/privacy-policy.html](https://snapper.ch/privacy-policy.html).

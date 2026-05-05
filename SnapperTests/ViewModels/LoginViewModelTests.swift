@@ -165,6 +165,11 @@ final class LoginViewModelTests: XCTestCase {
             XCTAssertTrue(viewModel.isAuthenticated)
             XCTAssertNil(viewModel.errorMessage)
             XCTAssertFalse(viewModel.isLoading)
+            XCTAssertEqual(
+                viewModel.password,
+                "",
+                "Plaintext password must be cleared from the view model after a successful login — the privacy policy promises this."
+            )
         }
     }
 
@@ -186,6 +191,11 @@ final class LoginViewModelTests: XCTestCase {
             XCTAssertFalse(viewModel.isAuthenticated)
             XCTAssertEqual(viewModel.errorMessage, "Invalid credentials")
             XCTAssertFalse(viewModel.isLoading)
+            XCTAssertEqual(
+                viewModel.password,
+                "",
+                "Plaintext password must be cleared from the view model on auth failure too — the privacy policy promises 'success or failure'."
+            )
         }
     }
 
