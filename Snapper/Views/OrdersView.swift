@@ -45,7 +45,19 @@ struct OrdersView: View {
                 .padding()
 
                 List {
-                    if Self.shouldShowLoadError(
+                    if Self.shouldShowLoadingPlaceholder(
+                        isLoading: isLoading,
+                        activeSegmentIsEmpty: activeSegmentIsEmpty
+                    ) {
+                        Section {
+                            HStack(spacing: 8) {
+                                ProgressView()
+                                Text("Loading…")
+                                    .font(.subheadline)
+                                    .foregroundStyle(.secondary)
+                            }
+                        }
+                    } else if Self.shouldShowLoadError(
                         errorMessage: errorMessage,
                         isLoading: isLoading
                     ), let errorMessage {
@@ -54,7 +66,7 @@ struct OrdersView: View {
                                 Image(systemName: "exclamationmark.triangle")
                                     .foregroundStyle(.orange)
                                 VStack(alignment: .leading, spacing: 2) {
-                                    Text("Couldn't load orders")
+                                    Text("Couldn't load")
                                         .font(.subheadline.weight(.semibold))
                                     Text(errorMessage)
                                         .font(.caption)
@@ -204,6 +216,18 @@ struct OrdersView: View {
         )
     }
 
+    /// True when the visible segment has no rows after filtering.
+    /// Used to drive the "Loading…" placeholder so a Retry tap on
+    /// an empty failure state shows progress feedback instead of a
+    /// blank list while the request is in flight.
+    var activeSegmentIsEmpty: Bool {
+        switch segment {
+        case .open: return filteredOpen.isEmpty
+        case .recent: return filteredRecent.isEmpty
+        case .fills: return filteredFills.isEmpty
+        }
+    }
+
     /// Backend-canonical "open" lifecycle states. Values mirror
     /// ``snapper.core.types.OrderStatusEnum`` members that have not
     /// reached a terminal state (``filled``, ``cancelled``,
@@ -268,6 +292,19 @@ struct OrdersView: View {
         return !errorMessage.isEmpty
     }
 
+    /// Decision helper for the in-list "Loading…" placeholder. The
+    /// banner suppresses itself while ``isLoading`` so a Retry tap
+    /// on an empty failure leaves the user staring at a blank list
+    /// without this placeholder. We only surface the placeholder
+    /// when the active segment has nothing to render — once any
+    /// rows are present the cached data covers the loading window.
+    static func shouldShowLoadingPlaceholder(
+        isLoading: Bool,
+        activeSegmentIsEmpty: Bool
+    ) -> Bool {
+        return isLoading && activeSegmentIsEmpty
+    }
+
     private func load() async {
         isLoading = true
         defer { isLoading = false }
@@ -275,19 +312,25 @@ struct OrdersView: View {
         async let ordersResult = APIClient.shared.fetchOrders()
         async let executionsResult = APIClient.shared.fetchExecutions()
 
+        // Capture both results before mutating errorMessage so a
+        // partial failure on either fetch surfaces — the Fills
+        // segment was previously hiding executions failures because
+        // only fetchOrders' catch was wired up.
+        var encounteredError: String?
         do {
             orders = try await ordersResult
-            errorMessage = nil
         } catch {
             logger.error("Failed to fetch orders: \(error)")
-            errorMessage = error.localizedDescription
+            encounteredError = error.localizedDescription
         }
 
         do {
             executions = try await executionsResult
         } catch {
             logger.error("Failed to fetch executions: \(error)")
+            encounteredError = encounteredError ?? error.localizedDescription
         }
+        errorMessage = encounteredError
     }
 
     @discardableResult

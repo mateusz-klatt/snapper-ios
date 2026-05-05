@@ -191,4 +191,38 @@ final class OrdersViewTests: XCTestCase {
             )
         )
     }
+
+    /// Loading-placeholder branch (PR #2 fix-up): when isLoading
+    /// suppresses the error banner and the active segment has no
+    /// rows, a "Loading…" placeholder replaces the blank list the
+    /// user would otherwise stare at after tapping Retry.
+    func testShouldShowLoadingPlaceholderWhenLoadingAndEmpty() {
+        XCTAssertTrue(
+            OrdersView.shouldShowLoadingPlaceholder(
+                isLoading: true,
+                activeSegmentIsEmpty: true
+            )
+        )
+    }
+
+    /// Cached rows take priority — re-fetching while the user has
+    /// existing data on screen leaves the list visible instead of
+    /// pushing a placeholder above their working data.
+    func testShouldNotShowLoadingPlaceholderWhenSegmentHasData() {
+        XCTAssertFalse(
+            OrdersView.shouldShowLoadingPlaceholder(
+                isLoading: true,
+                activeSegmentIsEmpty: false
+            )
+        )
+    }
+
+    func testShouldNotShowLoadingPlaceholderWhenIdle() {
+        XCTAssertFalse(
+            OrdersView.shouldShowLoadingPlaceholder(
+                isLoading: false,
+                activeSegmentIsEmpty: true
+            )
+        )
+    }
 }

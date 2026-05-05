@@ -43,7 +43,10 @@ struct WalletPicker: View {
             }
         } label: {
             HStack(spacing: 6) {
-                Image(systemName: loadError == nil ? "wallet.bifold" : "exclamationmark.triangle")
+                Image(systemName: Self.shouldShowLoadError(
+                    wallets: appState.availableWallets,
+                    loadError: loadError
+                ) ? "exclamationmark.triangle" : "wallet.bifold")
                 Text(Self.currentLabel(
                     wallets: appState.availableWallets,
                     selected: appState.selectedWalletPublicId,
