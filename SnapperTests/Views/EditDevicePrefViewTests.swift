@@ -279,7 +279,7 @@ final class EditDevicePrefViewTests: XCTestCase {
             minPriority: "high"
         )
 
-        NotificationPrefsView.applySavedPref(updated, into: &prefs)
+        NotificationPrefsViewModel.applySavedPref(updated, into: &prefs)
 
         XCTAssertEqual(prefs.count, 2)
         XCTAssertEqual(prefs.first(where: { $0.publicId == "p-1" })?.enabled, false)
@@ -302,7 +302,7 @@ final class EditDevicePrefViewTests: XCTestCase {
             enabled: false
         )
 
-        NotificationPrefsView.applySavedPref(updated, into: &prefs)
+        NotificationPrefsViewModel.applySavedPref(updated, into: &prefs)
 
         XCTAssertEqual(prefs.count, 1)
         XCTAssertEqual(prefs[0].publicId, "p-new")
@@ -318,7 +318,7 @@ final class EditDevicePrefViewTests: XCTestCase {
             alertType: "margin_warning"
         )
 
-        NotificationPrefsView.applySavedPref(added, into: &prefs)
+        NotificationPrefsViewModel.applySavedPref(added, into: &prefs)
 
         XCTAssertEqual(prefs.count, 2)
         XCTAssertTrue(prefs.contains { $0.publicId == "p-2" })

@@ -70,6 +70,27 @@ binders.
   `AppState.shared`. Establishes the AppState init-injection
   pattern that subsequent VMs (`OrdersViewModel`,
   `PositionsViewModel`) reuse.
+- **`NotificationPrefsView` MVVM extraction — `NotificationPrefsViewModel`**
+  at `Snapper/ViewModels/NotificationPrefsViewModel.swift`. The
+  View shrinks from a 464-line state-and-async holder to a thin
+  Form binder (~270 lines including the inline AlertDefaultRow,
+  DevicePrefRow, and SheetIdentifier helpers). The VM owns the
+  alert-defaults dictionary, device-prefs array, devicePublicId
+  resolution, isLoading, loadError, the per-row inflightAlertTypes
+  set, the `load()` async, the `mutateDefault()` optimistic-
+  update flow, and `applySavedPref(_:)`. Static helpers
+  (`alertTypes`, `priorityValues`, `displayName`,
+  `priorityDisplayName`, `scopeLabel`, `summaryLabel`,
+  `formatMinutes`, `applySavedPref`, `makeDefaultCommand`)
+  preserved verbatim. Sheet presentation flag (`sheetMode`) stays
+  `@State` in the View. Cross-file callsites in `EditDevicePrefView`,
+  `NotificationPrefsViewTests`, `EditDevicePrefViewTests`
+  retargeted to `NotificationPrefsViewModel.X` via mechanical sed.
+  13 new VM tests cover load happy / device-skipped / defaults-
+  failure / device-pref-failure-not-clobbering-defaults branches,
+  mutateDefault success / clear-prior-error / failure paths,
+  applySavedPref replace-by-id / append-new-scope, and static
+  helper sanity (displayName, formatMinutes, scopeLabel).
 - **`PositionsView` MVVM extraction — `PositionsViewModel`** at
   `Snapper/ViewModels/PositionsViewModel.swift`. The View shrinks
   from a 581-line state-and-async holder to a thin List binder
@@ -139,12 +160,19 @@ binders.
   the slot whenever a fresh `fetchInstruments` succeeds.
   Regression covered by
   `testLoadInstrumentsClearsLoadErrorOnRecovery`.
+- **`NotificationPrefsView` load is now actually parallel.** The
+  pre-MVVM body's docstring claimed "fetched in parallel via
+  `async let`" but the implementation was sequential (Q9b in the
+  v0.3.1 architect consensus). The VM now genuinely fans out the
+  alert-defaults + device-prefs fetches concurrently via
+  `async let`, with the device-prefs branch short-circuited if
+  the device isn't yet registered.
 
 ### Tests
 
-- Test count: 205 (post-foundations) → 296 (+21 NewOrderSheet
+- Test count: 205 (post-foundations) → 309 (+21 NewOrderSheet
   pilot, +14 WalletPicker, +11 AttachBracket, +12 AttachTrailing,
-  +17 OrdersView, +16 PositionsView).
+  +17 OrdersView, +16 PositionsView, +13 NotificationPrefs).
   New tests live under `SnapperTests/ViewModels/` and cover
   load / failure / race / submit / re-entry / idempotency /
   AppState mutation branches against the lock-protected

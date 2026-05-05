@@ -1,41 +1,29 @@
 import SwiftUI
-import os
 
 /// Notification preferences screen pushed from Settings → Notifications
 /// → "Manage preferences".
 ///
-/// Two sections:
-/// - User defaults: each of the five backend ``alert_types`` is
-///   rendered as a row with an enabled toggle + min_priority picker.
-///   Toggling fires ``APIClient.updateAlertDefault`` immediately —
-///   optimistic UI with revert-on-error so the user never sees a
-///   stale toggle position after a network blip.
-/// - Device overrides: list of active per-(alert_type, scope) rows
-///   for the registered device. Each row opens an editor sheet with
-///   scope picker, quiet hours, and mute_until controls so the
-///   wallet-narrowed configuration is editable end-to-end.
+/// Refactored to MVVM in v0.3.1 — data, parallel async load, and
+/// optimistic-update flow live in `NotificationPrefsViewModel`.
+/// The View binds sheet presentation via `@State`.
 ///
-/// On appear the view fetches both surfaces in parallel via
-/// ``async let``. Empty list is the legitimate "no overrides" state
-/// — the routing layer falls through to the in-app defaults.
+/// Two sections:
+/// - User defaults: each of the five backend `alert_types` is
+///   rendered as a row with an enabled toggle + min_priority picker.
+///   Toggling fires `mutateDefault` immediately — optimistic UI
+///   with revert-on-error so the user never sees a stale toggle
+///   position after a network blip.
+/// - Device overrides: list of active per-(alert_type, scope) rows
+///   for the registered device.
 struct NotificationPrefsView: View {
-    @Environment(AppState.self) private var appState
-    @State private var defaults: [String: UserAlertDefaultInfo] = [:]
-    @State private var devicePrefs: [DeviceAlertPrefInfo] = []
-    @State private var devicePublicId: String?
-    @State private var isLoading = false
-    @State private var loadError: String?
-    @State private var inflightAlertTypes: Set<String> = []
-    @State private var sheetMode: EditDevicePrefView.Mode?
 
-    private let logger = Logger(
-        subsystem: Bundle.main.bundleIdentifier ?? "Snapper",
-        category: "NotificationPrefsView"
-    )
+    @Environment(AppState.self) private var appState
+    @State private var viewModel = NotificationPrefsViewModel()
+    @State private var sheetMode: EditDevicePrefView.Mode?
 
     var body: some View {
         Form {
-            if let loadError {
+            if let loadError = viewModel.loadError {
                 Section {
                     Text(loadError)
                         .font(.caption)
@@ -44,13 +32,13 @@ struct NotificationPrefsView: View {
             }
 
             Section {
-                ForEach(Self.alertTypes, id: \.self) { alertType in
+                ForEach(NotificationPrefsViewModel.alertTypes, id: \.self) { alertType in
                     AlertDefaultRow(
                         alertType: alertType,
-                        existing: defaults[alertType],
-                        isInflight: inflightAlertTypes.contains(alertType),
+                        existing: viewModel.defaults[alertType],
+                        isInflight: viewModel.inflightAlertTypes.contains(alertType),
                         onChange: { enabled, minPriority in
-                            await mutateDefault(
+                            await viewModel.mutateDefault(
                                 alertType: alertType,
                                 enabled: enabled,
                                 minPriority: minPriority
@@ -67,7 +55,7 @@ struct NotificationPrefsView: View {
             }
 
             Section {
-                if devicePublicId == nil {
+                if viewModel.devicePublicId == nil {
                     ContentUnavailableView(
                         "No device registered",
                         systemImage: "iphone.slash",
@@ -76,12 +64,12 @@ struct NotificationPrefsView: View {
                         )
                     )
                 } else {
-                    if devicePrefs.isEmpty {
+                    if viewModel.devicePrefs.isEmpty {
                         Text("No overrides yet — defaults apply to every alert.")
                             .font(.caption)
                             .foregroundStyle(.secondary)
                     } else {
-                        ForEach(devicePrefs, id: \.publicId) { pref in
+                        ForEach(viewModel.devicePrefs, id: \.publicId) { pref in
                             Button {
                                 sheetMode = .edit(existing: pref)
                             } label: {
@@ -96,7 +84,7 @@ struct NotificationPrefsView: View {
                     } label: {
                         Label("Add override", systemImage: "plus.circle")
                     }
-                    .disabled(devicePublicId == nil)
+                    .disabled(viewModel.devicePublicId == nil)
                 }
             } header: {
                 Text("Device overrides")
@@ -105,220 +93,24 @@ struct NotificationPrefsView: View {
         .navigationTitle("Notification preferences")
         .navigationBarTitleDisplayMode(.inline)
         .task {
-            await load()
+            await viewModel.load()
         }
         .refreshable {
-            await load()
+            await viewModel.load()
         }
         .sheet(item: Binding(
             get: { sheetMode.map { SheetIdentifier(mode: $0) } },
             set: { newValue in sheetMode = newValue?.mode }
         )) { identifier in
-            if let id = devicePublicId {
+            if let id = viewModel.devicePublicId {
                 EditDevicePrefView(
                     mode: identifier.mode,
                     devicePublicId: id,
                     onSaved: { saved in
-                        Self.applySavedPref(saved, into: &devicePrefs)
+                        viewModel.applySavedPref(saved)
                     }
                 )
             }
-        }
-    }
-
-    // MARK: - Pure helpers (extracted for unit testing)
-
-    /// Backend-canonical alert_types in display order. Kept in sync
-    /// with ``snapper.api.schemas.devices.UserAlertDefaultBody``'s
-    /// Literal — adding a new alert_type backend-side requires
-    /// updating both this list and ``displayName(for:)``.
-    static let alertTypes: [String] = [
-        "order_fill_full",
-        "order_rejected",
-        "position_stop_loss_fired",
-        "margin_warning",
-        "critical_system_error",
-    ]
-
-    /// Backend-canonical priority members from
-    /// ``UserAlertDefaultBody.min_priority`` Literal.
-    static let priorityValues: [String] = ["low", "medium", "high"]
-
-    static func displayName(for alertType: String) -> String {
-        switch alertType {
-        case "order_fill_full": return "Order filled"
-        case "order_rejected": return "Order rejected"
-        case "position_stop_loss_fired": return "Stop-loss fired"
-        case "margin_warning": return "Margin warning"
-        case "critical_system_error": return "System error"
-        default: return alertType
-        }
-    }
-
-    static func priorityDisplayName(for priority: String) -> String {
-        return priority.prefix(1).uppercased() + priority.dropFirst()
-    }
-
-    static func scopeLabel(for pref: DeviceAlertPrefInfo) -> String {
-        if let walletId = pref.walletPublicId {
-            return "Wallet \(String(walletId.prefix(8)))…"
-        }
-        if let operatorId = pref.operatorPublicId {
-            return "Operator \(String(operatorId.prefix(8)))…"
-        }
-        return "Device-global"
-    }
-
-    /// One-line summary of a device pref's runtime semantics:
-    /// enabled flag · min_priority · optional quiet-hours window ·
-    /// optional active-mute marker.
-    static func summaryLabel(for pref: DeviceAlertPrefInfo) -> String {
-        var parts: [String] = []
-        parts.append(pref.enabled ? "Enabled" : "Muted")
-        parts.append("min \(pref.minPriority)")
-        if let start = pref.quietHoursStartMin, let end = pref.quietHoursEndMin {
-            parts.append("quiet \(formatMinutes(start))–\(formatMinutes(end))")
-        }
-        if let muteUntil = pref.muteUntil, muteUntil > Date() {
-            parts.append("muted until \(formatRelativeDate(muteUntil))")
-        }
-        return parts.joined(separator: " · ")
-    }
-
-    /// Format minutes-since-midnight as ``HH:MM`` (UTC bias). Out-of-
-    /// range values fall back to the raw integer for diagnostic
-    /// surfacing.
-    static func formatMinutes(_ totalMinutes: Int) -> String {
-        guard (0..<1440).contains(totalMinutes) else {
-            return String(totalMinutes)
-        }
-        let h = totalMinutes / 60
-        let m = totalMinutes % 60
-        return String(format: "%02d:%02d", h, m)
-    }
-
-    /// Merge a saved ``DeviceAlertPrefInfo`` into the local cache.
-    /// Replaces an existing row that shares the same scope tuple
-    /// (alert_type, operator_public_id, wallet_public_id) — the SCD2
-    /// upsert preserves the same ``public_id`` so a bare publicId
-    /// match suffices on the happy path. New scopes append.
-    static func applySavedPref(
-        _ saved: DeviceAlertPrefInfo,
-        into prefs: inout [DeviceAlertPrefInfo]
-    ) {
-        if let index = prefs.firstIndex(where: { $0.publicId == saved.publicId }) {
-            prefs[index] = saved
-        } else if let scopeIndex = prefs.firstIndex(where: {
-            $0.alertType == saved.alertType
-                && $0.operatorPublicId == saved.operatorPublicId
-                && $0.walletPublicId == saved.walletPublicId
-        }) {
-            prefs[scopeIndex] = saved
-        } else {
-            prefs.append(saved)
-        }
-    }
-
-    /// Build the iOS-side envelope for ``PATCH /api/alert_defaults``.
-    /// Provenance comes from ``EnvelopeMinter`` so the backend gap
-    /// detector sees a coherent ``session_id`` + monotonic
-    /// ``sequence_id`` across iOS-originated commands.
-    @MainActor
-    static func makeDefaultCommand(
-        alertType: String,
-        enabled: Bool,
-        minPriority: String,
-        provenance: EnvelopeMinter.Provenance? = nil
-    ) -> UpdateUserAlertDefaultCommand {
-        let envelope = provenance ?? EnvelopeMinter.shared.next(.control)
-        return UpdateUserAlertDefaultCommand(
-            type: "update_user_alert_default_command",
-            sequenceId: envelope.sequenceId,
-            publicId: envelope.publicId,
-            timestamp: envelope.timestamp,
-            sessionId: envelope.sessionId,
-            topic: nil,
-            payload: UserAlertDefaultBody(
-                alertType: alertType,
-                enabled: enabled,
-                minPriority: minPriority
-            )
-        )
-    }
-
-    private static func formatRelativeDate(_ date: Date) -> String {
-        let formatter = RelativeDateTimeFormatter()
-        formatter.unitsStyle = .short
-        return formatter.localizedString(for: date, relativeTo: Date())
-    }
-
-    // MARK: - Networking
-
-    private func load() async {
-        isLoading = true
-        defer { isLoading = false }
-        loadError = nil
-
-        let resolvedDeviceId = await DeviceRegistrationService.shared().currentDevicePublicId()
-        devicePublicId = resolvedDeviceId
-
-        do {
-            let envelope = try await APIClient.shared.fetchAlertDefaults()
-            defaults = Dictionary(
-                uniqueKeysWithValues: envelope.payload.map { ($0.alertType, $0) }
-            )
-        } catch {
-            logger.error("Failed to fetch alert defaults: \(error)")
-            loadError = "Couldn't load preferences. Pull to refresh."
-        }
-
-        guard let deviceId = resolvedDeviceId, !deviceId.isEmpty else { return }
-        do {
-            let prefsEnvelope = try await APIClient.shared.fetchDevicePrefs(
-                devicePublicId: deviceId
-            )
-            devicePrefs = prefsEnvelope.payload
-        } catch {
-            logger.error("Failed to fetch device prefs: \(error)")
-        }
-    }
-
-    /// Optimistic-update + revert-on-failure (PR #4):
-    ///
-    /// The user toggles ``enabled`` or changes ``minPriority`` →
-    /// ``AlertDefaultRow`` fires this method. We attempt the PATCH
-    /// against the backend; on success the parent ``defaults``
-    /// dict updates and the row stays at its tapped value. On
-    /// failure we return ``false`` so the row reverts its local
-    /// ``@State`` to the pre-tap value — without this signal the
-    /// row would stay visually flipped while the server-side
-    /// truth still reads the prior state.
-    @discardableResult
-    private func mutateDefault(
-        alertType: String,
-        enabled: Bool,
-        minPriority: String
-    ) async -> Bool {
-        inflightAlertTypes.insert(alertType)
-        defer { inflightAlertTypes.remove(alertType) }
-
-        let command = Self.makeDefaultCommand(
-            alertType: alertType,
-            enabled: enabled,
-            minPriority: minPriority
-        )
-        do {
-            let response = try await APIClient.shared.updateAlertDefault(command: command)
-            defaults[alertType] = response.payload
-            // Clear the prior failure banner on a successful save so
-            // the screen doesn't keep showing "Couldn't save…" after
-            // the user retries and the next PATCH lands cleanly.
-            loadError = nil
-            return true
-        } catch {
-            logger.error("Failed to update alert default for \(alertType): \(error)")
-            loadError = "Couldn't save preference. Try again."
-            return false
         }
     }
 }
@@ -331,13 +123,7 @@ private struct AlertDefaultRow: View {
 
     @State private var enabled: Bool
     @State private var minPriority: String
-    /// Synchronous re-entry guard — the parent's
-    /// ``inflightAlertTypes.insert`` runs INSIDE the awaited
-    /// ``onChange`` Task, which leaves a window where the user can
-    /// fire a second mutation before the first marks the row in
-    /// flight. This local flag closes that window: the toggle and
-    /// picker disable the moment a Task is dispatched, so the
-    /// rollback path can never be re-entered with a stale snapshot.
+    /// Synchronous re-entry guard (preserved from pre-MVVM body).
     @State private var localInflight: Bool = false
 
     init(
@@ -357,7 +143,7 @@ private struct AlertDefaultRow: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
             HStack {
-                Text(NotificationPrefsView.displayName(for: alertType))
+                Text(NotificationPrefsViewModel.displayName(for: alertType))
                     .font(.body)
                 Spacer()
                 if isInflight || localInflight {
@@ -374,19 +160,14 @@ private struct AlertDefaultRow: View {
                     Task {
                         let succeeded = await onChange(newValue, minPriority)
                         localInflight = false
-                        // Revert ONLY this field on failure — the
-                        // sibling field is gated by the same
-                        // localInflight flag so it can't have moved
-                        // mid-request, and touching it here would
-                        // overwrite a successful sibling save.
                         if !succeeded {
                             enabled = priorEnabled
                         }
                     }
                 }
             Picker("Minimum priority", selection: $minPriority) {
-                ForEach(NotificationPrefsView.priorityValues, id: \.self) { priority in
-                    Text(NotificationPrefsView.priorityDisplayName(for: priority)).tag(priority)
+                ForEach(NotificationPrefsViewModel.priorityValues, id: \.self) { priority in
+                    Text(NotificationPrefsViewModel.priorityDisplayName(for: priority)).tag(priority)
                 }
             }
             .pickerStyle(.segmented)
@@ -406,11 +187,6 @@ private struct AlertDefaultRow: View {
             }
         }
         .padding(.vertical, 4)
-        // Sync local @State when the async load (or a server response)
-        // updates the existing row underneath us. The guard inside the
-        // .onChange-of-enabled / -minPriority handlers above bails when
-        // the new local value matches the new baseline, so this sync
-        // does not recurse into an extra PATCH.
         .onChange(of: existing?.publicId) { _, _ in
             if let existing {
                 if enabled != existing.enabled { enabled = existing.enabled }
@@ -425,12 +201,12 @@ private struct DevicePrefRow: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 4) {
-            Text(NotificationPrefsView.displayName(for: pref.alertType))
+            Text(NotificationPrefsViewModel.displayName(for: pref.alertType))
                 .font(.body)
-            Text(NotificationPrefsView.scopeLabel(for: pref))
+            Text(NotificationPrefsViewModel.scopeLabel(for: pref))
                 .font(.caption)
                 .foregroundStyle(.secondary)
-            Text(NotificationPrefsView.summaryLabel(for: pref))
+            Text(NotificationPrefsViewModel.summaryLabel(for: pref))
                 .font(.caption2)
                 .foregroundStyle(.tertiary)
         }
@@ -438,9 +214,6 @@ private struct DevicePrefRow: View {
     }
 }
 
-/// Identifier wrapper so SwiftUI's ``sheet(item:)`` can drive the
-/// edit/create sheet from an enum without forcing the caller to
-/// manage Identifiable conformance on the enum itself.
 private struct SheetIdentifier: Identifiable {
     let mode: EditDevicePrefView.Mode
 
