@@ -152,6 +152,23 @@ final class NotificationServiceTests: XCTestCase {
         XCTAssertEqual(registerCalls, 1)
     }
 
+    /// `.ephemeral` (App Clips push grant) is treated as granted by
+    /// `shouldFireDurableRegistration` — pin the wiring test too so
+    /// a future refactor that switches `refreshAuthorizationStatus`
+    /// to a manual status check (instead of the pure helper) cannot
+    /// silently drop `.ephemeral` while the helper test still passes.
+    func testRefreshFiresRegisterForRemoteWhenEphemeralAndLoggedIn() {
+        var registerCalls = 0
+        let service = NotificationService(
+            isLoggedIn: { true },
+            registerForRemote: { registerCalls += 1 }
+        )
+
+        service._refreshWithStatusForTests(.ephemeral)
+
+        XCTAssertEqual(registerCalls, 1)
+    }
+
     /// Logged-out user must NOT trigger `registerForRemote()` —
     /// the backend `/api/devices` register call would 401 without
     /// a session, and worse, the device row could bind to whoever

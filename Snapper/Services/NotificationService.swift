@@ -145,6 +145,7 @@ final class NotificationService: ObservableObject {
             || authorizationStatus == .ephemeral
     }
 
+    #if DEBUG
     /// Test-only seam: directly drive ``refreshAuthorizationStatus``
     /// for a chosen post-settings status without going through the
     /// real ``UNUserNotificationCenter``.
@@ -156,8 +157,16 @@ final class NotificationService: ObservableObject {
     /// helper bypasses the settings read so tests can pin the status
     /// to ``.authorized`` / ``.provisional`` / ``.ephemeral`` and
     /// verify that the injected ``registerForRemote`` closure fires
-    /// when ``isLoggedIn`` is also true. Mirrors the
-    /// ``WebSocketManager._setConnectionStateForTests`` pattern.
+    /// when ``isLoggedIn`` is also true.
+    ///
+    /// `#if DEBUG`-gated so the seam is stripped from release builds
+    /// — this is stricter than the
+    /// ``WebSocketManager._setConnectionStateForTests`` pattern
+    /// (which lives in the test target as an extension) because
+    /// ``authorizationStatus`` is ``@Published private(set)`` on the
+    /// production class and a test-target extension cannot bypass
+    /// the private setter, so the seam has to live on the class
+    /// itself; the DEBUG gate prevents it from shipping.
     func _refreshWithStatusForTests(_ status: UNAuthorizationStatus) {
         self.authorizationStatus = status
         if Self.shouldFireDurableRegistration(
@@ -167,4 +176,5 @@ final class NotificationService: ObservableObject {
             registerForRemote()
         }
     }
+    #endif
 }
