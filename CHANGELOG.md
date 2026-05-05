@@ -6,6 +6,45 @@ uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+MVVM extraction trajectory toward global ≥80% unit-test coverage —
+the architecture rules + concurrency / mocking conventions live in
+`docs/architecture-mvvm.md`. Baseline at v0.3.0: **66.5% global**
+(5758/8660 lines). The release-
+critical Views are the bulk of the gap (PositionsView 15.6%,
+OrdersView 10.6%, NewOrderSheet 26.4%, NotificationPrefsView 21.1%,
+WalletPicker 23.8%, attach sheets ~25%); v0.3.1 closes them by
+moving load / submit / error / business state into
+`@MainActor @Observable` ViewModels and leaving the Views as thin
+binders.
+
+### Added
+
+- **`APIClientProtocol` seam** at `Services/APIClientProtocol.swift`.
+  Mirrors every public `APIClient` method so ViewModels can be
+  init-injected with a deterministic `MockAPIClient` test double
+  without going through the URL stack. Concrete `APIClient` now
+  conforms; existing `APIClientNetworkTests` keep using the
+  `URLProtocol` interception path against the concrete class to
+  verify JSON encode / decode end-to-end.
+- **`MockAPIClient` test double** at
+  `SnapperTests/Helpers/MockAPIClient.swift`. Closure-overridable
+  slot per method; default behavior throws `APIError.invalidResponse`
+  so unconfigured calls fail loudly. Pattern: `mock.fetchPositionsHandler = { [.fixture] }`.
+- **MVVM architecture doc** at `docs/architecture-mvvm.md`. Documents
+  the View / ViewModel split, mocking strategy, concurrency rules,
+  coverage philosophy (hybrid: slim bodies first, xccov filter as
+  fallback), and the extract-vs-skip decision for each kind of View.
+
+### Changed
+
+- **`LoginViewModel` migrated from `ObservableObject` to
+  `@Observable`** (iOS 17+ Observation framework). Eliminates the
+  Combine `@Published` / `assign(to:)` plumbing; `errorMessage` and
+  `isAuthenticated` are now passthrough computed properties so the
+  test contract stays identical. `LoginView` switches from
+  `@StateObject` to `@State` accordingly. `AuthService` itself
+  stays `ObservableObject` for now — out of scope for this PR.
+
 ## [0.3.0] — 2026-05-05
 
 Release-gate slice — targeted reliability uplift on the notification
