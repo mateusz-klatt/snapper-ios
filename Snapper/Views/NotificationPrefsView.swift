@@ -283,11 +283,22 @@ struct NotificationPrefsView: View {
         }
     }
 
+    /// Optimistic-update + revert-on-failure (PR #4):
+    ///
+    /// The user toggles ``enabled`` or changes ``minPriority`` →
+    /// ``AlertDefaultRow`` fires this method. We attempt the PATCH
+    /// against the backend; on success the parent ``defaults``
+    /// dict updates and the row stays at its tapped value. On
+    /// failure we return ``false`` so the row reverts its local
+    /// ``@State`` to the pre-tap value — without this signal the
+    /// row would stay visually flipped while the server-side
+    /// truth still reads the prior state.
+    @discardableResult
     private func mutateDefault(
         alertType: String,
         enabled: Bool,
         minPriority: String
-    ) async {
+    ) async -> Bool {
         inflightAlertTypes.insert(alertType)
         defer { inflightAlertTypes.remove(alertType) }
 
@@ -299,9 +310,15 @@ struct NotificationPrefsView: View {
         do {
             let response = try await APIClient.shared.updateAlertDefault(command: command)
             defaults[alertType] = response.payload
+            // Clear the prior failure banner on a successful save so
+            // the screen doesn't keep showing "Couldn't save…" after
+            // the user retries and the next PATCH lands cleanly.
+            loadError = nil
+            return true
         } catch {
             logger.error("Failed to update alert default for \(alertType): \(error)")
             loadError = "Couldn't save preference. Try again."
+            return false
         }
     }
 }
@@ -310,16 +327,24 @@ private struct AlertDefaultRow: View {
     let alertType: String
     let existing: UserAlertDefaultInfo?
     let isInflight: Bool
-    let onChange: (Bool, String) async -> Void
+    let onChange: (Bool, String) async -> Bool
 
     @State private var enabled: Bool
     @State private var minPriority: String
+    /// Synchronous re-entry guard — the parent's
+    /// ``inflightAlertTypes.insert`` runs INSIDE the awaited
+    /// ``onChange`` Task, which leaves a window where the user can
+    /// fire a second mutation before the first marks the row in
+    /// flight. This local flag closes that window: the toggle and
+    /// picker disable the moment a Task is dispatched, so the
+    /// rollback path can never be re-entered with a stale snapshot.
+    @State private var localInflight: Bool = false
 
     init(
         alertType: String,
         existing: UserAlertDefaultInfo?,
         isInflight: Bool,
-        onChange: @escaping (Bool, String) async -> Void
+        onChange: @escaping (Bool, String) async -> Bool
     ) {
         self.alertType = alertType
         self.existing = existing
@@ -335,16 +360,29 @@ private struct AlertDefaultRow: View {
                 Text(NotificationPrefsView.displayName(for: alertType))
                     .font(.body)
                 Spacer()
-                if isInflight {
+                if isInflight || localInflight {
                     ProgressView().controlSize(.small)
                 }
             }
             Toggle("Enabled", isOn: $enabled)
-                .disabled(isInflight)
-                .onChange(of: enabled) { _, newValue in
+                .disabled(isInflight || localInflight)
+                .onChange(of: enabled) { oldValue, newValue in
                     let baseline = existing?.enabled ?? true
                     guard newValue != baseline else { return }
-                    Task { await onChange(newValue, minPriority) }
+                    let priorEnabled = oldValue
+                    localInflight = true
+                    Task {
+                        let succeeded = await onChange(newValue, minPriority)
+                        localInflight = false
+                        // Revert ONLY this field on failure — the
+                        // sibling field is gated by the same
+                        // localInflight flag so it can't have moved
+                        // mid-request, and touching it here would
+                        // overwrite a successful sibling save.
+                        if !succeeded {
+                            enabled = priorEnabled
+                        }
+                    }
                 }
             Picker("Minimum priority", selection: $minPriority) {
                 ForEach(NotificationPrefsView.priorityValues, id: \.self) { priority in
@@ -352,11 +390,19 @@ private struct AlertDefaultRow: View {
                 }
             }
             .pickerStyle(.segmented)
-            .disabled(isInflight)
-            .onChange(of: minPriority) { _, newValue in
+            .disabled(isInflight || localInflight)
+            .onChange(of: minPriority) { oldValue, newValue in
                 let baseline = existing?.minPriority ?? "medium"
                 guard newValue != baseline else { return }
-                Task { await onChange(enabled, newValue) }
+                let priorMinPriority = oldValue
+                localInflight = true
+                Task {
+                    let succeeded = await onChange(enabled, newValue)
+                    localInflight = false
+                    if !succeeded {
+                        minPriority = priorMinPriority
+                    }
+                }
             }
         }
         .padding(.vertical, 4)
