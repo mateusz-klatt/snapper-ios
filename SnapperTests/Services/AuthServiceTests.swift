@@ -84,6 +84,48 @@ final class AuthServiceTests: XCTestCase {
         XCTAssertFalse(authService.hasPermission(.manageUsers))
     }
 
+    /// UI-gating contract for the trading mutation surfaces
+    /// (OrdersView / PositionsView toolbar + action sheet). Viewer
+    /// role must NOT have any of the three mutation permissions —
+    /// the iOS UI hides New Order / Cancel swipe / Close / Reduce /
+    /// Attach SL+TP / Attach trailing stop based on these flags so
+    /// Apple Reviewer's read-only account doesn't surface buttons
+    /// that 403 against the backend capability guard.
+    func testViewerRoleLacksTradingMutationPermissions() {
+        authService.currentUser = makeUser(role: .viewer)
+
+        XCTAssertFalse(
+            authService.hasPermission(.createOrders),
+            "Viewer must not have createOrders — UI gates the New Order toolbar button on this."
+        )
+        XCTAssertFalse(
+            authService.hasPermission(.cancelOrders),
+            "Viewer must not have cancelOrders — UI gates the Cancel swipe action on this."
+        )
+        XCTAssertFalse(
+            authService.hasPermission(.managePositions),
+            "Viewer must not have managePositions — UI gates the position-row tap + action-sheet (Close/Reduce/Attach) on this."
+        )
+    }
+
+    /// Mirror assertion for the operator + admin paths so any
+    /// future role-permission table refactor that accidentally
+    /// drops mutation perms from those roles fails loudly here
+    /// rather than silently hiding the buttons in production.
+    func testOperatorAndAdminRolesRetainTradingMutationPermissions() {
+        authService.currentUser = makeUser(role: .operatorRole)
+
+        XCTAssertTrue(authService.hasPermission(.createOrders))
+        XCTAssertTrue(authService.hasPermission(.cancelOrders))
+        XCTAssertTrue(authService.hasPermission(.managePositions))
+
+        authService.currentUser = makeUser(role: .admin)
+
+        XCTAssertTrue(authService.hasPermission(.createOrders))
+        XCTAssertTrue(authService.hasPermission(.cancelOrders))
+        XCTAssertTrue(authService.hasPermission(.managePositions))
+    }
+
     func testHasPermissionAdminAllowsAll() {
         authService.currentUser = makeUser(role: .admin)
 

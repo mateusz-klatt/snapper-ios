@@ -19,6 +19,7 @@ import os
 /// data.
 struct OrdersView: View {
     @Environment(AppState.self) private var appState
+    @EnvironmentObject private var authService: AuthService
     @State private var segment: OrdersSegment = .open
     @State private var orders: [OrderStatus] = []
     @State private var executions: [ExecutionRecord] = []
@@ -83,15 +84,19 @@ struct OrdersView: View {
                     switch segment {
                     case .open:
                         ForEach(filteredOpen, id: \.publicId) { order in
-                            OrderRow(order: order)
-                                .swipeActions(edge: .trailing, allowsFullSwipe: false) {
-                                    Button(role: .destructive) {
-                                        pendingCancelOrder = order
-                                    } label: {
-                                        Label("Cancel", systemImage: "xmark.circle")
+                            if authService.hasPermission(.cancelOrders) {
+                                OrderRow(order: order)
+                                    .swipeActions(edge: .trailing, allowsFullSwipe: false) {
+                                        Button(role: .destructive) {
+                                            pendingCancelOrder = order
+                                        } label: {
+                                            Label("Cancel", systemImage: "xmark.circle")
+                                        }
+                                        .disabled(order.planPublicId == nil)
                                     }
-                                    .disabled(order.planPublicId == nil)
-                                }
+                            } else {
+                                OrderRow(order: order)
+                            }
                         }
                     case .recent:
                         ForEach(filteredRecent, id: \.publicId) { order in
@@ -110,13 +115,15 @@ struct OrdersView: View {
             }
             .navigationTitle("Orders")
             .toolbar {
-                ToolbarItem(placement: .topBarTrailing) {
-                    Button {
-                        presentingNewOrder = true
-                    } label: {
-                        Label("New order", systemImage: "plus.circle")
+                if authService.hasPermission(.createOrders) {
+                    ToolbarItem(placement: .topBarTrailing) {
+                        Button {
+                            presentingNewOrder = true
+                        } label: {
+                            Label("New order", systemImage: "plus.circle")
+                        }
+                        .disabled(resolvedWallet == nil)
                     }
-                    .disabled(resolvedWallet == nil)
                 }
             }
         }
