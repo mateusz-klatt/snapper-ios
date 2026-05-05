@@ -310,6 +310,10 @@ struct NotificationPrefsView: View {
         do {
             let response = try await APIClient.shared.updateAlertDefault(command: command)
             defaults[alertType] = response.payload
+            // Clear the prior failure banner on a successful save so
+            // the screen doesn't keep showing "Couldn't save…" after
+            // the user retries and the next PATCH lands cleanly.
+            loadError = nil
             return true
         } catch {
             logger.error("Failed to update alert default for \(alertType): \(error)")
@@ -327,6 +331,14 @@ private struct AlertDefaultRow: View {
 
     @State private var enabled: Bool
     @State private var minPriority: String
+    /// Synchronous re-entry guard — the parent's
+    /// ``inflightAlertTypes.insert`` runs INSIDE the awaited
+    /// ``onChange`` Task, which leaves a window where the user can
+    /// fire a second mutation before the first marks the row in
+    /// flight. This local flag closes that window: the toggle and
+    /// picker disable the moment a Task is dispatched, so the
+    /// rollback path can never be re-entered with a stale snapshot.
+    @State private var localInflight: Bool = false
 
     init(
         alertType: String,
@@ -348,26 +360,27 @@ private struct AlertDefaultRow: View {
                 Text(NotificationPrefsView.displayName(for: alertType))
                     .font(.body)
                 Spacer()
-                if isInflight {
+                if isInflight || localInflight {
                     ProgressView().controlSize(.small)
                 }
             }
             Toggle("Enabled", isOn: $enabled)
-                .disabled(isInflight)
+                .disabled(isInflight || localInflight)
                 .onChange(of: enabled) { oldValue, newValue in
                     let baseline = existing?.enabled ?? true
                     guard newValue != baseline else { return }
-                    let priorMinPriority = minPriority
+                    let priorEnabled = oldValue
+                    localInflight = true
                     Task {
                         let succeeded = await onChange(newValue, minPriority)
-                        // Revert optimistic toggle if the PATCH failed
-                        // — the server-side truth still reads the
-                        // baseline, and without this rollback the row
-                        // would stay visually flipped while the user
-                        // believes their tap was saved.
+                        localInflight = false
+                        // Revert ONLY this field on failure — the
+                        // sibling field is gated by the same
+                        // localInflight flag so it can't have moved
+                        // mid-request, and touching it here would
+                        // overwrite a successful sibling save.
                         if !succeeded {
-                            enabled = oldValue
-                            minPriority = priorMinPriority
+                            enabled = priorEnabled
                         }
                     }
                 }
@@ -377,16 +390,17 @@ private struct AlertDefaultRow: View {
                 }
             }
             .pickerStyle(.segmented)
-            .disabled(isInflight)
+            .disabled(isInflight || localInflight)
             .onChange(of: minPriority) { oldValue, newValue in
                 let baseline = existing?.minPriority ?? "medium"
                 guard newValue != baseline else { return }
-                let priorEnabled = enabled
+                let priorMinPriority = oldValue
+                localInflight = true
                 Task {
                     let succeeded = await onChange(enabled, newValue)
+                    localInflight = false
                     if !succeeded {
-                        minPriority = oldValue
-                        enabled = priorEnabled
+                        minPriority = priorMinPriority
                     }
                 }
             }
