@@ -15,6 +15,19 @@ class AuthService: ObservableObject {
     private var wsToken: String?
     private let session: URLSession
 
+    /// Single-flight slot for ``fetchFreshWsToken()``. When a refresh
+    /// is in flight, concurrent callers ``await`` the same task value
+    /// instead of launching parallel network requests. Cleared by
+    /// the inner task's ``defer`` block once the request resolves so
+    /// the next caller starts a fresh refresh.
+    ///
+    /// Without this coalescing, multiple parallel REST calls (e.g.
+    /// ``HomeView.loadData``'s ``async let`` orders + positions) that
+    /// each receive a 401 would each call ``fetchFreshWsToken()`` ->
+    /// stampede of refresh requests + race-y double logout when the
+    /// refresh itself returns 401.
+    private var refreshTask: Task<String?, Never>?
+
     init(session: URLSession = .shared) {
         self.session = session
     }
@@ -153,7 +166,29 @@ class AuthService: ObservableObject {
         return wsToken
     }
 
+    /// Coalesces concurrent refresh callers into a single in-flight
+    /// network request. Mirrors the bridge's `withLock(...)` slot
+    /// pattern: the first caller mints a ``Task``, stores it in
+    /// ``refreshTask`` and awaits it; subsequent callers see the
+    /// in-flight slot and await the same task instead of launching
+    /// their own. Once the inner task completes, ``defer`` clears
+    /// the slot so the next refresh window starts fresh.
     func fetchFreshWsToken() async -> String? {
+        if let existing = refreshTask {
+            return await existing.value
+        }
+        let task = Task<String?, Never> { @MainActor [weak self] in
+            guard let self else { return nil }
+            defer { self.refreshTask = nil }
+            return await self.performRefresh()
+        }
+        refreshTask = task
+        return await task.value
+    }
+
+    /// Bare refresh request — never call this directly; go through
+    /// ``fetchFreshWsToken()`` so concurrent callers coalesce.
+    private func performRefresh() async -> String? {
         guard let url = URL(string: "\(AppConfig.apiBaseURL)\(AppConfig.Endpoints.refresh)") else {
             return nil
         }

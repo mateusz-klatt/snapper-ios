@@ -183,6 +183,138 @@ final class AuthServiceNetworkTests: XCTestCase {
         XCTAssertEqual(payload?["password"] as? String, "s3cret")
     }
 
+    /// Concurrent 401 retry path (PR #3): two callers that both arrive
+    /// at ``fetchFreshWsToken()`` while a refresh is in flight must
+    /// coalesce into a single network request. Without coalescing,
+    /// parallel REST calls (e.g. ``HomeView.loadData``'s
+    /// ``async let`` orders + positions) each hitting 401 stampede
+    /// the refresh endpoint and can race their way into a double
+    /// logout when the second refresh sees the just-rotated session.
+    func testConcurrentRefreshCallersCoalesceIntoSingleRequest() async throws {
+        let counter = HandlerCallCounter()
+
+        MockURLProtocol.requestHandler = { request in
+            counter.increment()
+            // Hold the URLProtocol thread for 100 ms so the second
+            // caller has a deterministic window to enter
+            // fetchFreshWsToken() and find the in-flight slot
+            // populated. URLProtocol.startLoading runs on a
+            // dedicated queue, so blocking here does not stall the
+            // MainActor where the awaiters are parked.
+            Thread.sleep(forTimeInterval: 0.1)
+
+            let response = HTTPURLResponse(
+                url: request.url!,
+                statusCode: 200,
+                httpVersion: nil,
+                headerFields: [AppConfig.HTTPHeader.contentType: AppConfig.ContentType.json]
+            )!
+            let json: [String: Any] = [
+                "sequence_id": 1,
+                "public_id": "01961234-5678-7000-8000-000000000200",
+                "timestamp": "2025-11-22T11:00:00Z",
+                "session_id": "session-r",
+                "payload": [
+                    "sequence_id": 1,
+                    "public_id": "01961234-5678-7000-8000-000000000201",
+                    "timestamp": "2025-11-22T11:00:00Z",
+                    "session_id": "session-r",
+                    "message": "Token refreshed",
+                    "ws_token": "fresh-ws-token",
+                    "ws_token_exp": "2025-11-22T11:15:00Z",
+                    "csrf_token": "csrf",
+                    "user": [
+                        "sequence_id": 1,
+                        "public_id": "01961234-5678-7000-8000-000000000202",
+                        "timestamp": "2025-01-01T00:00:00Z",
+                        "session_id": "session-r",
+                        "username": "alice",
+                        "email": "alice@example.com",
+                        "role": "viewer",
+                        "is_active": true,
+                        "created_at": "2025-01-01T00:00:00Z"
+                    ]
+                ]
+            ]
+            let data = try JSONSerialization.data(withJSONObject: json)
+            return (response, data)
+        }
+
+        let firstTask = Task { @MainActor in
+            await self.authService.fetchFreshWsToken()
+        }
+        let secondTask = Task { @MainActor in
+            await self.authService.fetchFreshWsToken()
+        }
+        let first = await firstTask.value
+        let second = await secondTask.value
+
+        XCTAssertEqual(first, "fresh-ws-token")
+        XCTAssertEqual(second, "fresh-ws-token")
+        XCTAssertEqual(
+            counter.value,
+            1,
+            "Concurrent refresh callers must coalesce into a single network request, not stampede the refresh endpoint."
+        )
+    }
+
+    /// After a refresh completes, the in-flight slot is cleared so
+    /// the next refresh window starts fresh. A naive implementation
+    /// that latched the slot would wedge the app — every subsequent
+    /// 401 would resolve to the cached (now-stale) token and the
+    /// retry path would loop or force premature logout.
+    func testSubsequentRefreshAfterCompletionStartsNewRequest() async throws {
+        let counter = HandlerCallCounter()
+
+        MockURLProtocol.requestHandler = { request in
+            counter.increment()
+            let response = HTTPURLResponse(
+                url: request.url!,
+                statusCode: 200,
+                httpVersion: nil,
+                headerFields: [AppConfig.HTTPHeader.contentType: AppConfig.ContentType.json]
+            )!
+            let json: [String: Any] = [
+                "sequence_id": 1,
+                "public_id": "01961234-5678-7000-8000-000000000300",
+                "timestamp": "2025-11-22T11:00:00Z",
+                "session_id": "session-r2",
+                "payload": [
+                    "sequence_id": 1,
+                    "public_id": "01961234-5678-7000-8000-000000000301",
+                    "timestamp": "2025-11-22T11:00:00Z",
+                    "session_id": "session-r2",
+                    "message": "Token refreshed",
+                    "ws_token": "fresh-ws-token-\(counter.value)",
+                    "ws_token_exp": "2025-11-22T11:15:00Z",
+                    "csrf_token": "csrf",
+                    "user": [
+                        "sequence_id": 1,
+                        "public_id": "01961234-5678-7000-8000-000000000302",
+                        "timestamp": "2025-01-01T00:00:00Z",
+                        "session_id": "session-r2",
+                        "username": "alice",
+                        "email": "alice@example.com",
+                        "role": "viewer",
+                        "is_active": true,
+                        "created_at": "2025-01-01T00:00:00Z"
+                    ]
+                ]
+            ]
+            let data = try JSONSerialization.data(withJSONObject: json)
+            return (response, data)
+        }
+
+        _ = await authService.fetchFreshWsToken()
+        _ = await authService.fetchFreshWsToken()
+
+        XCTAssertEqual(
+            counter.value,
+            2,
+            "Sequential refresh calls must each fire a network request — the in-flight slot is cleared on completion."
+        )
+    }
+
     private static func readBody(from request: URLRequest) -> Data? {
         if let body = request.httpBody {
             return body
@@ -215,5 +347,22 @@ private final class CapturedBody: @unchecked Sendable {
 
     var value: Data {
         lock.withLock { bytes }
+    }
+}
+
+/// Counts handler invocations across the URLProtocol queue + the
+/// MainActor that issues `await fetchFreshWsToken()`. NSLock-backed
+/// so the URLProtocol thread can mutate the counter safely while the
+/// MainActor reads it for assertion.
+private final class HandlerCallCounter: @unchecked Sendable {
+    private let lock = NSLock()
+    private var count: Int = 0
+
+    func increment() {
+        lock.withLock { count += 1 }
+    }
+
+    var value: Int {
+        lock.withLock { count }
     }
 }
