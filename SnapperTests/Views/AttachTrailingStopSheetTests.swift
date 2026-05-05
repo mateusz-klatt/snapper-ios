@@ -15,13 +15,13 @@ final class AttachTrailingStopSheetTests: XCTestCase {
     )
 
     func testParsePercentHandlesLocalisedAndPathologicalInput() {
-        XCTAssertEqual(AttachTrailingStopSheet.parsePercent("1.5"), 1.5)
-        XCTAssertEqual(AttachTrailingStopSheet.parsePercent("1,5"), 1.5)
-        XCTAssertEqual(AttachTrailingStopSheet.parsePercent(" 2 "), 2.0)
-        XCTAssertNil(AttachTrailingStopSheet.parsePercent(""))
-        XCTAssertNil(AttachTrailingStopSheet.parsePercent("0"))
-        XCTAssertNil(AttachTrailingStopSheet.parsePercent("-1"))
-        XCTAssertNil(AttachTrailingStopSheet.parsePercent("abc"))
+        XCTAssertEqual(AttachTrailingStopSheetViewModel.parsePercent("1.5"), 1.5)
+        XCTAssertEqual(AttachTrailingStopSheetViewModel.parsePercent("1,5"), 1.5)
+        XCTAssertEqual(AttachTrailingStopSheetViewModel.parsePercent(" 2 "), 2.0)
+        XCTAssertNil(AttachTrailingStopSheetViewModel.parsePercent(""))
+        XCTAssertNil(AttachTrailingStopSheetViewModel.parsePercent("0"))
+        XCTAssertNil(AttachTrailingStopSheetViewModel.parsePercent("-1"))
+        XCTAssertNil(AttachTrailingStopSheetViewModel.parsePercent("abc"))
     }
 
     /// Backend `TrailingStopCreateBody` requires a positive
@@ -29,27 +29,27 @@ final class AttachTrailingStopSheetTests: XCTestCase {
     /// the submit button on its own.
     func testCanSubmitRequiresTrailingDistanceOnly() {
         XCTAssertTrue(
-            AttachTrailingStopSheet.canSubmit(trailingPct: 1.5, minLockPct: nil, isSubmitting: false)
+            AttachTrailingStopSheetViewModel.canSubmit(trailingPct: 1.5, minLockPct: nil, isSubmitting: false)
         )
         XCTAssertTrue(
-            AttachTrailingStopSheet.canSubmit(trailingPct: 1.5, minLockPct: 0.5, isSubmitting: false)
+            AttachTrailingStopSheetViewModel.canSubmit(trailingPct: 1.5, minLockPct: 0.5, isSubmitting: false)
         )
         XCTAssertFalse(
-            AttachTrailingStopSheet.canSubmit(trailingPct: nil, minLockPct: nil, isSubmitting: false)
+            AttachTrailingStopSheetViewModel.canSubmit(trailingPct: nil, minLockPct: nil, isSubmitting: false)
         )
         XCTAssertFalse(
-            AttachTrailingStopSheet.canSubmit(trailingPct: nil, minLockPct: 0.5, isSubmitting: false)
+            AttachTrailingStopSheetViewModel.canSubmit(trailingPct: nil, minLockPct: 0.5, isSubmitting: false)
         )
     }
 
     func testCanSubmitBlocksWhileInFlight() {
         XCTAssertFalse(
-            AttachTrailingStopSheet.canSubmit(trailingPct: 1.5, minLockPct: 0.5, isSubmitting: true)
+            AttachTrailingStopSheetViewModel.canSubmit(trailingPct: 1.5, minLockPct: 0.5, isSubmitting: true)
         )
     }
 
     func testMakeCommandEmbedsCycleIdAndProvenance() {
-        let command = AttachTrailingStopSheet.makeCommand(
+        let command = AttachTrailingStopSheetViewModel.makeCommand(
             positionCyclePublicId: "cycle-2",
             trailingPct: 1.5,
             minLockPct: 0.5,
@@ -67,7 +67,7 @@ final class AttachTrailingStopSheetTests: XCTestCase {
     }
 
     func testMakeCommandWithoutMinLockPct() {
-        let command = AttachTrailingStopSheet.makeCommand(
+        let command = AttachTrailingStopSheetViewModel.makeCommand(
             positionCyclePublicId: "cycle-3",
             trailingPct: 2.0,
             minLockPct: nil,

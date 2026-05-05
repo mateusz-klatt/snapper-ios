@@ -329,7 +329,7 @@ struct PositionsView: View {
             return false
         }
         do {
-            let command = AttachBracketSheet.makeCommand(
+            let command = AttachBracketSheetViewModel.makeCommand(
                 positionCyclePublicId: cycleId,
                 slPrice: slPrice,
                 tpPrice: tpPrice,
@@ -357,7 +357,7 @@ struct PositionsView: View {
             return false
         }
         do {
-            let command = AttachTrailingStopSheet.makeCommand(
+            let command = AttachTrailingStopSheetViewModel.makeCommand(
                 positionCyclePublicId: cycleId,
                 trailingPct: trailingPct,
                 minLockPct: minLockPct,
