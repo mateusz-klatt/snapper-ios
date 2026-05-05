@@ -91,7 +91,7 @@ final class OrdersViewTests: XCTestCase {
             makeOrder(publicId: "r", status: "rejected", walletPublicId: nil, createdAtOffset: 6),
         ]
 
-        let result = OrdersView.filterOpen(orders: orders, selectedWalletPublicId: nil)
+        let result = OrdersViewModel.filterOpen(orders: orders, selectedWalletPublicId: nil)
 
         XCTAssertEqual(result.map(\.publicId), ["n", "s", "o", "p"])
     }
@@ -107,7 +107,7 @@ final class OrdersViewTests: XCTestCase {
             makeOrder(publicId: "other", status: "filled", walletPublicId: "w-b", createdAtOffset: 200),
         ]
 
-        let scoped = OrdersView.filterRecent(
+        let scoped = OrdersViewModel.filterRecent(
             orders: orders,
             selectedWalletPublicId: "w-a",
             limit: 50
@@ -115,7 +115,7 @@ final class OrdersViewTests: XCTestCase {
 
         XCTAssertEqual(scoped.map(\.publicId), ["newest", "mid", "old"])
 
-        let capped = OrdersView.filterRecent(
+        let capped = OrdersViewModel.filterRecent(
             orders: orders,
             selectedWalletPublicId: nil,
             limit: 2
@@ -134,14 +134,14 @@ final class OrdersViewTests: XCTestCase {
             makeExecution(publicId: "x-orphan", walletPublicId: nil),
         ]
 
-        let scoped = OrdersView.filterFills(
+        let scoped = OrdersViewModel.filterFills(
             executions: executions,
             selectedWalletPublicId: "w-a"
         )
 
         XCTAssertEqual(Set(scoped.map(\.publicId)), Set(["x-a", "x-orphan"]))
 
-        let unscoped = OrdersView.filterFills(
+        let unscoped = OrdersViewModel.filterFills(
             executions: executions,
             selectedWalletPublicId: nil
         )
@@ -153,7 +153,7 @@ final class OrdersViewTests: XCTestCase {
     /// a "Couldn't load" Section when the most recent fetch failed.
     func testShouldShowLoadErrorWhenErrorMessageSet() {
         XCTAssertTrue(
-            OrdersView.shouldShowLoadError(
+            OrdersViewModel.shouldShowLoadError(
                 errorMessage: "Network unavailable",
                 isLoading: false
             )
@@ -164,7 +164,7 @@ final class OrdersViewTests: XCTestCase {
     /// stale error banner flashes above an active fetch.
     func testShouldNotShowLoadErrorWhileLoading() {
         XCTAssertFalse(
-            OrdersView.shouldShowLoadError(
+            OrdersViewModel.shouldShowLoadError(
                 errorMessage: "Network unavailable",
                 isLoading: true
             )
@@ -173,7 +173,7 @@ final class OrdersViewTests: XCTestCase {
 
     func testShouldNotShowLoadErrorWhenNil() {
         XCTAssertFalse(
-            OrdersView.shouldShowLoadError(
+            OrdersViewModel.shouldShowLoadError(
                 errorMessage: nil,
                 isLoading: false
             )
@@ -185,7 +185,7 @@ final class OrdersViewTests: XCTestCase {
     /// empty, in which case the banner has nothing to show.
     func testShouldNotShowLoadErrorOnEmptyString() {
         XCTAssertFalse(
-            OrdersView.shouldShowLoadError(
+            OrdersViewModel.shouldShowLoadError(
                 errorMessage: "",
                 isLoading: false
             )
@@ -198,7 +198,7 @@ final class OrdersViewTests: XCTestCase {
     /// user would otherwise stare at after tapping Retry.
     func testShouldShowLoadingPlaceholderWhenLoadingAndEmpty() {
         XCTAssertTrue(
-            OrdersView.shouldShowLoadingPlaceholder(
+            OrdersViewModel.shouldShowLoadingPlaceholder(
                 isLoading: true,
                 activeSegmentIsEmpty: true
             )
@@ -210,7 +210,7 @@ final class OrdersViewTests: XCTestCase {
     /// pushing a placeholder above their working data.
     func testShouldNotShowLoadingPlaceholderWhenSegmentHasData() {
         XCTAssertFalse(
-            OrdersView.shouldShowLoadingPlaceholder(
+            OrdersViewModel.shouldShowLoadingPlaceholder(
                 isLoading: true,
                 activeSegmentIsEmpty: false
             )
@@ -219,7 +219,7 @@ final class OrdersViewTests: XCTestCase {
 
     func testShouldNotShowLoadingPlaceholderWhenIdle() {
         XCTAssertFalse(
-            OrdersView.shouldShowLoadingPlaceholder(
+            OrdersViewModel.shouldShowLoadingPlaceholder(
                 isLoading: false,
                 activeSegmentIsEmpty: true
             )

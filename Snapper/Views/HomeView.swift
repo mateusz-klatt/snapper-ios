@@ -80,7 +80,7 @@ struct HomeView: View {
     }
 
     /// Wallet-scoped order list, newest-first by ``createdAt``.
-    /// Delegates to ``OrdersView.filterRecent`` so the Home
+    /// Delegates to ``OrdersViewModel.filterRecent`` so the Home
     /// "Recent Orders" card and the Orders tab "Recent" segment
     /// agree on BOTH the wallet predicate AND the ordering — the
     /// API payload is not guaranteed to arrive sorted, so a plain
@@ -92,7 +92,7 @@ struct HomeView: View {
     /// paging cap so the in-memory sort window stays bounded
     /// regardless of how large the unfiltered list grows.
     var filteredOrders: [OrderStatus] {
-        return OrdersView.filterRecent(
+        return OrdersViewModel.filterRecent(
             orders: orders,
             selectedWalletPublicId: appState.selectedWalletPublicId
         )
@@ -100,7 +100,7 @@ struct HomeView: View {
 
     /// Wallet-scoped active-order subset for the Home stat card.
     /// Uses the canonical "open lifecycle" set
-    /// (``OrdersView.openStatuses``) instead of the previous ad-hoc
+    /// (``OrdersViewModel.openStatuses``) instead of the previous ad-hoc
     /// ``"open"|"pending"`` pair, which under-counted ``new`` /
     /// ``submitted`` / ``partially_filled`` orders the user could
     /// still cancel from the Orders tab.
@@ -112,7 +112,7 @@ struct HomeView: View {
     }
 
     /// Pure helper extracted for unit testing — joins
-    /// ``OrdersView.walletMatches`` and ``OrdersView.isOpen`` so
+    /// ``OrdersViewModel.walletMatches`` and ``OrdersViewModel.isOpen`` so
     /// the Home counter and the OrdersView "Open" segment stay in
     /// lockstep on the canonical lifecycle set.
     static func filterActiveOrders(
@@ -120,11 +120,11 @@ struct HomeView: View {
         selectedWalletPublicId: String?
     ) -> [OrderStatus] {
         return orders.filter { order in
-            OrdersView.walletMatches(
+            OrdersViewModel.walletMatches(
                 rowWalletId: order.walletPublicId,
                 selected: selectedWalletPublicId
             )
-                && OrdersView.isOpen(status: order.status)
+                && OrdersViewModel.isOpen(status: order.status)
         }
     }
 

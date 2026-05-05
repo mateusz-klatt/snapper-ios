@@ -124,7 +124,7 @@ final class HomeViewTests: XCTestCase {
     }
 
     /// Canonical lifecycle set (PR #6): the Active Orders counter
-    /// must use ``OrdersView.openStatuses`` (``new`` / ``submitted``
+    /// must use ``OrdersViewModel.openStatuses`` (``new`` / ``submitted``
     /// / ``open`` / ``partially_filled``) instead of the previous
     /// ad-hoc ``"open"|"pending"`` pair, which under-counted orders
     /// the user could still cancel.
@@ -201,7 +201,7 @@ final class HomeViewTests: XCTestCase {
     }
 
     /// Recent-Orders ordering (PR #6 fix-up): the Home
-    /// recent-orders card delegates to ``OrdersView.filterRecent``
+    /// recent-orders card delegates to ``OrdersViewModel.filterRecent``
     /// so the wallet-scoped slice arrives newest-first by
     /// ``createdAt`` regardless of the API payload order — without
     /// that delegation a plain wallet-filter would surface older
@@ -216,7 +216,7 @@ final class HomeViewTests: XCTestCase {
             makeOrderAtOffset(publicId: "other-wallet", walletPublicId: "wallet-b", createdAtOffset: 200),
         ]
 
-        let recent = OrdersView.filterRecent(
+        let recent = OrdersViewModel.filterRecent(
             orders: unsorted,
             selectedWalletPublicId: walletA,
             limit: 50
@@ -225,7 +225,7 @@ final class HomeViewTests: XCTestCase {
         XCTAssertEqual(
             recent.map(\.publicId),
             ["newest", "mid", "old"],
-            "Home filteredOrders delegates to OrdersView.filterRecent which sorts createdAt-descending; wallet-b drops, walletA rows surface newest-first."
+            "Home filteredOrders delegates to OrdersViewModel.filterRecent which sorts createdAt-descending; wallet-b drops, walletA rows surface newest-first."
         )
     }
 }

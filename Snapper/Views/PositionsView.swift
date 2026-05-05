@@ -17,7 +17,7 @@ private struct IdentifiedPosition: Identifiable {
 /// ``AppState.selectedWalletPublicId`` whenever a wallet is picked.
 /// Rows whose ``walletPublicId`` is ``nil`` (legacy / pre-projection
 /// rows) pass through so the UI never silently drops data — mirrors
-/// the policy ``OrdersView.walletMatches`` uses for the same edge.
+/// the policy ``OrdersViewModel.walletMatches`` uses for the same edge.
 ///
 /// Mutations: tap a row to open an ActionSheet with two options.
 ///
@@ -233,7 +233,7 @@ struct PositionsView: View {
     }
 
     /// Pure wallet-match helper extracted for unit testing — mirrors
-    /// the policy in ``OrdersView.walletMatches``: ``nil`` selection
+    /// the policy in ``OrdersViewModel.walletMatches``: ``nil`` selection
     /// passes through every row, and ``nil`` row-side wallet passes
     /// through so legacy / system rows are never silently dropped.
     static func walletMatches(rowWalletId: String?, selected: String?) -> Bool {
