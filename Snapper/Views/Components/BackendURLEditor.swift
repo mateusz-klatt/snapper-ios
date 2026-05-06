@@ -114,21 +114,29 @@ struct BackendURLEditor: View {
 }
 
 struct BackendURLEditor_Previews: PreviewProvider {
-    /// Empty closures below are intentional — the SwiftUI Preview
-    /// renders the static layout only and never invokes the action
-    /// callbacks; production wiring lives in ``LoginView`` and
-    /// ``SettingsView``.
+    /// Container reads-and-renders the static layout only.
+    ///
+    /// All three callbacks are no-ops because the SwiftUI Preview
+    /// never invokes the action paths. Naming each handler avoids
+    /// inline empty closures so the no-comments rule and Sonar's
+    /// empty-closure rule (``swift:S1186``) are both satisfied;
+    /// production wiring lives in ``LoginView`` and ``SettingsView``.
     private struct Container: View {
         @State private var draft: String = ""
+
         var body: some View {
             BackendURLEditor(
                 draft: $draft,
-                onSave: { _ in /* preview-only: no save action */ },
-                onReset: { /* preview-only: no reset action */ },
-                onCancel: { /* preview-only: no cancel action */ }
+                onSave: previewSave,
+                onReset: previewReset,
+                onCancel: previewCancel
             )
             .padding()
         }
+
+        private func previewSave(_ url: URL) {}
+        private func previewReset() {}
+        private func previewCancel() {}
     }
 
     static var previews: some View {

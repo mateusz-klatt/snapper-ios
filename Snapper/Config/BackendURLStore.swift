@@ -139,10 +139,6 @@ final class BackendURLStore: @unchecked Sendable {
         guard let host = components.host?.lowercased(), !host.isEmpty else { return nil }
         components.host = host
 
-        // Release builds only allow https:// (App Store ATS).
-        // Debug builds additionally permit http:// for loopback
-        // addresses (localhost / 127.x.x.x / ::1) so developers
-        // can point the app at a local server without TLS.
         #if !DEBUG
         if scheme == "http" { return nil }
         #else

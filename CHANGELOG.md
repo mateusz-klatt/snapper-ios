@@ -6,6 +6,36 @@ uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Tooling
+
+- **Swift comment scanner** at `scripts/check_no_comments.py` —
+  mirrors the parent monorepo's Python scanner for Swift sources.
+  Rejects `//` and `/* ... */` non-doc comments while allowing
+  `///` and `/** ... */` documentation comments. Wired to
+  `make check-all` in report-only mode (default); `make check-no-
+  comments-strict` flips to fail-on-finding for clean files. Legacy
+  iOS sources retain ~366 non-doc comments (43 files) carried over
+  from v0.1.x → v0.3.1; cleanup tracked for a follow-up release.
+
+### Sonar
+
+- Ignored `swift:S1186` on `BackendURLEditor.swift` (SwiftUI Preview
+  empty-closure stubs) and `swift:S1075` on the same file plus
+  `BackendURLStore.swift` (intentional design constants —
+  `inputPlaceholder` is UX placeholder text, `compiledInFallbackURLString`
+  is the dev-only fallback when `Configuration.plist` fails to
+  load). Sonar's accept-via-comment workaround conflicts with the
+  no-comments rule; suppressing at config level keeps both rules
+  green.
+- Ignored `swift:S2068` on `LoginViewModel.swift` (the SwiftUI
+  ``@State`` `password` binding is form input, not a stored secret —
+  historically marked False-Positive in the SonarCloud UI; the
+  ignore lifts that mark into version control so it survives
+  line-number drift across releases) and `swift:S7435` on
+  `DeviceRegistrationService.swift` (`identifierForVendor` is the
+  Apple-recommended privacy-friendly device id, declared in
+  `PrivacyInfo.xcprivacy` under the DeviceID Required-Reason API).
+
 MVVM extraction trajectory toward global ≥80% unit-test coverage —
 the architecture rules + concurrency / mocking conventions live in
 `docs/architecture-mvvm.md`. Baseline at v0.3.0: **66.5% global**

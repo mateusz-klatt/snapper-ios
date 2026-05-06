@@ -153,7 +153,7 @@ struct SettingsView: View {
             Text("Are you sure you want to logout?")
         }
         .alert("Change backend?", isPresented: $showingBackendChangeAlert) {
-            Button("Cancel", role: .cancel) { /* Dismiss alert with no action */ }
+            Button("Cancel", role: .cancel, action: dismissBackendChangeAlert)
             Button("Continue") {
                 backendDraft = ""
                 showingBackendEditor = true
@@ -193,6 +193,24 @@ struct SettingsView: View {
         }
     }
 
+    /// Run the sequenced sign-out triggered by Settings → Change
+    /// backend → Save (or Reset).
+    ///
+    /// Order matters and is invariant:
+    /// 1. ``WebSocketManager.disconnect()`` first so the old socket
+    ///    does not block on the server-side logout response.
+    /// 2. ``AuthService.logout()`` is non-throwing and flips
+    ///    ``isAuthenticated = false`` at the end — that flip causes
+    ///    ``SnapperApp``'s root conditional to swap ``MainTabView``
+    ///    for ``LoginView`` once the actor yields back to MainActor.
+    /// 3. Cookie cleanup is host-scoped (``oldURL.host``) so
+    ///    path-scoped session cookies under ``/api/auth/refresh`` are
+    ///    also dropped, regardless of cookie ``Path`` attribute.
+    /// 4. ``saveOverride()`` runs LAST so any in-flight 401 refresh-
+    ///    retry that races into this window still resolves against
+    ///    the OLD URL via the dynamic ``apiBaseURLProvider`` closure;
+    ///    only after this return value is committed does the new
+    ///    backend become the effective URL.
     private func performBackendSwitch(to candidate: URL?) {
         guard !isSwitchingBackend else { return }
         isSwitchingBackend = true
@@ -200,18 +218,8 @@ struct SettingsView: View {
 
         Task { @MainActor in
             defer { isSwitchingBackend = false }
-
-            // Disconnect WebSocket FIRST so the old socket doesn't
-            // hang while server-side logout is awaiting a response.
             webSocketManager.disconnect()
-
-            // logout() is non-throwing and flips isAuthenticated = false
-            // at the end → SnapperApp's root conditional swaps to
-            // LoginView automatically once we yield back to MainActor.
             await authService.logout()
-
-            // Cookie cleanup scoped by host so path-scoped cookies
-            // (e.g. /api/auth/refresh) are also dropped.
             let oldHost = oldURL.host?.lowercased()
             let allCookies = HTTPCookieStorage.shared.cookies ?? []
             for cookie in allCookies {
@@ -227,9 +235,6 @@ struct SettingsView: View {
             appState.availableWallets = []
             appState.availableOperators = []
 
-            // Persist the new override LAST so any in-flight 401
-            // refresh-retry that races into this window still hits
-            // the OLD URL via the dynamic provider.
             if let url = candidate {
                 BackendURLStore.shared.saveOverride(url)
             } else {
@@ -239,6 +244,15 @@ struct SettingsView: View {
             displayedBackendURL = AppConfig.baseURL
         }
     }
+
+    /// No-op handler for the alert's ``Cancel`` button.
+    ///
+    /// SwiftUI ``alert(_:isPresented:actions:)`` requires a closure
+    /// for every button; the Cancel role automatically dismisses the
+    /// alert without further state change. Naming the no-op keeps the
+    /// call site free of empty closures so the no-comments rule and
+    /// Sonar's empty-closure rule (``swift:S1186``) are both satisfied.
+    private func dismissBackendChangeAlert() {}
 
     private var notificationStatusView: some View {
         HStack(spacing: 6) {

@@ -24,8 +24,6 @@ final class BackendURLStoreTests: XCTestCase {
         super.tearDown()
     }
 
-    // MARK: - canonicalize
-
     func testCanonicalizeAcceptsBareHTTPSURL() {
         let url = BackendURLStore.canonicalize("https://api.example.com")
         XCTAssertEqual(url?.absoluteString, "https://api.example.com")
@@ -119,9 +117,9 @@ final class BackendURLStoreTests: XCTestCase {
         #endif
     }
 
+    /// Verify the loopback-only restriction on the DEBUG ``http://``
+    /// allow-list — non-loopback hosts must still be rejected.
     func testCanonicalizeRejectsHTTPNonLoopbackInDebug() {
-        // http:// against a non-loopback host must be rejected even in
-        // DEBUG builds — only localhost / 127.x / ::1 get the http exception.
         #if DEBUG
         XCTAssertNil(BackendURLStore.canonicalize("http://staging.example.com"))
         XCTAssertNil(BackendURLStore.canonicalize("http://192.168.1.1"))
@@ -132,8 +130,6 @@ final class BackendURLStoreTests: XCTestCase {
         let url = BackendURLStore.canonicalize("https://10.0.0.5:8443")
         XCTAssertEqual(url?.absoluteString, "https://10.0.0.5:8443")
     }
-
-    // MARK: - override persistence
 
     func testFreshStoreWithNoOverrideReturnsBundledURL() {
         let store = BackendURLStore(userDefaults: defaults)
