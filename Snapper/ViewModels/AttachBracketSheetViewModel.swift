@@ -55,7 +55,6 @@ final class AttachBracketSheetViewModel {
         defer { isSubmitting = false }
         return await onSubmit(sl, tp, idempotencyKey)
     }
-    // for backward-compatible test contract)
 
     /// Parses a free-text price string into a positive `Double`.
     /// Empty / non-numeric / non-positive input maps to `nil` so the
