@@ -134,7 +134,7 @@ struct BackendURLEditor_Previews: PreviewProvider {
             .padding()
         }
 
-        private func previewSave(_ url: URL) {}
+        private func previewSave(_: URL) {}
         private func previewReset() {}
         private func previewCancel() {}
     }

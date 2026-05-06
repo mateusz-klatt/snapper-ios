@@ -67,8 +67,8 @@ final class BackendURLEditorTests: XCTestCase {
         )
     }
 
-    private static func discardDraftMutation(_ value: String) {}
-    private static func discardSavedURL(_ url: URL) {}
+    private static func discardDraftMutation(_: String) {}
+    private static func discardSavedURL(_: URL) {}
     private static func discardReset() {}
     private static func discardCancel() {}
 }
