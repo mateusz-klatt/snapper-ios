@@ -167,7 +167,7 @@ final class NotificationService: ObservableObject {
     /// production class and a test-target extension cannot bypass
     /// the private setter, so the seam has to live on the class
     /// itself; the DEBUG gate prevents it from shipping.
-    func _refreshWithStatusForTests(_ status: UNAuthorizationStatus) {
+    func refreshWithStatusForTests(_ status: UNAuthorizationStatus) {
         self.authorizationStatus = status
         if Self.shouldFireDurableRegistration(
             authorizationStatus: status,

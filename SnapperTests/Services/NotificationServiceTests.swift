@@ -116,7 +116,7 @@ final class NotificationServiceTests: XCTestCase {
     // The pure-helper tests above prove the decision logic. These
     // tests prove the WIRING — that the result of the decision
     // helper actually fires the injected `registerForRemote`
-    // closure. They use `_refreshWithStatusForTests` to bypass the
+    // closure. They use `refreshWithStatusForTests` to bypass the
     // simulator UNUserNotificationCenter (which always reports
     // .notDetermined) and pin a chosen status directly.
 
@@ -131,7 +131,7 @@ final class NotificationServiceTests: XCTestCase {
             registerForRemote: { registerCalls += 1 }
         )
 
-        service._refreshWithStatusForTests(.authorized)
+        service.refreshWithStatusForTests(.authorized)
 
         XCTAssertEqual(registerCalls, 1)
         XCTAssertEqual(service.authorizationStatus, .authorized)
@@ -147,7 +147,7 @@ final class NotificationServiceTests: XCTestCase {
             registerForRemote: { registerCalls += 1 }
         )
 
-        service._refreshWithStatusForTests(.provisional)
+        service.refreshWithStatusForTests(.provisional)
 
         XCTAssertEqual(registerCalls, 1)
     }
@@ -164,7 +164,7 @@ final class NotificationServiceTests: XCTestCase {
             registerForRemote: { registerCalls += 1 }
         )
 
-        service._refreshWithStatusForTests(.ephemeral)
+        service.refreshWithStatusForTests(.ephemeral)
 
         XCTAssertEqual(registerCalls, 1)
     }
@@ -181,7 +181,7 @@ final class NotificationServiceTests: XCTestCase {
             registerForRemote: { registerCalls += 1 }
         )
 
-        service._refreshWithStatusForTests(.authorized)
+        service.refreshWithStatusForTests(.authorized)
 
         XCTAssertEqual(registerCalls, 0)
         XCTAssertEqual(
@@ -202,7 +202,7 @@ final class NotificationServiceTests: XCTestCase {
             registerForRemote: { registerCalls += 1 }
         )
 
-        service._refreshWithStatusForTests(.denied)
+        service.refreshWithStatusForTests(.denied)
 
         XCTAssertEqual(registerCalls, 0)
     }
@@ -217,7 +217,7 @@ final class NotificationServiceTests: XCTestCase {
             registerForRemote: { registerCalls += 1 }
         )
 
-        service._refreshWithStatusForTests(.notDetermined)
+        service.refreshWithStatusForTests(.notDetermined)
 
         XCTAssertEqual(registerCalls, 0)
     }
@@ -236,9 +236,9 @@ final class NotificationServiceTests: XCTestCase {
             registerForRemote: { registerCalls += 1 }
         )
 
-        service._refreshWithStatusForTests(.authorized)
-        service._refreshWithStatusForTests(.authorized)
-        service._refreshWithStatusForTests(.authorized)
+        service.refreshWithStatusForTests(.authorized)
+        service.refreshWithStatusForTests(.authorized)
+        service.refreshWithStatusForTests(.authorized)
 
         XCTAssertEqual(registerCalls, 3)
     }
