@@ -32,6 +32,15 @@ final class BackendURLStore: @unchecked Sendable {
 
     static let userDefaultsKey = "snapper.customBackendURL"
 
+    /// Compiled-in fallback URL used when ``Configuration.plist``
+    /// fails to load (missing, unparseable, or empty BaseURL). The
+    /// value is intentional and matches the committed dev default —
+    /// `Environment.swift` already crashes loud in DEBUG so this
+    /// branch only fires on a broken bundle (e.g. test target with
+    /// no plist), where pointing at a local dev backend is the
+    /// least-surprising recovery.
+    static let compiledInFallbackURLString = "http://localhost:8000"
+
     private static let logger = AppLogger.make(category: "BackendURLStore")
 
     private struct State: Sendable {
@@ -171,10 +180,10 @@ final class BackendURLStore: @unchecked Sendable {
             !baseURLString.isEmpty,
             let baseURL = URL(string: baseURLString)
         else {
-            let message = "BackendURLStore: Configuration.plist missing or unparsable. App configuration is broken; defaulting to http://localhost:8000 so DEBUG launches surface the failure instead of crashing."
+            let message = "BackendURLStore: Configuration.plist missing or unparsable. App configuration is broken; defaulting to \(compiledInFallbackURLString) so DEBUG launches surface the failure instead of crashing."
             logger.error("\(message, privacy: .public)")
             assertionFailure(message)
-            return URL(string: "http://localhost:8000")!
+            return URL(string: compiledInFallbackURLString)!
         }
         return baseURL
     }

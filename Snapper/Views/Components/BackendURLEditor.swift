@@ -17,6 +17,11 @@ import SwiftUI
 ///   stateless beyond the typing draft.
 struct BackendURLEditor: View {
 
+    /// Placeholder URL surfaced to the user inside the input field.
+    /// Not connected to anywhere — purely a visual hint about the
+    /// expected origin shape (`https://host[:port]`).
+    static let inputPlaceholder = "https://your-backend.example"
+
     @Binding var draft: String
     let allowReset: Bool
     let onSave: (URL) -> Void
@@ -39,7 +44,7 @@ struct BackendURLEditor: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
-            TextField("https://your-backend.example", text: $draft)
+            TextField(Self.inputPlaceholder, text: $draft)
                 .textFieldStyle(.roundedBorder)
                 .textInputAutocapitalization(.never)
                 .keyboardType(.URL)
@@ -109,14 +114,18 @@ struct BackendURLEditor: View {
 }
 
 struct BackendURLEditor_Previews: PreviewProvider {
+    /// Empty closures below are intentional — the SwiftUI Preview
+    /// renders the static layout only and never invokes the action
+    /// callbacks; production wiring lives in ``LoginView`` and
+    /// ``SettingsView``.
     private struct Container: View {
         @State private var draft: String = ""
         var body: some View {
             BackendURLEditor(
                 draft: $draft,
-                onSave: { _ in },
-                onReset: {},
-                onCancel: {}
+                onSave: { _ in /* preview-only: no save action */ },
+                onReset: { /* preview-only: no reset action */ },
+                onCancel: { /* preview-only: no cancel action */ }
             )
             .padding()
         }
