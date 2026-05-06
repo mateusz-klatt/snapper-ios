@@ -184,12 +184,25 @@ final class EnvironmentTests: XCTestCase {
     }
 
     func testConfigurationLoadReturnsEmptyWhenPlistIsMissing() throws {
-        let directory = FileManager.default.temporaryDirectory
-            .appendingPathComponent(UUID().uuidString, isDirectory: true)
-        try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
-        defer { try? FileManager.default.removeItem(at: directory) }
+        let bundleURL = FileManager.default.temporaryDirectory
+            .appendingPathComponent(UUID().uuidString)
+            .appendingPathExtension("bundle")
+        try FileManager.default.createDirectory(at: bundleURL, withIntermediateDirectories: true)
+        try Data("""
+        <?xml version="1.0" encoding="UTF-8"?>
+        <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+        <plist version="1.0">
+        <dict>
+            <key>CFBundleIdentifier</key>
+            <string>com.snapper.tests.empty</string>
+            <key>CFBundlePackageType</key>
+            <string>BNDL</string>
+        </dict>
+        </plist>
+        """.utf8).write(to: bundleURL.appendingPathComponent("Info.plist"))
+        defer { try? FileManager.default.removeItem(at: bundleURL) }
 
-        let bundle = try XCTUnwrap(Bundle(url: directory))
+        let bundle = try XCTUnwrap(Bundle(url: bundleURL))
         var assertionMessages: [String] = []
 
         let loaded = AppConfig.AppConfiguration.load(
