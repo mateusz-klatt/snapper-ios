@@ -6,14 +6,14 @@ final class AuthServiceTests: XCTestCase {
 
     var authService: AuthService!
 
-    override func setUp() {
-        super.setUp()
+    override func setUp() async throws {
+        try await super.setUp()
         authService = AuthService(session: .shared)
     }
 
-    override func tearDown() {
+    override func tearDown() async throws {
         authService = nil
-        super.tearDown()
+        try await super.tearDown()
     }
 
     func testLoginResponseDecoding() throws {
@@ -138,6 +138,12 @@ final class AuthServiceTests: XCTestCase {
 
         XCTAssertTrue(authService.canAccess("overview"))
         XCTAssertFalse(authService.canAccess("settings"))
+    }
+
+    func testCanAccessRejectsUnknownResource() {
+        authService.currentUser = makeUser(role: .admin)
+
+        XCTAssertFalse(authService.canAccess("unknown-resource"))
     }
 
     func testRoleAndPermissionChecksReturnFalseWithoutUser() {

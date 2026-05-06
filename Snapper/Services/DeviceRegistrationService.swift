@@ -86,7 +86,7 @@ actor DeviceRegistrationService {
         cancelPendingRetry()
         pendingToken = token
         if isLoggedIn {
-            await register(attempt: 1)
+            await register(token: token, attempt: 1)
         } else {
             status = .awaitingLogin
         }
@@ -101,8 +101,8 @@ actor DeviceRegistrationService {
     func onLogin() async {
         cancelPendingRetry()
         isLoggedIn = true
-        if pendingToken != nil {
-            await register(attempt: 1)
+        if let token = pendingToken {
+            await register(token: token, attempt: 1)
         } else {
             status = .awaitingToken
         }
@@ -153,16 +153,13 @@ actor DeviceRegistrationService {
     /// full retry envelope rather than tail-end backoff.
     func retryNow() async {
         cancelPendingRetry()
-        guard isLoggedIn, pendingToken != nil else {
+        guard isLoggedIn, let token = pendingToken else {
             return
         }
-        await register(attempt: 1)
+        await register(token: token, attempt: 1)
     }
 
-    private func register(attempt: Int) async {
-        guard let token = pendingToken else {
-            return
-        }
+    private func register(token: Data, attempt: Int) async {
         status = .inFlight
         let hex = token.map { String(format: "%02x", $0) }.joined()
         let appVersion = Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String
@@ -238,10 +235,10 @@ actor DeviceRegistrationService {
 
     private func attemptRetryIfPending(attempt: Int) async {
         if Task.isCancelled { return }
-        guard isLoggedIn, pendingToken != nil else {
+        guard isLoggedIn, let token = pendingToken else {
             return
         }
-        await register(attempt: attempt)
+        await register(token: token, attempt: attempt)
     }
 
     private func cancelPendingRetry() {

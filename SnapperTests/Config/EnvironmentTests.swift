@@ -136,6 +136,39 @@ final class EnvironmentTests: XCTestCase {
         XCTAssertEqual(parsed.endpoints.trailingStops, "")
     }
 
+    func testConfigurationParsingDefaultsMissingEndpointsBlock() {
+        let parsed = AppConfig.AppConfiguration.parse([
+            "BaseURL": "https://api.example.com",
+            "APIPrefix": "/v1",
+            "WSPath": "/stream"
+        ])
+
+        XCTAssertEqual(parsed.baseURL, "https://api.example.com")
+        XCTAssertEqual(parsed.apiPrefix, "/v1")
+        XCTAssertEqual(parsed.wsPath, "/stream")
+        XCTAssertEqual(parsed.endpoints.login, "")
+        XCTAssertEqual(parsed.endpoints.orders, "")
+        XCTAssertEqual(parsed.endpoints.trailingStops, "")
+    }
+
+    func testConfigurationParsingAcceptsSingleMissingCriticalFieldWhenAssertionsDisabled() {
+        let missingPrefix = AppConfig.AppConfiguration.parse([
+            "BaseURL": "https://api.example.com",
+            "APIPrefix": "",
+            "WSPath": "/stream"
+        ], assertOnMissingCriticalFields: false)
+        let missingBaseURL = AppConfig.AppConfiguration.parse([
+            "BaseURL": "",
+            "APIPrefix": "/v1",
+            "WSPath": "/stream"
+        ], assertOnMissingCriticalFields: false)
+
+        XCTAssertEqual(missingPrefix.baseURL, "https://api.example.com")
+        XCTAssertEqual(missingPrefix.apiPrefix, "")
+        XCTAssertEqual(missingBaseURL.baseURL, "")
+        XCTAssertEqual(missingBaseURL.apiPrefix, "/v1")
+    }
+
     func testEmptyConfigurationContainsEmptyValues() {
         let empty = AppConfig.AppConfiguration.empty
 
