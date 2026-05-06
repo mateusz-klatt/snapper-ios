@@ -26,10 +26,7 @@ final class OrdersViewModel {
     private let api: APIClientProtocol
     private let appState: AppState
 
-    private let logger = Logger(
-        subsystem: Bundle.main.bundleIdentifier ?? "Snapper",
-        category: "OrdersViewModel"
-    )
+    private let logger = AppLogger.make(category: "OrdersViewModel")
 
     init(
         api: APIClientProtocol = APIClient.shared,

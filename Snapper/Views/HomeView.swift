@@ -2,7 +2,7 @@ import SwiftUI
 import os
 
 struct HomeView: View {
-    private let logger = Logger(subsystem: Bundle.main.bundleIdentifier ?? "Snapper", category: "Home")
+    private let logger = AppLogger.make(category: "Home")
     @EnvironmentObject var webSocketManager: WebSocketManager
     @Environment(AppState.self) private var appState
     @State private var systemStatus: SystemStatus?

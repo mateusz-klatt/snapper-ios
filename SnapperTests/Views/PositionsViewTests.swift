@@ -21,6 +21,7 @@ final class PositionsViewTests: XCTestCase {
     private func makePosition(
         publicId: String,
         walletPublicId: String?,
+        instrumentPublicId: String? = "inst-1",
         quantity: Double = 1.0
     ) -> PositionSnapshot {
         return PositionData(
@@ -31,7 +32,7 @@ final class PositionsViewTests: XCTestCase {
             sessionId: "session-test",
             topic: nil,
             instrument: "BTC-USD",
-            instrumentPublicId: "inst-1",
+            instrumentPublicId: instrumentPublicId,
             exchange: "kraken",
             mode: nil,
             quantity: quantity,
@@ -174,42 +175,26 @@ final class PositionsViewTests: XCTestCase {
         XCTAssertNil(command)
     }
 
-    func testMakeReduceCommandReturnsNilWhenInstrumentIdMissingOrEmpty() {
-        let missingInstrument = PositionData(
-            type: "position",
-            sequenceId: 1,
-            publicId: "p-missing-inst",
-            timestamp: Self.baseTimestamp,
-            sessionId: "session-test",
-            topic: nil,
-            instrument: "BTC-USD",
-            instrumentPublicId: nil,
-            exchange: "kraken",
-            mode: nil,
+    func testMakeReduceCommandReturnsNilWhenWalletIdEmpty() {
+        let position = makePosition(publicId: "p-empty-wallet", walletPublicId: "", quantity: 1.0)
+        let command = PositionsViewModel.makeReduceCommand(
+            position: position,
             quantity: 1.0,
-            averagePrice: 50000.0,
-            unrealizedPnl: 0.0,
-            realizedPnl: 0.0,
-            positionCyclePublicId: nil,
-            walletPublicId: "wallet-a"
+            provenance: Self.fixedProvenance
         )
-        let emptyInstrument = PositionData(
-            type: "position",
-            sequenceId: 1,
+        XCTAssertNil(command)
+    }
+
+    func testMakeReduceCommandReturnsNilWhenInstrumentIdMissingOrEmpty() {
+        let missingInstrument = makePosition(
+            publicId: "p-missing-inst",
+            walletPublicId: "wallet-a",
+            instrumentPublicId: nil
+        )
+        let emptyInstrument = makePosition(
             publicId: "p-empty-inst",
-            timestamp: Self.baseTimestamp,
-            sessionId: "session-test",
-            topic: nil,
-            instrument: "BTC-USD",
-            instrumentPublicId: "",
-            exchange: "kraken",
-            mode: nil,
-            quantity: 1.0,
-            averagePrice: 50000.0,
-            unrealizedPnl: 0.0,
-            realizedPnl: 0.0,
-            positionCyclePublicId: nil,
-            walletPublicId: "wallet-a"
+            walletPublicId: "wallet-a",
+            instrumentPublicId: ""
         )
 
         XCTAssertNil(PositionsViewModel.makeReduceCommand(
@@ -245,28 +230,21 @@ final class PositionsViewTests: XCTestCase {
             positionCyclePublicId: nil,
             walletPublicId: ""
         )
-        let missingInstrument = PositionData(
-            type: "position",
-            sequenceId: 1,
+        let missingInstrument = makePosition(
             publicId: "p-missing-inst",
-            timestamp: Self.baseTimestamp,
-            sessionId: "session-test",
-            topic: nil,
-            instrument: "BTC-USD",
-            instrumentPublicId: nil,
-            exchange: "kraken",
-            mode: nil,
-            quantity: 1.0,
-            averagePrice: 50000.0,
-            unrealizedPnl: 0.0,
-            realizedPnl: 0.0,
-            positionCyclePublicId: nil,
-            walletPublicId: "wallet-a"
+            walletPublicId: "wallet-a",
+            instrumentPublicId: nil
+        )
+        let emptyInstrument = makePosition(
+            publicId: "p-empty-inst",
+            walletPublicId: "wallet-a",
+            instrumentPublicId: ""
         )
         XCTAssertTrue(PositionsViewModel.canSubmitReduce(position: ok))
         XCTAssertFalse(PositionsViewModel.canSubmitReduce(position: missingWallet))
         XCTAssertFalse(PositionsViewModel.canSubmitReduce(position: emptyWallet))
         XCTAssertFalse(PositionsViewModel.canSubmitReduce(position: missingInstrument))
+        XCTAssertFalse(PositionsViewModel.canSubmitReduce(position: emptyInstrument))
     }
 
     /// Surface-load-errors branch (PR #2): a refresh failure on top

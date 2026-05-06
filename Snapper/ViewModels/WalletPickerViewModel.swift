@@ -25,10 +25,7 @@ final class WalletPickerViewModel {
     private let api: APIClientProtocol
     private let appState: AppState
 
-    private let logger = Logger(
-        subsystem: Bundle.main.bundleIdentifier ?? "Snapper",
-        category: "WalletPickerViewModel"
-    )
+    private let logger = AppLogger.make(category: "WalletPickerViewModel")
 
     init(
         api: APIClientProtocol = APIClient.shared,

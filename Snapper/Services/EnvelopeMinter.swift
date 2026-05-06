@@ -51,14 +51,10 @@ final class EnvelopeMinter {
         let timestampString: String
     }
 
-    private static let iso8601: ISO8601DateFormatter = {
+    nonisolated static func formatTimestamp(_ date: Date) -> String {
         let formatter = ISO8601DateFormatter()
         formatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
-        return formatter
-    }()
-
-    static func formatTimestamp(_ date: Date) -> String {
-        return iso8601.string(from: date)
+        return formatter.string(from: date)
     }
 
     private let sessionIdValue: String

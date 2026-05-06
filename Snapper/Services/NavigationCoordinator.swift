@@ -20,10 +20,7 @@ import os
 final class NavigationCoordinator: ObservableObject {
     static let shared = NavigationCoordinator()
 
-    private let logger = Logger(
-        subsystem: Bundle.main.bundleIdentifier ?? "Snapper",
-        category: "Navigation"
-    )
+    private let logger = AppLogger.make(category: "Navigation")
 
     /// Deep-link path pulled from the tapped notification's custom
     /// payload, or `nil` when no navigation is pending.

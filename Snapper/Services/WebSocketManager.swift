@@ -15,7 +15,7 @@ class WebSocketManager: ObservableObject {
     @Published private(set) var state = WSState()
     @Published private(set) var reconnectAttempts = 0
 
-    private let logger = Logger(subsystem: Bundle.main.bundleIdentifier ?? "Snapper", category: "WebSocket")
+    private let logger = AppLogger.make(category: "WebSocket")
 
     private let authService: AuthRefreshing
     private let taskFactory: WebSocketTaskFactory
@@ -230,8 +230,7 @@ class WebSocketManager: ObservableObject {
         let data: Data
         switch message {
         case .string(let text):
-            guard let d = text.data(using: .utf8) else { return }
-            data = d
+            data = Data(text.utf8)
         case .data(let d):
             data = d
         @unknown default:

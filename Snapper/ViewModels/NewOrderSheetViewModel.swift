@@ -101,10 +101,7 @@ final class NewOrderSheetViewModel {
 
     private let api: APIClientProtocol
 
-    private let logger = Logger(
-        subsystem: Bundle.main.bundleIdentifier ?? "Snapper",
-        category: "NewOrderSheetViewModel"
-    )
+    private let logger = AppLogger.make(category: "NewOrderSheetViewModel")
 
     init(
         exchanges: [String],

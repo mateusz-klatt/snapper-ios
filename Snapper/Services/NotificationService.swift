@@ -18,14 +18,19 @@ import os
 final class NotificationService: ObservableObject {
     static let shared = NotificationService()
 
-    private let logger = Logger(
-        subsystem: Bundle.main.bundleIdentifier ?? "Snapper",
-        category: "Notifications"
-    )
+    private let logger = AppLogger.make(category: "Notifications")
     private let authorizationStatusProvider: @MainActor () async -> UNAuthorizationStatus
     private let authorizationRequester: @MainActor (UNAuthorizationOptions) async throws -> Bool
-    private let isLoggedIn: () -> Bool
-    private let registerForRemote: () -> Void
+    private let isLoggedIn: @MainActor () -> Bool
+    private let registerForRemote: @MainActor () -> Void
+
+    private static func defaultIsLoggedIn() -> Bool {
+        return AuthService.shared.isAuthenticated
+    }
+
+    private static func defaultRegisterForRemote() {
+        UIApplication.shared.registerForRemoteNotifications()
+    }
 
     /// Current UNUserNotificationCenter authorization status.
     ///
@@ -41,10 +46,8 @@ final class NotificationService: ObservableObject {
     /// without an actual UIApplication round-trip.
     init(
         notificationCenter: UNUserNotificationCenter = .current(),
-        isLoggedIn: @escaping () -> Bool = { AuthService.shared.isAuthenticated },
-        registerForRemote: @escaping () -> Void = {
-            UIApplication.shared.registerForRemoteNotifications()
-        }
+        isLoggedIn: @MainActor @escaping () -> Bool = NotificationService.defaultIsLoggedIn,
+        registerForRemote: @MainActor @escaping () -> Void = NotificationService.defaultRegisterForRemote
     ) {
         self.authorizationStatusProvider = {
             let settings = await notificationCenter.notificationSettings()
@@ -60,10 +63,8 @@ final class NotificationService: ObservableObject {
     init(
         authorizationStatusProvider: @MainActor @escaping () async -> UNAuthorizationStatus,
         authorizationRequester: @MainActor @escaping (UNAuthorizationOptions) async throws -> Bool,
-        isLoggedIn: @escaping () -> Bool = { AuthService.shared.isAuthenticated },
-        registerForRemote: @escaping () -> Void = {
-            UIApplication.shared.registerForRemoteNotifications()
-        }
+        isLoggedIn: @MainActor @escaping () -> Bool = NotificationService.defaultIsLoggedIn,
+        registerForRemote: @MainActor @escaping () -> Void = NotificationService.defaultRegisterForRemote
     ) {
         self.authorizationStatusProvider = authorizationStatusProvider
         self.authorizationRequester = authorizationRequester

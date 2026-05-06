@@ -27,6 +27,11 @@ final class APIClient: Sendable, APIClientProtocol {
         return value.addingPercentEncoding(withAllowedCharacters: rfc3986Unreserved) ?? value
     }
 
+    private struct QueryParameter {
+        let name: String
+        let value: String
+    }
+
     /// Build the trailing query suffix from name/value pairs.
     ///
     /// Encodes query names and values against the RFC 3986 unreserved
@@ -34,16 +39,13 @@ final class APIClient: Sendable, APIClientProtocol {
     /// in opaque server-emitted cursors) are always percent-escaped.
     /// Returns the empty string when no items are supplied so callers
     /// can concatenate unconditionally.
-    private static func querySuffix(_ items: [URLQueryItem]) -> String {
+    private static func querySuffix(_ items: [QueryParameter]) -> String {
         guard !items.isEmpty else {
             return ""
         }
         let query = items.map { item in
             let name = item.name.addingPercentEncoding(withAllowedCharacters: rfc3986Unreserved) ?? item.name
-            guard let value = item.value else {
-                return name
-            }
-            let encodedValue = value.addingPercentEncoding(withAllowedCharacters: rfc3986Unreserved) ?? value
+            let encodedValue = item.value.addingPercentEncoding(withAllowedCharacters: rfc3986Unreserved) ?? item.value
             return "\(name)=\(encodedValue)"
         }.joined(separator: "&")
         return "?\(query)"
@@ -276,12 +278,12 @@ final class APIClient: Sendable, APIClientProtocol {
     /// cursor from the previous page's ``next_cursor`` — pass ``nil``
     /// for the first page.
     func fetchAlertHistory(limit: Int? = nil, before: String? = nil) async throws -> AlertHistoryResponse {
-        var queryItems: [URLQueryItem] = []
+        var queryItems: [QueryParameter] = []
         if let limit {
-            queryItems.append(URLQueryItem(name: "limit", value: "\(limit)"))
+            queryItems.append(QueryParameter(name: "limit", value: "\(limit)"))
         }
         if let before, !before.isEmpty {
-            queryItems.append(URLQueryItem(name: "before", value: before))
+            queryItems.append(QueryParameter(name: "before", value: before))
         }
         return try await request(endpoint: "\(AppConfig.Endpoints.alerts)\(Self.querySuffix(queryItems))")
     }
@@ -359,7 +361,6 @@ enum APIError: LocalizedError {
     case invalidResponse
     case httpError(Int)
     case serverError(String)
-    case decodingError
 
     var errorDescription: String? {
         switch self {
@@ -371,8 +372,6 @@ enum APIError: LocalizedError {
             return "HTTP error: \(code)"
         case .serverError(let message):
             return message
-        case .decodingError:
-            return "Failed to decode response"
         }
     }
 }

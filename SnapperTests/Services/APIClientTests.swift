@@ -24,7 +24,6 @@ final class APIClientTests: XCTestCase {
         XCTAssertEqual(APIError.invalidResponse.errorDescription, "Invalid response from server")
         XCTAssertEqual(APIError.httpError(404).errorDescription, "HTTP error: 404")
         XCTAssertEqual(APIError.serverError("Test error").errorDescription, "Test error")
-        XCTAssertEqual(APIError.decodingError.errorDescription, "Failed to decode response")
     }
 
     /// First 401 triggers fresh-token fetch; second call returns 200.

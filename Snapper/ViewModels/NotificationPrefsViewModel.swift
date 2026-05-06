@@ -27,14 +27,11 @@ final class NotificationPrefsViewModel {
     private let api: APIClientProtocol
     private let deviceIdProvider: @Sendable () async -> String?
 
-    private let logger = Logger(
-        subsystem: Bundle.main.bundleIdentifier ?? "Snapper",
-        category: "NotificationPrefsViewModel"
-    )
+    private let logger = AppLogger.make(category: "NotificationPrefsViewModel")
 
     init(
         api: APIClientProtocol = APIClient.shared,
-        deviceIdProvider: @escaping @Sendable () async -> String? = { await DeviceRegistrationService.shared().currentDevicePublicId() }
+        deviceIdProvider: @escaping @Sendable () async -> String? = { DeviceRegistrationService.shared().currentDevicePublicId() }
     ) {
         self.api = api
         self.deviceIdProvider = deviceIdProvider

@@ -66,10 +66,7 @@ struct EditDevicePrefView: View {
     private let lockedOperatorPublicId: String?
     private let lockedWalletPublicId: String?
 
-    private let logger = Logger(
-        subsystem: Bundle.main.bundleIdentifier ?? "Snapper",
-        category: "EditDevicePrefView"
-    )
+    private let logger = AppLogger.make(category: "EditDevicePrefView")
 
     init(
         mode: Mode,

@@ -53,6 +53,34 @@ final class NavigationCoordinatorTests: XCTestCase {
         XCTAssertNil(coordinator.pendingAlertPublicId)
     }
 
+    func testHandleTapWithNonStringDeepLinkIsNoOp() async {
+        let response = _makeResponse(withUserInfo: [
+            "deep_link_path": 123,
+            "alert_event_public_id": "alert-ignored",
+        ])
+
+        await coordinator.handleNotificationTap(response)
+
+        XCTAssertNil(coordinator.pendingDeepLink)
+        XCTAssertNil(coordinator.pendingAlertPublicId)
+    }
+
+    func testHandleTapWithNonStringAnchorClearsPriorAnchor() async {
+        await coordinator.handleNotificationTap(_makeResponse(withUserInfo: [
+            "deep_link_path": "/orders/old",
+            "alert_event_public_id": "alert-old",
+        ]))
+
+        let response = _makeResponse(withUserInfo: [
+            "deep_link_path": "/orders/new",
+            "alert_event_public_id": 123,
+        ])
+        await coordinator.handleNotificationTap(response)
+
+        XCTAssertEqual(coordinator.pendingDeepLink, "/orders/new")
+        XCTAssertNil(coordinator.pendingAlertPublicId)
+    }
+
     func testClearResetsBothFields() async {
         let response = _makeResponse(withUserInfo: [
             "deep_link_path": "/orders/x",

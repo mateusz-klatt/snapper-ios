@@ -61,10 +61,7 @@ actor DeviceRegistrationService {
 
     private let apiClient: APIClient
     private let sleeper: Sleeper
-    private let logger = Logger(
-        subsystem: Bundle.main.bundleIdentifier ?? "Snapper",
-        category: "DeviceRegistration"
-    )
+    private let logger = AppLogger.make(category: "DeviceRegistration")
     private var pendingToken: Data?
     private var isLoggedIn: Bool = false
     private var lastRegisteredDevicePublicId: String?
