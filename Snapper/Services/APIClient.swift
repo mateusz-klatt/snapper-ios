@@ -55,6 +55,36 @@ final class APIClient: Sendable, APIClientProtocol {
         charactersIn: "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-._~"
     )
 
+    /// Attach the ``X-CSRF-Token`` header for state-changing requests.
+    ///
+    /// The backend's cookie-auth path requires double-submit CSRF
+    /// (``csrf_token`` cookie value mirrored into ``X-CSRF-Token``
+    /// header) on every non-safe HTTP method — see
+    /// ``snapper.auth.dependencies.validate_csrf_token``. Login,
+    /// refresh, and logout are explicitly exempt server-side and do
+    /// not flow through this client.
+    ///
+    /// Cookie lookup is scoped to the request URL via
+    /// ``HTTPCookieStorage.cookies(for:)`` so a stale cookie from a
+    /// different host (e.g. mid backend-switch) does not leak into a
+    /// new-host request. Absent or unmatched cookie → header is left
+    /// off and the backend returns its native 403, which surfaces the
+    /// missing-CSRF condition rather than masking it with a synthetic
+    /// header.
+    static func attachCSRFHeader(to request: inout URLRequest, method: String) {
+        guard !Self.isSafeMethod(method) else { return }
+        guard let url = request.url else { return }
+        let cookies = HTTPCookieStorage.shared.cookies(for: url) ?? []
+        guard let csrf = cookies.first(where: { $0.name == AppConfig.CookieName.csrfToken }) else { return }
+        guard !csrf.value.isEmpty else { return }
+        request.setValue(csrf.value, forHTTPHeaderField: AppConfig.HTTPHeader.xCSRFToken)
+    }
+
+    private static func isSafeMethod(_ method: String) -> Bool {
+        let upper = method.uppercased()
+        return upper == "GET" || upper == "HEAD"
+    }
+
     private func request<T: Decodable>(
         endpoint: String,
         method: String = "GET",
@@ -68,6 +98,8 @@ final class APIClient: Sendable, APIClientProtocol {
         var request = URLRequest(url: url)
         request.httpMethod = method
         request.setValue(AppConfig.ContentType.json, forHTTPHeaderField: AppConfig.HTTPHeader.contentType)
+
+        Self.attachCSRFHeader(to: &request, method: method)
 
         if let body = body {
             let encoder = JSONEncoder()

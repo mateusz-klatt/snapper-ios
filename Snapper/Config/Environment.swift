@@ -35,6 +35,11 @@ enum AppConfig {
     enum HTTPHeader {
         static let contentType = "Content-Type"
         static let authorization = "Authorization"
+        static let xCSRFToken = "X-CSRF-Token"
+    }
+
+    enum CookieName {
+        static let csrfToken = "csrf_token"
     }
 
     static var apiBaseURL: String {
