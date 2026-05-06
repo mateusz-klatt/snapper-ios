@@ -25,10 +25,7 @@ import os
 /// to mark the boundary explicitly.
 @MainActor
 final class AppDelegate: NSObject, UIApplicationDelegate, @preconcurrency UNUserNotificationCenterDelegate {
-    private let logger = Logger(
-        subsystem: Bundle.main.bundleIdentifier ?? "Snapper",
-        category: "APNs"
-    )
+    private let logger = AppLogger.make(category: "APNs")
 
     nonisolated func application(
         _ _: UIApplication,

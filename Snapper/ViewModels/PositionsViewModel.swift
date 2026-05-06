@@ -25,10 +25,7 @@ final class PositionsViewModel {
     private let api: APIClientProtocol
     private let appState: AppState
 
-    private let logger = Logger(
-        subsystem: Bundle.main.bundleIdentifier ?? "Snapper",
-        category: "PositionsViewModel"
-    )
+    private let logger = AppLogger.make(category: "PositionsViewModel")
 
     init(
         api: APIClientProtocol = APIClient.shared,

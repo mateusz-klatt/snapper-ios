@@ -66,6 +66,55 @@ final class WebSocketManagerTests: XCTestCase {
         XCTAssertEqual(fakeTask.resumeCount, 0)
     }
 
+    func testConnectIsNoOpWhenAlreadyConnecting() {
+        let task1 = FakeWebSocketTask()
+        let task2 = FakeWebSocketTask()
+        let manager = WebSocketManager(
+            authService: FakeAuthService(nextToken: "t"),
+            taskFactory: FakeWebSocketTaskFactory(tasks: [task1, task2]),
+            sleeper: FakeSleeper()
+        )
+
+        manager.connect()
+        manager.connect()
+
+        XCTAssertEqual(task1.resumeCount, 1)
+        XCTAssertEqual(task2.resumeCount, 0)
+        XCTAssertEqual(manager.connectionState, .connecting)
+    }
+
+    func testConnectIsNoOpWhenConnectedOrAuthenticating() {
+        let task1 = FakeWebSocketTask()
+        let task2 = FakeWebSocketTask()
+        let task3 = FakeWebSocketTask()
+        let manager = WebSocketManager(
+            authService: FakeAuthService(nextToken: "t"),
+            taskFactory: FakeWebSocketTaskFactory(tasks: [task1, task2, task3]),
+            sleeper: FakeSleeper()
+        )
+
+        manager._setConnectionStateForTests(.connected)
+        manager.connect()
+        XCTAssertEqual(task1.resumeCount, 0)
+
+        manager._setConnectionStateForTests(.authenticating)
+        manager.connect()
+        XCTAssertEqual(task1.resumeCount, 0)
+        XCTAssertEqual(task2.resumeCount, 0)
+        XCTAssertEqual(task3.resumeCount, 0)
+    }
+
+    func testConnectRetriesFromErrorState() {
+        let fakeTask = FakeWebSocketTask()
+        let (manager, _, _, _) = makeManager(fakeTask: fakeTask)
+
+        manager._setConnectionStateForTests(.error("temporary failure"))
+        manager.connect()
+
+        XCTAssertEqual(fakeTask.resumeCount, 1)
+        XCTAssertEqual(manager.connectionState, .connecting)
+    }
+
     func testTradeFrameDispatchedToLastTrade() {
         let (manager, _, _, _) = makeManager()
 
@@ -381,6 +430,17 @@ final class WebSocketManagerTests: XCTestCase {
         XCTAssertEqual(manager.connectionState, .connected)
     }
 
+    func testMinimalAuthCompleteWithoutTopicsStillConnects() {
+        let (manager, _, _, _) = makeManager()
+        manager.connect()
+
+        manager.handleRawMessage(frame(["type": "auth_complete"]))
+
+        XCTAssertTrue(manager.availableTopics.isEmpty)
+        XCTAssertNil(manager.state.wsTokenExp)
+        XCTAssertEqual(manager.connectionState, .connected)
+    }
+
     func testInboundReceiveLoopAuthenticatesAndReauthenticates() async {
         let fakeAuth = FakeAuthService(nextToken: "first-token")
         let fakeTask = FakeWebSocketTask()
@@ -517,6 +577,29 @@ final class WebSocketManagerTests: XCTestCase {
         }
         let logoutCalls = await fakeAuth.logoutCalls
         XCTAssertEqual(logoutCalls, 1, "logout must fire on server-driven auth rejection")
+    }
+
+    func testServerAuthFailedWithoutReasonUsesUnknownFallback() async {
+        let fakeAuth = FakeAuthService(nextToken: "t")
+        let fakeTask = FakeWebSocketTask()
+        let manager = WebSocketManager(
+            authService: fakeAuth,
+            taskFactory: FakeWebSocketTaskFactory(task: fakeTask),
+            sleeper: FakeSleeper()
+        )
+        manager.connect()
+
+        manager.handleRawMessage(frame(["type": "auth_failed"]))
+        await drainSendTasks()
+        await drainSendTasks()
+
+        if case .authFailed(let reason) = manager.connectionState {
+            XCTAssertTrue(reason.contains("unknown"))
+        } else {
+            XCTFail("expected authFailed for auth_failed without reason, got \(manager.connectionState)")
+        }
+        let logoutCalls = await fakeAuth.logoutCalls
+        XCTAssertEqual(logoutCalls, 1)
     }
 
     /// Once `.authFailed` is reached, `connect()` must be a no-op —

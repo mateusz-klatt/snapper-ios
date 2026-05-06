@@ -55,6 +55,38 @@ final class NotificationServiceTests: XCTestCase {
         XCTAssertEqual(registerCalls, 1)
     }
 
+    func testRefreshAuthorizationStatusDoesNotRegisterWhenDenied() async {
+        var registerCalls = 0
+        let service = NotificationService(
+            authorizationStatusProvider: { .denied },
+            authorizationRequester: { _ in false },
+            isLoggedIn: { true },
+            registerForRemote: { registerCalls += 1 }
+        )
+
+        await service.refreshAuthorizationStatus()
+
+        XCTAssertEqual(service.authorizationStatus, .denied)
+        XCTAssertFalse(service.isAuthorized)
+        XCTAssertEqual(registerCalls, 0)
+    }
+
+    func testRefreshAuthorizationStatusDoesNotRegisterWhenLoggedOut() async {
+        var registerCalls = 0
+        let service = NotificationService(
+            authorizationStatusProvider: { .authorized },
+            authorizationRequester: { _ in true },
+            isLoggedIn: { false },
+            registerForRemote: { registerCalls += 1 }
+        )
+
+        await service.refreshAuthorizationStatus()
+
+        XCTAssertEqual(service.authorizationStatus, .authorized)
+        XCTAssertTrue(service.isAuthorized)
+        XCTAssertEqual(registerCalls, 0)
+    }
+
     func testPrimaryInitializerDefaultLoginStateControlsRegistration() {
         var registerCalls = 0
         let expectedCalls = AuthService.shared.isAuthenticated ? 1 : 0
@@ -135,6 +167,22 @@ final class NotificationServiceTests: XCTestCase {
         XCTAssertEqual(service.authorizationStatus, .provisional)
         XCTAssertTrue(service.isAuthorized)
         XCTAssertEqual(registerCalls, 1)
+    }
+
+    func testRequestAuthorizationErrorWithDeniedStatusDoesNotRegister() async {
+        var registerCalls = 0
+        let service = NotificationService(
+            authorizationStatusProvider: { .denied },
+            authorizationRequester: { _ in throw RequestError.failed },
+            isLoggedIn: { true },
+            registerForRemote: { registerCalls += 1 }
+        )
+
+        await service.requestAuthorization()
+
+        XCTAssertEqual(service.authorizationStatus, .denied)
+        XCTAssertFalse(service.isAuthorized)
+        XCTAssertEqual(registerCalls, 0)
     }
 
     /// Durable-registration branch (PR #5): when the user has a

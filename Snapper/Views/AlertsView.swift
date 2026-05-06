@@ -25,10 +25,7 @@ struct AlertsView: View {
     @State private var errorMessage: String?
     @State private var selectedAlert: AlertEventInfo?
 
-    private let logger = Logger(
-        subsystem: Bundle.main.bundleIdentifier ?? "Snapper",
-        category: "AlertsView"
-    )
+    private let logger = AppLogger.make(category: "AlertsView")
 
     var body: some View {
         NavigationView {

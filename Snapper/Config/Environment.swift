@@ -3,10 +3,7 @@ import os
 
 enum AppConfig {
 
-    private static let logger = Logger(
-        subsystem: Bundle.main.bundleIdentifier ?? "Snapper",
-        category: "Config"
-    )
+    private static let logger = AppLogger.make(category: "Config")
 
     private static let configuration = AppConfiguration.load()
 

@@ -143,6 +143,23 @@ final class APIClientSurfaceTests: XCTestCase {
         }
     }
 
+    func testFetchAlertHistorySkipsEmptyBeforeCursor() async throws {
+        let requests = self.requests!
+        MockURLProtocol.requestHandler = { request in
+            requests.append(request)
+            return MockURLProtocol.jsonResponse(
+                statusCode: 200,
+                json: Self.responseEnvelope(for: request)
+            )
+        }
+
+        _ = try await apiClient.fetchAlertHistory(before: "")
+
+        let snapshot = try XCTUnwrap(requests.snapshots.last)
+        XCTAssertEqual(snapshot.path, "/api/alerts")
+        XCTAssertNil(snapshot.query)
+    }
+
     private static func responseEnvelope(for request: URLRequest) -> [String: Any] {
         let method = request.httpMethod ?? "GET"
         let path = Self.percentEncodedPath(for: request)

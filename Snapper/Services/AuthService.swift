@@ -6,7 +6,7 @@ import os
 class AuthService: ObservableObject {
     static let shared = AuthService()
 
-    private let logger = Logger(subsystem: Bundle.main.bundleIdentifier ?? "Snapper", category: "Auth")
+    private let logger = AppLogger.make(category: "Auth")
 
     @Published var isAuthenticated = false
     @Published var currentUser: UserProfile?

@@ -6,14 +6,14 @@ final class NotificationPrefsViewModelTests: XCTestCase {
 
     private var mockAPI: MockAPIClient!
 
-    override func setUp() {
-        super.setUp()
+    override func setUp() async throws {
+        try await super.setUp()
         mockAPI = MockAPIClient()
     }
 
-    override func tearDown() {
+    override func tearDown() async throws {
         mockAPI = nil
-        super.tearDown()
+        try await super.tearDown()
     }
 
     private static let baseTimestamp = Date(timeIntervalSince1970: 1_700_000_000)
@@ -173,6 +173,27 @@ final class NotificationPrefsViewModelTests: XCTestCase {
         XCTAssertEqual(count, 0)
         XCTAssertNil(viewModel.devicePublicId)
         XCTAssertEqual(viewModel.defaults.count, 1)
+    }
+
+    func testLoadUsesDefaultDeviceRegistrationProviderWhenNotInjected() async {
+        let service = DeviceRegistrationService.shared()
+        await service.onLogout()
+        let viewModel = NotificationPrefsViewModel(api: mockAPI)
+        let defaultsResp = makeDefaultsResponse([makeAlertDefault()])
+        mockAPI.fetchAlertDefaultsHandler = { defaultsResp }
+        let calls = NotifPrefsCallCounter()
+        mockAPI.fetchDevicePrefsHandler = { _ in
+            await calls.increment()
+            throw APIError.invalidResponse
+        }
+
+        await viewModel.load()
+        let count = await calls.count
+
+        XCTAssertEqual(count, 0)
+        XCTAssertNil(viewModel.devicePublicId)
+        XCTAssertEqual(viewModel.defaults.count, 1)
+        await service.onLogout()
     }
 
     /// Empty-string device id leak guard: a `deviceIdProvider`
