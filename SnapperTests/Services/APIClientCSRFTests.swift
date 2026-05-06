@@ -126,6 +126,13 @@ final class APIClientCSRFTests: XCTestCase {
         )
     }
 
+    func testNonSafeRequestSkipsCSRFHeaderWhenCookieValueIsEmpty() {
+        setCSRFCookie(value: "", on: target)
+        var request = URLRequest(url: target)
+        APIClient.attachCSRFHeader(to: &request, method: "POST")
+        XCTAssertNil(request.value(forHTTPHeaderField: AppConfig.HTTPHeader.xCSRFToken))
+    }
+
     func testRequestWithoutURLNoOps() {
         var request = URLRequest(url: target)
         request.url = nil

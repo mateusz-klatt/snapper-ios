@@ -76,6 +76,7 @@ final class APIClient: Sendable, APIClientProtocol {
         guard let url = request.url else { return }
         let cookies = HTTPCookieStorage.shared.cookies(for: url) ?? []
         guard let csrf = cookies.first(where: { $0.name == AppConfig.CookieName.csrfToken }) else { return }
+        guard !csrf.value.isEmpty else { return }
         request.setValue(csrf.value, forHTTPHeaderField: AppConfig.HTTPHeader.xCSRFToken)
     }
 
