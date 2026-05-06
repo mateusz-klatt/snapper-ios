@@ -116,4 +116,22 @@ final class WalletPickerTests: XCTestCase {
             "Wallets unavailable"
         )
     }
+
+    func testCurrentLabelHandlesStaleSelectionWithEmptyWalletCache() {
+        XCTAssertEqual(
+            WalletPickerViewModel.currentLabel(
+                wallets: [],
+                selected: "p-stale"
+            ),
+            "Loading wallets..."
+        )
+        XCTAssertEqual(
+            WalletPickerViewModel.currentLabel(
+                wallets: [],
+                selected: "p-stale",
+                loadError: .httpError(503)
+            ),
+            "Wallets unavailable"
+        )
+    }
 }

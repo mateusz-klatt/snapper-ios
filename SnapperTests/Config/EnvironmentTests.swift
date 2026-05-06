@@ -169,6 +169,40 @@ final class EnvironmentTests: XCTestCase {
         XCTAssertEqual(missingBaseURL.apiPrefix, "/v1")
     }
 
+    func testConfigurationParsingReportsMissingCriticalFieldsWhenAssertionsEnabled() {
+        var assertionMessages: [String] = []
+        let parsed = AppConfig.AppConfiguration.parse([
+            "BaseURL": "",
+            "APIPrefix": "",
+            "WSPath": "/stream"
+        ], assertionHandler: { assertionMessages.append($0) })
+
+        XCTAssertEqual(parsed.baseURL, "")
+        XCTAssertEqual(parsed.apiPrefix, "")
+        XCTAssertEqual(assertionMessages.count, 1)
+        XCTAssertTrue(assertionMessages[0].contains("missing critical fields"))
+    }
+
+    func testConfigurationLoadReturnsEmptyWhenPlistIsMissing() throws {
+        let directory = FileManager.default.temporaryDirectory
+            .appendingPathComponent(UUID().uuidString, isDirectory: true)
+        try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
+        defer { try? FileManager.default.removeItem(at: directory) }
+
+        let bundle = try XCTUnwrap(Bundle(url: directory))
+        var assertionMessages: [String] = []
+
+        let loaded = AppConfig.AppConfiguration.load(
+            bundle: bundle,
+            assertionHandler: { assertionMessages.append($0) }
+        )
+
+        XCTAssertEqual(loaded.baseURL, "")
+        XCTAssertEqual(loaded.apiPrefix, "")
+        XCTAssertEqual(assertionMessages.count, 1)
+        XCTAssertTrue(assertionMessages[0].contains("Failed to load Configuration.plist"))
+    }
+
     func testEmptyConfigurationContainsEmptyValues() {
         let empty = AppConfig.AppConfiguration.empty
 

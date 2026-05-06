@@ -86,6 +86,7 @@ final class PositionsViewTests: XCTestCase {
     }
 
     func testWalletMatchesPolicyMirrorsOrdersView() {
+        XCTAssertTrue(PositionsViewModel.walletMatches(rowWalletId: nil, selected: nil))
         XCTAssertTrue(PositionsViewModel.walletMatches(rowWalletId: nil, selected: "wallet-a"))
         XCTAssertTrue(PositionsViewModel.walletMatches(rowWalletId: "wallet-a", selected: nil))
         XCTAssertTrue(PositionsViewModel.walletMatches(rowWalletId: "wallet-a", selected: "wallet-a"))
