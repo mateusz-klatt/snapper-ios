@@ -286,9 +286,8 @@ of the binary. Two surfaces ship together:
 The full mid-session smooth-switch coordinator (no sign-out
 required, with progress overlay, in-flight REST race guards,
 `DeviceRegistrationService` switch-prep + barrier, old-backend
-device DELETE) is captured in
-`proprietary/plans/plan_2026_05_06_ios_v0_4_0_backend_url_override_v6_descoped.md`
-§9 and only ships if real users complain about the sign-out-required UX.
+device DELETE) is tracked internally and only ships if real users
+complain about the sign-out-required UX.
 
 ## [0.3.0] — 2026-05-05
 
