@@ -198,7 +198,7 @@ struct SettingsView: View {
         isSwitchingBackend = true
         let oldURL = BackendURLStore.shared.currentEffectiveURL()
 
-        Task {
+        Task { @MainActor in
             defer { isSwitchingBackend = false }
 
             // Disconnect WebSocket FIRST so the old socket doesn't

@@ -71,8 +71,9 @@ final class BackendURLStore: @unchecked Sendable {
         return lock.withLock { $0.bundledBaseURL }
     }
 
-    /// Returns ``true`` when a UserDefaults override is active and
-    /// differs from the bundled default; ``false`` otherwise.
+    /// Returns ``true`` when a UserDefaults override is currently
+    /// applied (regardless of whether it happens to equal the
+    /// bundled default); ``false`` when no override is set.
     func hasOverride() -> Bool {
         return lock.withLock { $0.override != nil }
     }
@@ -167,9 +168,12 @@ final class BackendURLStore: @unchecked Sendable {
             let plist = try? PropertyListSerialization.propertyList(from: data, options: [], format: nil),
             let dict = plist as? [String: Any],
             let baseURLString = dict["BaseURL"] as? String,
+            !baseURLString.isEmpty,
             let baseURL = URL(string: baseURLString)
         else {
-            logger.error("Configuration.plist missing or unparsable — falling back to localhost.")
+            let message = "BackendURLStore: Configuration.plist missing or unparsable. App configuration is broken; defaulting to http://localhost:8000 so DEBUG launches surface the failure instead of crashing."
+            logger.error("\(message, privacy: .public)")
+            assertionFailure(message)
             return URL(string: "http://localhost:8000")!
         }
         return baseURL
