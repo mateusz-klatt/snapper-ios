@@ -197,6 +197,92 @@ binders.
   AppState mutation branches against the lock-protected
   `MockAPIClient` + per-test ephemeral `AppState(userDefaults:)`.
 
+## [0.4.0] — 2026-05-06
+
+App Store self-hoster slice — the listing copy ("Self-hosted
+trading copilot — you provide the URL during sign-in") is now true
+of the binary. Two surfaces ship together:
+
+### Added
+
+- **`X-CSRF-Token` header plumbing in `APIClient`** for every
+  non-safe HTTP method (POST / PATCH / DELETE / PUT). Echoes the
+  `csrf_token` cookie value into the header, scoped to the request
+  URL via `HTTPCookieStorage.cookies(for:)` so cross-host cookies
+  don't leak after a backend switch. Empty cookie values skip
+  attachment so the backend can return its native missing-CSRF
+  error rather than receiving a synthetic empty header. Closes a
+  latent production bug where every iOS-driven `/api/devices`
+  mutation silently 403'd because the header was missing.
+- **`BackendURLStore` runtime override** at
+  `Snapper/Config/BackendURLStore.swift`. Final class with
+  `OSAllocatedUnfairLock`-protected mutable state so synchronous
+  reads from `APIClient`'s `@Sendable` URL providers stay actor-
+  free. Static `canonicalize()` validates origin-only URLs (no
+  path / query / fragment / userinfo / userpass / `ws://` /
+  `wss://`); release builds reject `http://` to satisfy ATS.
+  Persisted overrides are revalidated against current policy on
+  every load.
+- **`AppConfig.baseURL`** now resolves through the store; the
+  bundled `Configuration.plist` value patched at Xcode Cloud build
+  time by `ci_post_clone.sh` remains the fallback. Existing
+  string-concatenation call sites in `APIClient` /
+  `WebSocketManager` / `AuthService` keep working unchanged.
+- **`BackendURLEditor`** shared SwiftUI view at
+  `Snapper/Views/Components/BackendURLEditor.swift`. Inline
+  canonicalize preview + Save / Reset / Cancel actions with
+  build-policy-sensitive validation copy.
+- **LoginView Advanced disclosure** — collapsed by default at the
+  bottom of the form. Self-hosters expand, enter their backend
+  URL, Save → store override is persisted directly (no logout —
+  user is unauthenticated). Casual users never see this.
+- **SettingsView Change backend… button** — confirm alert ("you
+  will be signed out") followed by an editor sheet. On Save /
+  Reset the sheet runs a sequenced sign-out:
+  1. `WebSocketManager.disconnect()` — first, so the old socket
+     does not block on server-side logout.
+  2. `await AuthService.logout()` — non-throwing; flips
+     `isAuthenticated = false` at the end.
+  3. Cookie cleanup scoped by old host (including `.domain.`
+     variants) so path-scoped session cookies are dropped.
+  4. `URLCache.shared.removeAllCachedResponses()` + AppState
+     wallet / operator / selectedWallet caches reset.
+  5. `saveOverride()` / `clearOverride()` LAST — any in-flight
+     401 refresh-retry that races still resolves against the OLD
+     URL via the dynamic provider.
+  After step 2 the SnapperApp root conditional swaps to
+  LoginView automatically; the user re-authenticates against the
+  new backend.
+
+### Changed
+
+- ATS posture for the App Store binary stays HTTPS-only with
+  publicly trusted certificates. Self-hosters running plain HTTP
+  or self-signed backends must front their backend with an HTTPS
+  reverse proxy or build from source — the editor's inline
+  validation copy explains this in release builds.
+
+### Tests
+
+- 14 `APIClientCSRFTests` covering the safe / non-safe × cookie
+  present / absent / empty / foreign-host matrix plus an
+  end-to-end `RegisterDeviceCommand` round trip that captures the
+  on-the-wire request to assert the header lands.
+- 22 `BackendURLStoreTests` covering every `canonicalize()`
+  branch + override roundtrip + invalid-on-launch recovery + a
+  cross-`Sendable` read from a detached Task.
+- 7 `BackendURLEditorTests` covering preview reactivity + button
+  enable matrix + build-policy-sensitive validation copy.
+
+### Deferred to v0.5.0+
+
+The full mid-session smooth-switch coordinator (no sign-out
+required, with progress overlay, in-flight REST race guards,
+`DeviceRegistrationService` switch-prep + barrier, old-backend
+device DELETE) is captured in
+`proprietary/plans/plan_2026_05_06_ios_v0_4_0_backend_url_override_v6_descoped.md`
+§9 and only ships if real users complain about the sign-out-required UX.
+
 ## [0.3.0] — 2026-05-05
 
 Release-gate slice — targeted reliability uplift on the notification

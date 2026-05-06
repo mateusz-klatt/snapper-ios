@@ -139,3 +139,42 @@ preserve a single key per presentation:
 
 Tests must verify the key is stable across retries inside one
 presentation and rotates across presentations.
+
+## Backend URL override (v0.4.0)
+
+`BackendURLStore` is the single source of truth for the active
+backend base URL. It is **not** a ViewModel — it sits one layer
+below `AppConfig` and is consumed via:
+
+- `AppConfig.baseURL` (sync, called from `@Sendable` URL providers
+  in `APIClient` / `AuthService` / `WebSocketManager`).
+- `BackendURLStore.shared.currentEffectiveURL()` for code paths
+  that need the resolved `URL` directly.
+
+The store is a `final class @unchecked Sendable` whose mutable
+state lives behind `OSAllocatedUnfairLock`. The lock pattern is
+deliberate: if it were an `actor`, sync `@Sendable` reads from
+`apiBaseURLProvider` would force every URL evaluation through an
+`await`, which the existing service architecture doesn't support
+without invasive refactoring. The lock keeps reads cheap and
+synchronous while still satisfying Swift 6 strict concurrency.
+
+The editor surface lives in two places:
+
+- `LoginView` — collapsed `DisclosureGroup("Advanced (custom
+  backend)")`. Save → `saveOverride` directly. No logout (user is
+  unauthenticated).
+- `SettingsView` — `Change backend…` button → confirm alert →
+  `BackendURLEditor` sheet → on Save: sequenced sign-out
+  documented in `CHANGELOG.md` v0.4.0 entry. The sequence is
+  intentionally simple ("best-effort logout + force relogin")
+  rather than a smooth in-session switch — the smooth switch is
+  deferred to v0.5.0+ pending real-user signal.
+
+Validation rules in `BackendURLStore.canonicalize` are the single
+authority on what is acceptable input; the editor surfaces user-
+facing copy that mirrors them. **Do not** add bypass paths that
+let unsanitized URLs reach the store — every persisted override
+is revalidated against current policy on every load, so a release
+build will silently clear an entry that was acceptable in DEBUG
+but not in Release (e.g. `http://localhost`).
