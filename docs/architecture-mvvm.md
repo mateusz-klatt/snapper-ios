@@ -146,8 +146,12 @@ presentation and rotates across presentations.
 backend base URL. It is **not** a ViewModel — it sits one layer
 below `AppConfig` and is consumed via:
 
-- `AppConfig.baseURL` (sync, called from `@Sendable` URL providers
-  in `APIClient` / `AuthService` / `WebSocketManager`).
+- `AppConfig.baseURL` (sync, called from the URL providers in
+  `APIClient` / `AuthService` / `WebSocketManager`). `APIClient`
+  uses a `@Sendable` provider closure; the `AuthService` and
+  `WebSocketManager` providers are `@MainActor`-bound. All three
+  need a synchronous read path so override resolution never
+  suspends mid-request.
 - `BackendURLStore.shared.currentEffectiveURL()` for code paths
   that need the resolved `URL` directly.
 
