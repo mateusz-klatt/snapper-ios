@@ -108,6 +108,55 @@ final class APIClientNetworkTests: XCTestCase {
         }
     }
 
+    func testFetchOrdersNonHTTPResponseThrowsInvalidResponse() async {
+        let configuration = URLSessionConfiguration.ephemeral
+        configuration.protocolClasses = [APIClientNonHTTPURLProtocol.self]
+        let session = URLSession(configuration: configuration)
+        let client = APIClient(session: session, authService: FakeAuthService())
+        APIClientNonHTTPURLProtocol.responseHandler = { request in
+            let response = URLResponse(
+                url: request.url!,
+                mimeType: AppConfig.ContentType.json,
+                expectedContentLength: 0,
+                textEncodingName: nil
+            )
+            return (response, Data())
+        }
+        defer { APIClientNonHTTPURLProtocol.responseHandler = nil }
+
+        do {
+            _ = try await client.fetchOrders()
+            XCTFail("Expected invalidResponse")
+        } catch let error as APIError {
+            if case .invalidResponse = error {
+            } else {
+                XCTFail("Wrong APIError: \(error)")
+            }
+        } catch {
+            XCTFail("Unexpected error type: \(error)")
+        }
+    }
+
+    func testFetchOrdersInvalidBaseURLThrowsInvalidURL() async {
+        let client = APIClient(
+            session: mockSession,
+            authService: FakeAuthService(),
+            apiBaseURLProvider: { "http://[::1" }
+        )
+
+        do {
+            _ = try await client.fetchOrders()
+            XCTFail("Expected invalidURL")
+        } catch let error as APIError {
+            if case .invalidURL = error {
+            } else {
+                XCTFail("Wrong APIError: \(error)")
+            }
+        } catch {
+            XCTFail("Unexpected error type: \(error)")
+        }
+    }
+
     func testFetchPositionsSuccess() async throws {
 
         MockURLProtocol.requestHandler = { request in
@@ -242,4 +291,37 @@ final class APIClientNetworkTests: XCTestCase {
         let contentType = capturedRequest?.value(forHTTPHeaderField: AppConfig.HTTPHeader.contentType)
         XCTAssertEqual(contentType, AppConfig.ContentType.json)
     }
+}
+
+private final class APIClientNonHTTPURLProtocol: URLProtocol {
+    private static let lock = NSLock()
+    private nonisolated(unsafe) static var handler: ((URLRequest) -> (URLResponse, Data?))?
+
+    static var responseHandler: ((URLRequest) -> (URLResponse, Data?))? {
+        get { lock.withLock { handler } }
+        set { lock.withLock { handler = newValue } }
+    }
+
+    override class func canInit(with request: URLRequest) -> Bool {
+        return true
+    }
+
+    override class func canonicalRequest(for request: URLRequest) -> URLRequest {
+        return request
+    }
+
+    override func startLoading() {
+        guard let handler = Self.responseHandler else {
+            client?.urlProtocol(self, didFailWithError: URLError(.badServerResponse))
+            return
+        }
+        let (response, data) = handler(request)
+        client?.urlProtocol(self, didReceive: response, cacheStoragePolicy: .notAllowed)
+        if let data {
+            client?.urlProtocol(self, didLoad: data)
+        }
+        client?.urlProtocolDidFinishLoading(self)
+    }
+
+    override func stopLoading() {}
 }

@@ -146,6 +146,30 @@ final class NewOrderSheetTests: XCTestCase {
         XCTAssertFalse(NewOrderSheetViewModel.needsStopPrice(orderType: "market"))
     }
 
+    func testDisplayNameMapsOrderTypes() {
+        XCTAssertEqual(NewOrderSheetViewModel.displayName(forOrderType: "limit"), "Limit")
+        XCTAssertEqual(NewOrderSheetViewModel.displayName(forOrderType: "market"), "Market")
+        XCTAssertEqual(NewOrderSheetViewModel.displayName(forOrderType: "stop"), "Stop")
+        XCTAssertEqual(NewOrderSheetViewModel.displayName(forOrderType: "stop_limit"), "Stop limit")
+        XCTAssertEqual(NewOrderSheetViewModel.displayName(forOrderType: "iceberg"), "iceberg")
+    }
+
+    func testParsePositiveHandlesWhitespaceCommaAndInvalidValues() {
+        XCTAssertEqual(NewOrderSheetViewModel.parsePositive(" 1,25 "), 1.25)
+        XCTAssertNil(NewOrderSheetViewModel.parsePositive(""))
+        XCTAssertNil(NewOrderSheetViewModel.parsePositive("0"))
+        XCTAssertNil(NewOrderSheetViewModel.parsePositive("-1"))
+        XCTAssertNil(NewOrderSheetViewModel.parsePositive("abc"))
+    }
+
+    func testParsePositiveIntHandlesWhitespaceAndInvalidValues() {
+        XCTAssertEqual(NewOrderSheetViewModel.parsePositiveInt(" 5 "), 5)
+        XCTAssertNil(NewOrderSheetViewModel.parsePositiveInt(""))
+        XCTAssertNil(NewOrderSheetViewModel.parsePositiveInt("0"))
+        XCTAssertNil(NewOrderSheetViewModel.parsePositiveInt("-1"))
+        XCTAssertNil(NewOrderSheetViewModel.parsePositiveInt("1.5"))
+    }
+
     /// Submit gate: instrument must be tradable, exchange must
     /// match the picker, instruments fetch must be settled,
     /// quantity must parse positive, and any required price field
@@ -187,6 +211,15 @@ final class NewOrderSheetTests: XCTestCase {
     func testCanSubmitBlockedWhileInstrumentsLoading() {
         var gate = Self.baseGate()
         gate.isLoadingInstruments = true
+        XCTAssertFalse(NewOrderSheetViewModel.canSubmit(
+            form: Self.baseForm(),
+            gate: gate
+        ))
+    }
+
+    func testCanSubmitBlockedWhileSubmitting() {
+        var gate = Self.baseGate()
+        gate.isSubmitting = true
         XCTAssertFalse(NewOrderSheetViewModel.canSubmit(
             form: Self.baseForm(),
             gate: gate
@@ -290,6 +323,34 @@ final class NewOrderSheetTests: XCTestCase {
         XCTAssertNil(NewOrderSheetViewModel.buildBody(
             form: form,
             wallet: Self.walletContext(publicId: "wallet-9"),
+            idempotencyKey: Self.testIdempotencyKey
+        ))
+    }
+
+    func testBuildBodyReturnsNilForMissingQuantityOrRequiredPrices() {
+        var missingQuantity = Self.baseForm()
+        missingQuantity.quantityText = ""
+        XCTAssertNil(NewOrderSheetViewModel.buildBody(
+            form: missingQuantity,
+            wallet: Self.walletContext(),
+            idempotencyKey: Self.testIdempotencyKey
+        ))
+
+        var missingLimitPrice = Self.baseForm()
+        missingLimitPrice.orderType = "limit"
+        missingLimitPrice.priceText = ""
+        XCTAssertNil(NewOrderSheetViewModel.buildBody(
+            form: missingLimitPrice,
+            wallet: Self.walletContext(),
+            idempotencyKey: Self.testIdempotencyKey
+        ))
+
+        var missingStopPrice = Self.baseForm()
+        missingStopPrice.orderType = "stop"
+        missingStopPrice.stopPriceText = ""
+        XCTAssertNil(NewOrderSheetViewModel.buildBody(
+            form: missingStopPrice,
+            wallet: Self.walletContext(),
             idempotencyKey: Self.testIdempotencyKey
         ))
     }

@@ -81,7 +81,10 @@ final class NotificationPrefsViewModelTests: XCTestCase {
         walletPublicId: String? = nil,
         operatorPublicId: String? = nil,
         enabled: Bool = true,
-        minPriority: String = "medium"
+        minPriority: String = "medium",
+        quietHoursStartMin: Int? = nil,
+        quietHoursEndMin: Int? = nil,
+        muteUntil: Date? = nil
     ) -> DeviceAlertPrefInfo {
         return DeviceAlertPrefInfo(
             type: "device_alert_pref_info",
@@ -96,9 +99,9 @@ final class NotificationPrefsViewModelTests: XCTestCase {
             walletPublicId: walletPublicId,
             enabled: enabled,
             minPriority: minPriority,
-            quietHoursStartMin: nil,
-            quietHoursEndMin: nil,
-            muteUntil: nil,
+            quietHoursStartMin: quietHoursStartMin,
+            quietHoursEndMin: quietHoursEndMin,
+            muteUntil: muteUntil,
             timezone: "UTC"
         )
     }
@@ -318,12 +321,46 @@ final class NotificationPrefsViewModelTests: XCTestCase {
         XCTAssertEqual(viewModel.devicePrefs.count, 2)
     }
 
+    func testApplySavedPrefReplacesByScopeTupleWhenPublicIdChanges() {
+        let viewModel = makeViewModel()
+        viewModel.devicePrefs = [
+            makeDevicePref(
+                publicId: "old-id",
+                alertType: "margin_warning",
+                walletPublicId: "wallet-1",
+                operatorPublicId: "operator-1",
+                enabled: true
+            )
+        ]
+        let saved = makeDevicePref(
+            publicId: "new-id",
+            alertType: "margin_warning",
+            walletPublicId: "wallet-1",
+            operatorPublicId: "operator-1",
+            enabled: false
+        )
+
+        viewModel.applySavedPref(saved)
+
+        XCTAssertEqual(viewModel.devicePrefs.count, 1)
+        XCTAssertEqual(viewModel.devicePrefs.first?.publicId, "new-id")
+        XCTAssertEqual(viewModel.devicePrefs.first?.enabled, false)
+    }
+
     // MARK: - Static helpers (sanity)
 
     func testDisplayNameMapsKnownAlertTypes() {
         XCTAssertEqual(NotificationPrefsViewModel.displayName(for: "order_fill_full"), "Order filled")
+        XCTAssertEqual(NotificationPrefsViewModel.displayName(for: "order_rejected"), "Order rejected")
+        XCTAssertEqual(NotificationPrefsViewModel.displayName(for: "position_stop_loss_fired"), "Stop-loss fired")
         XCTAssertEqual(NotificationPrefsViewModel.displayName(for: "margin_warning"), "Margin warning")
+        XCTAssertEqual(NotificationPrefsViewModel.displayName(for: "critical_system_error"), "System error")
         XCTAssertEqual(NotificationPrefsViewModel.displayName(for: "unknown"), "unknown")
+    }
+
+    func testPriorityDisplayNameCapitalizesFirstLetter() {
+        XCTAssertEqual(NotificationPrefsViewModel.priorityDisplayName(for: "medium"), "Medium")
+        XCTAssertEqual(NotificationPrefsViewModel.priorityDisplayName(for: ""), "")
     }
 
     func testFormatMinutesHandlesValidAndInvalid() {
@@ -344,6 +381,35 @@ final class NotificationPrefsViewModelTests: XCTestCase {
         XCTAssertTrue(NotificationPrefsViewModel.scopeLabel(for: walletPref).hasPrefix("Wallet "))
         XCTAssertTrue(NotificationPrefsViewModel.scopeLabel(for: opPref).hasPrefix("Operator "))
         XCTAssertEqual(NotificationPrefsViewModel.scopeLabel(for: globalPref), "Device-global")
+    }
+
+    func testSummaryLabelIncludesQuietHoursAndFutureMute() {
+        let pref = makeDevicePref(
+            publicId: "p-1",
+            enabled: false,
+            minPriority: "high",
+            quietHoursStartMin: 60,
+            quietHoursEndMin: 125,
+            muteUntil: Date().addingTimeInterval(3600)
+        )
+
+        let summary = NotificationPrefsViewModel.summaryLabel(for: pref)
+
+        XCTAssertTrue(summary.contains("Muted"))
+        XCTAssertTrue(summary.contains("min high"))
+        XCTAssertTrue(summary.contains("quiet 01:00–02:05"))
+        XCTAssertTrue(summary.contains("muted until"))
+    }
+
+    func testSummaryLabelSkipsExpiredMute() {
+        let pref = makeDevicePref(
+            publicId: "p-1",
+            muteUntil: Date().addingTimeInterval(-3600)
+        )
+
+        let summary = NotificationPrefsViewModel.summaryLabel(for: pref)
+
+        XCTAssertFalse(summary.contains("muted until"))
     }
 }
 

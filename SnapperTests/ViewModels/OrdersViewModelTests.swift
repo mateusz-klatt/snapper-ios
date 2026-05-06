@@ -355,6 +355,22 @@ final class OrdersViewModelTests: XCTestCase {
         XCTAssertEqual(recent.first?.publicId, "ord-59", "Newest first")
     }
 
+    func testFilteredFillsScopesByWallet() {
+        let viewModel = makeViewModel()
+        appState.selectedWalletPublicId = "w-A"
+        viewModel.executions = [
+            makeExecution(publicId: "exec-A", walletPublicId: "w-A"),
+            makeExecution(publicId: "exec-B", walletPublicId: "w-B"),
+            makeExecution(publicId: "exec-system", walletPublicId: nil),
+        ]
+
+        let fills = viewModel.filteredFills
+
+        XCTAssertEqual(fills.count, 2)
+        XCTAssertTrue(fills.contains { $0.publicId == "exec-A" })
+        XCTAssertTrue(fills.contains { $0.publicId == "exec-system" })
+    }
+
     func testDerivedExchangesUniquesAndPreservesOrder() {
         let viewModel = makeViewModel()
         viewModel.orders = [

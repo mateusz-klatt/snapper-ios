@@ -174,11 +174,99 @@ final class PositionsViewTests: XCTestCase {
         XCTAssertNil(command)
     }
 
+    func testMakeReduceCommandReturnsNilWhenInstrumentIdMissingOrEmpty() {
+        let missingInstrument = PositionData(
+            type: "position",
+            sequenceId: 1,
+            publicId: "p-missing-inst",
+            timestamp: Self.baseTimestamp,
+            sessionId: "session-test",
+            topic: nil,
+            instrument: "BTC-USD",
+            instrumentPublicId: nil,
+            exchange: "kraken",
+            mode: nil,
+            quantity: 1.0,
+            averagePrice: 50000.0,
+            unrealizedPnl: 0.0,
+            realizedPnl: 0.0,
+            positionCyclePublicId: nil,
+            walletPublicId: "wallet-a"
+        )
+        let emptyInstrument = PositionData(
+            type: "position",
+            sequenceId: 1,
+            publicId: "p-empty-inst",
+            timestamp: Self.baseTimestamp,
+            sessionId: "session-test",
+            topic: nil,
+            instrument: "BTC-USD",
+            instrumentPublicId: "",
+            exchange: "kraken",
+            mode: nil,
+            quantity: 1.0,
+            averagePrice: 50000.0,
+            unrealizedPnl: 0.0,
+            realizedPnl: 0.0,
+            positionCyclePublicId: nil,
+            walletPublicId: "wallet-a"
+        )
+
+        XCTAssertNil(PositionsViewModel.makeReduceCommand(
+            position: missingInstrument,
+            quantity: 1.0,
+            provenance: Self.fixedProvenance
+        ))
+        XCTAssertNil(PositionsViewModel.makeReduceCommand(
+            position: emptyInstrument,
+            quantity: 1.0,
+            provenance: Self.fixedProvenance
+        ))
+    }
+
     func testCanSubmitReduceRequiresBothIds() {
         let ok = makePosition(publicId: "p-ok", walletPublicId: "wallet-a", quantity: 1.0)
         let missingWallet = makePosition(publicId: "p-mw", walletPublicId: nil, quantity: 1.0)
+        let emptyWallet = PositionData(
+            type: "position",
+            sequenceId: 1,
+            publicId: "p-empty-wallet",
+            timestamp: Self.baseTimestamp,
+            sessionId: "session-test",
+            topic: nil,
+            instrument: "BTC-USD",
+            instrumentPublicId: "inst-1",
+            exchange: "kraken",
+            mode: nil,
+            quantity: 1.0,
+            averagePrice: 50000.0,
+            unrealizedPnl: 0.0,
+            realizedPnl: 0.0,
+            positionCyclePublicId: nil,
+            walletPublicId: ""
+        )
+        let missingInstrument = PositionData(
+            type: "position",
+            sequenceId: 1,
+            publicId: "p-missing-inst",
+            timestamp: Self.baseTimestamp,
+            sessionId: "session-test",
+            topic: nil,
+            instrument: "BTC-USD",
+            instrumentPublicId: nil,
+            exchange: "kraken",
+            mode: nil,
+            quantity: 1.0,
+            averagePrice: 50000.0,
+            unrealizedPnl: 0.0,
+            realizedPnl: 0.0,
+            positionCyclePublicId: nil,
+            walletPublicId: "wallet-a"
+        )
         XCTAssertTrue(PositionsViewModel.canSubmitReduce(position: ok))
         XCTAssertFalse(PositionsViewModel.canSubmitReduce(position: missingWallet))
+        XCTAssertFalse(PositionsViewModel.canSubmitReduce(position: emptyWallet))
+        XCTAssertFalse(PositionsViewModel.canSubmitReduce(position: missingInstrument))
     }
 
     /// Surface-load-errors branch (PR #2): a refresh failure on top

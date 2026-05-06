@@ -107,7 +107,6 @@ final class WebSocketManagerEnvelopeTests: XCTestCase {
     func testAuthenticateFrameStampsProvenanceViaSendEnvelope() async {
         let (manager, fakeTask) = makeManager()
         manager.connect()
-        manager.handleRawMessage(authCompleteFrame(sessionId: "s-auth"))
         manager.sendEnvelope(["type": "authenticate", "ws_token": "test-token"], counter: .control)
         manager.sendEnvelope(["type": "reauth", "ws_token": "renewed-token"], counter: .control)
         await drainSendTasks()

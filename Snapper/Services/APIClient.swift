@@ -5,10 +5,16 @@ final class APIClient: Sendable, APIClientProtocol {
 
     private let session: URLSession
     private let authService: AuthRefreshing
+    private let apiBaseURLProvider: @Sendable () -> String
 
-    init(session: URLSession, authService: AuthRefreshing) {
+    init(
+        session: URLSession,
+        authService: AuthRefreshing,
+        apiBaseURLProvider: @Sendable @escaping () -> String = { AppConfig.apiBaseURL }
+    ) {
         self.session = session
         self.authService = authService
+        self.apiBaseURLProvider = apiBaseURLProvider
     }
 
     /// Percent-encode a value for safe inclusion as a URL path segment.
@@ -18,24 +24,34 @@ final class APIClient: Sendable, APIClientProtocol {
     /// malformed URLs. Falls back to the raw segment only on the
     /// (theoretical) case where the encoder fails.
     private static func encodePathSegment(_ value: String) -> String {
-        return value.addingPercentEncoding(withAllowedCharacters: .urlPathAllowed) ?? value
+        return value.addingPercentEncoding(withAllowedCharacters: rfc3986Unreserved) ?? value
     }
 
     /// Build the trailing query suffix from name/value pairs.
     ///
-    /// Uses ``URLComponents`` so reserved characters in values (e.g.
-    /// ``+``, ``=``, ``/`` in opaque server-emitted cursors) get the
-    /// proper percent-encoding that ``URLQueryItem`` performs. Returns
-    /// the empty string when no items are supplied so callers can
-    /// concatenate unconditionally.
+    /// Encodes query names and values against the RFC 3986 unreserved
+    /// set so reserved characters in values (e.g. ``+``, ``=``, ``/``
+    /// in opaque server-emitted cursors) are always percent-escaped.
+    /// Returns the empty string when no items are supplied so callers
+    /// can concatenate unconditionally.
     private static func querySuffix(_ items: [URLQueryItem]) -> String {
         guard !items.isEmpty else {
             return ""
         }
-        var components = URLComponents()
-        components.queryItems = items
-        return components.percentEncodedQuery.map { "?\($0)" } ?? ""
+        let query = items.map { item in
+            let name = item.name.addingPercentEncoding(withAllowedCharacters: rfc3986Unreserved) ?? item.name
+            guard let value = item.value else {
+                return name
+            }
+            let encodedValue = value.addingPercentEncoding(withAllowedCharacters: rfc3986Unreserved) ?? value
+            return "\(name)=\(encodedValue)"
+        }.joined(separator: "&")
+        return "?\(query)"
     }
+
+    private static let rfc3986Unreserved = CharacterSet(
+        charactersIn: "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-._~"
+    )
 
     private func request<T: Decodable>(
         endpoint: String,
@@ -43,7 +59,7 @@ final class APIClient: Sendable, APIClientProtocol {
         body: Encodable? = nil,
         isRetry: Bool = false
     ) async throws -> T {
-        guard let url = URL(string: "\(AppConfig.apiBaseURL)\(endpoint)") else {
+        guard let url = URL(string: "\(apiBaseURLProvider())\(endpoint)") else {
             throw APIError.invalidURL
         }
 

@@ -149,6 +149,13 @@ final class OrdersViewTests: XCTestCase {
         XCTAssertEqual(unscoped.count, 3)
     }
 
+    func testWalletMatchesCoversScopedUnscopedAndLegacyRows() {
+        XCTAssertTrue(OrdersViewModel.walletMatches(rowWalletId: "w-a", selected: nil))
+        XCTAssertTrue(OrdersViewModel.walletMatches(rowWalletId: nil, selected: "w-a"))
+        XCTAssertTrue(OrdersViewModel.walletMatches(rowWalletId: "w-a", selected: "w-a"))
+        XCTAssertFalse(OrdersViewModel.walletMatches(rowWalletId: "w-b", selected: "w-a"))
+    }
+
     /// Surface-load-errors branch (PR #2): the orders list prepends
     /// a "Couldn't load" Section when the most recent fetch failed.
     func testShouldShowLoadErrorWhenErrorMessageSet() {

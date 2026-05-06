@@ -14,12 +14,17 @@ import Foundation
 /// once a frame lands in the queue.
 final class FakeWebSocketTask: @unchecked Sendable, WebSocketTaskProtocol {
     private let lock = NSLock()
+    private let sendError: Error?
     private var inboundQueue: [URLSessionWebSocketTask.Message] = []
     private var waiter: CheckedContinuation<URLSessionWebSocketTask.Message, Error>?
     private(set) var sentMessages: [URLSessionWebSocketTask.Message] = []
     private(set) var resumeCount = 0
     private(set) var cancelCount = 0
     private(set) var lastCancelCode: URLSessionWebSocketTask.CloseCode?
+
+    init(sendError: Error? = nil) {
+        self.sendError = sendError
+    }
 
     func pumpInbound(_ msg: URLSessionWebSocketTask.Message) {
         let resumed: CheckedContinuation<URLSessionWebSocketTask.Message, Error>? = lock.withLock {
@@ -43,6 +48,9 @@ final class FakeWebSocketTask: @unchecked Sendable, WebSocketTaskProtocol {
     }
 
     func send(_ message: URLSessionWebSocketTask.Message) async throws {
+        if let sendError {
+            throw sendError
+        }
         lock.withLock { sentMessages.append(message) }
     }
 

@@ -137,6 +137,84 @@ final class AuthServiceNetworkTests: XCTestCase {
         }
     }
 
+    func testLoginFailureWithoutDetailFallsBackToGenericMessage() async throws {
+        MockURLProtocol.requestHandler = { request in
+            let response = HTTPURLResponse(
+                url: request.url!,
+                statusCode: 403,
+                httpVersion: nil,
+                headerFields: [AppConfig.HTTPHeader.contentType: AppConfig.ContentType.json]
+            )!
+            let data = try JSONSerialization.data(withJSONObject: ["unexpected": "shape"])
+            return (response, data)
+        }
+
+        await authService.login(username: "testuser", password: "testpass")
+
+        XCTAssertFalse(authService.isAuthenticated)
+        XCTAssertEqual(authService.errorMessage, "Login failed")
+    }
+
+    func testLoginNonHTTPResponseSetsInvalidResponse() async {
+        let configuration = URLSessionConfiguration.ephemeral
+        configuration.protocolClasses = [NonHTTPURLProtocol.self]
+        let service = AuthService(session: URLSession(configuration: configuration))
+
+        await service.login(username: "testuser", password: "testpass")
+
+        XCTAssertFalse(service.isAuthenticated)
+        XCTAssertEqual(service.errorMessage, "Invalid response")
+    }
+
+    func testLoginInvalidBaseURLSetsInvalidURL() async {
+        let service = AuthService(
+            session: mockSession,
+            apiBaseURLProvider: { "http://[::1" }
+        )
+
+        await service.login(username: "testuser", password: "testpass")
+
+        XCTAssertFalse(service.isAuthenticated)
+        XCTAssertEqual(service.errorMessage, "Invalid URL")
+    }
+
+    func testLogoutNetworkFailureStillClearsLocalState() async {
+        MockURLProtocol.requestHandler = { _ in
+            throw MockURLProtocol.networkError()
+        }
+
+        await authService.logout()
+
+        XCTAssertFalse(authService.isAuthenticated)
+        XCTAssertNil(authService.currentUser)
+        XCTAssertNil(authService.getWsToken())
+    }
+
+    func testLogoutInvalidBaseURLStillClearsLocalState() async {
+        let service = AuthService(
+            session: mockSession,
+            apiBaseURLProvider: { "http://[::1" }
+        )
+
+        await service.logout()
+
+        XCTAssertFalse(service.isAuthenticated)
+        XCTAssertNil(service.currentUser)
+        XCTAssertNil(service.getWsToken())
+    }
+
+    func testFetchFreshWsTokenInvalidBaseURLReturnsNil() async {
+        let service = AuthService(
+            session: mockSession,
+            apiBaseURLProvider: { "http://[::1" }
+        )
+
+        let token = await service.fetchFreshWsToken()
+
+        XCTAssertNil(token)
+        XCTAssertNil(service.getWsToken())
+    }
+
     /// Regression guard for the envelope/provenance contract enforced
     /// by ``snapper.api.schemas.base.StrictDataSchema``: outbound
     /// login requests must wrap credentials inside ``payload`` and
@@ -388,6 +466,24 @@ final class AuthServiceNetworkTests: XCTestCase {
         )
     }
 
+    func testFetchFreshWsTokenNonSuccessReturnsNil() async throws {
+        MockURLProtocol.requestHandler = { request in
+            let response = HTTPURLResponse(
+                url: request.url!,
+                statusCode: 503,
+                httpVersion: nil,
+                headerFields: [AppConfig.HTTPHeader.contentType: AppConfig.ContentType.json]
+            )!
+            let data = try JSONSerialization.data(withJSONObject: ["detail": "offline"])
+            return (response, data)
+        }
+
+        let token = await authService.fetchFreshWsToken()
+
+        XCTAssertNil(token)
+        XCTAssertNil(authService.getWsToken())
+    }
+
     private static func readBody(from request: URLRequest) -> Data? {
         if let body = request.httpBody {
             return body
@@ -406,6 +502,29 @@ final class AuthServiceNetworkTests: XCTestCase {
         }
         return data
     }
+}
+
+private final class NonHTTPURLProtocol: URLProtocol {
+    override class func canInit(with request: URLRequest) -> Bool {
+        return true
+    }
+
+    override class func canonicalRequest(for request: URLRequest) -> URLRequest {
+        return request
+    }
+
+    override func startLoading() {
+        let response = URLResponse(
+            url: request.url!,
+            mimeType: nil,
+            expectedContentLength: 0,
+            textEncodingName: nil
+        )
+        client?.urlProtocol(self, didReceive: response, cacheStoragePolicy: .notAllowed)
+        client?.urlProtocolDidFinishLoading(self)
+    }
+
+    override func stopLoading() {}
 }
 
 /// Captures bytes from inside the URLProtocol handler closure into a
