@@ -76,6 +76,7 @@ struct LoginView: View {
 
                             BackendURLEditor(
                                 draft: $backendDraft,
+                                allowReset: BackendURLStore.shared.hasOverride(),
                                 onSave: { url in
                                     BackendURLStore.shared.saveOverride(url)
                                     displayedBackendURL = AppConfig.baseURL

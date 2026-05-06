@@ -113,6 +113,9 @@ final class BackendURLStoreTests: XCTestCase {
         #if DEBUG
         let url = BackendURLStore.canonicalize("http://127.0.0.1:8000")
         XCTAssertEqual(url?.absoluteString, "http://127.0.0.1:8000")
+        #else
+        let url = BackendURLStore.canonicalize("http://127.0.0.1:8000")
+        XCTAssertNil(url, "Release build must reject http:// (App Store ATS)")
         #endif
     }
 

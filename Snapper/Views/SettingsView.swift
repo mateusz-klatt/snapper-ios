@@ -199,6 +199,8 @@ struct SettingsView: View {
         let oldURL = BackendURLStore.shared.currentEffectiveURL()
 
         Task {
+            defer { isSwitchingBackend = false }
+
             // Disconnect WebSocket FIRST so the old socket doesn't
             // hang while server-side logout is awaiting a response.
             webSocketManager.disconnect()
@@ -235,7 +237,6 @@ struct SettingsView: View {
             }
 
             displayedBackendURL = AppConfig.baseURL
-            isSwitchingBackend = false
         }
     }
 
