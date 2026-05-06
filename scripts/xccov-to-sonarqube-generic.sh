@@ -36,11 +36,11 @@ function convert_xccov_to_xml {
       gsub(/&/, "\\&amp;", path)
       print "  <file path=\"" path "\">"
       current_file = path
-      in_branch_block = 0
+      in_subrange_block = 0
       next
     }
 
-    # Match branch info opening: "  NN: X ["
+    # Match subrange info opening: "  NN: X ["
     /^ *[0-9]+: [0-9]+ \[$/ {
       # Parse line number (field 1 without colon)
       line_num = $1
@@ -50,7 +50,7 @@ function convert_xccov_to_xml {
       
       current_line = line_num
       current_exec = exec_count
-      in_branch_block = 1
+      in_subrange_block = 1
       next
     }
 
@@ -59,17 +59,17 @@ function convert_xccov_to_xml {
       next
     }
 
-    # Match branch block closing: "]"
+    # Match subrange block closing: "]"
     /^\]$/ {
-      if (in_branch_block) {
+      if (in_subrange_block) {
         covered = (current_exec > 0) ? "true" : "false"
         printf "    <lineToCover lineNumber=\"%s\" covered=\"%s\"/>\n", current_line, covered
-        in_branch_block = 0
+        in_subrange_block = 0
       }
       next
     }
 
-    # Match uncovered line: "  NN: 0" (no branch info)
+    # Match uncovered line: "  NN: 0" (no subrange info)
     /^ *[0-9]+: 0$/ {
       line_num = $1
       sub(/:$/, "", line_num)
@@ -77,7 +77,7 @@ function convert_xccov_to_xml {
       next
     }
 
-    # Match covered line without branch info: "  NN: X" where X > 0
+    # Match covered line without subrange info: "  NN: X" where X > 0
     /^ *[0-9]+: [1-9][0-9]*$/ {
       line_num = $1
       sub(/:$/, "", line_num)

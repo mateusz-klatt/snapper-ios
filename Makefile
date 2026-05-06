@@ -9,7 +9,7 @@ COVERAGE_RESULT_BUNDLE = build/test-results.xcresult
 COVERAGE_REPORT = build/sonarqube-generic-coverage.xml
 # xccov-to-Sonar converter — verified at build time so a tampered script
 # cannot change coverage semantics in CI.
-XCCOV_SCRIPT_SHA256 = bd024041f4aaa33a511a72f3226b1e36cf677b1d6161e2295986d7fc19d2acca
+XCCOV_SCRIPT_SHA256 = 4b6369e6e1255856081c92b21c8fcf2a6d19cb5ac98efb3fd074856ce281af09
 
 setup:
 	@command -v xcodegen >/dev/null 2>&1 || (echo "xcodegen not installed; run: brew install xcodegen" && exit 1)

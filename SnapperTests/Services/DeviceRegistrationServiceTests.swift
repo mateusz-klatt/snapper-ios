@@ -435,6 +435,7 @@ private actor ManualSleeper: Sleeper {
     private var isSleeping = false
 
     func sleep(seconds: TimeInterval) async throws {
+        precondition(sleepContinuation == nil, "ManualSleeper only supports one active sleep")
         isSleeping = true
         waitingContinuation?.resume()
         waitingContinuation = nil
@@ -448,12 +449,18 @@ private actor ManualSleeper: Sleeper {
             return
         }
         await withCheckedContinuation { continuation in
+            precondition(waitingContinuation == nil, "ManualSleeper only supports one pending wait")
             waitingContinuation = continuation
         }
     }
 
     func resume() {
-        sleepContinuation?.resume()
+        guard isSleeping else {
+            return
+        }
+        isSleeping = false
+        let continuation = sleepContinuation
         sleepContinuation = nil
+        continuation?.resume()
     }
 }

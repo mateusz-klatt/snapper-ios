@@ -168,7 +168,8 @@ enum AppConfig {
                 let plist = try? PropertyListSerialization.propertyList(from: data, options: [], format: nil),
                 let dict = plist as? [String: Any]
             else {
-                let message = "Failed to load Configuration.plist from main bundle. Verify the file is included in target resources and contains valid plist data."
+                let message = "Failed to load Configuration.plist from bundle at \(bundle.bundleURL.path). " +
+                    "Verify the file is included in target resources and contains valid plist data."
                 AppConfig.logger.error("\(message, privacy: .public)")
                 assertionHandler(message)
                 return empty
