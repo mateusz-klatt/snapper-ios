@@ -17,6 +17,7 @@ final class FakeWebSocketTask: @unchecked Sendable, WebSocketTaskProtocol {
     private let sendError: Error?
     private var inboundQueue: [URLSessionWebSocketTask.Message] = []
     private var waiter: CheckedContinuation<URLSessionWebSocketTask.Message, Error>?
+    private var receivePendingWaiter: CheckedContinuation<Void, Never>?
     private(set) var sentMessages: [URLSessionWebSocketTask.Message] = []
     private(set) var resumeCount = 0
     private(set) var cancelCount = 0
@@ -47,6 +48,22 @@ final class FakeWebSocketTask: @unchecked Sendable, WebSocketTaskProtocol {
         resumed?.resume(throwing: error)
     }
 
+    func waitUntilReceivePending() async {
+        await withCheckedContinuation { continuation in
+            let resumeImmediately = lock.withLock {
+                if waiter != nil {
+                    return true
+                }
+                precondition(receivePendingWaiter == nil, "FakeWebSocketTask only supports one pending receive waiter")
+                receivePendingWaiter = continuation
+                return false
+            }
+            if resumeImmediately {
+                continuation.resume()
+            }
+        }
+    }
+
     func send(_ message: URLSessionWebSocketTask.Message) async throws {
         if let sendError {
             throw sendError
@@ -56,6 +73,7 @@ final class FakeWebSocketTask: @unchecked Sendable, WebSocketTaskProtocol {
 
     func receive() async throws -> URLSessionWebSocketTask.Message {
         return try await withCheckedThrowingContinuation { continuation in
+            var receiveWaiterToResume: CheckedContinuation<Void, Never>?
             // Single atomic critical section: either consume a queued
             // message OR install the waiter. Splitting the lock would leave
             // a gap where `pumpInbound` enqueues after our empty-check but
@@ -66,8 +84,11 @@ final class FakeWebSocketTask: @unchecked Sendable, WebSocketTaskProtocol {
                     return inboundQueue.removeFirst()
                 }
                 waiter = continuation
+                receiveWaiterToResume = receivePendingWaiter
+                receivePendingWaiter = nil
                 return nil
             }
+            receiveWaiterToResume?.resume()
             if let msg = immediate {
                 continuation.resume(returning: msg)
             }

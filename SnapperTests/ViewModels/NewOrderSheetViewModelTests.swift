@@ -261,6 +261,18 @@ final class NewOrderSheetViewModelTests: XCTestCase {
         XCTAssertNil(viewModel.selectedInstrument)
     }
 
+    func testLoadInstrumentsKeepsSelectedInstrumentPresentInFetch() async {
+        let viewModel = makeViewModel()
+        let current = makeInstrument(instrumentPublicId: "current")
+        viewModel.selectedInstrument = current
+        mockAPI.fetchInstrumentsHandler = { _ in [current] }
+
+        await viewModel.loadInstruments()
+
+        XCTAssertEqual(viewModel.selectedInstrument?.instrumentPublicId, "current")
+        XCTAssertEqual(viewModel.availableInstruments.first?.instrumentPublicId, "current")
+    }
+
     /// When the previously-selected instrument was for a different
     /// exchange than the one being loaded, the VM must clear it
     /// synchronously (BEFORE the await) so the user cannot tap

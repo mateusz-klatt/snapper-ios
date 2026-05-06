@@ -380,6 +380,30 @@ final class DeviceRegistrationServiceTests: XCTestCase {
         let requestedIntervals = await sleeper.requestedIntervals
         XCTAssertEqual(requestedIntervals, [])
     }
+
+    func testScheduledRetryIsNoOpAfterLogoutClearsToken() async {
+        let sleeper = ManualSleeper()
+        let service = DeviceRegistrationService(apiClient: apiClient, sleeper: sleeper)
+        let token = Data([0x33])
+        var attempts = 0
+
+        MockURLProtocol.requestHandler = { _ in
+            attempts += 1
+            return MockURLProtocol.errorResponse(statusCode: 500, message: "temporary")
+        }
+
+        await service.onLogin()
+        await service.onTokenReceived(token)
+        await sleeper.waitUntilSleeping()
+
+        await service.onLogout()
+        await sleeper.resume()
+        await drainAsyncWork()
+
+        XCTAssertEqual(attempts, 1)
+        let status = await service.currentStatus()
+        XCTAssertEqual(status, .idle)
+    }
 }
 
 private nonisolated(unsafe) let _deviceResponseJSON: [String: Any] = [
@@ -404,3 +428,39 @@ private nonisolated(unsafe) let _deviceResponseJSON: [String: Any] = [
         "last_seen_at": nil,
     ],
 ]
+
+private actor ManualSleeper: Sleeper {
+    private var sleepContinuation: CheckedContinuation<Void, Never>?
+    private var waitingContinuation: CheckedContinuation<Void, Never>?
+    private var isSleeping = false
+
+    func sleep(seconds: TimeInterval) async throws {
+        precondition(sleepContinuation == nil, "ManualSleeper only supports one active sleep")
+        isSleeping = true
+        waitingContinuation?.resume()
+        waitingContinuation = nil
+        await withCheckedContinuation { continuation in
+            sleepContinuation = continuation
+        }
+    }
+
+    func waitUntilSleeping() async {
+        if isSleeping {
+            return
+        }
+        await withCheckedContinuation { continuation in
+            precondition(waitingContinuation == nil, "ManualSleeper only supports one pending wait")
+            waitingContinuation = continuation
+        }
+    }
+
+    func resume() {
+        guard isSleeping else {
+            return
+        }
+        isSleeping = false
+        let continuation = sleepContinuation
+        sleepContinuation = nil
+        continuation?.resume()
+    }
+}

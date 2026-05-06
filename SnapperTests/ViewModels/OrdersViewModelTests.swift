@@ -413,4 +413,16 @@ final class OrdersViewModelTests: XCTestCase {
         XCTAssertEqual(viewModel.resolvedWallet?.publicId, "w-1")
         XCTAssertEqual(viewModel.resolvedWallet?.label, "matched")
     }
+
+    func testResolvedWalletMatchesWhenSelectedWalletIsFirstInCache() {
+        let viewModel = makeViewModel()
+        appState.selectedWalletPublicId = "w-1"
+        appState.availableWallets = [
+            makeWallet(publicId: "w-1", label: "first"),
+            makeWallet(publicId: "w-2"),
+        ]
+
+        XCTAssertEqual(viewModel.resolvedWallet?.publicId, "w-1")
+        XCTAssertEqual(viewModel.resolvedWallet?.label, "first")
+    }
 }

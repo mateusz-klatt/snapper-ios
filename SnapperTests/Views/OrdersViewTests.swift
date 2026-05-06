@@ -150,6 +150,7 @@ final class OrdersViewTests: XCTestCase {
     }
 
     func testWalletMatchesCoversScopedUnscopedAndLegacyRows() {
+        XCTAssertTrue(OrdersViewModel.walletMatches(rowWalletId: nil, selected: nil))
         XCTAssertTrue(OrdersViewModel.walletMatches(rowWalletId: "w-a", selected: nil))
         XCTAssertTrue(OrdersViewModel.walletMatches(rowWalletId: nil, selected: "w-a"))
         XCTAssertTrue(OrdersViewModel.walletMatches(rowWalletId: "w-a", selected: "w-a"))

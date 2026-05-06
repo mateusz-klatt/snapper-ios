@@ -262,6 +262,15 @@ final class WebSocketManagerTests: XCTestCase {
         for _ in 0..<10 { await Task.yield() }
     }
 
+    private func waitUntil(_ condition: @MainActor () -> Bool) async {
+        for _ in 0..<100 {
+            if condition() {
+                return
+            }
+            try? await Task.sleep(nanoseconds: 1_000_000)
+        }
+    }
+
     func testSubscribePendsWhileConnectingReplaysOnConnect() async {
         let (manager, _, fakeTask, _) = makeManager()
         manager.connect()
@@ -485,19 +494,24 @@ final class WebSocketManagerTests: XCTestCase {
         let manager = WebSocketManager(
             authService: FakeAuthService(nextToken: "t"),
             taskFactory: FakeWebSocketTaskFactory(tasks: [task1, task2]),
-            sleeper: FakeSleeper()
+            sleeper: FakeSleeper(),
+            reconnectScheduler: { _, _ in }
         )
 
         manager.connect()
         task1.pumpInbound(frame(["type": "auth_expired"]))
-        await drainSendTasks()
+        await waitUntil {
+            manager.connectionState == .disconnected && manager.reconnectAttempts == 1
+        }
         XCTAssertEqual(manager.connectionState, .disconnected)
         XCTAssertEqual(manager.reconnectAttempts, 1)
 
         manager.connect()
-        for _ in 0..<10 { await Task.yield() }
+        await task2.waitUntilReceivePending()
         task2.pumpError(URLError(.networkConnectionLost))
-        await drainSendTasks()
+        await waitUntil {
+            manager.connectionState == .disconnected && manager.reconnectAttempts == 2
+        }
         XCTAssertEqual(manager.connectionState, .disconnected)
         XCTAssertEqual(manager.reconnectAttempts, 2)
     }

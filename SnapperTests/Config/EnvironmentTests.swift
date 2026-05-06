@@ -169,6 +169,53 @@ final class EnvironmentTests: XCTestCase {
         XCTAssertEqual(missingBaseURL.apiPrefix, "/v1")
     }
 
+    func testConfigurationParsingReportsMissingCriticalFieldsWhenAssertionsEnabled() {
+        var assertionMessages: [String] = []
+        let parsed = AppConfig.AppConfiguration.parse([
+            "BaseURL": "",
+            "APIPrefix": "",
+            "WSPath": "/stream"
+        ], assertionHandler: { assertionMessages.append($0) })
+
+        XCTAssertEqual(parsed.baseURL, "")
+        XCTAssertEqual(parsed.apiPrefix, "")
+        XCTAssertEqual(assertionMessages.count, 1)
+        XCTAssertTrue(assertionMessages[0].contains("missing critical fields"))
+    }
+
+    func testConfigurationLoadReturnsEmptyWhenPlistIsMissing() throws {
+        let bundleURL = FileManager.default.temporaryDirectory
+            .appendingPathComponent(UUID().uuidString)
+            .appendingPathExtension("bundle")
+        try FileManager.default.createDirectory(at: bundleURL, withIntermediateDirectories: true)
+        try Data("""
+        <?xml version="1.0" encoding="UTF-8"?>
+        <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+        <plist version="1.0">
+        <dict>
+            <key>CFBundleIdentifier</key>
+            <string>com.snapper.tests.empty</string>
+            <key>CFBundlePackageType</key>
+            <string>BNDL</string>
+        </dict>
+        </plist>
+        """.utf8).write(to: bundleURL.appendingPathComponent("Info.plist"))
+        defer { try? FileManager.default.removeItem(at: bundleURL) }
+
+        let bundle = try XCTUnwrap(Bundle(url: bundleURL))
+        var assertionMessages: [String] = []
+
+        let loaded = AppConfig.AppConfiguration.load(
+            bundle: bundle,
+            assertionHandler: { assertionMessages.append($0) }
+        )
+
+        XCTAssertEqual(loaded.baseURL, "")
+        XCTAssertEqual(loaded.apiPrefix, "")
+        XCTAssertEqual(assertionMessages.count, 1)
+        XCTAssertTrue(assertionMessages[0].contains("Failed to load Configuration.plist"))
+    }
+
     func testEmptyConfigurationContainsEmptyValues() {
         let empty = AppConfig.AppConfiguration.empty
 

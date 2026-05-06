@@ -7,9 +7,9 @@ SIMULATOR_OS ?= 26.2
 DESTINATION = platform=iOS Simulator,name=$(SIMULATOR),OS=$(SIMULATOR_OS)
 COVERAGE_RESULT_BUNDLE = build/test-results.xcresult
 COVERAGE_REPORT = build/sonarqube-generic-coverage.xml
-# Vendored from SonarSource/sonar-scanning-examples@bcf43b3b — verified at
-# build time so a tampered script can't run against TestFlight artifacts.
-XCCOV_SCRIPT_SHA256 = eccc3e2f3b7a67dab74fdc4b2de9a888a9f86e0ede2856d7d55de095ba488d63
+# xccov-to-Sonar converter — verified at build time so a tampered script
+# cannot change coverage semantics in CI.
+XCCOV_SCRIPT_SHA256 = 4b6369e6e1255856081c92b21c8fcf2a6d19cb5ac98efb3fd074856ce281af09
 
 setup:
 	@command -v xcodegen >/dev/null 2>&1 || (echo "xcodegen not installed; run: brew install xcodegen" && exit 1)

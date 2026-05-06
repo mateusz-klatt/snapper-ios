@@ -158,23 +158,31 @@ enum AppConfig {
             let trailingStops: String
         }
 
-        static func load() -> AppConfiguration {
+        static func load(
+            bundle: Bundle = .main,
+            assertionHandler: (String) -> Void = { assertionFailure($0) }
+        ) -> AppConfiguration {
             guard
-                let url = Bundle.main.url(forResource: "Configuration", withExtension: "plist"),
+                let url = bundle.url(forResource: "Configuration", withExtension: "plist"),
                 let data = try? Data(contentsOf: url),
                 let plist = try? PropertyListSerialization.propertyList(from: data, options: [], format: nil),
                 let dict = plist as? [String: Any]
             else {
-                let message = "Failed to load Configuration.plist from main bundle. Verify the file is included in target resources and contains valid plist data."
+                let message = "Failed to load Configuration.plist from bundle at \(bundle.bundleURL.path). " +
+                    "Verify the file is included in target resources and contains valid plist data."
                 AppConfig.logger.error("\(message, privacy: .public)")
-                assertionFailure(message)
+                assertionHandler(message)
                 return empty
             }
 
-            return parse(dict)
+            return parse(dict, assertionHandler: assertionHandler)
         }
 
-        static func parse(_ dict: [String: Any], assertOnMissingCriticalFields: Bool = true) -> AppConfiguration {
+        static func parse(
+            _ dict: [String: Any],
+            assertOnMissingCriticalFields: Bool = true,
+            assertionHandler: (String) -> Void = { assertionFailure($0) }
+        ) -> AppConfiguration {
             let endpoints = dict["Endpoints"] as? [String: Any] ?? [:]
             let config = AppConfiguration(
                 baseURL: dict["BaseURL"] as? String ?? "",
@@ -206,7 +214,7 @@ enum AppConfig {
                 let message = "Configuration.plist missing critical fields. BaseURL=\"\(config.baseURL)\" APIPrefix=\"\(config.apiPrefix)\". Check ios/Snapper/Config/Configuration.plist."
                 AppConfig.logger.error("\(message, privacy: .public)")
                 if assertOnMissingCriticalFields {
-                    assertionFailure(message)
+                    assertionHandler(message)
                 }
             }
 

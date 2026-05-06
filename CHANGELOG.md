@@ -37,6 +37,12 @@ binders.
 
 ### Changed
 
+- **Sonar coverage export now reports xccov line coverage only.**
+  `xccov` archive subrange tuples are execution-count metadata, not
+  branch counters, so the converter no longer maps them to Sonar
+  `branchesToCover` / `coveredBranches` fields. This removes false
+  uncovered-condition findings for Swift switches, guards, and
+  closures while preserving executable-line coverage.
 - **`LoginViewModel` migrated from `ObservableObject` to
   `@Observable`** (iOS 17+ Observation framework). Eliminates the
   Combine `@Published` / `assign(to:)` plumbing; `errorMessage` and

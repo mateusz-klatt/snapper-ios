@@ -1,21 +1,22 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# Convert xccov output to SonarQube Generic Coverage format
-# Supports both line coverage and branch coverage
+# Convert xccov output to SonarQube Generic Coverage format.
 #
 # xccov output format:
 #   /path/to/file.swift:
 #   10: *              <- non-executable line
 #   11: 0              <- uncovered line
 #   12: 5              <- covered line (executed 5 times)
-#   13: 2 [            <- covered line with branch info
-#   (33, 9, 0)         <- branch at column 33: 9 hits on one path, 0 on other
+#   13: 2 [            <- covered line with subrange info
+#   (33, 9, 0)         <- subrange at column 33: execution count 9, length 0
 #   ]
 #
-# Branch tuple format: (column, count1, count2)
-#   - count1 > 0 means first branch path was executed
-#   - count2 > 0 means second branch path was executed
+# xccov archive tuples are subrange execution counts, not branch counters.
+# Sonar's Generic Coverage branch fields require true branch totals, so this
+# converter intentionally exports line coverage only. Treating subrange length
+# as a second branch count creates false "uncovered conditions" for Swift
+# switches, guards, and closures.
 
 function convert_xccov_to_xml {
   awk '
@@ -35,11 +36,11 @@ function convert_xccov_to_xml {
       gsub(/&/, "\\&amp;", path)
       print "  <file path=\"" path "\">"
       current_file = path
-      in_branch_block = 0
+      in_subrange_block = 0
       next
     }
 
-    # Match branch info opening: "  NN: X ["
+    # Match subrange info opening: "  NN: X ["
     /^ *[0-9]+: [0-9]+ \[$/ {
       # Parse line number (field 1 without colon)
       line_num = $1
@@ -49,48 +50,26 @@ function convert_xccov_to_xml {
       
       current_line = line_num
       current_exec = exec_count
-      total_branches = 0
-      covered_branches = 0
-      in_branch_block = 1
+      in_subrange_block = 1
       next
     }
 
-    # Match branch tuple: "(column, count1, count2)"
+    # Match subrange tuple: "(column, executionCount, length)"
     /^\([0-9]+, [0-9]+, [0-9]+\)$/ {
-      if (in_branch_block) {
-        # Remove parentheses
-        line = $0
-        gsub(/[()]/, "", line)
-        # Split by ", "
-        n = split(line, vals, ", ")
-        if (n >= 3) {
-          count1 = vals[2] + 0
-          count2 = vals[3] + 0
-          
-          # Each tuple represents 2 branches
-          total_branches += 2
-          if (count1 > 0) covered_branches++
-          if (count2 > 0) covered_branches++
-        }
-      }
       next
     }
 
-    # Match branch block closing: "]"
+    # Match subrange block closing: "]"
     /^\]$/ {
-      if (in_branch_block) {
+      if (in_subrange_block) {
         covered = (current_exec > 0) ? "true" : "false"
-        if (total_branches > 0) {
-          printf "    <lineToCover lineNumber=\"%s\" covered=\"%s\" branchesToCover=\"%d\" coveredBranches=\"%d\"/>\n", current_line, covered, total_branches, covered_branches
-        } else {
-          printf "    <lineToCover lineNumber=\"%s\" covered=\"%s\"/>\n", current_line, covered
-        }
-        in_branch_block = 0
+        printf "    <lineToCover lineNumber=\"%s\" covered=\"%s\"/>\n", current_line, covered
+        in_subrange_block = 0
       }
       next
     }
 
-    # Match uncovered line: "  NN: 0" (no branch info)
+    # Match uncovered line: "  NN: 0" (no subrange info)
     /^ *[0-9]+: 0$/ {
       line_num = $1
       sub(/:$/, "", line_num)
@@ -98,7 +77,7 @@ function convert_xccov_to_xml {
       next
     }
 
-    # Match covered line without branch info: "  NN: X" where X > 0
+    # Match covered line without subrange info: "  NN: X" where X > 0
     /^ *[0-9]+: [1-9][0-9]*$/ {
       line_num = $1
       sub(/:$/, "", line_num)
