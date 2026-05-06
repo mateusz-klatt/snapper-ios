@@ -53,8 +53,6 @@ final class AttachTrailingStopSheetViewModel {
         defer { isSubmitting = false }
         return await onSubmit(trailing, minLock, idempotencyKey)
     }
-
-    // MARK: - Pure helpers (preserved verbatim from
     // AttachTrailingStopSheet for backward-compatible test contract)
 
     /// Parse a free-text percent into a positive `Double`. Empty /

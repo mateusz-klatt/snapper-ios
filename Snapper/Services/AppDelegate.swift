@@ -54,9 +54,6 @@ final class AppDelegate: NSObject, UIApplicationDelegate, @preconcurrency UNUser
             self.logger.error("APNs registration failed: \(error.localizedDescription)")
         }
     }
-
-    // MARK: - UNUserNotificationCenterDelegate
-
     func userNotificationCenter(
         _ _: UNUserNotificationCenter,
         willPresent _: UNNotification,

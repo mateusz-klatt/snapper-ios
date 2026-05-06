@@ -120,9 +120,6 @@ final class NotificationPrefsViewModelTests: XCTestCase {
             count: prefs.count
         )
     }
-
-    // MARK: - Initialization
-
     func testInitialStateIsEmpty() {
         let viewModel = makeViewModel()
         XCTAssertTrue(viewModel.defaults.isEmpty)
@@ -132,9 +129,6 @@ final class NotificationPrefsViewModelTests: XCTestCase {
         XCTAssertNil(viewModel.loadError)
         XCTAssertTrue(viewModel.inflightAlertTypes.isEmpty)
     }
-
-    // MARK: - load (parallel)
-
     func testLoadHappyPathPopulatesBoth() async {
         let viewModel = makeViewModel()
         let defaultsResp = makeDefaultsResponse([
@@ -275,9 +269,6 @@ final class NotificationPrefsViewModelTests: XCTestCase {
         XCTAssertEqual(viewModel.defaults.count, 1)
         XCTAssertTrue(viewModel.devicePrefs.isEmpty)
     }
-
-    // MARK: - mutateDefault
-
     func testMutateDefaultSuccessReturnsTrueAndUpdatesDefaults() async {
         let viewModel = makeViewModel()
         let updated = makeAlertDefault(alertType: "order_fill_full", enabled: false, minPriority: "high")
@@ -321,9 +312,6 @@ final class NotificationPrefsViewModelTests: XCTestCase {
         XCTAssertEqual(viewModel.loadError, "Couldn't save preference. Try again.")
         XCTAssertFalse(viewModel.inflightAlertTypes.contains("order_fill_full"))
     }
-
-    // MARK: - applySavedPref
-
     func testApplySavedPrefReplacesByPublicId() {
         let viewModel = makeViewModel()
         let original = makeDevicePref(publicId: "p-1", enabled: true)
@@ -367,9 +355,6 @@ final class NotificationPrefsViewModelTests: XCTestCase {
         XCTAssertEqual(viewModel.devicePrefs.first?.publicId, "new-id")
         XCTAssertEqual(viewModel.devicePrefs.first?.enabled, false)
     }
-
-    // MARK: - Static helpers (sanity)
-
     func testDisplayNameMapsKnownAlertTypes() {
         XCTAssertEqual(NotificationPrefsViewModel.displayName(for: "order_fill_full"), "Order filled")
         XCTAssertEqual(NotificationPrefsViewModel.displayName(for: "order_rejected"), "Order rejected")

@@ -95,9 +95,6 @@ final class PositionsViewModelTests: XCTestCase {
             )
         )
     }
-
-    // MARK: - Initialization
-
     func testInitialStateIsEmpty() {
         let viewModel = makeViewModel()
         XCTAssertTrue(viewModel.positions.isEmpty)
@@ -105,9 +102,6 @@ final class PositionsViewModelTests: XCTestCase {
         XCTAssertNil(viewModel.loadError)
         XCTAssertNil(viewModel.submitError)
     }
-
-    // MARK: - load
-
     func testLoadHappyPathPopulatesPositions() async {
         let viewModel = makeViewModel()
         let pos = makePosition(publicId: "p-1")
@@ -151,9 +145,6 @@ final class PositionsViewModelTests: XCTestCase {
         await viewModel.load()
         XCTAssertNil(viewModel.loadError)
     }
-
-    // MARK: - submitMarketReduce
-
     func testSubmitMarketReduceSuccessTriggersReload() async {
         let viewModel = makeViewModel()
         let pos = makePosition(publicId: "p-1")
@@ -182,9 +173,6 @@ final class PositionsViewModelTests: XCTestCase {
         XCTAssertFalse(result)
         XCTAssertEqual(viewModel.submitError, "Couldn't submit the order. Try again.")
     }
-
-    // MARK: - submitBracket
-
     func testSubmitBracketSuccessTriggersReload() async {
         let viewModel = makeViewModel()
         let pos = makePosition(publicId: "p-1")
@@ -227,9 +215,6 @@ final class PositionsViewModelTests: XCTestCase {
         XCTAssertFalse(result)
         XCTAssertEqual(viewModel.submitError, "Couldn't attach bracket. Try again.")
     }
-
-    // MARK: - submitTrailingStop
-
     func testSubmitTrailingStopSuccess() async {
         let viewModel = makeViewModel()
         let pos = makePosition(publicId: "p-1")
@@ -272,9 +257,6 @@ final class PositionsViewModelTests: XCTestCase {
         XCTAssertFalse(result)
         XCTAssertEqual(viewModel.submitError, "Couldn't attach trailing stop. Try again.")
     }
-
-    // MARK: - filteredPositions
-
     func testFilteredPositionsScopesByWallet() {
         let viewModel = makeViewModel()
         appState.selectedWalletPublicId = "w-A"

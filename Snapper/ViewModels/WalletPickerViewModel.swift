@@ -34,9 +34,6 @@ final class WalletPickerViewModel {
         self.api = api
         self.appState = appState
     }
-
-    // MARK: - Passthrough state (View reads via VM)
-
     var availableWallets: [WalletInfo] {
         return appState.availableWallets
     }
@@ -44,9 +41,6 @@ final class WalletPickerViewModel {
     var selectedWalletPublicId: String? {
         return appState.selectedWalletPublicId
     }
-
-    // MARK: - Computed view state
-
     var currentLabel: String {
         return Self.currentLabel(
             wallets: appState.availableWallets,
@@ -61,9 +55,6 @@ final class WalletPickerViewModel {
             loadError: loadError
         )
     }
-
-    // MARK: - Behaviour
-
     /// Fetch the user's accessible wallets via
     /// `APIClient.fetchWallets()`. Updates `appState.availableWallets`
     /// on success, falls through to the first wallet if no prior
@@ -96,8 +87,6 @@ final class WalletPickerViewModel {
     func selectWallet(_ publicId: String) {
         appState.selectedWalletPublicId = publicId
     }
-
-    // MARK: - Pure helpers (preserved verbatim from WalletPicker for
     // backward-compatible test contract)
 
     /// When the wallet list could not be loaded and the user has no

@@ -24,9 +24,6 @@ final class NewOrderSheetViewModelTests: XCTestCase {
         mockAPI = nil
         super.tearDown()
     }
-
-    // MARK: - Helpers
-
     private func makeViewModel(
         exchanges: [String] = ["kraken"],
         defaultExchange: String? = nil,
@@ -67,9 +64,6 @@ final class NewOrderSheetViewModelTests: XCTestCase {
             expiryAt: nil
         )
     }
-
-    // MARK: - Initialization
-
     func testInitialStateUsesFirstExchangeWhenNoDefault() {
         let viewModel = makeViewModel(exchanges: ["kraken", "binance"])
         XCTAssertEqual(viewModel.selectedExchange, "kraken")
@@ -95,9 +89,6 @@ final class NewOrderSheetViewModelTests: XCTestCase {
         let viewModel = makeViewModel(exchanges: [])
         XCTAssertEqual(viewModel.selectedExchange, "")
     }
-
-    // MARK: - loadInstruments — happy path + skip + failure
-
     func testLoadInstrumentsSuccessPopulatesAvailable() async {
         let viewModel = makeViewModel()
         let instrument = makeInstrument()
@@ -289,9 +280,6 @@ final class NewOrderSheetViewModelTests: XCTestCase {
         await viewModel.loadInstruments()
         XCTAssertNil(viewModel.selectedInstrument)
     }
-
-    // MARK: - submit — happy path + invalid + re-entry
-
     func testSubmitFiresOnSubmitClosureWithBuiltBody() async {
         let viewModel = makeViewModel()
         viewModel.selectedInstrument = makeInstrument()
@@ -367,9 +355,6 @@ final class NewOrderSheetViewModelTests: XCTestCase {
         XCTAssertEqual(totalCalls, 1, "Re-entry guard must reject concurrent submit")
         XCTAssertFalse(secondResult)
     }
-
-    // MARK: - Idempotency key stability
-
     /// The idempotency key must stay stable across retries within
     /// the same VM instance — server-side dedup index keys on it,
     /// and a regenerated key on retry would create a duplicate
@@ -414,9 +399,6 @@ final class NewOrderSheetViewModelTests: XCTestCase {
         XCTAssertFalse(vm1.idempotencyKey.isEmpty)
         XCTAssertFalse(vm2.idempotencyKey.isEmpty)
     }
-
-    // MARK: - Computed properties
-
     func testNeedsPriceComputedReflectsOrderType() {
         let viewModel = makeViewModel()
         viewModel.orderType = "limit"
@@ -466,9 +448,6 @@ final class NewOrderSheetViewModelTests: XCTestCase {
         XCTAssertEqual(body?.walletPublicId, "wallet-1")
     }
 }
-
-// MARK: - Test-only actor helpers for closure-captured state
-
 /// Crosses isolation cleanly under Swift 6 strict concurrency. VM
 /// closures are not declared `@Sendable`, so technically a plain
 /// `var` capture would work, but routing through actors keeps the

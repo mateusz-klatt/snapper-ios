@@ -10,9 +10,6 @@ import XCTest
 /// re-entry guard, and idempotency-stable submission.
 @MainActor
 final class AttachBracketSheetViewModelTests: XCTestCase {
-
-    // MARK: - Initialization
-
     func testInitialStateIsBlankAndStable() {
         let viewModel = AttachBracketSheetViewModel(idempotencyKey: "test-key")
         XCTAssertEqual(viewModel.slPriceText, "")
@@ -30,9 +27,6 @@ final class AttachBracketSheetViewModelTests: XCTestCase {
         XCTAssertNotEqual(vm1.idempotencyKey, vm2.idempotencyKey)
         XCTAssertFalse(vm1.idempotencyKey.isEmpty)
     }
-
-    // MARK: - Parsed legs
-
     func testParsedSLReflectsSlPriceText() {
         let viewModel = AttachBracketSheetViewModel()
         viewModel.slPriceText = "95.5"
@@ -52,9 +46,6 @@ final class AttachBracketSheetViewModelTests: XCTestCase {
         viewModel.tpPriceText = "abc"
         XCTAssertNil(viewModel.parsedTP)
     }
-
-    // MARK: - canSubmit
-
     func testCanSubmitTrueWhenAtLeastOneLegParsed() {
         let viewModel = AttachBracketSheetViewModel()
         XCTAssertFalse(viewModel.canSubmit)
@@ -73,9 +64,6 @@ final class AttachBracketSheetViewModelTests: XCTestCase {
         viewModel.isSubmitting = true
         XCTAssertFalse(viewModel.canSubmit)
     }
-
-    // MARK: - submit
-
     func testSubmitFiresClosureWithParsedLegsAndIdempotencyKey() async {
         let viewModel = AttachBracketSheetViewModel(idempotencyKey: "bk-1")
         viewModel.slPriceText = "95.5"

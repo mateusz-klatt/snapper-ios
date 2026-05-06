@@ -36,9 +36,6 @@ final class NotificationPrefsViewModel {
         self.api = api
         self.deviceIdProvider = deviceIdProvider
     }
-
-    // MARK: - Behaviour
-
     /// Parallel-load alert defaults + device prefs (after resolving
     /// the device public id). The pre-MVVM body's docstring claimed
     /// "fetched in parallel via `async let`" but the implementation
@@ -129,9 +126,6 @@ final class NotificationPrefsViewModel {
     func applySavedPref(_ saved: DeviceAlertPrefInfo) {
         Self.applySavedPref(saved, into: &devicePrefs)
     }
-
-    // MARK: - Pure helpers (preserved from NotificationPrefsView)
-
     /// Backend-canonical alert_types in display order.
     static let alertTypes: [String] = [
         "order_fill_full",

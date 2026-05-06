@@ -41,9 +41,6 @@ final class PositionsViewModel {
             selectedWalletPublicId: appState.selectedWalletPublicId
         )
     }
-
-    // MARK: - Behaviour
-
     func load() async {
         isLoading = true
         defer { isLoading = false }
@@ -132,8 +129,6 @@ final class PositionsViewModel {
             return false
         }
     }
-
-    // MARK: - Pure helpers (preserved verbatim from PositionsView for
     // backward-compatible test contract)
 
     /// Pure wallet-match helper. `nil` selection passes through every

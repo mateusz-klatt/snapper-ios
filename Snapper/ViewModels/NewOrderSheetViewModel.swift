@@ -66,9 +66,6 @@ final class NewOrderSheetViewModel {
         var publicId: String
         var isPaper: Bool
     }
-
-    // MARK: - Mutable form state (read/write from View)
-
     var selectedExchange: String
     var availableInstruments: [InstrumentDetailData] = []
     var selectedInstrument: InstrumentDetailData?
@@ -79,15 +76,9 @@ final class NewOrderSheetViewModel {
     var stopPriceText: String = ""
     var leverageText: String = ""
     var reduceOnly: Bool = false
-
-    // MARK: - Async + submit-flow flags
-
     var isLoadingInstruments: Bool = false
     var isSubmitting: Bool = false
     var loadError: String?
-
-    // MARK: - Static config (immutable for the VM's lifetime)
-
     let exchanges: [String]
     let walletPublicId: String
     let walletIsPaper: Bool
@@ -96,9 +87,6 @@ final class NewOrderSheetViewModel {
     /// inject a deterministic value via the `idempotencyKey` init
     /// parameter; production code lets it default to a random UUID.
     let idempotencyKey: String
-
-    // MARK: - Dependencies
-
     private let api: APIClientProtocol
 
     private let logger = AppLogger.make(category: "NewOrderSheetViewModel")
@@ -118,9 +106,6 @@ final class NewOrderSheetViewModel {
         self.api = api
         self.idempotencyKey = idempotencyKey
     }
-
-    // MARK: - Computed view state
-
     var needsPrice: Bool {
         return Self.needsPrice(orderType: orderType)
     }
@@ -135,9 +120,6 @@ final class NewOrderSheetViewModel {
             gate: submitGateState
         )
     }
-
-    // MARK: - Async behaviour
-
     /// Fetch capability-aware instrument rows for the currently
     /// selected exchange. Race-safe via a post-await `guard` on
     /// `selectedExchange` so a stale response from a previous
@@ -223,8 +205,6 @@ final class NewOrderSheetViewModel {
         defer { isSubmitting = false }
         return await onSubmit(body)
     }
-
-    // MARK: - Pure helpers (preserved from NewOrderSheet for the
     // existing test contract; tests reference `NewOrderSheetViewModel.X`
     // after the v0.3.1 migration)
 

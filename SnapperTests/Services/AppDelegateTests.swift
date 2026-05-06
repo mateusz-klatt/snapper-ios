@@ -123,9 +123,6 @@ final class AppDelegateTests: XCTestCase {
         XCTAssertNil(coordinator.pendingDeepLink)
         XCTAssertNil(coordinator.pendingAlertPublicId)
     }
-
-    // MARK: - Helpers
-
     private func _capturePresentOptions(for notification: UNNotification) async -> UNNotificationPresentationOptions {
         await withCheckedContinuation { (continuation: CheckedContinuation<UNNotificationPresentationOptions, Never>) in
             let center = UNUserNotificationCenter.current()
@@ -196,9 +193,6 @@ private enum _UnsafeNotificationFactory {
         return response
     }
 }
-
-// MARK: - WebSocketManager test hook
-
 extension WebSocketManager {
     /// Test-only setter for `connectionState` so AppDelegate tests can
     /// pin the state without spinning up a real socket. Not declared

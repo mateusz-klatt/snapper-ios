@@ -28,9 +28,6 @@ import Foundation
 ///     await viewModel.load()
 ///     XCTAssertEqual(viewModel.positions.count, 1)
 final class MockAPIClient: APIClientProtocol, @unchecked Sendable {
-
-    // MARK: - Backing storage
-
     /// All mutable handler closures live in a single struct guarded
     /// by `lock`. Generic `read(_:)` / `write(_:_:)` keypath helpers
     /// keep the per-slot getter / setter boilerplate to one line each.
@@ -112,9 +109,6 @@ final class MockAPIClient: APIClientProtocol, @unchecked Sendable {
     private func write<T>(_ keyPath: WritableKeyPath<HandlerStorage, T>, _ value: T) {
         lock.withLock { storage[keyPath: keyPath] = value }
     }
-
-    // MARK: - Handler accessors (test-facing)
-
     var fetchOrdersHandler: @Sendable () async throws -> [OrderStatus] {
         get { read(\.fetchOrders) }
         set { write(\.fetchOrders, newValue) }
@@ -199,9 +193,6 @@ final class MockAPIClient: APIClientProtocol, @unchecked Sendable {
         get { read(\.updateAlertDefault) }
         set { write(\.updateAlertDefault, newValue) }
     }
-
-    // MARK: - APIClientProtocol
-
     func fetchOrders() async throws -> [OrderStatus] {
         return try await fetchOrdersHandler()
     }
