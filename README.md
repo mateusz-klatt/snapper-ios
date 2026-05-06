@@ -29,9 +29,15 @@ make test SIMULATOR='iPhone 17' SIMULATOR_OS='26.2'
 
 ## Configure the backend URL
 
-Edit `Snapper/Config/Configuration.plist` and change `BaseURL`. The default is `http://localhost:8000` so a clean clone connects to a developer's local backend; production users override this in their own private build pipeline.
+Three layers, evaluated in priority order:
 
-`Environment.swift` validates the plist at startup and crashes loud in DEBUG builds if `BaseURL` or `APIPrefix` are missing — better a fatal launch error than a vague invalid-URL deep in a request path.
+1. **Runtime override (per-install, persisted in UserDefaults).** Self-hosters running the App Store binary set this from inside the app:
+    - **Login → Advanced (custom backend)** disclosure for first-run / pre-authentication. Save persists immediately, no logout needed.
+    - **Settings → Change backend…** for authenticated switches. Saving signs out, clears local app state, and routes the user back to LoginView pointing at the new URL.
+2. **Bundled `Configuration.plist` BaseURL** patched at build time. Xcode Cloud's `ci_post_clone.sh` substitutes the production URL via the `SNAPPER_BACKEND_URL` secret; local builds keep the committed default (`http://localhost:8000`).
+3. **Compiled-in fallback** if the plist is missing — also `http://localhost:8000`. `Environment.swift` validates the plist at startup and crashes loud in DEBUG when critical fields are missing.
+
+The release build's runtime editor enforces the same rules `BackendURLStore.canonicalize` uses: origin-only URLs (no path / query / fragment / userinfo), no `ws://` / `wss://`, and `https://` only in App Store builds. Certificate trust itself is not validated in the editor — it is enforced at connect time by App Transport Security inside `URLSession`, and a connection to a backend without a publicly trusted certificate will fail then. Self-hosters running plain HTTP or self-signed backends must front them with an HTTPS reverse proxy (Caddy / nginx / Traefik / Cloudflare Tunnel) — the App Store binary cannot honor ATS exceptions or self-signed roots. DEBUG builds additionally accept `http://` for loopback (localhost / 127.0.0.0/8 / ::1) only.
 
 ## Architecture
 
