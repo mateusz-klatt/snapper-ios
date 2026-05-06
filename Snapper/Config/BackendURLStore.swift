@@ -110,8 +110,8 @@ final class BackendURLStore: @unchecked Sendable {
     /// - In Release builds, reject anything that is not
     ///   ``https://`` — the App Store binary cannot honor ATS
     ///   exceptions and self-signed certificates.
-    /// - Allow ``http://localhost`` and ``http://127.0.0.1``
-    ///   in Debug builds for local development.
+    /// - Allow ``http://localhost``, ``http://127.x.x.x``, and
+    ///   ``http://[::1]`` in Debug builds for local development.
     /// - Strip a trailing slash on the path so we never produce
     ///   ``...//api/...``.
     ///
@@ -123,17 +123,26 @@ final class BackendURLStore: @unchecked Sendable {
         guard var components = URLComponents(string: trimmed) else { return nil }
 
         let scheme = components.scheme?.lowercased() ?? ""
-        let allowedSchemes: Set<String>
-        #if DEBUG
-        allowedSchemes = ["http", "https"]
-        #else
-        allowedSchemes = ["https"]
-        #endif
-        guard allowedSchemes.contains(scheme) else { return nil }
+        guard scheme == "http" || scheme == "https" else { return nil }
         components.scheme = scheme
 
         guard let host = components.host?.lowercased(), !host.isEmpty else { return nil }
         components.host = host
+
+        // Release builds only allow https:// (App Store ATS).
+        // Debug builds additionally permit http:// for loopback
+        // addresses (localhost / 127.x.x.x / ::1) so developers
+        // can point the app at a local server without TLS.
+        #if !DEBUG
+        if scheme == "http" { return nil }
+        #else
+        if scheme == "http" {
+            let isLoopback = host == "localhost"
+                || host == "::1"
+                || host.hasPrefix("127.")
+            guard isLoopback else { return nil }
+        }
+        #endif
 
         if components.user != nil || components.password != nil {
             return nil

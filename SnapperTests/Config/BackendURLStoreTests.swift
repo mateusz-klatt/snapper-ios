@@ -116,6 +116,15 @@ final class BackendURLStoreTests: XCTestCase {
         #endif
     }
 
+    func testCanonicalizeRejectsHTTPNonLoopbackInDebug() {
+        // http:// against a non-loopback host must be rejected even in
+        // DEBUG builds — only localhost / 127.x / ::1 get the http exception.
+        #if DEBUG
+        XCTAssertNil(BackendURLStore.canonicalize("http://staging.example.com"))
+        XCTAssertNil(BackendURLStore.canonicalize("http://192.168.1.1"))
+        #endif
+    }
+
     func testCanonicalizeAcceptsIPHostHTTPSInRelease() {
         let url = BackendURLStore.canonicalize("https://10.0.0.5:8443")
         XCTAssertEqual(url?.absoluteString, "https://10.0.0.5:8443")
