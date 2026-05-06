@@ -38,7 +38,7 @@ check-no-comments:
 check-no-comments-strict:
 	python3 scripts/check_no_comments.py --strict
 
-check-all: build test check-no-comments
+check-all: build test check-no-comments-strict
 
 archive: setup
 	@test -n "$(DEVELOPMENT_TEAM)" || (echo "Set DEVELOPMENT_TEAM env var (your Apple Developer team)" && exit 1)
