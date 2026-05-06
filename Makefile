@@ -1,4 +1,4 @@
-.PHONY: setup build test coverage archive clean check-all
+.PHONY: setup build test coverage archive clean check-all check-no-comments check-no-comments-strict
 
 DEVELOPMENT_TEAM ?=
 PRODUCT_BUNDLE_IDENTIFIER ?= com.example.snapper
@@ -32,7 +32,13 @@ coverage: setup
 	@echo "$(XCCOV_SCRIPT_SHA256)  scripts/xccov-to-sonarqube-generic.sh" | shasum -a 256 -c -
 	scripts/xccov-to-sonarqube-generic.sh $(COVERAGE_RESULT_BUNDLE) > $(COVERAGE_REPORT)
 
-check-all: build test
+check-no-comments:
+	python3 scripts/check_no_comments.py
+
+check-no-comments-strict:
+	python3 scripts/check_no_comments.py --strict
+
+check-all: build test check-no-comments
 
 archive: setup
 	@test -n "$(DEVELOPMENT_TEAM)" || (echo "Set DEVELOPMENT_TEAM env var (your Apple Developer team)" && exit 1)

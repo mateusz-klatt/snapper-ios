@@ -49,16 +49,26 @@ final class BackendURLEditorTests: XCTestCase {
         XCTAssertFalse(BackendURLEditor.helpMessage.isEmpty)
     }
 
+    /// Build an editor with a frozen draft binding for pure-helper tests.
+    ///
+    /// The setter is intentionally a no-op — the tests treat the draft
+    /// as static input and only exercise canonicalization helpers, not
+    /// the Save/Reset/Cancel callbacks.
     private func makeEditor(draft: String) -> BackendURLEditor {
         let binding = Binding<String>(
             get: { draft },
-            set: { _ in /* No-op: tests treat the draft as static input. */ }
+            set: Self.discardDraftMutation
         )
         return BackendURLEditor(
             draft: binding,
-            onSave: { _ in },
-            onReset: {},
-            onCancel: {}
+            onSave: Self.discardSavedURL,
+            onReset: Self.discardReset,
+            onCancel: Self.discardCancel
         )
     }
+
+    private static func discardDraftMutation(_ value: String) {}
+    private static func discardSavedURL(_ url: URL) {}
+    private static func discardReset() {}
+    private static func discardCancel() {}
 }
