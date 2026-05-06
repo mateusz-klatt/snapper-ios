@@ -2,6 +2,9 @@ import SwiftUI
 
 struct LoginView: View {
     @State private var viewModel = LoginViewModel()
+    @State private var advancedExpanded = false
+    @State private var backendDraft = ""
+    @State private var displayedBackendURL = AppConfig.baseURL
 
     var body: some View {
         NavigationView {
@@ -62,6 +65,40 @@ struct LoginView: View {
                         .foregroundColor(.white)
                         .cornerRadius(10)
                         .disabled(!viewModel.isLoginEnabled)
+                    }
+                    .padding(.horizontal, 32)
+
+                    DisclosureGroup(isExpanded: $advancedExpanded) {
+                        VStack(alignment: .leading, spacing: 12) {
+                            Text("Current backend: \(displayedBackendURL)")
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+
+                            BackendURLEditor(
+                                draft: $backendDraft,
+                                onSave: { url in
+                                    BackendURLStore.shared.saveOverride(url)
+                                    displayedBackendURL = AppConfig.baseURL
+                                    backendDraft = ""
+                                    advancedExpanded = false
+                                },
+                                onReset: {
+                                    BackendURLStore.shared.clearOverride()
+                                    displayedBackendURL = AppConfig.baseURL
+                                    backendDraft = ""
+                                    advancedExpanded = false
+                                },
+                                onCancel: {
+                                    backendDraft = ""
+                                    advancedExpanded = false
+                                }
+                            )
+                        }
+                        .padding(.vertical, 8)
+                    } label: {
+                        Text("Advanced (custom backend)")
+                            .font(.footnote)
+                            .foregroundColor(.textSecondary)
                     }
                     .padding(.horizontal, 32)
 

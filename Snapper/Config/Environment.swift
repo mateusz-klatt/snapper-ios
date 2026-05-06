@@ -7,8 +7,19 @@ enum AppConfig {
 
     private static let configuration = AppConfiguration.load()
 
+    /// Resolve the active backend base URL for this app session.
+    ///
+    /// Layers, in priority order:
+    /// 1. ``BackendURLStore.shared`` override — set by the user via
+    ///    Login "Advanced" or Settings "Change backend…".
+    /// 2. The bundled ``Configuration.plist`` value, patched at
+    ///    Xcode Cloud build time by ``ci_post_clone.sh``.
+    ///
+    /// Returns the override's ``absoluteString`` so existing
+    /// string-concatenation call sites in ``APIClient`` /
+    /// ``WebSocketManager`` keep working unchanged.
     static var baseURL: String {
-        return configuration.baseURL
+        return BackendURLStore.shared.currentEffectiveURL().absoluteString
     }
 
     static var apiPrefix: String {

@@ -6,11 +6,17 @@ struct SettingsView: View {
     @EnvironmentObject var authService: AuthService
     @EnvironmentObject var webSocketManager: WebSocketManager
     @EnvironmentObject var notificationService: NotificationService
+    @Environment(AppState.self) private var appState
 
     @State private var showingLogoutAlert = false
     @State private var registeredDevicePublicId: String?
     @State private var registrationStatus: DeviceRegistrationStatus = .idle
     @State private var isRetrying = false
+    @State private var displayedBackendURL = AppConfig.baseURL
+    @State private var showingBackendChangeAlert = false
+    @State private var showingBackendEditor = false
+    @State private var backendDraft = ""
+    @State private var isSwitchingBackend = false
 
     var body: some View {
         NavigationView {
@@ -53,10 +59,15 @@ struct SettingsView: View {
                     HStack {
                         Text("Backend URL")
                         Spacer()
-                        Text(AppConfig.baseURL)
+                        Text(displayedBackendURL)
                             .font(.caption)
                             .foregroundColor(.secondary)
                     }
+
+                    Button("Change backend…") {
+                        showingBackendChangeAlert = true
+                    }
+                    .disabled(isSwitchingBackend)
                 }
 
                 Section("Notifications") {
@@ -140,6 +151,91 @@ struct SettingsView: View {
             }
         } message: {
             Text("Are you sure you want to logout?")
+        }
+        .alert("Change backend?", isPresented: $showingBackendChangeAlert) {
+            Button("Cancel", role: .cancel) { /* Dismiss alert with no action */ }
+            Button("Continue") {
+                backendDraft = ""
+                showingBackendEditor = true
+            }
+        } message: {
+            Text("Switching backend signs you out and clears local app state. You'll need to sign in again at the new URL.")
+        }
+        .sheet(isPresented: $showingBackendEditor) {
+            backendEditorSheet
+        }
+    }
+
+    @ViewBuilder
+    private var backendEditorSheet: some View {
+        NavigationView {
+            Form {
+                Section("Custom backend URL") {
+                    BackendURLEditor(
+                        draft: $backendDraft,
+                        allowReset: BackendURLStore.shared.hasOverride(),
+                        onSave: { url in
+                            showingBackendEditor = false
+                            performBackendSwitch(to: url)
+                        },
+                        onReset: {
+                            showingBackendEditor = false
+                            performBackendSwitch(to: nil)
+                        },
+                        onCancel: {
+                            showingBackendEditor = false
+                        }
+                    )
+                }
+            }
+            .navigationTitle("Change backend")
+            .navigationBarTitleDisplayMode(.inline)
+        }
+    }
+
+    private func performBackendSwitch(to candidate: URL?) {
+        guard !isSwitchingBackend else { return }
+        isSwitchingBackend = true
+        let oldURL = BackendURLStore.shared.currentEffectiveURL()
+
+        Task {
+            // Disconnect WebSocket FIRST so the old socket doesn't
+            // hang while server-side logout is awaiting a response.
+            webSocketManager.disconnect()
+
+            // logout() is non-throwing and flips isAuthenticated = false
+            // at the end → SnapperApp's root conditional swaps to
+            // LoginView automatically once we yield back to MainActor.
+            await authService.logout()
+
+            // Cookie cleanup scoped by host so path-scoped cookies
+            // (e.g. /api/auth/refresh) are also dropped.
+            let oldHost = oldURL.host?.lowercased()
+            let allCookies = HTTPCookieStorage.shared.cookies ?? []
+            for cookie in allCookies {
+                let domain = cookie.domain.lowercased()
+                let trimmed = domain.hasPrefix(".") ? String(domain.dropFirst()) : domain
+                if let host = oldHost, host == trimmed {
+                    HTTPCookieStorage.shared.deleteCookie(cookie)
+                }
+            }
+
+            URLCache.shared.removeAllCachedResponses()
+            appState.selectedWalletPublicId = nil
+            appState.availableWallets = []
+            appState.availableOperators = []
+
+            // Persist the new override LAST so any in-flight 401
+            // refresh-retry that races into this window still hits
+            // the OLD URL via the dynamic provider.
+            if let url = candidate {
+                BackendURLStore.shared.saveOverride(url)
+            } else {
+                BackendURLStore.shared.clearOverride()
+            }
+
+            displayedBackendURL = AppConfig.baseURL
+            isSwitchingBackend = false
         }
     }
 
@@ -297,5 +393,6 @@ struct SettingsView_Previews: PreviewProvider {
             .environmentObject(AuthService.shared)
             .environmentObject(WebSocketManager.shared)
             .environmentObject(NotificationService.shared)
+            .environment(AppState.shared)
     }
 }
