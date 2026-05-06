@@ -264,13 +264,14 @@ of the binary. Two surfaces ship together:
 
 ### Tests
 
-- 14 `APIClientCSRFTests` covering the safe / non-safe × cookie
+- 13 `APIClientCSRFTests` covering the safe / non-safe × cookie
   present / absent / empty / foreign-host matrix plus an
   end-to-end `RegisterDeviceCommand` round trip that captures the
   on-the-wire request to assert the header lands.
-- 22 `BackendURLStoreTests` covering every `canonicalize()`
-  branch + override roundtrip + invalid-on-launch recovery + a
-  cross-`Sendable` read from a detached Task.
+- 28 `BackendURLStoreTests` covering every `canonicalize()`
+  branch (including the loopback-only DEBUG-`http://` rule) +
+  override roundtrip + invalid-on-launch recovery + a cross-
+  `Sendable` read from a detached Task.
 - 7 `BackendURLEditorTests` covering preview reactivity + button
   enable matrix + build-policy-sensitive validation copy.
 
