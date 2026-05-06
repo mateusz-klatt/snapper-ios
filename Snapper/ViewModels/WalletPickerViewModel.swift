@@ -87,8 +87,7 @@ final class WalletPickerViewModel {
     func selectWallet(_ publicId: String) {
         appState.selectedWalletPublicId = publicId
     }
-    // backward-compatible test contract)
-
+    /// Backward-compatible test contract.
     /// When the wallet list could not be loaded and the user has no
     /// prior selection cached, the label collapses to a short
     /// "Wallets unavailable" prompt so the toolbar capsule signals

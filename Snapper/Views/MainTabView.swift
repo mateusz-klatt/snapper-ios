@@ -70,22 +70,22 @@ struct MainTabView: View {
             }
         }
         .onAppear {
-            // Consume any pending deep-link that landed BEFORE the
-            // tab view existed (e.g. a notification tap while the
-            // user was on the login screen — `pendingDeepLink` is
-            // set by `NavigationCoordinator.handleNotificationTap`
-            // before `MainTabView` mounts after a successful auth
-            // flip in `SnapperApp`). `.onChange` alone misses this
-            // case: SwiftUI does not fire onChange for values that
-            // are already set at first render.
+            /// Consume any pending deep-link that landed BEFORE the
+            /// tab view existed (e.g. a notification tap while the
+            /// user was on the login screen — `pendingDeepLink` is
+            /// set by `NavigationCoordinator.handleNotificationTap`
+            /// before `MainTabView` mounts after a successful auth
+            /// flip in `SnapperApp`). `.onChange` alone misses this
+            /// case: SwiftUI does not fire onChange for values that
+            /// are already set at first render.
             consumePendingDeepLink()
         }
         .onChange(of: navigationCoordinator.pendingDeepLink) { _, _ in
             consumePendingDeepLink()
         }
-        // WS lifecycle is owned by `SnapperApp` (scenePhase + isAuthenticated
-        // observers). Putting connect/disconnect here would kill the
-        // socket whenever a modal sheet covered the tab view.
+        /// WS lifecycle is owned by `SnapperApp` (scenePhase + isAuthenticated
+        /// observers). Putting connect/disconnect here would kill the
+        /// socket whenever a modal sheet covered the tab view.
     }
 
     /// Read the coordinator's current `pendingDeepLink` and route

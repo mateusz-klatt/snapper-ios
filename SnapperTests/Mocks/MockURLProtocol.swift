@@ -13,8 +13,8 @@ class MockURLProtocol: URLProtocol {
         set { _lock.withLock { _handler = newValue } }
     }
 
+    /// Always intercept: all requests are handled by the mock.
     override class func canInit(with request: URLRequest) -> Bool {
-        /* Always intercept: all requests are handled by the mock */
         return true
     }
 
@@ -38,13 +38,13 @@ class MockURLProtocol: URLProtocol {
 
             client?.urlProtocolDidFinishLoading(self)
         } catch {
-            /* Forward the error to the URL loading system */
+            /// Forward the error to the URL loading system.
             client?.urlProtocol(self, didFailWithError: error)
         }
     }
 
+    /// No-op: cancellation is not needed for mock responses.
     override func stopLoading() {
-        /* No-op: cancellation is not needed for mock responses */
     }
 }
 

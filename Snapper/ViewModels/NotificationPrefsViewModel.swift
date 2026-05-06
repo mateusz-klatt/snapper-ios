@@ -47,18 +47,18 @@ final class NotificationPrefsViewModel {
         loadError = nil
 
         let resolvedDeviceId = await deviceIdProvider()
-        // Treat empty-string device id as "not registered" — the
-        // View only nil-checks, so storing "" would render as a
-        // registered device and let the user fire `updateDevicePref`
-        // with an invalid `/devices//prefs` path segment.
+        /// Treat empty-string device id as "not registered" — the
+        /// View only nil-checks, so storing "" would render as a
+        /// registered device and let the user fire `updateDevicePref`
+        /// with an invalid `/devices//prefs` path segment.
         let normalizedDeviceId: String? = (resolvedDeviceId?.isEmpty == false) ? resolvedDeviceId : nil
         devicePublicId = normalizedDeviceId
 
-        // Fan out alert-defaults + device-prefs concurrently. The
-        // device-prefs call requires the resolved device id; if the
-        // device isn't registered (`nil` after normalization), skip
-        // the device-prefs fetch entirely and surface only the alert
-        // defaults.
+        /// Fan out alert-defaults + device-prefs concurrently. The
+        /// device-prefs call requires the resolved device id; if the
+        /// device isn't registered (`nil` after normalization), skip
+        /// the device-prefs fetch entirely and surface only the alert
+        /// defaults.
         async let defaultsResult = api.fetchAlertDefaults()
         async let prefsResult: DeviceAlertPrefListResponse? = {
             guard let id = normalizedDeviceId else { return nil }
@@ -79,9 +79,9 @@ final class NotificationPrefsViewModel {
             }
         } catch {
             logger.error("Failed to fetch device prefs: \(error.localizedDescription, privacy: .public)")
-            // Device-pref failure does NOT clobber the alert-defaults
-            // banner — overrides being unavailable while defaults load
-            // is the legitimate "device not yet registered" UX.
+            /// Device-pref failure does NOT clobber the alert-defaults
+            /// banner — overrides being unavailable while defaults load
+            /// is the legitimate "device not yet registered" UX.
         }
     }
 
@@ -105,9 +105,9 @@ final class NotificationPrefsViewModel {
         do {
             let response = try await api.updateAlertDefault(command: command)
             defaults[alertType] = response.payload
-            // Clear the prior failure banner on a successful save so
-            // the screen doesn't keep showing "Couldn't save…" after
-            // the user retries and the next PATCH lands cleanly.
+            /// Clear the prior failure banner on a successful save so
+            /// the screen doesn't keep showing "Couldn't save…" after
+            /// the user retries and the next PATCH lands cleanly.
             loadError = nil
             return true
         } catch {

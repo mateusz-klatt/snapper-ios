@@ -110,9 +110,9 @@ final class NavigationCoordinatorTests: XCTestCase {
         ])
         await coordinator.handleNotificationTap(response)
 
-        // Multiple reads from the consumer (e.g. .onAppear + later
-        // .onChange triggered by an unrelated state update) must all
-        // see the same primed state until clearPendingDeepLink fires.
+        /// Multiple reads from the consumer (e.g. .onAppear + later
+        /// .onChange triggered by an unrelated state update) must all
+        /// see the same primed state until clearPendingDeepLink fires.
         XCTAssertEqual(coordinator.pendingDeepLink, "/orders/coid-replay")
         XCTAssertEqual(coordinator.pendingAlertPublicId, "alert-replay")
         XCTAssertEqual(coordinator.pendingDeepLink, "/orders/coid-replay")

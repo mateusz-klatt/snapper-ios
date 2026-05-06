@@ -273,12 +273,12 @@ final class AuthServiceNetworkTests: XCTestCase {
 
         MockURLProtocol.requestHandler = { request in
             counter.increment()
-            // Hold the URLProtocol thread for 100 ms so the second
-            // caller has a deterministic window to enter
-            // fetchFreshWsToken() and find the in-flight slot
-            // populated. URLProtocol.startLoading runs on a
-            // dedicated queue, so blocking here does not stall the
-            // MainActor where the awaiters are parked.
+            /// Hold the URLProtocol thread for 100 ms so the second
+            /// caller has a deterministic window to enter
+            /// fetchFreshWsToken() and find the in-flight slot
+            /// populated. URLProtocol.startLoading runs on a
+            /// dedicated queue, so blocking here does not stall the
+            /// MainActor where the awaiters are parked.
             Thread.sleep(forTimeInterval: 0.1)
 
             let response = HTTPURLResponse(
@@ -346,9 +346,9 @@ final class AuthServiceNetworkTests: XCTestCase {
     /// for the lifetime of the leaked token.
     func testLogoutDuringRefreshDropsTheRefreshedToken() async throws {
         MockURLProtocol.requestHandler = { request in
-            // Hold the URLProtocol thread long enough for logout to
-            // run and cancel the refresh task. 200 ms is generous —
-            // logout's local mutations are sub-millisecond.
+            /// Hold the URLProtocol thread long enough for logout to
+            /// run and cancel the refresh task. 200 ms is generous —
+            /// logout's local mutations are sub-millisecond.
             Thread.sleep(forTimeInterval: 0.2)
 
             let response = HTTPURLResponse(
@@ -392,8 +392,8 @@ final class AuthServiceNetworkTests: XCTestCase {
             await self.authService.fetchFreshWsToken()
         }
 
-        // Yield long enough for the refresh task to enter the
-        // URLProtocol sleep window, then fire logout.
+        /// Yield long enough for the refresh task to enter the
+        /// URLProtocol sleep window, then fire logout.
         try await Task.sleep(nanoseconds: 50_000_000)
         await authService.logout()
 

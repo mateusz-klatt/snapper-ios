@@ -18,8 +18,8 @@ final class WalletPickerViewModelTests: XCTestCase {
     override func setUp() {
         super.setUp()
         mockAPI = MockAPIClient()
-        // Each test gets a fresh in-memory UserDefaults so wallet
-        // selection writes from one test don't bleed into the next.
+        /// Each test gets a fresh in-memory UserDefaults so wallet
+        /// selection writes from one test don't bleed into the next.
         let suiteName = "WalletPickerViewModelTests-\(UUID().uuidString)"
         let userDefaults = UserDefaults(suiteName: suiteName)!
         userDefaults.removePersistentDomain(forName: suiteName)
@@ -31,8 +31,6 @@ final class WalletPickerViewModelTests: XCTestCase {
         appState = nil
         super.tearDown()
     }
-
-    // MARK: - Helpers
 
     private func makeViewModel() -> WalletPickerViewModel {
         return WalletPickerViewModel(api: mockAPI, appState: appState)
@@ -58,8 +56,6 @@ final class WalletPickerViewModelTests: XCTestCase {
         )
     }
 
-    // MARK: - Initialization
-
     func testInitialStateHasNoLoadError() {
         let viewModel = makeViewModel()
         XCTAssertNil(viewModel.loadError)
@@ -69,8 +65,6 @@ final class WalletPickerViewModelTests: XCTestCase {
         let viewModel = makeViewModel()
         XCTAssertTrue(viewModel.availableWallets.isEmpty)
     }
-
-    // MARK: - loadWallets — happy path + selection fallback
 
     func testLoadWalletsSuccessPopulatesAppState() async {
         let viewModel = makeViewModel()
@@ -130,8 +124,6 @@ final class WalletPickerViewModelTests: XCTestCase {
         XCTAssertTrue(appState.availableWallets.isEmpty)
     }
 
-    // MARK: - loadWallets — failure paths
-
     func testLoadWalletsFailureSetsAPIErrorOnLoadError() async {
         let viewModel = makeViewModel()
         mockAPI.fetchWalletsHandler = {
@@ -175,8 +167,6 @@ final class WalletPickerViewModelTests: XCTestCase {
         XCTAssertEqual(viewModel.availableWallets.count, 1)
     }
 
-    // MARK: - selectWallet
-
     func testSelectWalletWritesAppStateSelection() {
         let viewModel = makeViewModel()
         viewModel.selectWallet("p-pick")
@@ -191,21 +181,19 @@ final class WalletPickerViewModelTests: XCTestCase {
         XCTAssertEqual(appState.selectedWalletPublicId, "p-new")
     }
 
-    // MARK: - Computed properties
-
     func testCurrentLabelFromAppStateSnapshot() {
         let viewModel = makeViewModel()
-        // Empty + no error: loading state.
+        /// Empty + no error: loading state.
         XCTAssertEqual(viewModel.currentLabel, "Loading wallets...")
-        // Cached wallets + no selection: select-prompt.
+        /// Cached wallets + no selection: select-prompt.
         appState.availableWallets = [
             makeWallet(publicId: "p-1", label: "default"),
         ]
         XCTAssertEqual(viewModel.currentLabel, "Select wallet")
-        // Cached wallets + matching selection: the wallet display name.
+        /// Cached wallets + matching selection: the wallet display name.
         appState.selectedWalletPublicId = "p-1"
         XCTAssertEqual(viewModel.currentLabel, "default")
-        // Empty + error state: collapses to "Wallets unavailable".
+        /// Empty + error state: collapses to "Wallets unavailable".
         appState.availableWallets = []
         appState.selectedWalletPublicId = nil
         viewModel.loadError = .httpError(503)
@@ -214,12 +202,12 @@ final class WalletPickerViewModelTests: XCTestCase {
 
     func testShouldShowLoadErrorReflectsCachedWalletsAndError() {
         let viewModel = makeViewModel()
-        // No error: never show the error prompt.
+        /// No error: never show the error prompt.
         XCTAssertFalse(viewModel.shouldShowLoadError)
-        // Error + no cached wallets: show.
+        /// Error + no cached wallets: show.
         viewModel.loadError = .httpError(503)
         XCTAssertTrue(viewModel.shouldShowLoadError)
-        // Error + cached wallets: stay quiet (cached data > error).
+        /// Error + cached wallets: stay quiet (cached data > error).
         appState.availableWallets = [makeWallet(publicId: "p-1")]
         XCTAssertFalse(viewModel.shouldShowLoadError)
     }

@@ -83,7 +83,6 @@ final class AttachBracketSheetViewModelTests: XCTestCase {
 
     func testSubmitShortCircuitsWhenCannotSubmit() async {
         let viewModel = AttachBracketSheetViewModel()
-        // No price text — canSubmit false.
         let calls = BracketCallCounter()
         let result = await viewModel.submit { _, _, _ in
             await calls.increment()

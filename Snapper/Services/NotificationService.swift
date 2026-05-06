@@ -133,14 +133,14 @@ final class NotificationService: ObservableObject {
     func requestAuthorization() async {
         do {
             _ = try await authorizationRequester([.alert, .sound, .badge])
-            // refreshAuthorizationStatus already fires registerForRemote
-            // when the post-grant status is granted AND the user is
-            // logged in, so we let it own the registration call —
-            // routing through the injected closure here too keeps the
-            // grant + durable paths aligned, prevents a back-to-back
-            // double registerForRemoteNotifications() call after the
-            // user accepts the prompt while logged in, and lets tests
-            // assert the call count via the same seam.
+            /// refreshAuthorizationStatus already fires registerForRemote
+            /// when the post-grant status is granted AND the user is
+            /// logged in, so we let it own the registration call —
+            /// routing through the injected closure here too keeps the
+            /// grant + durable paths aligned, prevents a back-to-back
+            /// double registerForRemoteNotifications() call after the
+            /// user accepts the prompt while logged in, and lets tests
+            /// assert the call count via the same seam.
             await refreshAuthorizationStatus()
             if !isAuthorized {
                 logger.info("User declined notification permission")

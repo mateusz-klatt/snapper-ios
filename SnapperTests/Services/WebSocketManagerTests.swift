@@ -338,9 +338,9 @@ final class WebSocketManagerTests: XCTestCase {
         await drainSendTasks()
         XCTAssertGreaterThan(task1.sentMessages.count, 0, "first connect should have sent subscribe directly")
 
-        // Simulate a user-initiated disconnect + reconnect — covers the
-        // explicit-close path. Network-drop + auto-reconnect is covered by
-        // the infinite-backoff tests in Commit 2.
+        /// Simulate a user-initiated disconnect + reconnect — covers the
+        /// explicit-close path. Network-drop + auto-reconnect is covered by
+        /// the infinite-backoff tests in Commit 2.
         manager.disconnect()
         manager.connect()
         manager.handleRawMessage(frame([
@@ -389,7 +389,7 @@ final class WebSocketManagerTests: XCTestCase {
         ]))
         XCTAssertEqual(manager.connectionState, .connected)
 
-        // Simulate a full reconnect swap BEFORE task1's receive() resumes.
+        /// Simulate a full reconnect swap BEFORE task1's receive() resumes.
         manager.disconnect()
         manager.connect()
         manager.handleRawMessage(frame([
@@ -404,9 +404,9 @@ final class WebSocketManagerTests: XCTestCase {
         ]))
         XCTAssertEqual(manager.connectionState, .connected, "task2 should own connected state")
 
-        // Now resume task1's receive() with a stale error. If the guard is
-        // missing, this call will trip handleDisconnection() and flip state
-        // back to .disconnected.
+        /// Now resume task1's receive() with a stale error. If the guard is
+        /// missing, this call will trip handleDisconnection() and flip state
+        /// back to .disconnected.
         task1.pumpError(URLError(.networkConnectionLost))
         await drainSendTasks()
         await drainSendTasks()
@@ -559,8 +559,6 @@ final class WebSocketManagerTests: XCTestCase {
         XCTAssertEqual(manager.connectionState, .connecting)
     }
 
-    // MARK: - Commit 2 (FE-2) coverage
-
     /// Server-driven `auth_failed` frame must route through the same
     /// terminal `enterAuthFailedAndLogout` path as client-side token
     /// refresh failure. Otherwise a server rejection would fall back to
@@ -707,15 +705,15 @@ final class WebSocketManagerTests: XCTestCase {
         )
         let base: TimeInterval = 3
 
-        // Drive attempts forward via disconnect() + connect()? Simpler —
-        // the test-only setter `setReconnectAttemptsForTesting` is
-        // exposed via @testable below. Here we force-dispatch by
-        // directly mutating via repeated `handleDisconnection` calls
-        // that we reach through the public surface.
-        //
-        // We use the simplest reachable path: set should-reconnect false
-        // to avoid the async-after fire, set reconnectAttempts through a
-        // dedicated helper, and read the returned delay.
+        /// Drive attempts forward via disconnect() + connect()? Simpler —
+        /// the test-only setter `setReconnectAttemptsForTesting` is
+        /// exposed via @testable below. Here we force-dispatch by
+        /// directly mutating via repeated `handleDisconnection` calls
+        /// that we reach through the public surface.
+        ///
+        /// We use the simplest reachable path: set should-reconnect false
+        /// to avoid the async-after fire, set reconnectAttempts through a
+        /// dedicated helper, and read the returned delay.
 
         let cases: [Int] = [1, 5, 10, 50]
         for attempts in cases {
@@ -739,14 +737,14 @@ final class WebSocketManagerTests: XCTestCase {
             taskFactory: factory,
             sleeper: FakeSleeper()
         )
-        // Pre-seed to a value well past the old maxReconnectAttempts=10.
+        /// Pre-seed to a value well past the old maxReconnectAttempts=10.
         manager.setReconnectAttemptsForTesting(11)
 
-        // Drive one more disconnect; the attempt counter must advance.
+        /// Drive one more disconnect; the attempt counter must advance.
         let previous = manager.reconnectAttempts
         manager.connect()
-        // Simulate a wire-level drop that would previously have been
-        // suppressed at attempts >= 10.
+        /// Simulate a wire-level drop that would previously have been
+        /// suppressed at attempts >= 10.
         manager.forceHandleDisconnectionForTesting()
         XCTAssertEqual(manager.reconnectAttempts, previous + 1, "reconnectAttempts must keep advancing past the old cap")
     }
@@ -810,23 +808,23 @@ final class WebSocketManagerTests: XCTestCase {
             sleeper: FakeSleeper()
         )
         manager.connect()
-        // Arm a reconnect attempt via the test hook.
+        /// Arm a reconnect attempt via the test hook.
         manager.setReconnectAttemptsForTesting(1)
         manager.forceHandleDisconnectionForTesting()
 
-        // User-initiated disconnect should kill the pending reconnect
-        // before the async-after timer fires.
+        /// User-initiated disconnect should kill the pending reconnect
+        /// before the async-after timer fires.
         manager.disconnect()
 
-        // Let the main queue drain — if the reconnect still fires it
-        // would re-create `webSocketTask` on `connect()`.
+        /// Let the main queue drain — if the reconnect still fires it
+        /// would re-create `webSocketTask` on `connect()`.
         for _ in 0..<20 { await Task.yield() }
-        // Extra guard: wait long enough that even the minimum backoff
-        // interval (base = 3s) would have elapsed in real wall-clock,
-        // but since we just check no connect call happened, we can
-        // assert by state alone (connect would flip connectionState to
-        // .connecting). The async-after has NOT been mocked out here,
-        // so we use a short sleep of ~50ms to let the system settle.
+        /// Extra guard: wait long enough that even the minimum backoff
+        /// interval (base = 3s) would have elapsed in real wall-clock,
+        /// but since we just check no connect call happened, we can
+        /// assert by state alone (connect would flip connectionState to
+        /// .connecting). The async-after has NOT been mocked out here,
+        /// so we use a short sleep of ~50ms to let the system settle.
         try? await Task.sleep(nanoseconds: 50_000_000)
 
         XCTAssertEqual(manager.connectionState, .disconnected, "pending reconnect must NOT reopen the socket after disconnect()")
@@ -847,25 +845,25 @@ final class WebSocketManagerTests: XCTestCase {
             sleeper: FakeSleeper()
         )
         manager.connect()
-        // Start with state = .authenticating — matches the path used by
-        // server-driven "auth_required". Then the manager's
-        // performAuthentication runs, calls fetchFreshWsToken, which
-        // returns nil (simulating the race). Simultaneously disconnect.
+        /// Start with state = .authenticating — matches the path used by
+        /// server-driven "auth_required". Then the manager's
+        /// performAuthentication runs, calls fetchFreshWsToken, which
+        /// returns nil (simulating the race). Simultaneously disconnect.
         manager.handleRawMessage(frame(["type": "auth_required"]))
-        // The detached Task has already started performAuthentication
-        // and awaited fetchFreshWsToken. Immediately tear down.
+        /// The detached Task has already started performAuthentication
+        /// and awaited fetchFreshWsToken. Immediately tear down.
         manager.disconnect()
         await drainSendTasks()
         await drainSendTasks()
 
         let logoutCalls = await fakeAuth.logoutCalls
-        // Expected: 0 logouts — disconnect is not auth failure.
-        // The explicit user-initiated `disconnect()` path does not call
-        // `authService.logout()` either — forced logout is reserved for
-        // the .authFailed terminal state.
+        /// Expected: 0 logouts — disconnect is not auth failure.
+        /// The explicit user-initiated `disconnect()` path does not call
+        /// `authService.logout()` either — forced logout is reserved for
+        /// the .authFailed terminal state.
         XCTAssertEqual(logoutCalls, 0, "disconnect mid-refresh must NOT trigger AuthService.logout()")
-        // And state must be .disconnected (set by disconnect()), not
-        // .authFailed.
+        /// And state must be .disconnected (set by disconnect()), not
+        /// .authFailed.
         XCTAssertEqual(manager.connectionState, .disconnected)
     }
 
@@ -883,7 +881,7 @@ final class WebSocketManagerTests: XCTestCase {
         )
         manager.connect()
 
-        // TTL = 100s — so 80% fire target = 80s.
+        /// TTL = 100s — so 80% fire target = 80s.
         let exp = Date(timeIntervalSinceNow: 100)
         let isoFormatter = ISO8601DateFormatter()
         let expString = isoFormatter.string(from: exp)
@@ -897,8 +895,8 @@ final class WebSocketManagerTests: XCTestCase {
             "user_role": "viewer",
             "ws_token_exp": expString
         ]))
-        // Yield enough for the Task { try await sleeper.sleep(seconds:) }
-        // to register its interval.
+        /// Yield enough for the Task { try await sleeper.sleep(seconds:) }
+        /// to register its interval.
         await drainSendTasks()
         await drainSendTasks()
 

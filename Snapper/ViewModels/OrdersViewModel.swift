@@ -88,10 +88,10 @@ final class OrdersViewModel {
         async let ordersResult = api.fetchOrders()
         async let executionsResult = api.fetchExecutions()
 
-        // Capture both results before mutating errorMessage so a
-        // partial failure on either fetch surfaces — the Fills
-        // segment was previously hiding executions failures because
-        // only fetchOrders' catch was wired up.
+        /// Capture both results before mutating errorMessage so a
+        /// partial failure on either fetch surfaces — the Fills
+        /// segment was previously hiding executions failures because
+        /// only fetchOrders' catch was wired up.
         var encounteredError: String?
         do {
             orders = try await ordersResult
@@ -135,8 +135,7 @@ final class OrdersViewModel {
             submitError = "Couldn't cancel the order. Try again."
         }
     }
-    // backward-compatible test contract)
-
+    /// Backward-compatible test contract.
     /// Backend-canonical "open" lifecycle states. Values mirror
     /// `snapper.core.types.OrderStatusEnum` members that have not
     /// reached a terminal state (`filled`, `cancelled`, `rejected`).

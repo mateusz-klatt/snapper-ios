@@ -156,7 +156,7 @@ final class NotificationPrefsViewModelTests: XCTestCase {
         let viewModel = makeViewModel(deviceId: nil)
         let defaultsResp = makeDefaultsResponse([makeAlertDefault()])
         mockAPI.fetchAlertDefaultsHandler = { defaultsResp }
-        // The handler must NOT fire — record any call to fail loud.
+        /// The handler must NOT fire — record any call to fail loud.
         let calls = NotifPrefsCallCounter()
         mockAPI.fetchDevicePrefsHandler = { _ in
             await calls.increment()
@@ -227,19 +227,19 @@ final class NotificationPrefsViewModelTests: XCTestCase {
         let defaultsResp = makeDefaultsResponse([makeAlertDefault()])
         let prefsResp = makePrefsResponse([])
         mockAPI.fetchAlertDefaultsHandler = {
-            try await Task.sleep(nanoseconds: 100_000_000)  // 100 ms
+            try await Task.sleep(nanoseconds: 100_000_000)
             return defaultsResp
         }
         mockAPI.fetchDevicePrefsHandler = { _ in
-            try await Task.sleep(nanoseconds: 100_000_000)  // 100 ms
+            try await Task.sleep(nanoseconds: 100_000_000)
             return prefsResp
         }
         let started = Date()
         await viewModel.load()
         let elapsedMs = Date().timeIntervalSince(started) * 1000
-        // Sequential would be ≥200 ms (two 100-ms sleeps stacked).
-        // Parallel is ≈100 ms; allow 50 ms slack for actor hop +
-        // CI noise but stay well under the 200 ms regression line.
+        /// Sequential would be ≥200 ms (two 100-ms sleeps stacked).
+        /// Parallel is ≈100 ms; allow 50 ms slack for actor hop +
+        /// CI noise but stay well under the 200 ms regression line.
         XCTAssertLessThan(
             elapsedMs,
             180,
