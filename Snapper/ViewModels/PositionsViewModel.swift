@@ -129,8 +129,7 @@ final class PositionsViewModel {
             return false
         }
     }
-    // backward-compatible test contract)
-
+    /// Backward-compatible test contract.
     /// Pure wallet-match helper. `nil` selection passes through every
     /// row, and `nil` row-side wallet passes through so legacy /
     /// system rows are never silently dropped.

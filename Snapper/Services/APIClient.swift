@@ -104,10 +104,10 @@ final class APIClient: Sendable, APIClientProtocol {
         if let body = body {
             let encoder = JSONEncoder()
             encoder.keyEncodingStrategy = .convertToSnakeCase
-            // ISO-8601 mirrors the response decoder set below at line ~63;
-            // Codable Date fields (e.g. DeviceAlertPrefBody.mute_until)
-            // would otherwise serialize as numeric Unix timestamps and
-            // decode to a wrong instant on the backend.
+            /// ISO-8601 mirrors the response decoder set below at line ~63;
+            /// Codable Date fields (e.g. DeviceAlertPrefBody.mute_until)
+            /// would otherwise serialize as numeric Unix timestamps and
+            /// decode to a wrong instant on the backend.
             encoder.dateEncodingStrategy = .iso8601
             request.httpBody = try encoder.encode(body)
         }
@@ -118,9 +118,9 @@ final class APIClient: Sendable, APIClientProtocol {
             throw APIError.invalidResponse
         }
 
-        // 401 retry path: refresh ws_token exactly once, then replay.
-        // Second 401 → force logout so the UI routes to LoginView via
-        // SnapperApp's isAuthenticated observer.
+        /// 401 retry path: refresh ws_token exactly once, then replay.
+        /// Second 401 → force logout so the UI routes to LoginView via
+        /// SnapperApp's isAuthenticated observer.
         if httpResponse.statusCode == 401 {
             if isRetry {
                 await authService.logout()

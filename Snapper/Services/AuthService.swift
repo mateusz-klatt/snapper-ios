@@ -108,13 +108,13 @@ class AuthService: ObservableObject {
     }()
 
     func logout() async {
-        // Cancel any in-flight refresh BEFORE tearing down local
-        // session state — without this, ``performRefresh()`` can
-        // resolve after logout completes and re-stamp ``wsToken``
-        // with a value bound to a session the user has just signed
-        // out of. The stale token would be picked up by the next
-        // WS reconnect (or REST 401 retry) and bind the next
-        // session to the prior identity for that token's lifetime.
+        /// Cancel any in-flight refresh BEFORE tearing down local
+        /// session state — without this, ``performRefresh()`` can
+        /// resolve after logout completes and re-stamp ``wsToken``
+        /// with a value bound to a session the user has just signed
+        /// out of. The stale token would be picked up by the next
+        /// WS reconnect (or REST 401 retry) and bind the next
+        /// session to the prior identity for that token's lifetime.
         refreshTask?.cancel()
         refreshTask = nil
 
@@ -134,19 +134,19 @@ class AuthService: ObservableObject {
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
         request.setValue(AppConfig.ContentType.json, forHTTPHeaderField: AppConfig.HTTPHeader.contentType)
-        // Bound the logout/refresh endpoints at 10s so a dead network
-        // can't leave us wedged forever. `URLSession.shared` is
-        // immutable, so set this per-URLRequest — the test session is
-        // free to override via its own configuration.
+        /// Bound the logout/refresh endpoints at 10s so a dead network
+        /// can't leave us wedged forever. `URLSession.shared` is
+        /// immutable, so set this per-URLRequest — the test session is
+        /// free to override via its own configuration.
         request.timeoutInterval = 10
 
         do {
             _ = try await session.data(for: request)
         } catch {
-            // Network-level logout failure is non-fatal: local session is
-            // still cleared in `logout()`, but server-side blacklist may
-            // not have run. Log loudly so an oncall reading the device
-            // log can correlate "stale session on next login" reports.
+            /// Network-level logout failure is non-fatal: local session is
+            /// still cleared in `logout()`, but server-side blacklist may
+            /// not have run. Log loudly so an oncall reading the device
+            /// log can correlate "stale session on next login" reports.
             logger.warning("Server-side logout failed (local state still cleared): \(error.localizedDescription, privacy: .public)")
         }
     }
@@ -196,11 +196,11 @@ class AuthService: ObservableObject {
             guard let self else { return nil }
             defer { self.refreshTask = nil }
             let freshToken = await self.performRefresh()
-            // Bail out before the slot write if logout cancelled
-            // the task while the refresh was in flight — applying
-            // a freshly-minted token to a torn-down session would
-            // bind the next login to the prior session's
-            // backend-side state for that token's lifetime.
+            /// Bail out before the slot write if logout cancelled
+            /// the task while the refresh was in flight — applying
+            /// a freshly-minted token to a torn-down session would
+            /// bind the next login to the prior session's
+            /// backend-side state for that token's lifetime.
             if Task.isCancelled {
                 return nil
             }
@@ -226,9 +226,9 @@ class AuthService: ObservableObject {
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
         request.setValue(AppConfig.ContentType.json, forHTTPHeaderField: AppConfig.HTTPHeader.contentType)
-        // Cap refresh attempts at 10s — see logoutFromServer comment for
-        // rationale. Refresh payload is small, so 10s is generous for
-        // real networks; a legitimate hang means the network is dead.
+        /// Cap refresh attempts at 10s — see logoutFromServer comment for
+        /// rationale. Refresh payload is small, so 10s is generous for
+        /// real networks; a legitimate hang means the network is dead.
         request.timeoutInterval = 10
 
         do {

@@ -44,23 +44,23 @@ final class LoginViewModel {
 
     func login() async {
         isLoading = true
-        // Clear the prior error before firing a retry. `errorMessage`
-        // is now a computed passthrough to AuthService, so without
-        // this reset the previous attempt's error stays visible
-        // until the new request finishes — that's a UX regression
-        // from the pre-`@Observable` flow where the VM held its own
-        // `@Published` slot and zeroed it here on every entry.
+        /// Clear the prior error before firing a retry. `errorMessage`
+        /// is now a computed passthrough to AuthService, so without
+        /// this reset the previous attempt's error stays visible
+        /// until the new request finishes — that's a UX regression
+        /// from the pre-`@Observable` flow where the VM held its own
+        /// `@Published` slot and zeroed it here on every entry.
         authService.errorMessage = nil
 
         await authService.login(username: username, password: password)
 
-        // Clear the plaintext password from memory once the login
-        // request resolves — `@Observable` properties stay live for
-        // the view's lifetime otherwise, leaving the password
-        // observable to anything holding the view model. The
-        // privacy policy promises this clear; AuthService has the
-        // session-establishing tokens / cookies it needs, so the
-        // password is no longer required.
+        /// Clear the plaintext password from memory once the login
+        /// request resolves — `@Observable` properties stay live for
+        /// the view's lifetime otherwise, leaving the password
+        /// observable to anything holding the view model. The
+        /// privacy policy promises this clear; AuthService has the
+        /// session-establishing tokens / cookies it needs, so the
+        /// password is no longer required.
         password = ""
         isLoading = false
     }

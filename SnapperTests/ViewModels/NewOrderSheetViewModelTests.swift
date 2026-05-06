@@ -102,7 +102,7 @@ final class NewOrderSheetViewModelTests: XCTestCase {
 
     func testLoadInstrumentsSkipsForEmptySelectedExchange() async {
         let viewModel = makeViewModel(exchanges: [])
-        // The handler must NOT fire — record any call to fail loud.
+        /// The handler must NOT fire — record any call to fail loud.
         let calls = CallCounter()
         mockAPI.fetchInstrumentsHandler = { _ in
             await calls.increment()
@@ -129,11 +129,11 @@ final class NewOrderSheetViewModelTests: XCTestCase {
     /// banner persisted after recovery.
     func testLoadInstrumentsClearsLoadErrorOnRecovery() async {
         let viewModel = makeViewModel()
-        // First attempt fails — stamps loadError.
+        /// First attempt fails — stamps loadError.
         mockAPI.fetchInstrumentsHandler = { _ in throw APIError.invalidResponse }
         await viewModel.loadInstruments()
         XCTAssertNotNil(viewModel.loadError)
-        // Second attempt succeeds — must clear loadError.
+        /// Second attempt succeeds — must clear loadError.
         let instrument = makeInstrument()
         mockAPI.fetchInstrumentsHandler = { _ in [instrument] }
         await viewModel.loadInstruments()
@@ -147,9 +147,9 @@ final class NewOrderSheetViewModelTests: XCTestCase {
     /// new exchange's task will eventually populate.
     func testLoadInstrumentsRaceGuardDropsStaleSuccessResults() async {
         let viewModel = makeViewModel(exchanges: ["kraken", "binance"])
-        // Slow fetch for kraken; fast for binance — but we won't
-        // even let the binance task run; we just need to verify
-        // the kraken stale result is ignored after we change exchange.
+        /// Slow fetch for kraken; fast for binance — but we won't
+        /// even let the binance task run; we just need to verify
+        /// the kraken stale result is ignored after we change exchange.
         mockAPI.fetchInstrumentsHandler = { exchange in
             if exchange == "kraken" {
                 try await Task.sleep(nanoseconds: 50_000_000)
@@ -176,11 +176,11 @@ final class NewOrderSheetViewModelTests: XCTestCase {
             return []
         }
         let task = Task { await viewModel.loadInstruments() }
-        // Give the task time to enter the await, then change exchange.
+        /// Give the task time to enter the await, then change exchange.
         try? await Task.sleep(nanoseconds: 10_000_000)
         viewModel.selectedExchange = "binance"
         await task.value
-        // Stale kraken response must NOT have populated state.
+        /// Stale kraken response must NOT have populated state.
         XCTAssertTrue(
             viewModel.availableInstruments.isEmpty,
             "Race-guard must drop stale fetch result after exchange change"
@@ -206,11 +206,11 @@ final class NewOrderSheetViewModelTests: XCTestCase {
         }
         let task = Task { await viewModel.loadInstruments() }
         try? await Task.sleep(nanoseconds: 10_000_000)
-        // Switch to binance; simulate the .task(id:) modifier
-        // firing a fresh in-flight loading state.
+        /// Switch to binance; simulate the .task(id:) modifier
+        /// firing a fresh in-flight loading state.
         viewModel.selectedExchange = "binance"
         viewModel.isLoadingInstruments = true
-        // Stale kraken task completes and runs its defer block.
+        /// Stale kraken task completes and runs its defer block.
         await task.value
         XCTAssertTrue(
             viewModel.isLoadingInstruments,
@@ -245,7 +245,7 @@ final class NewOrderSheetViewModelTests: XCTestCase {
     /// keep a phantom row.
     func testLoadInstrumentsClearsStaleSelectedInstrumentMissingFromFetch() async {
         let viewModel = makeViewModel()
-        // Pre-select an instrument that the upcoming fetch will not return.
+        /// Pre-select an instrument that the upcoming fetch will not return.
         viewModel.selectedInstrument = makeInstrument(instrumentPublicId: "delisted")
         mockAPI.fetchInstrumentsHandler = { _ in [] }
         await viewModel.loadInstruments()
@@ -271,7 +271,7 @@ final class NewOrderSheetViewModelTests: XCTestCase {
     /// a new exchange's name.
     func testLoadInstrumentsClearsStaleSelectedInstrumentFromOtherExchange() async {
         let viewModel = makeViewModel(exchanges: ["binance"])
-        // Pre-select an instrument from a previous exchange.
+        /// Pre-select an instrument from a previous exchange.
         viewModel.selectedInstrument = makeInstrument(
             instrumentPublicId: "old",
             exchange: "kraken"
@@ -302,7 +302,7 @@ final class NewOrderSheetViewModelTests: XCTestCase {
 
     func testSubmitReturnsFalseAndSkipsClosureWhenBuildBodyReturnsNil() async {
         let viewModel = makeViewModel()
-        // No instrument → buildBody returns nil → submit short-circuits.
+        /// No instrument → buildBody returns nil → submit short-circuits.
         let calls = CallCounter()
         let result = await viewModel.submit { _ in
             await calls.increment()
@@ -343,9 +343,9 @@ final class NewOrderSheetViewModelTests: XCTestCase {
                 return true
             }
         }
-        // Allow the first call to enter the await.
+        /// Allow the first call to enter the await.
         try? await Task.sleep(nanoseconds: 10_000_000)
-        // Second submit while the first is in flight — must reject.
+        /// Second submit while the first is in flight — must reject.
         let secondResult = await viewModel.submit { _ in
             await counter.increment()
             return true
@@ -365,12 +365,12 @@ final class NewOrderSheetViewModelTests: XCTestCase {
         viewModel.quantityText = "1"
         viewModel.orderType = "market"
         let collector = KeyCollector()
-        // First attempt fails.
+        /// First attempt fails.
         _ = await viewModel.submit { body in
             await collector.append(body.idempotencyKey ?? "")
             return false
         }
-        // Retry must reuse the same key.
+        /// Retry must reuse the same key.
         _ = await viewModel.submit { body in
             await collector.append(body.idempotencyKey ?? "")
             return true

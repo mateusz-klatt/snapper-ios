@@ -259,14 +259,13 @@ final class NotificationServiceTests: XCTestCase {
             )
         )
     }
-    //
-    // The pure-helper tests above prove the decision logic. These
-    // tests prove the WIRING — that the result of the decision
-    // helper actually fires the injected `registerForRemote`
-    // closure. They use `refreshWithStatusForTests` to bypass the
-    // simulator UNUserNotificationCenter (which always reports
-    // .notDetermined) and pin a chosen status directly.
-
+    /// The pure-helper tests above prove the decision logic. These
+    /// tests prove the WIRING — that the result of the decision
+    /// helper actually fires the injected `registerForRemote`
+    /// closure. They use `refreshWithStatusForTests` to bypass the
+    /// simulator UNUserNotificationCenter (which always reports
+    /// .notDetermined) and pin a chosen status directly.
+    ///
     /// Granted + logged-in path — the durable APNs re-register hook
     /// fires `registerForRemote()` exactly once. Without this wiring
     /// guard, a future refactor could swap the decision helper for

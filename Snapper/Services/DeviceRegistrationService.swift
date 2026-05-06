@@ -184,15 +184,15 @@ actor DeviceRegistrationService {
         )
         do {
             let response = try await apiClient.registerDevice(command: command)
-            // Re-entrancy guard: actors are re-entrant across
-            // ``await``, so ``onLogout()`` could have run while the
-            // ``apiClient.registerDevice`` round-trip was in flight.
-            // Without re-checking ``isLoggedIn`` here, a successful
-            // response that lands after logout would re-populate
-            // ``lastRegisteredDevicePublicId`` (and flip ``status``
-            // back to ``.succeeded``) for a session the user has
-            // already torn down — exactly the cross-user-leak window
-            // ``onLogout()``'s slot clear was meant to close.
+            /// Re-entrancy guard: actors are re-entrant across
+            /// ``await``, so ``onLogout()`` could have run while the
+            /// ``apiClient.registerDevice`` round-trip was in flight.
+            /// Without re-checking ``isLoggedIn`` here, a successful
+            /// response that lands after logout would re-populate
+            /// ``lastRegisteredDevicePublicId`` (and flip ``status``
+            /// back to ``.succeeded``) for a session the user has
+            /// already torn down — exactly the cross-user-leak window
+            /// ``onLogout()``'s slot clear was meant to close.
             guard isLoggedIn else {
                 logger.info("Device registration response landed after logout; dropping result.")
                 return
@@ -201,11 +201,11 @@ actor DeviceRegistrationService {
             status = .succeeded
             logger.info("Device registered: \(response.payload.publicId)")
         } catch {
-            // Same re-entrancy guard for the failure branch — without
-            // it, a registration failure that resolves after logout
-            // would leave ``status`` pinned at ``.failed`` with a
-            // stale attempt counter and even schedule a retry against
-            // a torn-down session.
+            /// Same re-entrancy guard for the failure branch — without
+            /// it, a registration failure that resolves after logout
+            /// would leave ``status`` pinned at ``.failed`` with a
+            /// stale attempt counter and even schedule a retry against
+            /// a torn-down session.
             guard isLoggedIn else {
                 logger.info("Device registration error landed after logout; dropping retry schedule.")
                 return

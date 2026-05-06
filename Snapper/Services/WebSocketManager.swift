@@ -87,10 +87,10 @@ class WebSocketManager: ObservableObject {
         if case .connected = connectionState { return }
         if case .connecting = connectionState { return }
         if case .authenticating = connectionState { return }
-        // `.authFailed` is terminal — the user must explicitly re-authenticate
-        // via `LoginView` (which resets AuthService.isAuthenticated and drives
-        // `SnapperApp`'s auth-change observer). Silently reconnecting from
-        // here would defeat the kill-switch the logout path just armed.
+        /// `.authFailed` is terminal — the user must explicitly re-authenticate
+        /// via `LoginView` (which resets AuthService.isAuthenticated and drives
+        /// `SnapperApp`'s auth-change observer). Silently reconnecting from
+        /// here would defeat the kill-switch the logout path just armed.
         if case .authFailed = connectionState { return }
 
         guard let url = URL(string: webSocketURLProvider()) else {
@@ -191,28 +191,28 @@ class WebSocketManager: ObservableObject {
             do {
                 let message = try await task.receive()
                 guard let self = self else { return }
-                // Continue the read loop only while the in-flight task still
-                // matches the one we kicked off — guards against double-loops
-                // if the socket was swapped while `receive()` was suspended.
+                /// Continue the read loop only while the in-flight task still
+                /// matches the one we kicked off — guards against double-loops
+                /// if the socket was swapped while `receive()` was suspended.
                 guard let current = self.webSocketTask, current === task else {
                     return
                 }
                 self.handleRawMessage(message)
-                // handleRawMessage may have mutated webSocketTask (e.g.
-                // auth_failed cancels the task). Re-check before recursing
-                // so we never loop on a stale reference.
+                /// handleRawMessage may have mutated webSocketTask (e.g.
+                /// auth_failed cancels the task). Re-check before recursing
+                /// so we never loop on a stale reference.
                 if let now = self.webSocketTask, now === task {
                     self.listenForMessages()
                 }
             } catch {
                 guard let self = self else { return }
-                // Stale errors from a task we've already replaced or nilled
-                // must not touch shared state — otherwise an old receive()
-                // resuming after `disconnect()`, `enterAuthFailedAndLogout`,
-                // or a full reconnect swap would wipe the new socket via
-                // `handleDisconnection()`. The only case where this catch
-                // path has work to do is when the current task is STILL
-                // the one we suspended on.
+                /// Stale errors from a task we've already replaced or nilled
+                /// must not touch shared state — otherwise an old receive()
+                /// resuming after `disconnect()`, `enterAuthFailedAndLogout`,
+                /// or a full reconnect swap would wipe the new socket via
+                /// `handleDisconnection()`. The only case where this catch
+                /// path has work to do is when the current task is STILL
+                /// the one we suspended on.
                 guard let current = self.webSocketTask, current === task else {
                     return
                 }
@@ -256,9 +256,9 @@ class WebSocketManager: ObservableObject {
         case "auth_failed":
             let reason = json["reason"] as? String ?? "unknown"
             logger.error("WebSocket auth rejected by server: \(reason)")
-            // Server rejection is also terminal — route through the same
-            // logout flow as client-side refresh failure so the UI
-            // consistently falls back to LoginView.
+            /// Server rejection is also terminal — route through the same
+            /// logout flow as client-side refresh failure so the UI
+            /// consistently falls back to LoginView.
             Task { await self.enterAuthFailedAndLogout(reason: "Server rejected auth: \(reason)") }
 
         case "reauth_required":
@@ -292,8 +292,8 @@ class WebSocketManager: ObservableObject {
             availableTopics = parsed.availableTopics
             state.wsTokenExp = parsed.wsTokenExp
         } else if let topics = rawJSON["available_topics"] as? [String] {
-            // Fallback: keep the pre-envelope behaviour so partial frames
-            // from older backends still expose topic lists to the UI.
+            /// Fallback: keep the pre-envelope behaviour so partial frames
+            /// from older backends still expose topic lists to the UI.
             availableTopics = topics
         }
 
@@ -315,8 +315,8 @@ class WebSocketManager: ObservableObject {
         let fireAt = ttl * 0.8
         if fireAt <= 0 {
             logger.warning("ws_token already >= 80% expired on arrival; refreshing immediately")
-            // Track the immediate-refresh path too so a disconnect
-            // arriving before the refresh fires cancels it cleanly.
+            /// Track the immediate-refresh path too so a disconnect
+            /// arriving before the refresh fires cancels it cleanly.
             proactiveRefreshTask = Task { [weak self] in
                 guard let self = self, !Task.isCancelled else { return }
                 await self.performReauthentication()
@@ -331,7 +331,7 @@ class WebSocketManager: ObservableObject {
                 guard let self = self else { return }
                 await self.performReauthentication()
             } catch {
-                // Task cancelled — normal on disconnect.
+                /// Task cancelled — normal on disconnect.
             }
         }
     }
@@ -457,14 +457,14 @@ class WebSocketManager: ObservableObject {
 
         reconnectAttempts += 1
         let delay = nextReconnectDelay()
-        // Cancel any previously-armed reconnect so we never double-fire.
+        /// Cancel any previously-armed reconnect so we never double-fire.
         reconnectWorkItem?.cancel()
         let workItem = DispatchWorkItem { [weak self] in
             Task { @MainActor in
                 guard let self = self else { return }
-                // Re-check the intent right before reconnecting — a
-                // disconnect/background/logout that arrived while we
-                // were queued must win over the stale reconnect.
+                /// Re-check the intent right before reconnecting — a
+                /// disconnect/background/logout that arrived while we
+                /// were queued must win over the stale reconnect.
                 guard self.shouldReconnect else { return }
                 self.connect()
             }
@@ -484,13 +484,10 @@ class WebSocketManager: ObservableObject {
         return capped + jitter
     }
 
-    // MARK: - Test hooks (internal, @testable visibility only)
-    //
-    // Swift gives test bundles using `@testable import` visibility into
-    // `internal` symbols. These helpers expose just enough state to test
-    // the infinite-retry invariant + backoff range without bouncing off
-    // `DispatchQueue.asyncAfter` or `URLSession.webSocketTask`.
-
+    /// Swift gives test bundles using `@testable import` visibility into
+    /// `internal` symbols. These helpers expose just enough state to test
+    /// the infinite-retry invariant + backoff range without bouncing off
+    /// `DispatchQueue.asyncAfter` or `URLSession.webSocketTask`.
     func setReconnectAttemptsForTesting(_ n: Int) {
         reconnectAttempts = n
     }

@@ -138,9 +138,9 @@ struct HomeView: View {
     }
 
     private var connectionStatusView: some View {
-        // TimelineView re-evaluates every 1s so heartbeat freshness color
-        // transitions green → amber → red as time passes between frames
-        // even when no new @Published update fires from `webSocketManager`.
+        /// TimelineView re-evaluates every 1s so heartbeat freshness color
+        /// transitions green → amber → red as time passes between frames
+        /// even when no new @Published update fires from `webSocketManager`.
         TimelineView(.periodic(from: .now, by: 1)) { context in
             HStack {
                 Circle()

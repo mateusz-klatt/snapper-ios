@@ -144,8 +144,8 @@ struct NewOrderSheet: View {
                 ToolbarItem(placement: .confirmationAction) {
                     Button("Submit") {
                         Task {
-                            // Keep the sheet open on failure so the user can correct
-                            // input and retry under the same idempotency key.
+                            /// Keep the sheet open on failure so the user can correct
+                            /// input and retry under the same idempotency key.
                             if await viewModel.submit(via: onSubmit) {
                                 dismiss()
                             }

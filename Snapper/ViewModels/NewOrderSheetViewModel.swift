@@ -126,23 +126,23 @@ final class NewOrderSheetViewModel {
     /// exchange cannot overwrite the current state.
     func loadInstruments() async {
         guard !selectedExchange.isEmpty else { return }
-        // Synchronously clear stale rows BEFORE the await so the
-        // user cannot tap Submit during the fetch and ship the
-        // previous exchange's instrument under a new exchange's
-        // name.
+        /// Synchronously clear stale rows BEFORE the await so the
+        /// user cannot tap Submit during the fetch and ship the
+        /// previous exchange's instrument under a new exchange's
+        /// name.
         let exchangeBeingLoaded = selectedExchange
         if selectedInstrument?.exchange != exchangeBeingLoaded {
             selectedInstrument = nil
         }
         availableInstruments = []
         isLoadingInstruments = true
-        // Race-guard the loading-flag write too: a stale task
-        // returning after the user picked a fresh exchange must NOT
-        // flip `isLoadingInstruments` back to `false` and re-enable
-        // Submit while the new task is still in flight. Tying the
-        // defer to the same exchange-token check that gates the
-        // payload writes keeps the loading UI consistent with the
-        // current task.
+        /// Race-guard the loading-flag write too: a stale task
+        /// returning after the user picked a fresh exchange must NOT
+        /// flip `isLoadingInstruments` back to `false` and re-enable
+        /// Submit while the new task is still in flight. Tying the
+        /// defer to the same exchange-token check that gates the
+        /// payload writes keeps the loading UI consistent with the
+        /// current task.
         defer {
             if exchangeBeingLoaded == selectedExchange {
                 isLoadingInstruments = false
@@ -150,33 +150,33 @@ final class NewOrderSheetViewModel {
         }
         do {
             let fetched = try await api.fetchInstruments(exchange: exchangeBeingLoaded)
-            // Race-guard: if the user changed exchange while we were
-            // waiting, the .task(id: selectedExchange) modifier on the
-            // View has already started a fresh task — defensively bail
-            // so the stale payload does not clobber the new task's
-            // populated state.
+            /// Race-guard: if the user changed exchange while we were
+            /// waiting, the .task(id: selectedExchange) modifier on the
+            /// View has already started a fresh task — defensively bail
+            /// so the stale payload does not clobber the new task's
+            /// populated state.
             guard exchangeBeingLoaded == selectedExchange else { return }
             availableInstruments = fetched
-            // Clear sticky load-error on recovery (Q9a regression
-            // guard from the v0.3.1 architect consensus). The
-            // pre-MVVM body never reset this slot, so a successful
-            // retry left the error banner showing.
+            /// Clear sticky load-error on recovery (Q9a regression
+            /// guard from the v0.3.1 architect consensus). The
+            /// pre-MVVM body never reset this slot, so a successful
+            /// retry left the error banner showing.
             loadError = nil
             if let current = selectedInstrument,
                !fetched.contains(where: { $0.instrumentPublicId == current.instrumentPublicId }) {
                 selectedInstrument = nil
             }
         } catch {
-            // Preserve the device-log diagnostic the pre-MVVM body
-            // emitted so an oncall reading sysdiag can still
-            // correlate "instruments missing" reports with the
-            // underlying error + venue.
+            /// Preserve the device-log diagnostic the pre-MVVM body
+            /// emitted so an oncall reading sysdiag can still
+            /// correlate "instruments missing" reports with the
+            /// underlying error + venue.
             logger.error(
                 "Failed to load instruments for \(exchangeBeingLoaded, privacy: .public): \(error.localizedDescription, privacy: .public)"
             )
-            // Race-guard the error path too: a failure on the
-            // previous exchange must not surface an error banner
-            // for the exchange the user has since switched to.
+            /// Race-guard the error path too: a failure on the
+            /// previous exchange must not surface an error banner
+            /// for the exchange the user has since switched to.
             guard exchangeBeingLoaded == selectedExchange else { return }
             loadError = "Couldn't load instruments. Pull to refresh."
             availableInstruments = []
@@ -205,8 +205,8 @@ final class NewOrderSheetViewModel {
         defer { isSubmitting = false }
         return await onSubmit(body)
     }
-    // existing test contract; tests reference `NewOrderSheetViewModel.X`
-    // after the v0.3.1 migration)
+    /// Existing test contract; tests reference `NewOrderSheetViewModel.X`
+    /// after the v0.3.1 migration.
 
     static let orderTypes: [String] = ["limit", "market", "stop", "stop_limit"]
 

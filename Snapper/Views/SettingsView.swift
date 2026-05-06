@@ -145,7 +145,7 @@ struct SettingsView: View {
             }
         }
         .alert("Logout", isPresented: $showingLogoutAlert) {
-            Button("Cancel", role: .cancel) { /* Dismiss alert with no action */ }
+            Button("Cancel", role: .cancel, action: dismissLogoutAlert)
             Button("Logout", role: .destructive) {
                 logout()
             }
@@ -245,7 +245,14 @@ struct SettingsView: View {
         }
     }
 
-    /// No-op handler for the alert's ``Cancel`` button.
+    /// No-op handler for the logout alert's ``Cancel`` button.
+    ///
+    /// SwiftUI dismisses the alert automatically for cancel-role
+    /// buttons; naming the no-op keeps the call site free of inline
+    /// empty closures and block comments.
+    private func dismissLogoutAlert() {}
+
+    /// No-op handler for the backend-change alert's ``Cancel`` button.
     ///
     /// SwiftUI ``alert(_:isPresented:actions:)`` requires a closure
     /// for every button; the Cancel role automatically dismisses the

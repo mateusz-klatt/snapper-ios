@@ -250,24 +250,24 @@ final class DeviceRegistrationServiceTests: XCTestCase {
         let token = Data([0x42])
 
         MockURLProtocol.requestHandler = { _ in
-            // Hold the URLProtocol thread long enough for onLogout()
-            // to run and take the actor turn before the response
-            // resolves.
+            /// Hold the URLProtocol thread long enough for onLogout()
+            /// to run and take the actor turn before the response
+            /// resolves.
             Thread.sleep(forTimeInterval: 0.2)
             return MockURLProtocol.jsonResponse(statusCode: 200, json: _deviceResponseJSON)
         }
 
         await service.onLogin()
-        // Fire register; the inner await holds for ~200 ms.
+        /// Fire register; the inner await holds for ~200 ms.
         let registerTask = Task { await service.onTokenReceived(token) }
 
-        // Yield long enough for the URLProtocol thread to hit the
-        // sleep, then fire logout while register is in flight.
+        /// Yield long enough for the URLProtocol thread to hit the
+        /// sleep, then fire logout while register is in flight.
         try? await Task.sleep(nanoseconds: 50_000_000)
         await service.onLogout()
 
-        // Drain the register Task so the test observes the
-        // post-response actor state.
+        /// Drain the register Task so the test observes the
+        /// post-response actor state.
         await registerTask.value
 
         let pid = await service.currentDevicePublicId()
