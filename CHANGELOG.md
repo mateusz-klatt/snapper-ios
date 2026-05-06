@@ -27,6 +27,14 @@ uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   load). Sonar's accept-via-comment workaround conflicts with the
   no-comments rule; suppressing at config level keeps both rules
   green.
+- Ignored `swift:S2068` on `LoginViewModel.swift` (the SwiftUI
+  ``@State`` `password` binding is form input, not a stored secret —
+  historically marked False-Positive in the SonarCloud UI; the
+  ignore lifts that mark into version control so it survives
+  line-number drift across releases) and `swift:S7435` on
+  `DeviceRegistrationService.swift` (`identifierForVendor` is the
+  Apple-recommended privacy-friendly device id, declared in
+  `PrivacyInfo.xcprivacy` under the DeviceID Required-Reason API).
 
 MVVM extraction trajectory toward global ≥80% unit-test coverage —
 the architecture rules + concurrency / mocking conventions live in
