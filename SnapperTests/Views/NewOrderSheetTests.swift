@@ -39,6 +39,37 @@ final class NewOrderSheetTests: XCTestCase {
         )
     }
 
+    private static func baseForm() -> NewOrderSheetViewModel.OrderFormSnapshot {
+        return NewOrderSheetViewModel.OrderFormSnapshot(
+            instrument: makeInstrument(),
+            selectedExchange: "kraken",
+            side: "buy",
+            orderType: "market",
+            quantityText: "1",
+            priceText: "",
+            stopPriceText: "",
+            leverageText: "",
+            reduceOnly: false
+        )
+    }
+
+    private static func baseGate() -> NewOrderSheetViewModel.SubmitGateState {
+        return NewOrderSheetViewModel.SubmitGateState(
+            isLoadingInstruments: false,
+            isSubmitting: false
+        )
+    }
+
+    private static func walletContext(
+        publicId: String = "w",
+        isPaper: Bool = false
+    ) -> NewOrderSheetViewModel.WalletContext {
+        return NewOrderSheetViewModel.WalletContext(
+            publicId: publicId,
+            isPaper: isPaper
+        )
+    }
+
     private static let testIdempotencyKey: String = "test-idempotency-key"
 
     /// Two venues can list the same `symbol` (e.g. "BTC-USD" exists
@@ -59,22 +90,20 @@ final class NewOrderSheetTests: XCTestCase {
             symbol: "BTC-USD",
             exchange: "kraken_futures"
         )
+        var spotForm = Self.baseForm()
+        spotForm.instrument = krakenSpot
+        spotForm.selectedExchange = "kraken"
         let bodySpot = NewOrderSheetViewModel.buildBody(
-            instrument: krakenSpot,
-            selectedExchange: "kraken",
-            walletPublicId: "w", walletIsPaper: false,
-            side: "buy", orderType: "market",
-            quantityText: "1", priceText: "", stopPriceText: "",
-            leverageText: "", reduceOnly: false,
+            form: spotForm,
+            wallet: Self.walletContext(),
             idempotencyKey: Self.testIdempotencyKey
         )
+        var futuresForm = Self.baseForm()
+        futuresForm.instrument = krakenFutures
+        futuresForm.selectedExchange = "kraken_futures"
         let bodyFutures = NewOrderSheetViewModel.buildBody(
-            instrument: krakenFutures,
-            selectedExchange: "kraken_futures",
-            walletPublicId: "w", walletIsPaper: false,
-            side: "buy", orderType: "market",
-            quantityText: "1", priceText: "", stopPriceText: "",
-            leverageText: "", reduceOnly: false,
+            form: futuresForm,
+            wallet: Self.walletContext(),
             idempotencyKey: Self.testIdempotencyKey
         )
         XCTAssertEqual(bodySpot?.instrumentPublicId, "inst-kraken-spot-btc")
@@ -91,13 +120,12 @@ final class NewOrderSheetTests: XCTestCase {
     /// venue's name is the worst case the original symbol-keyed bug
     /// could produce.
     func testBuildBodyRejectsExchangeMismatch() {
+        var form = Self.baseForm()
+        form.instrument = Self.makeInstrument(exchange: "kraken")
+        form.selectedExchange = "kraken_futures"
         XCTAssertNil(NewOrderSheetViewModel.buildBody(
-            instrument: Self.makeInstrument(exchange: "kraken"),
-            selectedExchange: "kraken_futures",
-            walletPublicId: "w", walletIsPaper: false,
-            side: "buy", orderType: "market",
-            quantityText: "1", priceText: "", stopPriceText: "",
-            leverageText: "", reduceOnly: false,
+            form: form,
+            wallet: Self.walletContext(),
             idempotencyKey: Self.testIdempotencyKey
         ))
     }
@@ -125,35 +153,30 @@ final class NewOrderSheetTests: XCTestCase {
     /// the SwiftUI Form so the caller cannot fire requests that
     /// the backend would 422.
     func testCanSubmitRejectsMissingInstrument() {
+        var form = Self.baseForm()
+        form.instrument = nil
         XCTAssertFalse(NewOrderSheetViewModel.canSubmit(
-            instrument: nil,
-            selectedExchange: "kraken",
-            isLoadingInstruments: false,
-            quantityText: "1", priceText: "100", stopPriceText: "",
-            orderType: "limit",
-            isSubmitting: false
+            form: form,
+            gate: Self.baseGate()
         ))
     }
 
     func testCanSubmitRejectsMarketDataOnlyInstrument() {
+        var form = Self.baseForm()
+        form.instrument = Self.makeInstrument(canTrade: false)
         XCTAssertFalse(NewOrderSheetViewModel.canSubmit(
-            instrument: Self.makeInstrument(canTrade: false),
-            selectedExchange: "kraken",
-            isLoadingInstruments: false,
-            quantityText: "1", priceText: "", stopPriceText: "",
-            orderType: "market",
-            isSubmitting: false
+            form: form,
+            gate: Self.baseGate()
         ))
     }
 
     func testCanSubmitRejectsExchangeMismatch() {
+        var form = Self.baseForm()
+        form.instrument = Self.makeInstrument(exchange: "kraken")
+        form.selectedExchange = "kraken_futures"
         XCTAssertFalse(NewOrderSheetViewModel.canSubmit(
-            instrument: Self.makeInstrument(exchange: "kraken"),
-            selectedExchange: "kraken_futures",
-            isLoadingInstruments: false,
-            quantityText: "1", priceText: "", stopPriceText: "",
-            orderType: "market",
-            isSubmitting: false
+            form: form,
+            gate: Self.baseGate()
         ))
     }
 
@@ -162,78 +185,65 @@ final class NewOrderSheetTests: XCTestCase {
     /// fire the previously-selected instrument under a new
     /// exchange's name.
     func testCanSubmitBlockedWhileInstrumentsLoading() {
+        var gate = Self.baseGate()
+        gate.isLoadingInstruments = true
         XCTAssertFalse(NewOrderSheetViewModel.canSubmit(
-            instrument: Self.makeInstrument(),
-            selectedExchange: "kraken",
-            isLoadingInstruments: true,
-            quantityText: "1", priceText: "", stopPriceText: "",
-            orderType: "market",
-            isSubmitting: false
+            form: Self.baseForm(),
+            gate: gate
         ))
     }
 
     func testCanSubmitRejectsZeroOrMissingQuantity() {
-        let instrument = Self.makeInstrument()
+        var form = Self.baseForm()
+        form.quantityText = ""
         XCTAssertFalse(NewOrderSheetViewModel.canSubmit(
-            instrument: instrument,
-            selectedExchange: "kraken",
-            isLoadingInstruments: false,
-            quantityText: "", priceText: "", stopPriceText: "",
-            orderType: "market", isSubmitting: false
+            form: form,
+            gate: Self.baseGate()
         ))
+        form.quantityText = "0"
         XCTAssertFalse(NewOrderSheetViewModel.canSubmit(
-            instrument: instrument,
-            selectedExchange: "kraken",
-            isLoadingInstruments: false,
-            quantityText: "0", priceText: "", stopPriceText: "",
-            orderType: "market", isSubmitting: false
+            form: form,
+            gate: Self.baseGate()
         ))
     }
 
     func testCanSubmitRequiresPriceForLimit() {
-        let instrument = Self.makeInstrument()
+        var form = Self.baseForm()
+        form.orderType = "limit"
+        form.priceText = ""
         XCTAssertFalse(NewOrderSheetViewModel.canSubmit(
-            instrument: instrument,
-            selectedExchange: "kraken",
-            isLoadingInstruments: false,
-            quantityText: "1", priceText: "", stopPriceText: "",
-            orderType: "limit", isSubmitting: false
+            form: form,
+            gate: Self.baseGate()
         ))
+        form.priceText = "100"
         XCTAssertTrue(NewOrderSheetViewModel.canSubmit(
-            instrument: instrument,
-            selectedExchange: "kraken",
-            isLoadingInstruments: false,
-            quantityText: "1", priceText: "100", stopPriceText: "",
-            orderType: "limit", isSubmitting: false
+            form: form,
+            gate: Self.baseGate()
         ))
     }
 
     func testCanSubmitRequiresStopPriceForStopLimit() {
-        let instrument = Self.makeInstrument()
+        var form = Self.baseForm()
+        form.orderType = "stop_limit"
+        form.priceText = "100"
+        form.stopPriceText = ""
         XCTAssertFalse(NewOrderSheetViewModel.canSubmit(
-            instrument: instrument,
-            selectedExchange: "kraken",
-            isLoadingInstruments: false,
-            quantityText: "1", priceText: "100", stopPriceText: "",
-            orderType: "stop_limit", isSubmitting: false
+            form: form,
+            gate: Self.baseGate()
         ))
+        form.stopPriceText = "95"
         XCTAssertTrue(NewOrderSheetViewModel.canSubmit(
-            instrument: instrument,
-            selectedExchange: "kraken",
-            isLoadingInstruments: false,
-            quantityText: "1", priceText: "100", stopPriceText: "95",
-            orderType: "stop_limit", isSubmitting: false
+            form: form,
+            gate: Self.baseGate()
         ))
     }
 
     func testCanSubmitMarketOrderJustNeedsQuantity() {
-        let instrument = Self.makeInstrument()
+        var form = Self.baseForm()
+        form.quantityText = "0.25"
         XCTAssertTrue(NewOrderSheetViewModel.canSubmit(
-            instrument: instrument,
-            selectedExchange: "kraken",
-            isLoadingInstruments: false,
-            quantityText: "0.25", priceText: "", stopPriceText: "",
-            orderType: "market", isSubmitting: false
+            form: form,
+            gate: Self.baseGate()
         ))
     }
 
@@ -244,18 +254,16 @@ final class NewOrderSheetTests: XCTestCase {
     /// (avoids ambiguous "use venue defaults" semantics on the
     /// server side).
     func testBuildBodyPropagatesPickerSelectionsAndParsedNumbers() {
+        var form = Self.baseForm()
+        form.side = "sell"
+        form.orderType = "limit"
+        form.quantityText = "1.25"
+        form.priceText = "65000.5"
+        form.leverageText = "5"
+        form.reduceOnly = true
         let body = NewOrderSheetViewModel.buildBody(
-            instrument: Self.makeInstrument(),
-            selectedExchange: "kraken",
-            walletPublicId: "wallet-9",
-            walletIsPaper: false,
-            side: "sell",
-            orderType: "limit",
-            quantityText: "1.25",
-            priceText: "65000.5",
-            stopPriceText: "",
-            leverageText: "5",
-            reduceOnly: true,
+            form: form,
+            wallet: Self.walletContext(publicId: "wallet-9"),
             idempotencyKey: Self.testIdempotencyKey
         )
         XCTAssertNotNil(body)
@@ -277,14 +285,11 @@ final class NewOrderSheetTests: XCTestCase {
     }
 
     func testBuildBodyReturnsNilWhenGateFails() {
+        var form = Self.baseForm()
+        form.instrument = Self.makeInstrument(canTrade: false)
         XCTAssertNil(NewOrderSheetViewModel.buildBody(
-            instrument: Self.makeInstrument(canTrade: false),
-            selectedExchange: "kraken",
-            walletPublicId: "wallet-9",
-            walletIsPaper: false,
-            side: "buy", orderType: "market",
-            quantityText: "1", priceText: "", stopPriceText: "",
-            leverageText: "", reduceOnly: false,
+            form: form,
+            wallet: Self.walletContext(publicId: "wallet-9"),
             idempotencyKey: Self.testIdempotencyKey
         ))
     }
@@ -295,13 +300,8 @@ final class NewOrderSheetTests: XCTestCase {
     /// real money on a paper-wallet user's behalf.
     func testBuildBodyForPaperWalletStampsPaperMode() {
         let body = NewOrderSheetViewModel.buildBody(
-            instrument: Self.makeInstrument(),
-            selectedExchange: "kraken",
-            walletPublicId: "paper-wallet",
-            walletIsPaper: true,
-            side: "buy", orderType: "market",
-            quantityText: "0.1", priceText: "", stopPriceText: "",
-            leverageText: "", reduceOnly: false,
+            form: Self.baseForm(),
+            wallet: Self.walletContext(publicId: "paper-wallet", isPaper: true),
             idempotencyKey: Self.testIdempotencyKey
         )
         XCTAssertEqual(body?.mode, "paper")
@@ -309,13 +309,8 @@ final class NewOrderSheetTests: XCTestCase {
 
     func testBuildBodyForLiveWalletStampsLiveMode() {
         let body = NewOrderSheetViewModel.buildBody(
-            instrument: Self.makeInstrument(),
-            selectedExchange: "kraken",
-            walletPublicId: "live-wallet",
-            walletIsPaper: false,
-            side: "buy", orderType: "market",
-            quantityText: "0.1", priceText: "", stopPriceText: "",
-            leverageText: "", reduceOnly: false,
+            form: Self.baseForm(),
+            wallet: Self.walletContext(publicId: "live-wallet"),
             idempotencyKey: Self.testIdempotencyKey
         )
         XCTAssertEqual(body?.mode, "live")
@@ -326,12 +321,8 @@ final class NewOrderSheetTests: XCTestCase {
     /// dedup index instead of creating a duplicate live order.
     func testBuildBodyPropagatesIdempotencyKey() {
         let body = NewOrderSheetViewModel.buildBody(
-            instrument: Self.makeInstrument(),
-            selectedExchange: "kraken",
-            walletPublicId: "w", walletIsPaper: false,
-            side: "buy", orderType: "market",
-            quantityText: "1", priceText: "", stopPriceText: "",
-            leverageText: "", reduceOnly: false,
+            form: Self.baseForm(),
+            wallet: Self.walletContext(),
             idempotencyKey: "stable-key-42"
         )
         XCTAssertEqual(body?.idempotencyKey, "stable-key-42")

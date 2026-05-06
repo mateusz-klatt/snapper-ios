@@ -45,6 +45,28 @@ import os
 @Observable
 final class NewOrderSheetViewModel {
 
+    struct OrderFormSnapshot {
+        var instrument: InstrumentDetailData?
+        var selectedExchange: String
+        var side: String
+        var orderType: String
+        var quantityText: String
+        var priceText: String
+        var stopPriceText: String
+        var leverageText: String
+        var reduceOnly: Bool
+    }
+
+    struct SubmitGateState {
+        var isLoadingInstruments: Bool
+        var isSubmitting: Bool
+    }
+
+    struct WalletContext {
+        var publicId: String
+        var isPaper: Bool
+    }
+
     // MARK: - Mutable form state (read/write from View)
 
     var selectedExchange: String
@@ -112,14 +134,8 @@ final class NewOrderSheetViewModel {
 
     var canSubmit: Bool {
         return Self.canSubmit(
-            instrument: selectedInstrument,
-            selectedExchange: selectedExchange,
-            isLoadingInstruments: isLoadingInstruments,
-            quantityText: quantityText,
-            priceText: priceText,
-            stopPriceText: stopPriceText,
-            orderType: orderType,
-            isSubmitting: isSubmitting
+            form: orderFormSnapshot,
+            gate: submitGateState
         )
     }
 
@@ -189,22 +205,12 @@ final class NewOrderSheetViewModel {
     }
 
     /// Build the outbound `CreateOrderBody` from the current form
-    /// state. Returns `nil` when the form fails the same gate that
-    /// drives the submit-button disabled state, so the generated
-    /// body never violates backend's validators.
+    /// state. Returns `nil` when the selected instrument or numeric
+    /// fields cannot produce a backend-valid payload.
     func buildBody() -> CreateOrderBody? {
         return Self.buildBody(
-            instrument: selectedInstrument,
-            selectedExchange: selectedExchange,
-            walletPublicId: walletPublicId,
-            walletIsPaper: walletIsPaper,
-            side: side,
-            orderType: orderType,
-            quantityText: quantityText,
-            priceText: priceText,
-            stopPriceText: stopPriceText,
-            leverageText: leverageText,
-            reduceOnly: reduceOnly,
+            form: orderFormSnapshot,
+            wallet: walletContext,
             idempotencyKey: idempotencyKey
         )
     }
@@ -260,74 +266,59 @@ final class NewOrderSheetViewModel {
     }
 
     static func canSubmit(
-        instrument: InstrumentDetailData?,
-        selectedExchange: String,
-        isLoadingInstruments: Bool,
-        quantityText: String,
-        priceText: String,
-        stopPriceText: String,
-        orderType: String,
-        isSubmitting: Bool
+        form: OrderFormSnapshot,
+        gate: SubmitGateState
     ) -> Bool {
-        guard !isSubmitting,
-              !isLoadingInstruments,
-              let instrument,
+        guard !gate.isSubmitting,
+              !gate.isLoadingInstruments,
+              let instrument = form.instrument,
               instrument.canTrade,
-              instrument.exchange == selectedExchange,
-              parsePositive(quantityText) != nil
+              instrument.exchange == form.selectedExchange,
+              parsePositive(form.quantityText) != nil
         else { return false }
-        if needsPrice(orderType: orderType), parsePositive(priceText) == nil {
+        if needsPrice(orderType: form.orderType), parsePositive(form.priceText) == nil {
             return false
         }
-        if needsStopPrice(orderType: orderType), parsePositive(stopPriceText) == nil {
+        if needsStopPrice(orderType: form.orderType), parsePositive(form.stopPriceText) == nil {
             return false
         }
         return true
     }
 
     /// Pure builder for `CreateOrderBody`. Returns `nil` when the
-    /// form fails the same gate as the submit-button disabled
-    /// state. `walletIsPaper` derives the `mode` literal so a paper
-    /// wallet never accidentally routes as a live order.
+    /// form cannot produce a backend-valid payload. `wallet.isPaper`
+    /// derives the `mode` literal so a paper wallet never
+    /// accidentally routes as a live order.
     static func buildBody(
-        instrument: InstrumentDetailData?,
-        selectedExchange: String,
-        walletPublicId: String,
-        walletIsPaper: Bool,
-        side: String,
-        orderType: String,
-        quantityText: String,
-        priceText: String,
-        stopPriceText: String,
-        leverageText: String,
-        reduceOnly: Bool,
+        form: OrderFormSnapshot,
+        wallet: WalletContext,
         idempotencyKey: String
     ) -> CreateOrderBody? {
-        guard let instrument,
+        guard let instrument = form.instrument,
               instrument.canTrade,
-              instrument.exchange == selectedExchange
+              instrument.exchange == form.selectedExchange
         else { return nil }
-        guard let quantity = parsePositive(quantityText) else { return nil }
-        let price: Double? = needsPrice(orderType: orderType) ? parsePositive(priceText) : nil
-        if needsPrice(orderType: orderType), price == nil { return nil }
-        let stopPrice: Double? = needsStopPrice(orderType: orderType) ? parsePositive(stopPriceText) : nil
-        if needsStopPrice(orderType: orderType), stopPrice == nil { return nil }
-        let leverage: Int? = parsePositiveInt(leverageText)
+        guard let quantity = parsePositive(form.quantityText) else { return nil }
+        let price: Double? = needsPrice(orderType: form.orderType) ? parsePositive(form.priceText) : nil
+        if needsPrice(orderType: form.orderType), price == nil { return nil }
+        let stopPrice: Double? = needsStopPrice(orderType: form.orderType) ? parsePositive(form.stopPriceText) : nil
+        if needsStopPrice(orderType: form.orderType), stopPrice == nil { return nil }
+        let leverage: Int? = parsePositiveInt(form.leverageText)
         return CreateOrderBody(
             instrument: instrument.symbol,
             instrumentPublicId: instrument.instrumentPublicId,
             exchange: instrument.exchange,
-            mode: walletIsPaper ? "paper" : "live",
-            side: side,
-            orderType: orderType,
+            mode: wallet.isPaper ? "paper" : "live",
+            side: form.side,
+            orderType: form.orderType,
             quantity: quantity,
             price: price,
             stopPrice: stopPrice,
             timeInForce: "GTC",
             postOnly: false,
             leverage: leverage,
-            reduceOnly: reduceOnly,
-            walletPublicId: walletPublicId,
+            reduceOnly: form.reduceOnly,
+            walletPublicId: wallet.publicId,
             operatorPublicId: nil,
             idempotencyKey: idempotencyKey,
             aiReviewPublicId: nil
@@ -350,6 +341,37 @@ final class NewOrderSheetViewModel {
             sessionId: envelope.sessionId,
             topic: nil,
             payload: body
+        )
+    }
+}
+
+private extension NewOrderSheetViewModel {
+
+    var orderFormSnapshot: OrderFormSnapshot {
+        return OrderFormSnapshot(
+            instrument: selectedInstrument,
+            selectedExchange: selectedExchange,
+            side: side,
+            orderType: orderType,
+            quantityText: quantityText,
+            priceText: priceText,
+            stopPriceText: stopPriceText,
+            leverageText: leverageText,
+            reduceOnly: reduceOnly
+        )
+    }
+
+    var submitGateState: SubmitGateState {
+        return SubmitGateState(
+            isLoadingInstruments: isLoadingInstruments,
+            isSubmitting: isSubmitting
+        )
+    }
+
+    var walletContext: WalletContext {
+        return WalletContext(
+            publicId: walletPublicId,
+            isPaper: walletIsPaper
         )
     }
 }
