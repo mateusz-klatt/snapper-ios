@@ -56,9 +56,6 @@ final class AttachBracketSheetViewModel {
         return await onSubmit(sl, tp, idempotencyKey)
     }
 
-    // MARK: - Pure helpers (preserved verbatim from AttachBracketSheet
-    // for backward-compatible test contract)
-
     /// Parses a free-text price string into a positive `Double`.
     /// Empty / non-numeric / non-positive input maps to `nil` so the
     /// caller treats it as "not supplied" rather than zero — the

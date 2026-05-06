@@ -29,9 +29,6 @@ final class OrdersViewModelTests: XCTestCase {
         appState = nil
         super.tearDown()
     }
-
-    // MARK: - Helpers
-
     private func makeViewModel() -> OrdersViewModel {
         return OrdersViewModel(api: mockAPI, appState: appState)
     }
@@ -172,9 +169,6 @@ final class OrdersViewModelTests: XCTestCase {
             )
         )
     }
-
-    // MARK: - Initialization
-
     func testInitialStateIsEmpty() {
         let viewModel = makeViewModel()
         XCTAssertTrue(viewModel.orders.isEmpty)
@@ -183,9 +177,6 @@ final class OrdersViewModelTests: XCTestCase {
         XCTAssertNil(viewModel.errorMessage)
         XCTAssertNil(viewModel.submitError)
     }
-
-    // MARK: - load (parallel async let)
-
     func testLoadHappyPathPopulatesOrdersAndExecutions() async {
         let viewModel = makeViewModel()
         let order = makeOrder(publicId: "ord-1")
@@ -236,9 +227,6 @@ final class OrdersViewModelTests: XCTestCase {
         XCTAssertTrue(viewModel.executions.isEmpty)
         XCTAssertNotNil(viewModel.errorMessage)
     }
-
-    // MARK: - submitNewOrder
-
     func testSubmitNewOrderSuccessTriggersReload() async {
         let viewModel = makeViewModel()
         let order = makeOrder(publicId: "ord-fresh")
@@ -297,9 +285,6 @@ final class OrdersViewModelTests: XCTestCase {
         XCTAssertFalse(result)
         XCTAssertEqual(viewModel.submitError, "Couldn't submit the order. Try again.")
     }
-
-    // MARK: - submitCancel
-
     func testSubmitCancelSuccessTriggersReload() async {
         let viewModel = makeViewModel()
         let order = makeOrder(publicId: "ord-1", status: "filled", planPublicId: "plan-1")
@@ -324,9 +309,6 @@ final class OrdersViewModelTests: XCTestCase {
         await viewModel.submitCancel(order: makeOrder(publicId: "ord-1", planPublicId: "plan-1"))
         XCTAssertEqual(viewModel.submitError, "Couldn't cancel the order. Try again.")
     }
-
-    // MARK: - Derived collections
-
     func testFilteredOpenScopesByWallet() {
         let viewModel = makeViewModel()
         appState.selectedWalletPublicId = "w-A"
@@ -388,9 +370,6 @@ final class OrdersViewModelTests: XCTestCase {
         let viewModel = makeViewModel()
         XCTAssertEqual(viewModel.derivedExchanges, ["kraken"])
     }
-
-    // MARK: - resolvedWallet
-
     func testResolvedWalletReturnsNilWhenNoSelection() {
         let viewModel = makeViewModel()
         XCTAssertNil(viewModel.resolvedWallet)

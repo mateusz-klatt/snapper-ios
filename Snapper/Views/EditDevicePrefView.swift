@@ -300,9 +300,6 @@ struct EditDevicePrefView: View {
             logger.info("Wallet catalog refresh skipped: \(error.localizedDescription)")
         }
     }
-
-    // MARK: - Pure helpers (extracted for unit testing)
-
     var isAlertTypeLocked: Bool {
         if case .edit = mode { return true }
         return false
@@ -441,9 +438,6 @@ struct EditDevicePrefView: View {
             )
         )
     }
-
-    // MARK: - Save
-
     private func save() async {
         isSaving = true
         defer { isSaving = false }

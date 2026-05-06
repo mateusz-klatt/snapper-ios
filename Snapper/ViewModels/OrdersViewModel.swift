@@ -35,9 +35,6 @@ final class OrdersViewModel {
         self.api = api
         self.appState = appState
     }
-
-    // MARK: - Derived collections
-
     var filteredOpen: [OrderStatus] {
         return Self.filterOpen(
             orders: orders,
@@ -84,9 +81,6 @@ final class OrdersViewModel {
         guard let id = appState.selectedWalletPublicId else { return nil }
         return appState.availableWallets.first { $0.publicId == id }
     }
-
-    // MARK: - Behaviour
-
     func load() async {
         isLoading = true
         defer { isLoading = false }
@@ -141,8 +135,6 @@ final class OrdersViewModel {
             submitError = "Couldn't cancel the order. Try again."
         }
     }
-
-    // MARK: - Pure helpers (preserved verbatim from OrdersView for
     // backward-compatible test contract)
 
     /// Backend-canonical "open" lifecycle states. Values mirror

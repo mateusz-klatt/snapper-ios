@@ -4,9 +4,6 @@ import XCTest
 /// Async / instance-state tests for `AttachTrailingStopSheetViewModel`.
 @MainActor
 final class AttachTrailingStopSheetViewModelTests: XCTestCase {
-
-    // MARK: - Initialization
-
     func testInitialStateIsBlank() {
         let viewModel = AttachTrailingStopSheetViewModel(idempotencyKey: "tk-1")
         XCTAssertEqual(viewModel.trailingPctText, "")
@@ -23,9 +20,6 @@ final class AttachTrailingStopSheetViewModelTests: XCTestCase {
         let vm2 = AttachTrailingStopSheetViewModel()
         XCTAssertNotEqual(vm1.idempotencyKey, vm2.idempotencyKey)
     }
-
-    // MARK: - Parsed values
-
     func testParsedTrailingReflectsTrailingPctText() {
         let viewModel = AttachTrailingStopSheetViewModel()
         viewModel.trailingPctText = "1.5"
@@ -43,9 +37,6 @@ final class AttachTrailingStopSheetViewModelTests: XCTestCase {
         viewModel.minLockPctText = ""
         XCTAssertNil(viewModel.parsedMinLock)
     }
-
-    // MARK: - canSubmit
-
     func testCanSubmitRequiresTrailingDistance() {
         let viewModel = AttachTrailingStopSheetViewModel()
         XCTAssertFalse(viewModel.canSubmit)
@@ -63,9 +54,6 @@ final class AttachTrailingStopSheetViewModelTests: XCTestCase {
         viewModel.isSubmitting = true
         XCTAssertFalse(viewModel.canSubmit)
     }
-
-    // MARK: - submit
-
     func testSubmitFiresClosureWithParsedValues() async {
         let viewModel = AttachTrailingStopSheetViewModel(idempotencyKey: "ts-9")
         viewModel.trailingPctText = "1.5"

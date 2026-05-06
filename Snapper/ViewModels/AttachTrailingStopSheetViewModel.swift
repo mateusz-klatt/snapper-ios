@@ -54,9 +54,6 @@ final class AttachTrailingStopSheetViewModel {
         return await onSubmit(trailing, minLock, idempotencyKey)
     }
 
-    // MARK: - Pure helpers (preserved verbatim from
-    // AttachTrailingStopSheet for backward-compatible test contract)
-
     /// Parse a free-text percent into a positive `Double`. Empty /
     /// non-numeric / non-positive input maps to `nil` so the caller
     /// treats it as "not supplied" rather than zero — the backend

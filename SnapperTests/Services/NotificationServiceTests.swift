@@ -259,8 +259,6 @@ final class NotificationServiceTests: XCTestCase {
             )
         )
     }
-
-    // MARK: - Wiring tests (refreshAuthorizationStatus → registerForRemote)
     //
     // The pure-helper tests above prove the decision logic. These
     // tests prove the WIRING — that the result of the decision
