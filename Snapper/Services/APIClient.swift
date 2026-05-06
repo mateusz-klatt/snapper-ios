@@ -29,11 +29,11 @@ final class APIClient: Sendable, APIClientProtocol {
 
     /// Build the trailing query suffix from name/value pairs.
     ///
-    /// Uses ``URLComponents`` so reserved characters in values (e.g.
-    /// ``+``, ``=``, ``/`` in opaque server-emitted cursors) get the
-    /// proper percent-encoding that ``URLQueryItem`` performs. Returns
-    /// the empty string when no items are supplied so callers can
-    /// concatenate unconditionally.
+    /// Encodes query names and values against the RFC 3986 unreserved
+    /// set so reserved characters in values (e.g. ``+``, ``=``, ``/``
+    /// in opaque server-emitted cursors) are always percent-escaped.
+    /// Returns the empty string when no items are supplied so callers
+    /// can concatenate unconditionally.
     private static func querySuffix(_ items: [URLQueryItem]) -> String {
         guard !items.isEmpty else {
             return ""
