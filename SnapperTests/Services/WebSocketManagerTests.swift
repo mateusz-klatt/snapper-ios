@@ -7,13 +7,21 @@ final class WebSocketManagerTests: XCTestCase {
     private func makeManager(
         fakeAuth: FakeAuthService = FakeAuthService(nextToken: "test-token"),
         fakeTask: FakeWebSocketTask = FakeWebSocketTask(),
-        fakeSleeper: FakeSleeper = FakeSleeper()
+        fakeSleeper: FakeSleeper = FakeSleeper(),
+        webSocketURLProvider: @MainActor @escaping () -> String = { AppConfig.wsBaseURL },
+        pingInterval: TimeInterval = 30,
+        reconnectScheduler: @MainActor @escaping (TimeInterval, DispatchWorkItem) -> Void = { delay, workItem in
+            DispatchQueue.main.asyncAfter(deadline: .now() + delay, execute: workItem)
+        }
     ) -> (WebSocketManager, FakeAuthService, FakeWebSocketTask, FakeSleeper) {
         let factory = FakeWebSocketTaskFactory(task: fakeTask)
         let manager = WebSocketManager(
             authService: fakeAuth,
             taskFactory: factory,
-            sleeper: fakeSleeper
+            sleeper: fakeSleeper,
+            webSocketURLProvider: webSocketURLProvider,
+            pingInterval: pingInterval,
+            reconnectScheduler: reconnectScheduler
         )
         return (manager, fakeAuth, fakeTask, fakeSleeper)
     }
@@ -21,6 +29,41 @@ final class WebSocketManagerTests: XCTestCase {
     private func frame(_ json: [String: Any]) -> URLSessionWebSocketTask.Message {
         let data = try! JSONSerialization.data(withJSONObject: json)
         return .string(String(data: data, encoding: .utf8)!)
+    }
+
+    private func dataFrame(_ json: [String: Any]) -> URLSessionWebSocketTask.Message {
+        return .data(try! JSONSerialization.data(withJSONObject: json))
+    }
+
+    private func authCompleteFrame(expiration: Date = Date(timeIntervalSinceNow: 3600)) -> URLSessionWebSocketTask.Message {
+        let formatter = ISO8601DateFormatter()
+        return frame([
+            "type": "auth_complete",
+            "sequence_id": 5,
+            "public_id": "01961234-5678-7000-8000-000000000030",
+            "timestamp": "2025-11-22T10:00:00Z",
+            "session_id": "session-1",
+            "available_topics": ["trades.kraken.", "orders.events.kraken."],
+            "user_role": "operator",
+            "ws_token_exp": formatter.string(from: expiration)
+        ])
+    }
+
+    private func decodeFrame(_ message: URLSessionWebSocketTask.Message) -> [String: Any]? {
+        guard case let .string(text) = message,
+              let data = text.data(using: .utf8),
+              let parsed = try? JSONSerialization.jsonObject(with: data) as? [String: Any]
+        else { return nil }
+        return parsed
+    }
+
+    func testConnectReportsInvalidURL() {
+        let (manager, _, fakeTask, _) = makeManager(webSocketURLProvider: { "http://[::1" })
+
+        manager.connect()
+
+        XCTAssertEqual(manager.connectionState, .error("Invalid WebSocket URL"))
+        XCTAssertEqual(fakeTask.resumeCount, 0)
     }
 
     func testTradeFrameDispatchedToLastTrade() {
@@ -74,6 +117,95 @@ final class WebSocketManagerTests: XCTestCase {
         XCTAssertNil(manager.state.lastOrderEvent)
     }
 
+    func testDataFrameDispatchesOrderCancelHeartbeatAndUserDeactivated() {
+        let (manager, _, _, _) = makeManager()
+
+        manager.handleRawMessage(dataFrame([
+            "type": "order_cancel",
+            "sequence_id": 3,
+            "public_id": "01961234-5678-7000-8000-000000000003",
+            "timestamp": "2025-11-22T10:00:00Z",
+            "session_id": "session-1",
+            "exchange": "kraken",
+            "instrument": "BTCUSD",
+            "exchange_order_id": "ex-cancel-1",
+            "client_order_id": "cli-cancel-1"
+        ]))
+        manager.handleRawMessage(dataFrame([
+            "type": "heartbeat",
+            "sequence_id": 4,
+            "public_id": "01961234-5678-7000-8000-000000000004",
+            "timestamp": "2025-11-22T10:00:00Z",
+            "session_id": "session-1",
+            "component": "market-data",
+            "sequence": 42,
+            "status": "ok",
+            "lag_ms": 7
+        ]))
+        manager.handleRawMessage(dataFrame([
+            "type": "user_deactivated",
+            "sequence_id": 5,
+            "public_id": "01961234-5678-7000-8000-000000000005",
+            "timestamp": "2025-11-22T10:00:00Z",
+            "session_id": "session-1",
+            "user_public_id": "user-1",
+            "deactivated_at": "2025-11-22T10:01:00Z",
+            "reason": "policy"
+        ]))
+
+        XCTAssertEqual(manager.state.lastOrderCancel?.clientOrderId, "cli-cancel-1")
+        XCTAssertEqual(manager.state.lastHeartbeat?.component, "market-data")
+        XCTAssertEqual(manager.state.lastHeartbeat?.lagMs, 7)
+        XCTAssertNotNil(manager.state.lastHeartbeatAt)
+        XCTAssertEqual(manager.state.lastUserDeactivated?.userPublicId, "user-1")
+    }
+
+    func testMalformedTypedFramesDoNotMutateState() {
+        let (manager, _, _, _) = makeManager()
+
+        manager.handleRawMessage(frame([:]))
+        manager.handleRawMessage(frame(["type": "order_event"]))
+        manager.handleRawMessage(frame(["type": "order_cancel"]))
+        manager.handleRawMessage(frame(["type": "heartbeat"]))
+        manager.handleRawMessage(frame(["type": "user_deactivated"]))
+        manager.handleRawMessage(frame(["type": "unbound_frame_type", "value": 1]))
+        manager.handleRawMessage(.data(Data([0xff, 0x00])))
+
+        XCTAssertNil(manager.state.lastOrderEvent)
+        XCTAssertNil(manager.state.lastOrderCancel)
+        XCTAssertNil(manager.state.lastHeartbeat)
+        XCTAssertNil(manager.state.lastUserDeactivated)
+    }
+
+    func testFirePingForTestingSendsOnlyWhenConnected() async {
+        let (manager, _, fakeTask, _) = makeManager()
+
+        manager.firePingForTesting()
+        await drainSendTasks()
+        XCTAssertEqual(fakeTask.sentMessages.count, 0)
+
+        manager.connect()
+        manager.handleRawMessage(authCompleteFrame(expiration: Date(timeIntervalSinceNow: 100)))
+        manager.firePingForTesting()
+        await drainSendTasks()
+
+        let pingFrame = fakeTask.sentMessages.compactMap(decodeFrame).first { ($0["type"] as? String) == "ping" }
+        XCTAssertNotNil(pingFrame)
+    }
+
+    func testPingTimerUsesInjectedInterval() async {
+        let (manager, _, fakeTask, _) = makeManager(pingInterval: 0.01)
+
+        manager.connect()
+        manager.handleRawMessage(authCompleteFrame(expiration: Date(timeIntervalSinceNow: 100)))
+        try? await Task.sleep(nanoseconds: 80_000_000)
+        await drainSendTasks()
+
+        let pingFrame = fakeTask.sentMessages.compactMap(decodeFrame).first { ($0["type"] as? String) == "ping" }
+        XCTAssertNotNil(pingFrame)
+        manager.disconnect()
+    }
+
     /// `sendJSON` bounces through a detached Task to call `task.send`
     /// asynchronously. Yield to give that Task a chance to run before
     /// asserting on `sentMessages`.
@@ -107,6 +239,19 @@ final class WebSocketManagerTests: XCTestCase {
             return false
         }
         XCTAssertTrue(hasSubscribe, "replayed subscribe frame missing from sent messages")
+    }
+
+    func testUnsubscribeBeforeConnectRemovesPendingTopic() async {
+        let (manager, _, fakeTask, _) = makeManager()
+
+        manager.subscribe(topics: ["orders.events.kraken."])
+        manager.unsubscribe(topics: ["orders.events.kraken."])
+        manager.connect()
+        manager.handleRawMessage(authCompleteFrame())
+        await drainSendTasks()
+
+        let hasSubscribe = fakeTask.sentMessages.compactMap(decodeFrame).contains { ($0["type"] as? String) == "subscribe" }
+        XCTAssertFalse(hasSubscribe, "topic removed before connect must not replay")
     }
 
     func testSubscribedTopicsPreservedAcrossReconnect() async {
@@ -215,20 +360,129 @@ final class WebSocketManagerTests: XCTestCase {
         let (manager, _, _, _) = makeManager()
         manager.connect()
 
-        manager.handleRawMessage(frame([
-            "type": "auth_complete",
-            "sequence_id": 5,
-            "public_id": "01961234-5678-7000-8000-000000000030",
-            "timestamp": "2025-11-22T10:00:00Z",
-            "session_id": "session-1",
-            "available_topics": ["trades.kraken.", "orders.events.kraken."],
-            "user_role": "operator",
-            "ws_token_exp": "2025-11-22T11:00:00Z"
-        ]))
+        manager.handleRawMessage(authCompleteFrame())
 
         XCTAssertEqual(manager.availableTopics.sorted(), ["orders.events.kraken.", "trades.kraken."])
         XCTAssertNotNil(manager.state.wsTokenExp)
         XCTAssertEqual(manager.connectionState, .connected)
+    }
+
+    func testLegacyAuthCompleteFallsBackToRawAvailableTopics() {
+        let (manager, _, _, _) = makeManager()
+        manager.connect()
+
+        manager.handleRawMessage(frame([
+            "type": "auth_complete",
+            "available_topics": ["legacy.topic"]
+        ]))
+
+        XCTAssertEqual(manager.availableTopics, ["legacy.topic"])
+        XCTAssertNil(manager.state.wsTokenExp)
+        XCTAssertEqual(manager.connectionState, .connected)
+    }
+
+    func testInboundReceiveLoopAuthenticatesAndReauthenticates() async {
+        let fakeAuth = FakeAuthService(nextToken: "first-token")
+        let fakeTask = FakeWebSocketTask()
+        let manager = WebSocketManager(
+            authService: fakeAuth,
+            taskFactory: FakeWebSocketTaskFactory(task: fakeTask),
+            sleeper: FakeSleeper()
+        )
+
+        manager.connect()
+        fakeTask.pumpInbound(frame(["type": "auth_required"]))
+        await drainSendTasks()
+        await drainSendTasks()
+
+        var frames = fakeTask.sentMessages.compactMap(decodeFrame)
+        let authFrame = frames.first { ($0["type"] as? String) == "authenticate" }
+        XCTAssertEqual(authFrame?["ws_token"] as? String, "first-token")
+        XCTAssertEqual(manager.connectionState, .authenticating)
+
+        await fakeAuth.setNextToken("second-token")
+        manager.handleRawMessage(frame([
+            "type": "auth_complete",
+            "available_topics": []
+        ]))
+        fakeTask.pumpInbound(frame(["type": "reauth_required"]))
+        fakeTask.pumpInbound(frame(["type": "auth_ok"]))
+        fakeTask.pumpInbound(frame(["type": "reauth_ok"]))
+        fakeTask.pumpInbound(frame(["type": "pong"]))
+        await drainSendTasks()
+        await drainSendTasks()
+
+        frames = fakeTask.sentMessages.compactMap(decodeFrame)
+        let reauthFrame = frames.first { ($0["type"] as? String) == "reauth" }
+        XCTAssertEqual(reauthFrame?["ws_token"] as? String, "second-token")
+        let fetchCalls = await fakeAuth.fetchCalls
+        XCTAssertEqual(fetchCalls, 2)
+    }
+
+    func testAuthExpiredAndReceiveErrorDisconnectCurrentSocket() async {
+        let task1 = FakeWebSocketTask()
+        let task2 = FakeWebSocketTask()
+        let manager = WebSocketManager(
+            authService: FakeAuthService(nextToken: "t"),
+            taskFactory: FakeWebSocketTaskFactory(tasks: [task1, task2]),
+            sleeper: FakeSleeper()
+        )
+
+        manager.connect()
+        task1.pumpInbound(frame(["type": "auth_expired"]))
+        await drainSendTasks()
+        XCTAssertEqual(manager.connectionState, .disconnected)
+        XCTAssertEqual(manager.reconnectAttempts, 1)
+
+        manager.connect()
+        for _ in 0..<10 { await Task.yield() }
+        task2.pumpError(URLError(.networkConnectionLost))
+        await drainSendTasks()
+        XCTAssertEqual(manager.connectionState, .disconnected)
+        XCTAssertEqual(manager.reconnectAttempts, 2)
+    }
+
+    func testStaleReceiveSuccessDoesNotDispatchOldFrame() async {
+        let task1 = FakeWebSocketTask()
+        let task2 = FakeWebSocketTask()
+        let manager = WebSocketManager(
+            authService: FakeAuthService(nextToken: "t"),
+            taskFactory: FakeWebSocketTaskFactory(tasks: [task1, task2]),
+            sleeper: FakeSleeper()
+        )
+
+        manager.connect()
+        manager.forceHandleDisconnectionForTesting()
+        manager.connect()
+        task1.pumpInbound(authCompleteFrame())
+        await drainSendTasks()
+        await drainSendTasks()
+
+        XCTAssertEqual(manager.connectionState, .connecting)
+        XCTAssertTrue(manager.availableTopics.isEmpty)
+    }
+
+    func testSendJSONReturnsWhenPayloadIsInvalidOrSocketMissing() async {
+        let (manager, _, fakeTask, _) = makeManager()
+
+        manager.sendJSON(["type": "ping"])
+        manager.connect()
+        manager.sendJSON(["not_json": Double.infinity])
+        await drainSendTasks()
+
+        XCTAssertEqual(fakeTask.sentMessages.count, 0)
+    }
+
+    func testSendJSONSwallowsTaskSendError() async {
+        let fakeTask = FakeWebSocketTask(sendError: URLError(.cannotConnectToHost))
+        let (manager, _, _, _) = makeManager(fakeTask: fakeTask)
+
+        manager.connect()
+        manager.sendJSON(["type": "ping"])
+        await drainSendTasks()
+
+        XCTAssertEqual(fakeTask.sentMessages.count, 0)
+        XCTAssertEqual(manager.connectionState, .connecting)
     }
 
     // MARK: - Commit 2 (FE-2) coverage
@@ -319,6 +573,29 @@ final class WebSocketManagerTests: XCTestCase {
         XCTAssertEqual(logoutCalls, 1, "authService.logout() must be invoked exactly once")
     }
 
+    func testAuthRequiredNilTokenTriggersLogout() async {
+        let fakeAuth = FakeAuthService(nextToken: nil)
+        let fakeTask = FakeWebSocketTask()
+        let manager = WebSocketManager(
+            authService: fakeAuth,
+            taskFactory: FakeWebSocketTaskFactory(task: fakeTask),
+            sleeper: FakeSleeper()
+        )
+        manager.connect()
+
+        manager.handleRawMessage(frame(["type": "auth_required"]))
+        await drainSendTasks()
+        await drainSendTasks()
+
+        if case .authFailed(let reason) = manager.connectionState {
+            XCTAssertFalse(reason.isEmpty)
+        } else {
+            XCTFail("expected auth_failed after auth-required nil token, got \(manager.connectionState)")
+        }
+        let logoutCalls = await fakeAuth.logoutCalls
+        XCTAssertEqual(logoutCalls, 1)
+    }
+
     /// Direct unit test on `nextReconnectDelay()` — the delay should be
     /// bounded by `[baseInterval * 2^n, baseInterval * 2^n * 1.3]` up to
     /// a 300s cap, with infinite-attempt semantics (no hard attempt
@@ -375,6 +652,53 @@ final class WebSocketManagerTests: XCTestCase {
         // suppressed at attempts >= 10.
         manager.forceHandleDisconnectionForTesting()
         XCTAssertEqual(manager.reconnectAttempts, previous + 1, "reconnectAttempts must keep advancing past the old cap")
+    }
+
+    func testReconnectWorkItemReconnectsWhenStillWanted() async {
+        let task1 = FakeWebSocketTask()
+        let task2 = FakeWebSocketTask()
+        let factory = FakeWebSocketTaskFactory(tasks: [task1, task2])
+        var scheduledDelay: TimeInterval?
+        let manager = WebSocketManager(
+            authService: FakeAuthService(),
+            taskFactory: factory,
+            sleeper: FakeSleeper(),
+            reconnectScheduler: { delay, workItem in
+                scheduledDelay = delay
+                workItem.perform()
+            }
+        )
+
+        manager.connect()
+        manager.forceHandleDisconnectionForTesting()
+        await drainSendTasks()
+
+        XCTAssertNotNil(scheduledDelay)
+        XCTAssertEqual(task2.resumeCount, 1)
+        XCTAssertEqual(manager.connectionState, .connecting)
+    }
+
+    func testReconnectWorkItemRespectsDisabledReconnectBeforeFire() {
+        let task1 = FakeWebSocketTask()
+        let task2 = FakeWebSocketTask()
+        let factory = FakeWebSocketTaskFactory(tasks: [task1, task2])
+        var pendingWorkItem: DispatchWorkItem?
+        let manager = WebSocketManager(
+            authService: FakeAuthService(),
+            taskFactory: factory,
+            sleeper: FakeSleeper(),
+            reconnectScheduler: { _, workItem in
+                pendingWorkItem = workItem
+            }
+        )
+
+        manager.connect()
+        manager.forceHandleDisconnectionForTesting()
+        manager.disconnect()
+        pendingWorkItem?.perform()
+
+        XCTAssertEqual(task2.resumeCount, 0)
+        XCTAssertEqual(manager.connectionState, .disconnected)
     }
 
     /// Disconnect must cancel a previously-armed reconnect work item.
@@ -485,5 +809,49 @@ final class WebSocketManagerTests: XCTestCase {
         XCTAssertEqual(requested.count, 1, "proactive refresh should sleep exactly once per auth_complete")
         XCTAssertEqual(requested.first ?? -1, 80, accuracy: 1.0, "scheduled interval must equal 80% of TTL")
     }
+
+    func testProactiveRefreshSleepFailureIsIgnored() async {
+        let fakeAuth = FakeAuthService(nextToken: "fresh")
+        let fakeTask = FakeWebSocketTask()
+        let manager = WebSocketManager(
+            authService: fakeAuth,
+            taskFactory: FakeWebSocketTaskFactory(task: fakeTask),
+            sleeper: ThrowingSleeper()
+        )
+        manager.connect()
+
+        manager.handleRawMessage(authCompleteFrame(expiration: Date(timeIntervalSinceNow: 100)))
+        await drainSendTasks()
+        await drainSendTasks()
+
+        XCTAssertEqual(manager.connectionState, .connected)
+        let fetchCalls = await fakeAuth.fetchCalls
+        XCTAssertEqual(fetchCalls, 0)
+    }
+
+    func testExpiredTokenRefreshesImmediately() async {
+        let fakeAuth = FakeAuthService(nextToken: "fresh-now")
+        let fakeTask = FakeWebSocketTask()
+        let manager = WebSocketManager(
+            authService: fakeAuth,
+            taskFactory: FakeWebSocketTaskFactory(task: fakeTask),
+            sleeper: FakeSleeper()
+        )
+        manager.connect()
+
+        manager.handleRawMessage(authCompleteFrame(expiration: Date(timeIntervalSinceNow: -1)))
+        await drainSendTasks()
+        await drainSendTasks()
+
+        let reauthFrame = fakeTask.sentMessages.compactMap(decodeFrame).first { ($0["type"] as? String) == "reauth" }
+        XCTAssertEqual(reauthFrame?["ws_token"] as? String, "fresh-now")
+        let fetchCalls = await fakeAuth.fetchCalls
+        XCTAssertEqual(fetchCalls, 1)
+    }
 }
 
+private struct ThrowingSleeper: Sleeper {
+    func sleep(seconds: TimeInterval) async throws {
+        throw CancellationError()
+    }
+}

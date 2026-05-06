@@ -22,13 +22,58 @@ final class AppDelegateTests: XCTestCase {
         delegate = AppDelegate()
         coordinator = NavigationCoordinator.shared
         coordinator.clearPendingDeepLink()
+        UNUserNotificationCenter.current().delegate = nil
     }
 
     override func tearDown() {
+        UNUserNotificationCenter.current().delegate = nil
         delegate = nil
         coordinator.clearPendingDeepLink()
         coordinator = nil
         super.tearDown()
+    }
+
+    func testDidFinishLaunchingInstallsNotificationDelegate() async {
+        let launched = delegate.application(UIApplication.shared, didFinishLaunchingWithOptions: nil)
+        for _ in 0..<10 {
+            await Task.yield()
+        }
+
+        XCTAssertTrue(launched)
+        XCTAssertTrue(UNUserNotificationCenter.current().delegate === delegate)
+    }
+
+    func testDidRegisterForRemoteNotificationsForwardsTokenWhenLoggedOut() async {
+        let service = DeviceRegistrationService.shared()
+        await service.onLogout()
+
+        delegate.application(
+            UIApplication.shared,
+            didRegisterForRemoteNotificationsWithDeviceToken: Data([0xab, 0xcd])
+        )
+        for _ in 0..<10 {
+            await Task.yield()
+        }
+
+        let status = await service.currentStatus()
+        XCTAssertEqual(status, .awaitingLogin)
+        await service.onLogout()
+    }
+
+    func testDidFailToRegisterForRemoteNotificationsDoesNotRouteDeepLink() async {
+        delegate.application(
+            UIApplication.shared,
+            didFailToRegisterForRemoteNotificationsWithError: NSError(
+                domain: NSURLErrorDomain,
+                code: NSURLErrorNotConnectedToInternet
+            )
+        )
+        for _ in 0..<10 {
+            await Task.yield()
+        }
+
+        XCTAssertNil(coordinator.pendingDeepLink)
+        XCTAssertNil(coordinator.pendingAlertPublicId)
     }
 
     /// Foreground WS-connected → willPresent returns empty options.

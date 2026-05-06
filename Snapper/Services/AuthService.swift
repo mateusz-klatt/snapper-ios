@@ -14,6 +14,7 @@ class AuthService: ObservableObject {
 
     private var wsToken: String?
     private let session: URLSession
+    private let apiBaseURLProvider: @MainActor () -> String
 
     /// Single-flight slot for ``fetchFreshWsToken()``. When a refresh
     /// is in flight, concurrent callers ``await`` the same task value
@@ -28,8 +29,12 @@ class AuthService: ObservableObject {
     /// refresh itself returns 401.
     private var refreshTask: Task<String?, Never>?
 
-    init(session: URLSession = .shared) {
+    init(
+        session: URLSession = .shared,
+        apiBaseURLProvider: @MainActor @escaping () -> String = { AppConfig.apiBaseURL }
+    ) {
         self.session = session
+        self.apiBaseURLProvider = apiBaseURLProvider
     }
 
     private convenience init() {
@@ -37,7 +42,7 @@ class AuthService: ObservableObject {
     }
 
     func login(username: String, password: String) async {
-        guard let url = URL(string: "\(AppConfig.apiBaseURL)\(AppConfig.Endpoints.login)") else {
+        guard let url = URL(string: "\(apiBaseURLProvider())\(AppConfig.Endpoints.login)") else {
             errorMessage = "Invalid URL"
             return
         }
@@ -121,7 +126,7 @@ class AuthService: ObservableObject {
     }
 
     private func logoutFromServer() async {
-        guard let url = URL(string: "\(AppConfig.apiBaseURL)\(AppConfig.Endpoints.logout)") else {
+        guard let url = URL(string: "\(apiBaseURLProvider())\(AppConfig.Endpoints.logout)") else {
             logger.warning("Logout aborted: invalid URL")
             return
         }
@@ -214,7 +219,7 @@ class AuthService: ObservableObject {
     /// writing ``wsToken`` AFTER a ``Task.isCancelled`` check, so
     /// this helper deliberately does NOT touch member state.
     private func performRefresh() async -> String? {
-        guard let url = URL(string: "\(AppConfig.apiBaseURL)\(AppConfig.Endpoints.refresh)") else {
+        guard let url = URL(string: "\(apiBaseURLProvider())\(AppConfig.Endpoints.refresh)") else {
             return nil
         }
 

@@ -15,6 +15,9 @@ import UserNotifications
 ///   without propagating throws to the caller.
 @MainActor
 final class NotificationServiceTests: XCTestCase {
+    private enum RequestError: Error {
+        case failed
+    }
 
     func testIsAuthorizedReflectsAuthorizationStatus() {
         let service = NotificationService()
@@ -34,6 +37,104 @@ final class NotificationServiceTests: XCTestCase {
     func testServiceIsObservable() {
         let service = NotificationService()
         XCTAssertNotNil(service.objectWillChange as (any Publisher))
+    }
+
+    func testRefreshAuthorizationStatusUsesInjectedProviderAndRegistersWhenGranted() async {
+        var registerCalls = 0
+        let service = NotificationService(
+            authorizationStatusProvider: { .authorized },
+            authorizationRequester: { _ in true },
+            isLoggedIn: { true },
+            registerForRemote: { registerCalls += 1 }
+        )
+
+        await service.refreshAuthorizationStatus()
+
+        XCTAssertEqual(service.authorizationStatus, .authorized)
+        XCTAssertTrue(service.isAuthorized)
+        XCTAssertEqual(registerCalls, 1)
+    }
+
+    func testPrimaryInitializerDefaultLoginStateControlsRegistration() {
+        var registerCalls = 0
+        let expectedCalls = AuthService.shared.isAuthenticated ? 1 : 0
+        let service = NotificationService(
+            registerForRemote: { registerCalls += 1 }
+        )
+
+        service.refreshWithStatusForTests(.authorized)
+
+        XCTAssertEqual(registerCalls, expectedCalls)
+        XCTAssertEqual(service.authorizationStatus, .authorized)
+    }
+
+    func testInjectedInitializerDefaultLoginStateControlsRegistration() async {
+        var registerCalls = 0
+        let expectedCalls = AuthService.shared.isAuthenticated ? 1 : 0
+        let service = NotificationService(
+            authorizationStatusProvider: { .authorized },
+            authorizationRequester: { _ in true },
+            registerForRemote: { registerCalls += 1 }
+        )
+
+        await service.refreshAuthorizationStatus()
+
+        XCTAssertEqual(registerCalls, expectedCalls)
+        XCTAssertEqual(service.authorizationStatus, .authorized)
+    }
+
+    func testRequestAuthorizationUsesExpectedOptionsAndRegistersWhenGranted() async {
+        var requestedOptions: UNAuthorizationOptions?
+        var registerCalls = 0
+        let service = NotificationService(
+            authorizationStatusProvider: { .authorized },
+            authorizationRequester: { options in
+                requestedOptions = options
+                return true
+            },
+            isLoggedIn: { true },
+            registerForRemote: { registerCalls += 1 }
+        )
+
+        await service.requestAuthorization()
+
+        XCTAssertTrue(requestedOptions?.contains(.alert) ?? false)
+        XCTAssertTrue(requestedOptions?.contains(.sound) ?? false)
+        XCTAssertTrue(requestedOptions?.contains(.badge) ?? false)
+        XCTAssertEqual(service.authorizationStatus, .authorized)
+        XCTAssertEqual(registerCalls, 1)
+    }
+
+    func testRequestAuthorizationDeclinePublishesDeniedWithoutRegistering() async {
+        var registerCalls = 0
+        let service = NotificationService(
+            authorizationStatusProvider: { .denied },
+            authorizationRequester: { _ in false },
+            isLoggedIn: { true },
+            registerForRemote: { registerCalls += 1 }
+        )
+
+        await service.requestAuthorization()
+
+        XCTAssertEqual(service.authorizationStatus, .denied)
+        XCTAssertFalse(service.isAuthorized)
+        XCTAssertEqual(registerCalls, 0)
+    }
+
+    func testRequestAuthorizationErrorRefreshesStatus() async {
+        var registerCalls = 0
+        let service = NotificationService(
+            authorizationStatusProvider: { .provisional },
+            authorizationRequester: { _ in throw RequestError.failed },
+            isLoggedIn: { true },
+            registerForRemote: { registerCalls += 1 }
+        )
+
+        await service.requestAuthorization()
+
+        XCTAssertEqual(service.authorizationStatus, .provisional)
+        XCTAssertTrue(service.isAuthorized)
+        XCTAssertEqual(registerCalls, 1)
     }
 
     /// Durable-registration branch (PR #5): when the user has a

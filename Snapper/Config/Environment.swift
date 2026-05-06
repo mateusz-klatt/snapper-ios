@@ -41,10 +41,18 @@ enum AppConfig {
     }
 
     static var apiBaseURL: String {
-        return "\(baseURL)\(apiPrefix)"
+        return makeAPIBaseURL(baseURL: baseURL, apiPrefix: apiPrefix)
     }
 
     static var wsBaseURL: String {
+        return makeWSBaseURL(baseURL: baseURL, apiPrefix: apiPrefix, wsPath: wsPath)
+    }
+
+    static func makeAPIBaseURL(baseURL: String, apiPrefix: String) -> String {
+        return "\(baseURL)\(apiPrefix)"
+    }
+
+    static func makeWSBaseURL(baseURL: String, apiPrefix: String, wsPath: String) -> String {
         let wsProtocol = baseURL.hasPrefix(URIScheme.httpsPrefix) ? URIScheme.wss : URIScheme.ws
         let urlWithoutProtocol = baseURL
             .replacingOccurrences(of: URIScheme.http, with: "")
@@ -126,7 +134,7 @@ enum AppConfig {
         }
     }
 
-    private struct AppConfiguration {
+    struct AppConfiguration {
         let baseURL: String
         let apiPrefix: String
         let wsPath: String
@@ -166,8 +174,11 @@ enum AppConfig {
                 return empty
             }
 
-            let endpoints = dict["Endpoints"] as? [String: Any] ?? [:]
+            return parse(dict)
+        }
 
+        static func parse(_ dict: [String: Any], assertOnMissingCriticalFields: Bool = true) -> AppConfiguration {
+            let endpoints = dict["Endpoints"] as? [String: Any] ?? [:]
             let config = AppConfiguration(
                 baseURL: dict["BaseURL"] as? String ?? "",
                 apiPrefix: dict["APIPrefix"] as? String ?? "",
@@ -197,7 +208,9 @@ enum AppConfig {
             if config.baseURL.isEmpty || config.apiPrefix.isEmpty {
                 let message = "Configuration.plist missing critical fields. BaseURL=\"\(config.baseURL)\" APIPrefix=\"\(config.apiPrefix)\". Check ios/Snapper/Config/Configuration.plist."
                 AppConfig.logger.error("\(message, privacy: .public)")
-                assertionFailure(message)
+                if assertOnMissingCriticalFields {
+                    assertionFailure(message)
+                }
             }
 
             return config

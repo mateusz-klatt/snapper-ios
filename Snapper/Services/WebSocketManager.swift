@@ -20,6 +20,9 @@ class WebSocketManager: ObservableObject {
     private let authService: AuthRefreshing
     private let taskFactory: WebSocketTaskFactory
     let sleeper: Sleeper
+    private let webSocketURLProvider: @MainActor () -> String
+    private let pingInterval: TimeInterval
+    private let reconnectScheduler: @MainActor (TimeInterval, DispatchWorkItem) -> Void
 
     private var webSocketTask: WebSocketTaskProtocol?
     private var pingTimer: Timer?
@@ -62,10 +65,22 @@ class WebSocketManager: ObservableObject {
         case authFailed(String)
     }
 
-    init(authService: AuthRefreshing, taskFactory: WebSocketTaskFactory, sleeper: Sleeper) {
+    init(
+        authService: AuthRefreshing,
+        taskFactory: WebSocketTaskFactory,
+        sleeper: Sleeper,
+        webSocketURLProvider: @MainActor @escaping () -> String = { AppConfig.wsBaseURL },
+        pingInterval: TimeInterval = 30,
+        reconnectScheduler: @MainActor @escaping (TimeInterval, DispatchWorkItem) -> Void = { delay, workItem in
+            DispatchQueue.main.asyncAfter(deadline: .now() + delay, execute: workItem)
+        }
+    ) {
         self.authService = authService
         self.taskFactory = taskFactory
         self.sleeper = sleeper
+        self.webSocketURLProvider = webSocketURLProvider
+        self.pingInterval = pingInterval
+        self.reconnectScheduler = reconnectScheduler
     }
 
     func connect() {
@@ -78,7 +93,7 @@ class WebSocketManager: ObservableObject {
         // here would defeat the kill-switch the logout path just armed.
         if case .authFailed = connectionState { return }
 
-        guard let url = URL(string: AppConfig.wsBaseURL) else {
+        guard let url = URL(string: webSocketURLProvider()) else {
             connectionState = .error("Invalid WebSocket URL")
             return
         }
@@ -110,7 +125,8 @@ class WebSocketManager: ObservableObject {
     }
 
     func sendJSON(_ dict: [String: Any]) {
-        guard let data = try? JSONSerialization.data(withJSONObject: dict),
+        guard JSONSerialization.isValidJSONObject(dict),
+              let data = try? JSONSerialization.data(withJSONObject: dict),
               let text = String(data: data, encoding: .utf8),
               let task = webSocketTask else {
             return
@@ -418,7 +434,7 @@ class WebSocketManager: ObservableObject {
 
     private func startPingTimer() {
         pingTimer?.invalidate()
-        pingTimer = Timer.scheduledTimer(withTimeInterval: 30, repeats: true) { [weak self] _ in
+        pingTimer = Timer.scheduledTimer(withTimeInterval: pingInterval, repeats: true) { [weak self] _ in
             Task { @MainActor in
                 self?.sendPing()
             }
@@ -455,7 +471,7 @@ class WebSocketManager: ObservableObject {
             }
         }
         reconnectWorkItem = workItem
-        DispatchQueue.main.asyncAfter(deadline: .now() + delay, execute: workItem)
+        reconnectScheduler(delay, workItem)
     }
 
     /// Exponential backoff capped at `maxReconnectDelay` (300s) with up to
@@ -483,5 +499,9 @@ class WebSocketManager: ObservableObject {
     func forceHandleDisconnectionForTesting() {
         shouldReconnect = true
         handleDisconnection()
+    }
+
+    func firePingForTesting() {
+        sendPing()
     }
 }

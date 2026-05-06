@@ -22,7 +22,8 @@ final class NotificationService: ObservableObject {
         subsystem: Bundle.main.bundleIdentifier ?? "Snapper",
         category: "Notifications"
     )
-    private let notificationCenter: UNUserNotificationCenter
+    private let authorizationStatusProvider: @MainActor () async -> UNAuthorizationStatus
+    private let authorizationRequester: @MainActor (UNAuthorizationOptions) async throws -> Bool
     private let isLoggedIn: () -> Bool
     private let registerForRemote: () -> Void
 
@@ -45,7 +46,27 @@ final class NotificationService: ObservableObject {
             UIApplication.shared.registerForRemoteNotifications()
         }
     ) {
-        self.notificationCenter = notificationCenter
+        self.authorizationStatusProvider = {
+            let settings = await notificationCenter.notificationSettings()
+            return settings.authorizationStatus
+        }
+        self.authorizationRequester = { options in
+            try await notificationCenter.requestAuthorization(options: options)
+        }
+        self.isLoggedIn = isLoggedIn
+        self.registerForRemote = registerForRemote
+    }
+
+    init(
+        authorizationStatusProvider: @MainActor @escaping () async -> UNAuthorizationStatus,
+        authorizationRequester: @MainActor @escaping (UNAuthorizationOptions) async throws -> Bool,
+        isLoggedIn: @escaping () -> Bool = { AuthService.shared.isAuthenticated },
+        registerForRemote: @escaping () -> Void = {
+            UIApplication.shared.registerForRemoteNotifications()
+        }
+    ) {
+        self.authorizationStatusProvider = authorizationStatusProvider
+        self.authorizationRequester = authorizationRequester
         self.isLoggedIn = isLoggedIn
         self.registerForRemote = registerForRemote
     }
@@ -63,8 +84,7 @@ final class NotificationService: ObservableObject {
     /// only delivers a fresh APNs token in response to an explicit
     /// `registerForRemoteNotifications()` call.
     func refreshAuthorizationStatus() async {
-        let settings = await notificationCenter.notificationSettings()
-        self.authorizationStatus = settings.authorizationStatus
+        self.authorizationStatus = await authorizationStatusProvider()
 
         if Self.shouldFireDurableRegistration(
             authorizationStatus: self.authorizationStatus,
@@ -111,9 +131,7 @@ final class NotificationService: ObservableObject {
     /// `@Published authorizationStatus` field.
     func requestAuthorization() async {
         do {
-            _ = try await notificationCenter.requestAuthorization(
-                options: [.alert, .sound, .badge]
-            )
+            _ = try await authorizationRequester([.alert, .sound, .badge])
             // refreshAuthorizationStatus already fires registerForRemote
             // when the post-grant status is granted AND the user is
             // logged in, so we let it own the registration call —

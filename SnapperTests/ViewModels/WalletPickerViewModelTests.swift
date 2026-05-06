@@ -181,6 +181,7 @@ final class WalletPickerViewModelTests: XCTestCase {
         let viewModel = makeViewModel()
         viewModel.selectWallet("p-pick")
         XCTAssertEqual(appState.selectedWalletPublicId, "p-pick")
+        XCTAssertEqual(viewModel.selectedWalletPublicId, "p-pick")
     }
 
     func testSelectWalletReplacesPriorSelection() {

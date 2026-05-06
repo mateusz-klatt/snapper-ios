@@ -29,6 +29,85 @@ final class DeviceRegistrationServiceTests: XCTestCase {
         super.tearDown()
     }
 
+    private func drainAsyncWork() async {
+        for _ in 0..<30 {
+            await Task.yield()
+        }
+    }
+
+    private func waitForStatus(
+        _ service: DeviceRegistrationService,
+        matching predicate: (DeviceRegistrationStatus) -> Bool,
+        file: StaticString = #filePath,
+        line: UInt = #line
+    ) async -> DeviceRegistrationStatus {
+        var latest = await service.currentStatus()
+        for _ in 0..<100 {
+            if predicate(latest) {
+                return latest
+            }
+            await drainAsyncWork()
+            try? await Task.sleep(nanoseconds: 1_000_000)
+            latest = await service.currentStatus()
+        }
+        XCTFail("Timed out waiting for registration status; latest was \(latest)", file: file, line: line)
+        return latest
+    }
+
+    func testStatusTracksAwaitingLoginAwaitingTokenAndIdle() async {
+        let service = DeviceRegistrationService(apiClient: apiClient)
+
+        var status = await service.currentStatus()
+        XCTAssertEqual(status, .idle)
+
+        await service.onTokenReceived(Data([0x01]))
+        status = await service.currentStatus()
+        XCTAssertEqual(status, .awaitingLogin)
+
+        await service.onLogout()
+        status = await service.currentStatus()
+        XCTAssertEqual(status, .idle)
+
+        await service.onLogin()
+        status = await service.currentStatus()
+        XCTAssertEqual(status, .awaitingToken)
+    }
+
+    func testRetryNowIsNoOpWithoutLoginAndToken() async {
+        let service = DeviceRegistrationService(apiClient: apiClient)
+        var calls = 0
+        MockURLProtocol.requestHandler = { _ in
+            calls += 1
+            return MockURLProtocol.jsonResponse(statusCode: 200, json: _deviceResponseJSON)
+        }
+
+        await service.retryNow()
+        await service.onLogin()
+        await service.retryNow()
+
+        XCTAssertEqual(calls, 0)
+        let status = await service.currentStatus()
+        XCTAssertEqual(status, .awaitingToken)
+    }
+
+    func testRetryNowRegistersWhenLoginAndTokenReady() async {
+        let service = DeviceRegistrationService(apiClient: apiClient)
+        let token = Data([0x10, 0x20])
+        var calls = 0
+        MockURLProtocol.requestHandler = { _ in
+            calls += 1
+            return MockURLProtocol.jsonResponse(statusCode: 200, json: _deviceResponseJSON)
+        }
+
+        await service.onLogin()
+        await service.onTokenReceived(token)
+        await service.retryNow()
+
+        XCTAssertEqual(calls, 2)
+        let status = await service.currentStatus()
+        XCTAssertEqual(status, .succeeded)
+    }
+
     /// Token received before login → stored; no registration yet.
     func testTokenBeforeLoginStoredButNotRegistered() async {
         let service = DeviceRegistrationService(apiClient: apiClient)
@@ -221,6 +300,85 @@ final class DeviceRegistrationServiceTests: XCTestCase {
         await service.onTokenReceived(token)
         let secondPid = await service.currentDevicePublicId()
         XCTAssertEqual(secondPid, "dev-registered-pid")
+    }
+
+    func testFailedRegistrationSchedulesRetryAndEventuallySucceeds() async {
+        let sleeper = FakeSleeper()
+        let service = DeviceRegistrationService(apiClient: apiClient, sleeper: sleeper)
+        let token = Data([0xca, 0xfe])
+        var attempts = 0
+
+        MockURLProtocol.requestHandler = { _ in
+            attempts += 1
+            if attempts == 1 {
+                return MockURLProtocol.errorResponse(statusCode: 500, message: "temporary")
+            }
+            return MockURLProtocol.jsonResponse(statusCode: 200, json: _deviceResponseJSON)
+        }
+
+        await service.onLogin()
+        await service.onTokenReceived(token)
+        let status = await waitForStatus(service) { $0 == .succeeded }
+
+        let pid = await service.currentDevicePublicId()
+        XCTAssertEqual(pid, "dev-registered-pid")
+        XCTAssertEqual(status, .succeeded)
+        let requestedIntervals = await sleeper.requestedIntervals
+        XCTAssertEqual(requestedIntervals, [1])
+        XCTAssertEqual(attempts, 2)
+    }
+
+    func testRegistrationGivesUpAfterRetryBudget() async {
+        let sleeper = FakeSleeper()
+        let service = DeviceRegistrationService(apiClient: apiClient, sleeper: sleeper)
+        let token = Data([0xba, 0xad])
+        var attempts = 0
+
+        MockURLProtocol.requestHandler = { _ in
+            attempts += 1
+            return MockURLProtocol.errorResponse(statusCode: 500, message: "still down")
+        }
+
+        await service.onLogin()
+        await service.onTokenReceived(token)
+        let status = await waitForStatus(service) {
+            if case .failed(let attempt, _) = $0 {
+                return attempt == 5
+            }
+            return false
+        }
+
+        if case .failed(let attempt, let message) = status {
+            XCTAssertEqual(attempt, 5)
+            XCTAssertFalse(message.isEmpty)
+        } else {
+            XCTFail("expected final failed status, got \(status)")
+        }
+        let requestedIntervals = await sleeper.requestedIntervals
+        XCTAssertEqual(requestedIntervals, [1, 4, 16, 60])
+        XCTAssertEqual(attempts, 5)
+    }
+
+    func testLogoutDuringRegisterDropsTheErrorAndRetrySchedule() async {
+        let sleeper = FakeSleeper()
+        let service = DeviceRegistrationService(apiClient: apiClient, sleeper: sleeper)
+        let token = Data([0x24])
+
+        MockURLProtocol.requestHandler = { _ in
+            Thread.sleep(forTimeInterval: 0.2)
+            return MockURLProtocol.errorResponse(statusCode: 500, message: "late failure")
+        }
+
+        await service.onLogin()
+        let registerTask = Task { await service.onTokenReceived(token) }
+        try? await Task.sleep(nanoseconds: 50_000_000)
+        await service.onLogout()
+        await registerTask.value
+
+        let status = await service.currentStatus()
+        XCTAssertEqual(status, .idle)
+        let requestedIntervals = await sleeper.requestedIntervals
+        XCTAssertEqual(requestedIntervals, [])
     }
 }
 
