@@ -126,6 +126,50 @@ final class NotificationPrefsViewModel {
     func applySavedPref(_ saved: DeviceAlertPrefInfo) {
         Self.applySavedPref(saved, into: &devicePrefs)
     }
+
+    /// Revoke (SCD2 close) a device-scoped override.
+    ///
+    /// Optimistic remove with revert-on-failure: drops the row from
+    /// the local list before the network call so the swipe-to-delete
+    /// gesture lands instantly, then refunds it if the backend call
+    /// fails. A 404 is treated as success (the row is already gone
+    /// upstream — idempotent re-revoke), which prevents a stuck row
+    /// when the user double-taps the swipe action.
+    ///
+    /// Returns ``true`` on success (row removed); ``false`` on
+    /// non-404 failure (row reverted, banner shown).
+    @discardableResult
+    func revokeDevicePref(prefPublicId: String) async -> Bool {
+        guard let devicePublicId else { return false }
+        let originalIndex = devicePrefs.firstIndex(where: { $0.publicId == prefPublicId })
+        let snapshot = originalIndex.map { devicePrefs[$0] }
+        if let originalIndex {
+            devicePrefs.remove(at: originalIndex)
+        }
+        let command = Self.makeRevokeCommand()
+        do {
+            _ = try await api.revokeDevicePref(
+                devicePublicId: devicePublicId,
+                prefPublicId: prefPublicId,
+                command: command
+            )
+            loadError = nil
+            return true
+        } catch let APIError.httpError(404) {
+            loadError = nil
+            return true
+        } catch {
+            logger.error(
+                "Failed to revoke device pref \(prefPublicId, privacy: .public): \(error.localizedDescription, privacy: .public)"
+            )
+            if let originalIndex, let snapshot {
+                let insertAt = min(originalIndex, devicePrefs.count)
+                devicePrefs.insert(snapshot, at: insertAt)
+            }
+            loadError = "Couldn't remove override. Try again."
+            return false
+        }
+    }
     /// Backend-canonical alert_types in display order.
     static let alertTypes: [String] = [
         "order_fill_full",
@@ -221,6 +265,23 @@ final class NotificationPrefsViewModel {
                 enabled: enabled,
                 minPriority: minPriority
             )
+        )
+    }
+
+    @MainActor
+    static func makeRevokeCommand(
+        reason: String? = nil,
+        provenance: EnvelopeMinter.Provenance? = nil
+    ) -> RevokeDevicePrefCommand {
+        let envelope = provenance ?? EnvelopeMinter.shared.next(.control)
+        return RevokeDevicePrefCommand(
+            type: "revoke_device_pref_command",
+            sequenceId: envelope.sequenceId,
+            publicId: envelope.publicId,
+            timestamp: envelope.timestamp,
+            sessionId: envelope.sessionId,
+            topic: nil,
+            payload: RevokeDevicePrefBody(reason: reason)
         )
     }
 

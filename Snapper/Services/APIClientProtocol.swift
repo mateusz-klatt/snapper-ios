@@ -45,6 +45,11 @@ protocol APIClientProtocol: Sendable {
         devicePublicId: String,
         command: UpdateDevicePrefCommand
     ) async throws -> DeviceAlertPrefResponse
+    func revokeDevicePref(
+        devicePublicId: String,
+        prefPublicId: String,
+        command: RevokeDevicePrefCommand
+    ) async throws -> RevokeDevicePrefResponse
     func fetchAlertDefaults() async throws -> UserAlertDefaultListResponse
     func updateAlertDefault(
         command: UpdateUserAlertDefaultCommand

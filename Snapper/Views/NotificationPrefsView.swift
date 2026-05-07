@@ -76,6 +76,13 @@ struct NotificationPrefsView: View {
                                 DevicePrefRow(pref: pref)
                             }
                             .buttonStyle(.plain)
+                            .swipeActions(edge: .trailing, allowsFullSwipe: true) {
+                                Button(role: .destructive) {
+                                    Task { await viewModel.revokeDevicePref(prefPublicId: pref.publicId) }
+                                } label: {
+                                    Label("Remove", systemImage: "trash")
+                                }
+                            }
                         }
                     }
 

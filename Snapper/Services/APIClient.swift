@@ -372,6 +372,30 @@ final class APIClient: Sendable, APIClientProtocol {
         )
     }
 
+    /// Revoke (SCD2 close) one per-(device, alert_type, scope) preference.
+    ///
+    /// Sends ``POST /api/devices/{device_public_id}/prefs/{pref_public_id}/revoke``
+    /// with a ``RevokeDevicePrefCommand`` envelope. Backend convention is
+    /// POST + envelope (not DELETE) so every write carries client-side
+    /// provenance for the gap detector — same as ``cancelOrder`` /
+    /// ``revokeScopeGrant``.
+    ///
+    /// The response payload echoes the closed pref projection so the UI
+    /// can drop the row from its local list without an extra GET.
+    /// Idempotent at the backend: a second revoke of an already-closed
+    /// pref returns 404, which surfaces here as ``APIError.httpError(404)``.
+    func revokeDevicePref(
+        devicePublicId: String,
+        prefPublicId: String,
+        command: RevokeDevicePrefCommand
+    ) async throws -> RevokeDevicePrefResponse {
+        return try await request(
+            endpoint: "\(AppConfig.Endpoints.devices)/\(Self.encodePathSegment(devicePublicId))/prefs/\(Self.encodePathSegment(prefPublicId))/revoke",
+            method: "POST",
+            body: command
+        )
+    }
+
     /// Fetch the caller's user-level alert default fallbacks.
     ///
     /// Empty list is the legitimate "no overrides" state — the
