@@ -1,3 +1,4 @@
+import Combine
 import Foundation
 import Observation
 import os
@@ -23,6 +24,16 @@ final class OrdersViewModel {
     var errorMessage: String?
     var submitError: String?
 
+    @ObservationIgnored private var observationTasks: [Task<Void, Never>] = []
+    @ObservationIgnored private var liveReloadTask: Task<Void, Never>?
+
+    /// Observation-window debounce. 250ms picked to coalesce a
+    /// single market-sweep burst (typical Kraken 5-fill cascade
+    /// arrives within ~150ms) into one REST reload while staying
+    /// inside the 300ms "feels instant" window for the user. See
+    /// ``testLiveReloadCoalescesBurst``.
+    @ObservationIgnored static let liveReloadDebounceNanos: UInt64 = 250_000_000
+
     private let api: APIClientProtocol
     private let appState: AppState
 
@@ -34,6 +45,53 @@ final class OrdersViewModel {
     ) {
         self.api = api
         self.appState = appState
+    }
+
+    /// Begin observing live ``WSState`` frames for debounced REST
+    /// reload.
+    ///
+    /// Calling ``startObservingLiveUpdates(from:)`` while a prior
+    /// observation is in flight is safe: the first line cancels the
+    /// prior tasks via ``stopObservingLiveUpdates()`` before
+    /// installing new ones. This makes the SwiftUI `.task(id:)`
+    /// restart path race-safe even when the previous body's
+    /// ``onCancel:`` async stop hop has not completed.
+    func startObservingLiveUpdates(from state: WSState) {
+        stopObservingLiveUpdates()
+        observationTasks = [
+            Task { @MainActor [weak self, weak state] in
+                guard let stream = state?.$lastOrderEvent.values.dropFirst() else { return }
+                for await _ in stream {
+                    guard let self else { return }
+                    self.scheduleDebouncedReload()
+                }
+            },
+            Task { @MainActor [weak self, weak state] in
+                guard let stream = state?.$lastExecution.values.dropFirst() else { return }
+                for await _ in stream {
+                    guard let self else { return }
+                    self.scheduleDebouncedReload()
+                }
+            },
+        ]
+    }
+
+    /// Cancel all observation tasks and any pending debounced
+    /// reload. Idempotent.
+    func stopObservingLiveUpdates() {
+        observationTasks.forEach { $0.cancel() }
+        observationTasks.removeAll()
+        liveReloadTask?.cancel()
+        liveReloadTask = nil
+    }
+
+    private func scheduleDebouncedReload() {
+        liveReloadTask?.cancel()
+        liveReloadTask = Task { @MainActor [weak self] in
+            try? await Task.sleep(nanoseconds: Self.liveReloadDebounceNanos)
+            guard !Task.isCancelled, let self else { return }
+            await self.load()
+        }
     }
     var filteredOpen: [OrderStatus] {
         return Self.filterOpen(

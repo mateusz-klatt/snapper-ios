@@ -16,6 +16,7 @@ import Combine
 final class WSState: ObservableObject {
     @Published var lastTrade: TradeData?
     @Published var lastOrderEvent: OrderEventData?
+    @Published var lastExecution: ExecutionData?
     @Published var lastOrderCancel: OrderCancelData?
     @Published var lastHeartbeat: HeartbeatData?
     @Published var lastUserDeactivated: UserDeactivatedData?

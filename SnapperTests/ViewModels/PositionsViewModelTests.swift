@@ -279,4 +279,65 @@ final class PositionsViewModelTests: XCTestCase {
         ]
         XCTAssertEqual(viewModel.filteredPositions.count, 2)
     }
+
+    /// Pre-existing non-nil ``lastExecution`` at observation-start
+    /// time must NOT fire a redundant load.
+    func testLiveReloadDoesNotFireOnObservationStart() async throws {
+        let viewModel = makeViewModel()
+        let state = WSState()
+        state.lastExecution = ExecutionData.fixture()
+        let counter = PositionsLiveReloadCallCounter()
+        mockAPI.fetchPositionsHandler = { await counter.increment(); return [] }
+
+        viewModel.startObservingLiveUpdates(from: state)
+        try await Task.sleep(nanoseconds: 500_000_000)
+
+        let count = await counter.value
+        XCTAssertEqual(count, 0, "observation start must not fire load on the replayed value")
+        viewModel.stopObservingLiveUpdates()
+    }
+
+    /// Post-start mutation of ``lastExecution`` triggers a debounced
+    /// load. 100ms warm-up before the mutation lets the observation
+    /// task install its `for await` loop on the `.values` async
+    /// sequence before the dropFirst-skipped value lands.
+    func testLiveReloadFiresOnPostStartChange() async throws {
+        let viewModel = makeViewModel()
+        let state = WSState()
+        viewModel.startObservingLiveUpdates(from: state)
+        try await Task.sleep(nanoseconds: 100_000_000)
+        let counter = PositionsLiveReloadCallCounter()
+        mockAPI.fetchPositionsHandler = { await counter.increment(); return [] }
+
+        state.lastExecution = ExecutionData.fixture()
+        try await Task.sleep(nanoseconds: 500_000_000)
+
+        let count = await counter.value
+        XCTAssertGreaterThanOrEqual(count, 1)
+        viewModel.stopObservingLiveUpdates()
+    }
+
+    /// ``stopObservingLiveUpdates`` cancels a pending debounced
+    /// reload before it fires.
+    func testStopObservingCancelsPendingReload() async throws {
+        let viewModel = makeViewModel()
+        let state = WSState()
+        viewModel.startObservingLiveUpdates(from: state)
+        try await Task.sleep(nanoseconds: 100_000_000)
+        let counter = PositionsLiveReloadCallCounter()
+        mockAPI.fetchPositionsHandler = { await counter.increment(); return [] }
+
+        state.lastExecution = ExecutionData.fixture()
+        try await Task.sleep(nanoseconds: 50_000_000)
+        viewModel.stopObservingLiveUpdates()
+        try await Task.sleep(nanoseconds: 500_000_000)
+
+        let count = await counter.value
+        XCTAssertEqual(count, 0, "pending debounced load must be cancelled by stop")
+    }
+}
+
+private actor PositionsLiveReloadCallCounter {
+    var value: Int = 0
+    func increment() { value += 1 }
 }

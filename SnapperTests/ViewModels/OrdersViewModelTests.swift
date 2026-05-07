@@ -404,4 +404,124 @@ final class OrdersViewModelTests: XCTestCase {
         XCTAssertEqual(viewModel.resolvedWallet?.publicId, "w-1")
         XCTAssertEqual(viewModel.resolvedWallet?.label, "first")
     }
+
+    /// Pre-existing non-nil ``lastOrderEvent`` at observation-start
+    /// time must NOT fire a redundant load — the View's own
+    /// ``viewModel?.load()`` already covered the initial fetch in
+    /// the same `.task` body. ``.dropFirst()`` skips the published
+    /// replay so observation only triggers on post-start changes.
+    func testLiveReloadDoesNotFireOnObservationStart() async throws {
+        let viewModel = makeViewModel()
+        let state = WSState()
+        state.lastOrderEvent = OrderEventData.fixture()
+        let counter = OrdersLiveReloadCallCounter()
+        mockAPI.fetchOrdersHandler = { await counter.increment(); return [] }
+        mockAPI.fetchExecutionsHandler = { return [] }
+
+        viewModel.startObservingLiveUpdates(from: state)
+        try await Task.sleep(nanoseconds: 500_000_000)
+
+        let count = await counter.value
+        XCTAssertEqual(count, 0, "observation start must not fire load on the replayed value")
+        viewModel.stopObservingLiveUpdates()
+    }
+
+    /// Post-start mutation of ``lastOrderEvent`` triggers a
+    /// debounced load within ~250ms + tolerance.
+    ///
+    /// The 100ms warm-up sleep before the mutation gives the
+    /// observation tasks time to start their `for await` loops on
+    /// the `.values` async sequence — without it, the
+    /// `dropFirst()` skip can race against the assignment and miss
+    /// the change entirely.
+    func testLiveReloadFiresOnPostStartChange() async throws {
+        let viewModel = makeViewModel()
+        let state = WSState()
+        viewModel.startObservingLiveUpdates(from: state)
+        try await Task.sleep(nanoseconds: 100_000_000)
+        let counter = OrdersLiveReloadCallCounter()
+        mockAPI.fetchOrdersHandler = { await counter.increment(); return [] }
+        mockAPI.fetchExecutionsHandler = { return [] }
+
+        state.lastOrderEvent = OrderEventData.fixture()
+        try await Task.sleep(nanoseconds: 500_000_000)
+
+        let count = await counter.value
+        XCTAssertGreaterThanOrEqual(count, 1)
+        viewModel.stopObservingLiveUpdates()
+    }
+
+    /// Burst of 5 frames within 50ms coalesces to a single REST
+    /// reload via the 250ms debounce.
+    func testLiveReloadCoalescesBurst() async throws {
+        let viewModel = makeViewModel()
+        let state = WSState()
+        viewModel.startObservingLiveUpdates(from: state)
+        try await Task.sleep(nanoseconds: 100_000_000)
+        let counter = OrdersLiveReloadCallCounter()
+        mockAPI.fetchOrdersHandler = { await counter.increment(); return [] }
+        mockAPI.fetchExecutionsHandler = { return [] }
+
+        for i in 0..<5 {
+            state.lastOrderEvent = OrderEventData.fixture(clientOrderId: "burst-\(i)")
+            try await Task.sleep(nanoseconds: 10_000_000)
+        }
+        try await Task.sleep(nanoseconds: 500_000_000)
+
+        let count = await counter.value
+        XCTAssertEqual(count, 1, "burst should coalesce to exactly one reload")
+        viewModel.stopObservingLiveUpdates()
+    }
+
+    /// ``stopObservingLiveUpdates`` cancels a pending debounced
+    /// reload before it fires.
+    func testStopObservingCancelsPendingReload() async throws {
+        let viewModel = makeViewModel()
+        let state = WSState()
+        viewModel.startObservingLiveUpdates(from: state)
+        try await Task.sleep(nanoseconds: 100_000_000)
+        let counter = OrdersLiveReloadCallCounter()
+        mockAPI.fetchOrdersHandler = { await counter.increment(); return [] }
+        mockAPI.fetchExecutionsHandler = { return [] }
+
+        state.lastOrderEvent = OrderEventData.fixture()
+        try await Task.sleep(nanoseconds: 50_000_000)
+        viewModel.stopObservingLiveUpdates()
+        try await Task.sleep(nanoseconds: 500_000_000)
+
+        let count = await counter.value
+        XCTAssertEqual(count, 0, "pending debounced load must be cancelled by stop")
+    }
+
+    /// ``startObservingLiveUpdates`` is self-cleaning — calling it
+    /// while a prior observation is in flight cancels the old tasks
+    /// before installing new ones. After restart, mutations to the
+    /// PRIOR ``WSState`` instance must NOT fire reload.
+    func testRestartCleansUpPriorObservation() async throws {
+        let viewModel = makeViewModel()
+        let stateA = WSState()
+        let stateB = WSState()
+        viewModel.startObservingLiveUpdates(from: stateA)
+        viewModel.startObservingLiveUpdates(from: stateB)
+        try await Task.sleep(nanoseconds: 100_000_000)
+        let counter = OrdersLiveReloadCallCounter()
+        mockAPI.fetchOrdersHandler = { await counter.increment(); return [] }
+        mockAPI.fetchExecutionsHandler = { return [] }
+
+        stateA.lastOrderEvent = OrderEventData.fixture(clientOrderId: "should-not-fire")
+        try await Task.sleep(nanoseconds: 500_000_000)
+        let countAfterA = await counter.value
+        XCTAssertEqual(countAfterA, 0, "stateA observation should be torn down after restart")
+
+        stateB.lastOrderEvent = OrderEventData.fixture(clientOrderId: "should-fire")
+        try await Task.sleep(nanoseconds: 500_000_000)
+        let countAfterB = await counter.value
+        XCTAssertGreaterThanOrEqual(countAfterB, 1, "stateB observation should be active")
+        viewModel.stopObservingLiveUpdates()
+    }
+}
+
+private actor OrdersLiveReloadCallCounter {
+    var value: Int = 0
+    func increment() { value += 1 }
 }
