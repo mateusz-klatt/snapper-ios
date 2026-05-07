@@ -330,6 +330,67 @@ final class NotificationPrefsViewModelTests: XCTestCase {
         XCTAssertEqual(viewModel.devicePrefs.count, 2)
     }
 
+    func testRevokeDevicePrefHappyPathRemovesRowOptimistically() async {
+        let viewModel = makeViewModel()
+        viewModel.devicePublicId = "device-public-1"
+        let pref1 = makeDevicePref(publicId: "p-1")
+        let pref2 = makeDevicePref(publicId: "p-2", alertType: "margin_warning")
+        viewModel.devicePrefs = [pref1, pref2]
+        let revokeResponse = RevokeDevicePrefResponse(
+            type: "revoke_device_pref_response",
+            sequenceId: 1,
+            publicId: "envelope",
+            timestamp: Self.baseTimestamp,
+            sessionId: "session-test",
+            topic: nil,
+            payload: pref1
+        )
+        mockAPI.revokeDevicePrefHandler = { _, _, _ in revokeResponse }
+
+        let success = await viewModel.revokeDevicePref(prefPublicId: "p-1")
+
+        XCTAssertTrue(success)
+        XCTAssertEqual(viewModel.devicePrefs.map(\.publicId), ["p-2"])
+        XCTAssertNil(viewModel.loadError)
+    }
+
+    func testRevokeDevicePrefRevertsRowOnFailure() async {
+        let viewModel = makeViewModel()
+        viewModel.devicePublicId = "device-public-1"
+        let pref = makeDevicePref(publicId: "p-1")
+        viewModel.devicePrefs = [pref]
+        mockAPI.revokeDevicePrefHandler = { _, _, _ in throw APIError.invalidResponse }
+
+        let success = await viewModel.revokeDevicePref(prefPublicId: "p-1")
+
+        XCTAssertFalse(success)
+        XCTAssertEqual(viewModel.devicePrefs.map(\.publicId), ["p-1"])
+        XCTAssertNotNil(viewModel.loadError)
+    }
+
+    func testRevokeDevicePref404IsTreatedAsSuccess() async {
+        let viewModel = makeViewModel()
+        viewModel.devicePublicId = "device-public-1"
+        viewModel.devicePrefs = [makeDevicePref(publicId: "p-1")]
+        mockAPI.revokeDevicePrefHandler = { _, _, _ in throw APIError.httpError(404) }
+
+        let success = await viewModel.revokeDevicePref(prefPublicId: "p-1")
+
+        XCTAssertTrue(success, "404 means already-closed upstream — idempotent re-revoke")
+        XCTAssertTrue(viewModel.devicePrefs.isEmpty)
+        XCTAssertNil(viewModel.loadError)
+    }
+
+    func testRevokeDevicePrefNoOpWhenDeviceNotRegistered() async {
+        let viewModel = makeViewModel(deviceId: nil)
+        viewModel.devicePrefs = [makeDevicePref(publicId: "p-1")]
+
+        let success = await viewModel.revokeDevicePref(prefPublicId: "p-1")
+
+        XCTAssertFalse(success)
+        XCTAssertEqual(viewModel.devicePrefs.map(\.publicId), ["p-1"])
+    }
+
     func testApplySavedPrefReplacesByScopeTupleWhenPublicIdChanges() {
         let viewModel = makeViewModel()
         viewModel.devicePrefs = [

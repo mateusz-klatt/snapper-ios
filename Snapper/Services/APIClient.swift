@@ -309,6 +309,12 @@ final class APIClient: Sendable, APIClientProtocol {
     /// backend enforces its own upper bound. ``before`` is the opaque
     /// cursor from the previous page's ``next_cursor`` — pass ``nil``
     /// for the first page.
+    ///
+    /// Hits the ``/alerts/history`` sub-route (the bare ``/alerts``
+    /// prefix is reserved for ``GET /alerts/{public_id}`` single-row
+    /// lookups consumed by ``fetchAlert(publicId:)``). The mismatch
+    /// silently 404'd the entire Alerts tab on TestFlight v0.4.0
+    /// build 17 until this path was corrected.
     func fetchAlertHistory(limit: Int? = nil, before: String? = nil) async throws -> AlertHistoryResponse {
         var queryItems: [QueryParameter] = []
         if let limit {
@@ -317,7 +323,9 @@ final class APIClient: Sendable, APIClientProtocol {
         if let before, !before.isEmpty {
             queryItems.append(QueryParameter(name: "before", value: before))
         }
-        return try await request(endpoint: "\(AppConfig.Endpoints.alerts)\(Self.querySuffix(queryItems))")
+        return try await request(
+            endpoint: "\(AppConfig.Endpoints.alerts)/history\(Self.querySuffix(queryItems))"
+        )
     }
 
     /// Fetch a single alert by ``public_id`` (BE-1c — used for deep-linking).
@@ -360,6 +368,30 @@ final class APIClient: Sendable, APIClientProtocol {
         return try await request(
             endpoint: "\(AppConfig.Endpoints.devices)/\(Self.encodePathSegment(devicePublicId))/prefs",
             method: "PATCH",
+            body: command
+        )
+    }
+
+    /// Revoke (SCD2 close) one per-(device, alert_type, scope) preference.
+    ///
+    /// Sends ``POST /api/devices/{device_public_id}/prefs/{pref_public_id}/revoke``
+    /// with a ``RevokeDevicePrefCommand`` envelope. Backend convention is
+    /// POST + envelope (not DELETE) so every write carries client-side
+    /// provenance for the gap detector — same as ``cancelOrder`` /
+    /// ``revokeScopeGrant``.
+    ///
+    /// The response payload echoes the closed pref projection so the UI
+    /// can drop the row from its local list without an extra GET.
+    /// Idempotent at the backend: a second revoke of an already-closed
+    /// pref returns 404, which surfaces here as ``APIError.httpError(404)``.
+    func revokeDevicePref(
+        devicePublicId: String,
+        prefPublicId: String,
+        command: RevokeDevicePrefCommand
+    ) async throws -> RevokeDevicePrefResponse {
+        return try await request(
+            endpoint: "\(AppConfig.Endpoints.devices)/\(Self.encodePathSegment(devicePublicId))/prefs/\(Self.encodePathSegment(prefPublicId))/revoke",
+            method: "POST",
             body: command
         )
     }

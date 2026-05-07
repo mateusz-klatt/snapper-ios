@@ -91,6 +91,9 @@ final class MockAPIClient: APIClientProtocol, @unchecked Sendable {
         var updateDevicePref: @Sendable (String, UpdateDevicePrefCommand) async throws -> DeviceAlertPrefResponse = { _, _ in
             throw APIError.invalidResponse
         }
+        var revokeDevicePref: @Sendable (String, String, RevokeDevicePrefCommand) async throws -> RevokeDevicePrefResponse = { _, _, _ in
+            throw APIError.invalidResponse
+        }
         var fetchAlertDefaults: @Sendable () async throws -> UserAlertDefaultListResponse = {
             throw APIError.invalidResponse
         }
@@ -185,6 +188,10 @@ final class MockAPIClient: APIClientProtocol, @unchecked Sendable {
         get { read(\.updateDevicePref) }
         set { write(\.updateDevicePref, newValue) }
     }
+    var revokeDevicePrefHandler: @Sendable (String, String, RevokeDevicePrefCommand) async throws -> RevokeDevicePrefResponse {
+        get { read(\.revokeDevicePref) }
+        set { write(\.revokeDevicePref, newValue) }
+    }
     var fetchAlertDefaultsHandler: @Sendable () async throws -> UserAlertDefaultListResponse {
         get { read(\.fetchAlertDefaults) }
         set { write(\.fetchAlertDefaults, newValue) }
@@ -266,6 +273,14 @@ final class MockAPIClient: APIClientProtocol, @unchecked Sendable {
         command: UpdateDevicePrefCommand
     ) async throws -> DeviceAlertPrefResponse {
         return try await updateDevicePrefHandler(devicePublicId, command)
+    }
+
+    func revokeDevicePref(
+        devicePublicId: String,
+        prefPublicId: String,
+        command: RevokeDevicePrefCommand
+    ) async throws -> RevokeDevicePrefResponse {
+        return try await revokeDevicePrefHandler(devicePublicId, prefPublicId, command)
     }
 
     func fetchAlertDefaults() async throws -> UserAlertDefaultListResponse {

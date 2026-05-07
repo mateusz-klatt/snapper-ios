@@ -78,8 +78,8 @@ final class APIClientSurfaceTests: XCTestCase {
             "/api/status",
             "/api/health",
             "/api/devices",
-            "/api/alerts",
-            "/api/alerts",
+            "/api/alerts/history",
+            "/api/alerts/history",
             "/api/alerts/alert%2F1",
             "/api/devices/device%2F1/prefs",
             "/api/devices/device%2F1/prefs",
@@ -156,7 +156,7 @@ final class APIClientSurfaceTests: XCTestCase {
         _ = try await apiClient.fetchAlertHistory(before: "")
 
         let snapshot = try XCTUnwrap(requests.snapshots.last)
-        XCTAssertEqual(snapshot.path, "/api/alerts")
+        XCTAssertEqual(snapshot.path, "/api/alerts/history")
         XCTAssertNil(snapshot.query)
     }
 
@@ -193,7 +193,7 @@ final class APIClientSurfaceTests: XCTestCase {
         if method == "POST", path == "/api/devices" {
             return envelope(payload: notificationDevicePayload())
         }
-        if method == "GET", path == "/api/alerts" {
+        if method == "GET", path == "/api/alerts/history" {
             var value = listEnvelope(payload: [])
             value["next_cursor"] = "cursor-next"
             return value
