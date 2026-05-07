@@ -24,6 +24,7 @@ struct OrdersView: View {
 
     @Environment(AppState.self) private var appState
     @EnvironmentObject private var authService: AuthService
+    @EnvironmentObject private var webSocketManager: WebSocketManager
     @State private var viewModel: OrdersViewModel?
 
     @State private var segment: OrdersSegment = .open
@@ -130,6 +131,16 @@ struct OrdersView: View {
                 viewModel = OrdersViewModel(appState: appState)
             }
             await viewModel?.load()
+
+            guard let viewModel else { return }
+            viewModel.startObservingLiveUpdates(from: webSocketManager.state)
+            await withTaskCancellationHandler {
+                try? await Task.sleep(nanoseconds: .max)
+            } onCancel: {
+                Task { @MainActor in
+                    viewModel.stopObservingLiveUpdates()
+                }
+            }
         }
         .sheet(isPresented: $presentingNewOrder) {
             if let viewModel, let wallet = viewModel.resolvedWallet {

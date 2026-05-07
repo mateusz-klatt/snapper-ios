@@ -109,6 +109,14 @@ class WebSocketManager: ObservableObject {
         listenForMessages()
     }
 
+    /// Tear down the connection and reset all subscription tracking.
+    ///
+    /// Clears `subscribedTopics` + `pendingSubscriptions` so a
+    /// subsequent re-connect (e.g. logout-then-login as a different
+    /// role) does not replay stale topics that the new role's
+    /// ``availableTopics`` no longer permits. The replay-side filter
+    /// in ``replayPendingSubscriptions`` is defense-in-depth for the
+    /// reauth path where ``disconnect()`` is not invoked.
     func disconnect() {
         shouldReconnect = false
         intentionalDisconnect = true
@@ -121,6 +129,8 @@ class WebSocketManager: ObservableObject {
         reconnectWorkItem = nil
         webSocketTask?.cancel(with: .goingAway, reason: nil)
         webSocketTask = nil
+        subscribedTopics.removeAll()
+        pendingSubscriptions.removeAll()
         connectionState = .disconnected
     }
 
@@ -177,12 +187,57 @@ class WebSocketManager: ObservableObject {
         }
     }
 
+    /// Re-send subscriptions after (re)auth, dropping topics the
+    /// current role's server-shipped ``availableTopics`` no longer
+    /// permits.
+    ///
+    /// State mutations (``subscribedTopics`` reassignment + pending
+    /// clear) run BEFORE the empty-set guard so a full role
+    /// downgrade (every prior subscription denied) still resets
+    /// in-memory tracking — without this, a stale OPERATOR-era
+    /// ``orders.events.`` would persist into a VIEWER session and
+    /// re-fire on the next reauth.
+    ///
+    /// Filter semantics: roots-only. v0.6.0 subscriptions are
+    /// limited to TOPIC_REGISTRY roots (``system.heartbeats.``,
+    /// ``orders.events.``) which appear verbatim in
+    /// ``availableTopics``. Concrete sub-topic subscriptions are
+    /// not used by iOS today and would silently drop here; if a
+    /// future release subscribes to non-root topics, this filter
+    /// must be widened to a prefix match against the registry roots.
     private func replayPendingSubscriptions() {
-        let toSend = subscribedTopics.union(pendingSubscriptions)
-        guard !toSend.isEmpty else { return }
-        sendEnvelope(["type": "subscribe", "topics": Array(toSend)], counter: .control)
-        subscribedTopics.formUnion(pendingSubscriptions)
+        let allowed = Set(availableTopics)
+        let merged = subscribedTopics.union(pendingSubscriptions)
+        let filtered = merged.filter { allowed.contains($0) }
+        subscribedTopics = filtered
         pendingSubscriptions.removeAll()
+        guard !filtered.isEmpty else { return }
+        sendEnvelope(["type": "subscribe", "topics": Array(filtered)], counter: .control)
+    }
+
+    /// iOS-side preferred default topics. Intersected with the
+    /// server-shipped ``availableTopics`` per role on every
+    /// auth_complete / reauth_ok hook so subscribed traffic flows
+    /// without iOS hardcoding role-permission logic.
+    private static let preferredDefaultTopics: [String] = [
+        "system.heartbeats.",
+        "orders.events.",
+    ]
+
+    /// Subscribe to the iOS preferred-defaults intersected with the
+    /// role's server-shipped ``availableTopics``.
+    ///
+    /// VIEWER role lands ``availableTopics`` without
+    /// ``orders.events.`` (CREATE_ORDERS gate); OPERATOR + ADMIN land
+    /// both. The intersection produces the correct per-role envelope
+    /// without iOS hardcoding role logic. Idempotent: backend
+    /// ``handle_subscribe`` deduplicates server-side, and iOS
+    /// ``subscribe(topics:)`` tracks ``subscribedTopics``.
+    private func subscribeToServerAllowedDefaults() {
+        let allowed = Set(availableTopics)
+        let toSubscribe = Self.preferredDefaultTopics.filter { allowed.contains($0) }
+        guard !toSubscribe.isEmpty else { return }
+        subscribe(topics: toSubscribe)
     }
 
     private func listenForMessages() {
@@ -265,7 +320,7 @@ class WebSocketManager: ObservableObject {
             Task { await self.performReauthentication() }
 
         case "reauth_ok":
-            break
+            subscribeToServerAllowedDefaults()
 
         case "auth_expired":
             logger.warning("WebSocket auth expired")
@@ -298,6 +353,7 @@ class WebSocketManager: ObservableObject {
         }
 
         replayPendingSubscriptions()
+        subscribeToServerAllowedDefaults()
         startPingTimer()
         scheduleProactiveTokenRefresh()
     }
@@ -358,6 +414,12 @@ class WebSocketManager: ObservableObject {
                 state.lastOrderCancel = decoded
             } else {
                 logger.warning("WS order_cancel frame decode failed (\(data.count) bytes)")
+            }
+        case "execution":
+            if let decoded = try? decoder.decode(ExecutionData.self, from: data) {
+                state.lastExecution = decoded
+            } else {
+                logger.warning("WS execution frame decode failed (\(data.count) bytes)")
             }
         case "heartbeat":
             if let decoded = try? decoder.decode(HeartbeatData.self, from: data) {

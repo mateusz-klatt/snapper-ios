@@ -312,7 +312,15 @@ final class WebSocketManagerTests: XCTestCase {
         XCTAssertFalse(hasSubscribe, "topic removed before connect must not replay")
     }
 
-    func testSubscribedTopicsPreservedAcrossReconnect() async {
+    /// User-initiated disconnect (logout / backend-switch / scene
+    /// background) clears subscription tracking; reconnect then
+    /// re-establishes only the role-allowed preferred defaults via
+    /// ``subscribeToServerAllowedDefaults``. This is the v0.6.0
+    /// contract — pre-v0.6.0 the dual-set tracker preserved
+    /// previously-subscribed concrete topics across disconnect, but
+    /// that left a stale OPERATOR-era ``orders.events.`` entry
+    /// readable to a subsequent VIEWER reconnect (RBAC leak).
+    func testDisconnectClearsSubscriptionsAndReconnectAutoSubscribesDefaults() async {
         let task1 = FakeWebSocketTask()
         let task2 = FakeWebSocketTask()
         let factory = FakeWebSocketTaskFactory(tasks: [task1, task2])
@@ -322,25 +330,18 @@ final class WebSocketManagerTests: XCTestCase {
             sleeper: FakeSleeper()
         )
         manager.connect()
-
         manager.handleRawMessage(frame([
             "type": "auth_complete",
             "sequence_id": 1,
             "public_id": "01961234-5678-7000-8000-000000000020",
             "timestamp": "2025-11-22T10:00:00Z",
             "session_id": "session-1",
-            "available_topics": [],
-            "user_role": "viewer",
+            "available_topics": ["system.heartbeats.", "orders.events."],
+            "user_role": "operator",
             "ws_token_exp": "2025-11-22T11:00:00Z"
         ]))
-
-        manager.subscribe(topics: ["orders.events.kraken."])
         await drainSendTasks()
-        XCTAssertGreaterThan(task1.sentMessages.count, 0, "first connect should have sent subscribe directly")
 
-        /// Simulate a user-initiated disconnect + reconnect — covers the
-        /// explicit-close path. Network-drop + auto-reconnect is covered by
-        /// the infinite-backoff tests in Commit 2.
         manager.disconnect()
         manager.connect()
         manager.handleRawMessage(frame([
@@ -349,17 +350,156 @@ final class WebSocketManagerTests: XCTestCase {
             "public_id": "01961234-5678-7000-8000-000000000021",
             "timestamp": "2025-11-22T10:00:00Z",
             "session_id": "session-2",
-            "available_topics": [],
+            "available_topics": ["system.heartbeats."],
             "user_role": "viewer",
             "ws_token_exp": "2025-11-22T11:00:00Z"
         ]))
         await drainSendTasks()
 
-        let task2Subscribes = task2.sentMessages.contains { msg in
-            if case .string(let s) = msg, s.contains("orders.events.kraken.") { return true }
-            return false
-        }
-        XCTAssertTrue(task2Subscribes, "confirmed topic not replayed on reconnect — regression in dual-set tracking")
+        let secondConnectSubscribes = task2.sentMessages
+            .compactMap(decodeFrame)
+            .filter { ($0["type"] as? String) == "subscribe" }
+            .compactMap { $0["topics"] as? [String] }
+        let allTopicsSent = Set(secondConnectSubscribes.flatMap { $0 })
+        XCTAssertTrue(
+            allTopicsSent.contains("system.heartbeats."),
+            "VIEWER reconnect should auto-subscribe to system.heartbeats. via preferred defaults"
+        )
+        XCTAssertFalse(
+            allTopicsSent.contains("orders.events."),
+            "VIEWER reconnect must NOT carry orders.events. — RBAC enforced by availableTopics intersection"
+        )
+    }
+
+    /// Fresh connect at OPERATOR role lands both preferred defaults
+    /// (system.heartbeats. and orders.events.) in the auto-subscribe
+    /// envelope.
+    func testAuthCompleteAutoSubscribesPreferredDefaultsIntersection() async {
+        let (manager, _, fakeTask, _) = makeManager()
+        manager.connect()
+        manager.handleRawMessage(frame([
+            "type": "auth_complete",
+            "sequence_id": 1,
+            "public_id": "01961234-5678-7000-8000-000000000050",
+            "timestamp": "2025-11-22T10:00:00Z",
+            "session_id": "s1",
+            "available_topics": ["system.heartbeats.", "orders.events."],
+            "user_role": "operator",
+            "ws_token_exp": "2025-11-22T11:00:00Z"
+        ]))
+        await drainSendTasks()
+
+        let topicsSent: Set<String> = Set(
+            fakeTask.sentMessages
+                .compactMap(decodeFrame)
+                .filter { ($0["type"] as? String) == "subscribe" }
+                .compactMap { $0["topics"] as? [String] }
+                .flatMap { $0 }
+        )
+        XCTAssertTrue(topicsSent.contains("system.heartbeats."))
+        XCTAssertTrue(topicsSent.contains("orders.events."))
+    }
+
+    /// VIEWER role lands only ``system.heartbeats.`` (CREATE_ORDERS
+    /// permission missing → ``orders.events.`` not in
+    /// availableTopics → intersection drops it).
+    func testAuthCompleteAutoSubscribeViewerRoleHeartbeatsOnly() async {
+        let (manager, _, fakeTask, _) = makeManager()
+        manager.connect()
+        manager.handleRawMessage(frame([
+            "type": "auth_complete",
+            "sequence_id": 1,
+            "public_id": "01961234-5678-7000-8000-000000000051",
+            "timestamp": "2025-11-22T10:00:00Z",
+            "session_id": "s1",
+            "available_topics": ["system.heartbeats."],
+            "user_role": "viewer",
+            "ws_token_exp": "2025-11-22T11:00:00Z"
+        ]))
+        await drainSendTasks()
+
+        let topicsSent: Set<String> = Set(
+            fakeTask.sentMessages
+                .compactMap(decodeFrame)
+                .filter { ($0["type"] as? String) == "subscribe" }
+                .compactMap { $0["topics"] as? [String] }
+                .flatMap { $0 }
+        )
+        XCTAssertTrue(topicsSent.contains("system.heartbeats."))
+        XCTAssertFalse(topicsSent.contains("orders.events."))
+    }
+
+    /// A reauth_ok mid-session re-fires the auto-subscribe so an
+    /// inline token-refresh-driven re-auth re-establishes the
+    /// preferred-defaults intersection on the same connection.
+    func testReauthOkRefiresPreferredDefaultSubscribe() async {
+        let (manager, _, fakeTask, _) = makeManager()
+        manager.connect()
+        manager.handleRawMessage(frame([
+            "type": "auth_complete",
+            "sequence_id": 1,
+            "public_id": "01961234-5678-7000-8000-000000000060",
+            "timestamp": "2025-11-22T10:00:00Z",
+            "session_id": "s1",
+            "available_topics": ["system.heartbeats.", "orders.events."],
+            "user_role": "operator",
+            "ws_token_exp": "2025-11-22T11:00:00Z"
+        ]))
+        await drainSendTasks()
+        let preReauthSubscribeCount = fakeTask.sentMessages
+            .compactMap(decodeFrame)
+            .filter { ($0["type"] as? String) == "subscribe" }
+            .count
+
+        manager.handleRawMessage(frame([
+            "type": "reauth_ok",
+            "sequence_id": 2,
+            "public_id": "01961234-5678-7000-8000-000000000061",
+            "timestamp": "2025-11-22T10:30:00Z",
+            "session_id": "s1"
+        ]))
+        await drainSendTasks()
+        let postReauthSubscribeCount = fakeTask.sentMessages
+            .compactMap(decodeFrame)
+            .filter { ($0["type"] as? String) == "subscribe" }
+            .count
+
+        XCTAssertGreaterThan(
+            postReauthSubscribeCount, preReauthSubscribeCount,
+            "reauth_ok must re-fire preferred-defaults subscribe"
+        )
+    }
+
+    /// Pumping a `type: "execution"` frame should land in
+    /// ``WSState.lastExecution`` after dispatch.
+    func testDispatchExecutionFramePopulatesLastExecution() async {
+        let (manager, _, _, _) = makeManager()
+        XCTAssertNil(manager.state.lastExecution)
+
+        manager.handleRawMessage(frame([
+            "type": "execution",
+            "sequence_id": 1,
+            "public_id": "01961234-5678-7000-8000-000000000070",
+            "timestamp": "2025-11-22T10:00:00Z",
+            "session_id": "s1",
+            "trade_id": "T-001",
+            "exchange_order_id": "EX-001",
+            "client_order_id": "test-coid",
+            "instrument": "BTC-USD",
+            "exchange": "kraken",
+            "side": "buy",
+            "size": 0.05,
+            "price": 97840.0,
+            "last_size": 0.05,
+            "last_price": 97840.0,
+            "fee": 0.0,
+            "fee_asset": "USD",
+            "status": "filled",
+            "executed_at": "2025-11-22T10:00:00Z"
+        ]))
+
+        XCTAssertNotNil(manager.state.lastExecution)
+        XCTAssertEqual(manager.state.lastExecution?.clientOrderId, "test-coid")
     }
 
     /// A stale `receive()` error from task A (resolved after the manager

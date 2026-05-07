@@ -18,6 +18,7 @@ struct PositionsView: View {
 
     @Environment(AppState.self) private var appState
     @EnvironmentObject private var authService: AuthService
+    @EnvironmentObject private var webSocketManager: WebSocketManager
     @State private var viewModel: PositionsViewModel?
 
     @State private var actionSheetPosition: PositionSnapshot?
@@ -87,6 +88,16 @@ struct PositionsView: View {
                 viewModel = PositionsViewModel(appState: appState)
             }
             await viewModel?.load()
+
+            guard let viewModel else { return }
+            viewModel.startObservingLiveUpdates(from: webSocketManager.state)
+            await withTaskCancellationHandler {
+                try? await Task.sleep(nanoseconds: .max)
+            } onCancel: {
+                Task { @MainActor in
+                    viewModel.stopObservingLiveUpdates()
+                }
+            }
         }
         .confirmationDialog(
             actionSheetPosition.map { "\($0.instrument) on \($0.exchange)" } ?? "",

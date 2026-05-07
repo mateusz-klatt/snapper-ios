@@ -6,6 +6,64 @@ uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+## [0.6.0] — 2026-05-07
+
+Live data over WebSocket — closes the gap where the iOS client
+authenticated but never subscribed to any topic, leaving the Home
+tab stuck on "Connected · waiting for heartbeat" forever and
+forcing pull-to-refresh on Orders / Positions tabs.
+
+### Added
+
+- **Auto-subscribe on auth_complete and reauth_ok.** The client now
+  intersects an iOS-side preferred-defaults list
+  (`system.heartbeats.`, `orders.events.`) with the server-shipped
+  per-role `available_topics` and subscribes to the result. VIEWER
+  role lands `system.heartbeats.` only (CREATE_ORDERS gate denies
+  `orders.events.`); OPERATOR + ADMIN land both. No iOS-side
+  hardcoded role-permission logic — the server's allow-list is the
+  single source of truth.
+- **`ExecutionData` frame handling.** `WSState.lastExecution` slot
+  + dispatcher case decode `type: "execution"` frames so the
+  fill-event payload is observable from ViewModels.
+- **Debounced live-reload in `OrdersViewModel` + `PositionsViewModel`.**
+  Each VM exposes `start/stopObservingLiveUpdates(from: WSState)`
+  and observes the relevant `@Published` slots
+  (`lastOrderEvent` + `lastExecution` for Orders; `lastExecution`
+  for Positions) via `for await ... in state.$X.values.dropFirst()`.
+  Frame arrival schedules a 250ms debounced REST reload; bursts
+  coalesce into one network round-trip. SwiftUI `.task(id:)` cancel
+  handler drives `stopObservingLiveUpdates()` on view dismount /
+  wallet-selection change.
+
+### Fixed
+
+- **Home dot stuck on "Connected · waiting for heartbeat".** The
+  TimelineView-driven freshness dot at
+  `HomeView.swift:181-193` reads `WSState.lastHeartbeatAt`. Without
+  a `system.heartbeats.` subscription the slot stayed `nil` and the
+  dot never turned green. Auto-subscribe makes it green within 1-2
+  seconds of WS connect.
+- **Stale subscription replay across role downgrade.**
+  `disconnect()` now clears `subscribedTopics` +
+  `pendingSubscriptions` so a logout-and-login as a different role
+  cannot replay topics the new role's `available_topics` denies.
+  `replayPendingSubscriptions` filters its merged set through the
+  current role's allow-list as defense-in-depth for reauth paths
+  that don't go through `disconnect()`.
+
+### Tests
+
+- 5 new `WebSocketManagerTests`: preferred-defaults intersection
+  (OPERATOR + VIEWER cases), reauth_ok re-fires, execution-frame
+  dispatch, role-downgrade replay clear (RBAC leak guard).
+- 5 new `OrdersViewModelTests`: `dropFirst` skip on observation
+  start, post-start fire, burst coalesce, stop cancels pending,
+  restart self-cleans prior observation.
+- 3 new `PositionsViewModelTests`: equivalent dropFirst /
+  post-start / stop-cancels for the `lastExecution`-only path.
+- 2 new fixture files: `OrderEventDataFixture` + `ExecutionDataFixture`.
+
 ## [0.5.0] — 2026-05-07
 
 Notification follow-up — TestFlight v0.4.0 build 17 had two
@@ -696,7 +754,8 @@ v0.2.0 backlog: CSRF header on iOS mutating REST requests,
 public-side type regeneration script, fork-PR Sonar handling, and
 the SwiftUI coverage story.
 
-[Unreleased]: https://github.com/mateusz-klatt/snapper-ios/compare/v0.5.0...HEAD
+[Unreleased]: https://github.com/mateusz-klatt/snapper-ios/compare/v0.6.0...HEAD
+[0.6.0]: https://github.com/mateusz-klatt/snapper-ios/releases/tag/v0.6.0
 [0.5.0]: https://github.com/mateusz-klatt/snapper-ios/releases/tag/v0.5.0
 [0.4.0]: https://github.com/mateusz-klatt/snapper-ios/releases/tag/v0.4.0
 [0.3.0]: https://github.com/mateusz-klatt/snapper-ios/releases/tag/v0.3.0

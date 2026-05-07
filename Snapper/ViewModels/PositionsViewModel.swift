@@ -1,3 +1,4 @@
+import Combine
 import Foundation
 import Observation
 import os
@@ -22,6 +23,15 @@ final class PositionsViewModel {
     var loadError: APIError?
     var submitError: String?
 
+    @ObservationIgnored private var observationTasks: [Task<Void, Never>] = []
+    @ObservationIgnored private var liveReloadTask: Task<Void, Never>?
+
+    /// Observation-window debounce. 250ms picked to match
+    /// ``OrdersViewModel.liveReloadDebounceNanos``; positions
+    /// update path is `ExecutionData` arrival → REST fetch of
+    /// `/api/positions` (no `positions.` ZMQ topic exists).
+    @ObservationIgnored static let liveReloadDebounceNanos: UInt64 = 250_000_000
+
     private let api: APIClientProtocol
     private let appState: AppState
 
@@ -33,6 +43,38 @@ final class PositionsViewModel {
     ) {
         self.api = api
         self.appState = appState
+    }
+
+    /// Begin observing ``WSState.lastExecution`` for debounced REST
+    /// reload. Self-cleaning re-entry — safe to call repeatedly.
+    func startObservingLiveUpdates(from state: WSState) {
+        stopObservingLiveUpdates()
+        observationTasks = [
+            Task { @MainActor [weak self, weak state] in
+                guard let stream = state?.$lastExecution.values.dropFirst() else { return }
+                for await _ in stream {
+                    guard let self else { return }
+                    self.scheduleDebouncedReload()
+                }
+            },
+        ]
+    }
+
+    /// Cancel observation + pending debounce. Idempotent.
+    func stopObservingLiveUpdates() {
+        observationTasks.forEach { $0.cancel() }
+        observationTasks.removeAll()
+        liveReloadTask?.cancel()
+        liveReloadTask = nil
+    }
+
+    private func scheduleDebouncedReload() {
+        liveReloadTask?.cancel()
+        liveReloadTask = Task { @MainActor [weak self] in
+            try? await Task.sleep(nanoseconds: Self.liveReloadDebounceNanos)
+            guard !Task.isCancelled, let self else { return }
+            await self.load()
+        }
     }
 
     var filteredPositions: [PositionSnapshot] {
