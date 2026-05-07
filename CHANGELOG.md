@@ -6,6 +6,67 @@ uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+## [0.5.0] — 2026-05-07
+
+Notification follow-up — TestFlight v0.4.0 build 17 had two
+user-visible bugs in the iOS-push surface that this release closes
+(device-registration 422 loop, Alerts tab 404), plus a missing
+close-path for device overrides users had asked for.
+
+### Fixed
+
+- **Device registration was 422'ing every attempt.** A backend-side
+  envelope-validation regression rejected the ISO 8601 datetime
+  strings `JSONEncoder.iso8601` produces in the `timestamp` field,
+  leaving every iOS device-registration retry stuck on
+  `Failed (attempt N)` in Settings → Notifications. Same regression
+  affected `PATCH /api/devices/{id}/prefs` and
+  `PATCH /api/alert_defaults`. Fixed server-side; this iOS release
+  exists to ship the build that pairs with the corrected backend.
+- **Alerts tab silently 404'd.** `APIClient.fetchAlertHistory` was
+  hitting `/api/alerts` (the single-row sub-route) instead of
+  `/api/alerts/history`. UI surfaced as "Could not load alerts" with
+  only a Retry button. The single-row `fetchAlert(publicId:)` was
+  unaffected — only the list path was wrong.
+
+### Added
+
+- **Swipe-to-delete on device overrides.** User feedback flagged
+  there was no way to remove a per-(device, alert_type, scope)
+  override after creating one. `NotificationPrefsView` now has a
+  trailing swipe action on every device-pref row that fires
+  `NotificationPrefsViewModel.revokeDevicePref(prefPublicId:)`
+  against the new `POST /api/devices/{id}/prefs/{pref_id}/revoke`
+  backend endpoint. Backend convention is POST + envelope (not
+  DELETE) so every write carries client-side provenance for the
+  gap detector — same pattern as `cancelOrder` /
+  `revokeScopeGrant`. UX is optimistic-remove with revert-on-
+  failure (matches `mutateDefault`) and 404 is treated as success
+  so a double-tap on swipe doesn't leave a stuck row.
+
+### Tests
+
+- 4 new VM tests on `NotificationPrefsViewModel.revokeDevicePref`:
+  happy path optimistic remove, revert on non-404 failure, 404
+  treated as success, no-op when no device registered.
+- Generated `APITypes.swift` refresh picks up
+  `RevokeDevicePref{Body,Command,Response}` plus several types
+  that were re-added to the OpenAPI spec via `openapi_extra`
+  restoration on the backend side.
+- `APIClientSurfaceTests` updated to assert the corrected
+  `/api/alerts/history` wire path (both fixture-mapped happy-path
+  and the empty-cursor edge case).
+
+### Documentation
+
+- The v0.3.1-era MVVM extraction work that lived in [Unreleased]
+  below this entry shipped to users as part of the v0.4.0
+  TestFlight build (build 17 / Xcode Cloud) but was never moved
+  into the v0.4.0 changelog block. Left in place as a historical
+  marker; do not interpret as still-pending work.
+
+## [Pre-0.4.0 MVVM rollup — already shipped in build 17]
+
 ### Tooling
 
 - **Swift comment scanner** at `scripts/check_no_comments.py` —
@@ -635,7 +696,11 @@ v0.2.0 backlog: CSRF header on iOS mutating REST requests,
 public-side type regeneration script, fork-PR Sonar handling, and
 the SwiftUI coverage story.
 
-[Unreleased]: https://github.com/mateusz-klatt/snapper-ios/compare/v0.1.3...HEAD
+[Unreleased]: https://github.com/mateusz-klatt/snapper-ios/compare/v0.5.0...HEAD
+[0.5.0]: https://github.com/mateusz-klatt/snapper-ios/releases/tag/v0.5.0
+[0.4.0]: https://github.com/mateusz-klatt/snapper-ios/releases/tag/v0.4.0
+[0.3.0]: https://github.com/mateusz-klatt/snapper-ios/releases/tag/v0.3.0
+[0.2.0]: https://github.com/mateusz-klatt/snapper-ios/releases/tag/v0.2.0
 [0.1.3]: https://github.com/mateusz-klatt/snapper-ios/releases/tag/v0.1.3
 [0.1.2]: https://github.com/mateusz-klatt/snapper-ios/releases/tag/v0.1.2
 [0.1.1]: https://github.com/mateusz-klatt/snapper-ios/releases/tag/v0.1.1
