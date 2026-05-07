@@ -309,6 +309,12 @@ final class APIClient: Sendable, APIClientProtocol {
     /// backend enforces its own upper bound. ``before`` is the opaque
     /// cursor from the previous page's ``next_cursor`` — pass ``nil``
     /// for the first page.
+    ///
+    /// Hits the ``/alerts/history`` sub-route (the bare ``/alerts``
+    /// prefix is reserved for ``GET /alerts/{public_id}`` single-row
+    /// lookups consumed by ``fetchAlert(publicId:)``). The mismatch
+    /// silently 404'd the entire Alerts tab on TestFlight v0.4.0
+    /// build 17 until this path was corrected.
     func fetchAlertHistory(limit: Int? = nil, before: String? = nil) async throws -> AlertHistoryResponse {
         var queryItems: [QueryParameter] = []
         if let limit {
@@ -317,7 +323,9 @@ final class APIClient: Sendable, APIClientProtocol {
         if let before, !before.isEmpty {
             queryItems.append(QueryParameter(name: "before", value: before))
         }
-        return try await request(endpoint: "\(AppConfig.Endpoints.alerts)\(Self.querySuffix(queryItems))")
+        return try await request(
+            endpoint: "\(AppConfig.Endpoints.alerts)/history\(Self.querySuffix(queryItems))"
+        )
     }
 
     /// Fetch a single alert by ``public_id`` (BE-1c — used for deep-linking).
