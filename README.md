@@ -7,6 +7,24 @@ Native iOS client for the [Snapper](https://github.com/mateusz-klatt/snapper) tr
 - **v0.1.x** — Slice 1: order entry, cancel, brackets, trailing stops, alerts, push notifications, wallet picker. See [`CHANGELOG.md`](CHANGELOG.md) for the per-release breakdown.
 - Public source mirror; the maintainer owns the App Store / TestFlight pipeline. Forks build for the simulator out of the box.
 
+## Screenshots
+
+Captured on iPhone 17 Pro Max (iOS 26.2) signed in as a viewer-role account against a local Snapper backend with a seeded paper-mode portfolio (3 open positions, 6 orders across statuses).
+
+![Login — clean entry, optional Advanced disclosure for self-hosters who run a custom backend URL](docs/screenshots/01-login.png)
+
+![Home — paper wallet, WebSocket connected (heartbeat 2s ago), trader running, 3 open positions and 3 active orders summarised in one card](docs/screenshots/02-home.png)
+
+![Positions — wallet-scoped: BTC-USD long +$39.50, BTC-EUR long +$22.40, ETH-USDT short −$12.75 with average entry per leg](docs/screenshots/03-positions.png)
+
+![Orders — recent tab with full lifecycle: open / partial / rejected / filled status pills, side and size per row](docs/screenshots/04-orders.png)
+
+![Wallet picker — switch scope between live and paper wallets directly from the Home header](docs/screenshots/05-wallet-picker.png)
+
+![Settings — account row, WebSocket connection status with the active backend URL, push registration state, app version](docs/screenshots/06-settings.png)
+
+![Notification preferences — per-alert-type defaults (order filled, order rejected, stop-loss fired, margin warning, system error) with priority floor and enable toggle; device overrides layered on top](docs/screenshots/07-notification-prefs.png)
+
 ## Requirements
 
 - macOS with **Xcode 26.2** (matches the iOS 26.2 SDK the deployment target requires)
