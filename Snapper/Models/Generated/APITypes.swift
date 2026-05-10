@@ -45,6 +45,11 @@ enum ConfiguredProcessRole: String, Codable, Sendable {
     case backtest
 }
 
+enum ConfiguredProcessKind: String, Codable, Sendable {
+    case template
+    case instance
+}
+
 enum ExecutionDataExchange: String, Codable, Sendable {
     case paper
     case kraken
@@ -1006,6 +1011,9 @@ struct ConfiguredProcess: Codable, Sendable {
     let parametersSchema: JsonObject?
     let isOneShot: Bool
     let activePublicId: String?
+    let kind: String
+    let walletPublicId: String?
+    let parentTemplate: String?
 
     enum CodingKeys: String, CodingKey {
         case type
@@ -1028,6 +1036,9 @@ struct ConfiguredProcess: Codable, Sendable {
         case parametersSchema = "parameters_schema"
         case isOneShot = "is_one_shot"
         case activePublicId = "active_public_id"
+        case kind
+        case walletPublicId = "wallet_public_id"
+        case parentTemplate = "parent_template"
     }
 }
 
