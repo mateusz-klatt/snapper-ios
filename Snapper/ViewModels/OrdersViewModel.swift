@@ -122,9 +122,14 @@ final class OrdersViewModel {
     var derivedExchanges: [String] {
         var seen: Set<String> = []
         var ordered: [String] = []
-        for value in orders.map(\.exchange) + executions.map(\.exchange) {
-            if seen.insert(value).inserted {
-                ordered.append(value)
+        for order in orders {
+            if seen.insert(order.exchange).inserted {
+                ordered.append(order.exchange)
+            }
+        }
+        for execution in executions {
+            if seen.insert(execution.exchange).inserted {
+                ordered.append(execution.exchange)
             }
         }
         return ordered.isEmpty ? ["kraken"] : ordered
