@@ -25,6 +25,8 @@ Captured on iPhone 17 Pro Max (iOS 26.2) signed in as a viewer-role account agai
 
 ![Notification preferences — per-alert-type defaults (order filled, order rejected, stop-loss fired, margin warning, system error) with priority floor and enable toggle; device overrides layered on top](docs/screenshots/07-notification-prefs.png)
 
+![Market data — BTC-USD on kraken at 1m timeframe, Swift Charts custom candlesticks (BrandGreen up / BrandRed down), tight Y-axis auto-scale; REST snapshot + WS streaming via the same 200ms leading-edge throttle the frontend uses](docs/screenshots/08-market-data.png)
+
 ## Requirements
 
 - macOS with **Xcode 26.2** (matches the iOS 26.2 SDK the deployment target requires)

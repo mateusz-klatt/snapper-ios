@@ -108,7 +108,31 @@ struct LoginView: View {
                 .padding(.top, 80)
             }
             .navigationBarHidden(true)
+            .task { await runDevAutoLoginIfRequested() }
         }
+    }
+
+    /// DEBUG-only hook to skip manual credential entry when the
+    /// app is launched against a local-dev backend over a
+    /// trycloudflare tunnel from automation. Reads UserDefaults
+    /// keys ``snapper.devAutoLoginUser`` and
+    /// ``snapper.devAutoLoginPass`` once at first appear; if
+    /// both are non-empty, fills the VM and immediately invokes
+    /// the same login path the Sign In button would. Defaults
+    /// keys are NEVER read in non-DEBUG builds (e.g. TestFlight,
+    /// App Store) so the production login surface is unaffected.
+    @MainActor
+    private func runDevAutoLoginIfRequested() async {
+        #if DEBUG
+        guard viewModel.username.isEmpty, viewModel.password.isEmpty else { return }
+        let defaults = UserDefaults.standard
+        guard let user = defaults.string(forKey: "snapper.devAutoLoginUser"),
+              let pass = defaults.string(forKey: "snapper.devAutoLoginPass"),
+              !user.isEmpty, !pass.isEmpty else { return }
+        viewModel.username = user
+        viewModel.password = pass
+        await viewModel.login()
+        #endif
     }
 }
 

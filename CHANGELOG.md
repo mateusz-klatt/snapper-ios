@@ -6,6 +6,70 @@ uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+## [0.7.0] — 2026-05-11
+
+Market data viewing — the iOS app gains its first read-only chart
+surface, mirroring the frontend's `MarketData` route. Reaches the
+backend via the same REST + WebSocket layer that powers the existing
+positions / orders / alerts screens, with no server-side changes.
+
+### Added
+
+- **`MarketDataView`** — single deep-view screen with exchange /
+  instrument / timeframe selection, 2x2 metric grid (last price,
+  24h change %, 24h high, 24h low), and a Swift Charts candlestick
+  chart. Reached from `HomeView` via a `READ_MARKET_DATA`-gated
+  `NavigationLink` (the gate is plumbed correctly for future role
+  shaping even though all current production roles hold the
+  permission).
+- **`MarketDataViewModel`** — `@MainActor @Observable` VM with a
+  generation-token discipline that drops stale REST/WS results
+  after a fast selection switch. WS frames observed via the
+  Combine `state.$lastCandle.values.dropFirst()` pattern matching
+  `PositionsViewModel`. Leading-edge 200 ms throttle suppresses
+  render storms during active markets without losing the trailing
+  flush — buffered frames apply in `open_at` order when the next
+  window opens.
+- **`APIClient.fetchExchanges()`** + **`fetchCandles(...)`** on
+  the existing `APIClientProtocol`. The `/candles` route declares
+  `response_model=None` server-side, so the iOS decode wrapper
+  (`CandleListResponseLocal`) ships in `APIClient.swift` rather
+  than the generated `APITypes.swift`. The fetch helper uses a
+  `.custom` `JSONDecoder` strategy that accepts ISO 8601 with OR
+  without fractional seconds; the same strategy now backs the WS
+  dispatcher so streaming candle/tick frames decode reliably.
+- **WS prefix-aware allow-list.** `WebSocketManager.replayPendingSubscriptions`
+  widens its filter to accept any topic whose root is in the
+  server-shipped `available_topics`. This keeps the v0.6.0 root-only
+  topics (`system.heartbeats.`, `orders.events.`) matching exactly
+  while letting concrete `market.{exchange}.{instrument}.candles.{tf}`
+  subscriptions survive a reauth.
+- **`MarketCandle`** normalized type — `Decimal` storage for OHLCV
+  to avoid the binary-float noise that `Decimal(_: Double)` carries.
+  Conversion via `Decimal(string: String(describing:))` on the
+  REST + WS boundary.
+- **Screenshot** in `docs/screenshots/08-market-data.png` —
+  BTC-USD on kraken at 1m, Swift Charts custom candlesticks with
+  BrandGreen / BrandRed semantics and tight Y-axis auto-scale.
+
+### Changed
+
+- **`HomeView`** now injects `@EnvironmentObject var authService:
+  AuthService` (previously only consumed by `PositionsView` /
+  `OrdersView` / `SettingsView`).
+- **`WSState`** gains `@Published lastCandle: CandleData?` and
+  `lastTick: TickData?` slots, written by the WS dispatcher when
+  `type == "candle"` / `type == "tick"` frames arrive.
+
+### DEBUG-only
+
+- Three `#if DEBUG`-gated UserDefaults hooks support the dev /
+  screenshot pipeline when AppleScript / cliclick can't drive
+  Simulator UI (macOS Accessibility permission missing):
+  `snapper.devAutoLoginUser` + `snapper.devAutoLoginPass`,
+  `snapper.devStartOnMarket`, and an auto-select of BTC-USD on
+  the 1m timeframe. None of these read in release builds.
+
 ## [0.6.0] — 2026-05-07
 
 Live data over WebSocket — closes the gap where the iOS client

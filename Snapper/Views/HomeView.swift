@@ -5,7 +5,9 @@ struct HomeView: View {
     private let logger = AppLogger.make(category: "Home")
     @EnvironmentObject var webSocketManager: WebSocketManager
     @Environment(AppState.self) private var appState
+    @EnvironmentObject var authService: AuthService
     @State private var systemStatus: SystemStatus?
+    @State private var devShouldShowMarket = false
     @State private var positions: [PositionSnapshot] = []
     @State private var orders: [OrderStatus] = []
     @State private var latestAlert: AlertEventInfo?
@@ -22,6 +24,15 @@ struct HomeView: View {
                     }
 
                     LatestAlertCard(alert: latestAlert)
+
+                    if authService.hasPermission(.readMarketData) {
+                        NavigationLink {
+                            MarketDataView()
+                        } label: {
+                            MarketEntryCard()
+                        }
+                        .buttonStyle(.plain)
+                    }
 
                     connectionStatusView
 
@@ -52,13 +63,38 @@ struct HomeView: View {
                 await loadData()
                 await loadLatestAlert()
             }
+            .background(
+                NavigationLink(
+                    destination: MarketDataView(),
+                    isActive: $devShouldShowMarket,
+                    label: { EmptyView() }
+                )
+                .opacity(0)
+            )
         }
         .task {
             await loadData()
+            applyDevAutoNavigateIfRequested()
         }
         .task(id: appState.selectedWalletPublicId) {
             await loadLatestAlert()
         }
+    }
+
+    /// DEBUG-only auto-navigation hook. When the simulator is
+    /// launched with ``UserDefaults.snapper.devStartOnMarket = true``
+    /// (set via ``xcrun simctl spawn defaults write …``), Home
+    /// programmatically pushes ``MarketDataView`` on first appear.
+    /// Only fires once per process. Defaults key never read in
+    /// release builds.
+    @MainActor
+    private func applyDevAutoNavigateIfRequested() {
+        #if DEBUG
+        guard !devShouldShowMarket else { return }
+        if UserDefaults.standard.bool(forKey: "snapper.devStartOnMarket") {
+            devShouldShowMarket = true
+        }
+        #endif
     }
 
     /// Pure helper extracted for unit testing — returns the first
@@ -388,5 +424,6 @@ struct HomeView_Previews: PreviewProvider {
         HomeView()
             .environmentObject(WebSocketManager.shared)
             .environment(AppState.shared)
+            .environmentObject(AuthService.shared)
     }
 }
