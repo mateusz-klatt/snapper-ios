@@ -208,20 +208,7 @@ final class APIClient: Sendable, APIClientProtocol {
         }
 
         let decoder = JSONDecoder()
-        decoder.dateDecodingStrategy = .custom { decoder in
-            let container = try decoder.singleValueContainer()
-            let stringValue = try container.decode(String.self)
-            let withFractional = ISO8601DateFormatter()
-            withFractional.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
-            if let date = withFractional.date(from: stringValue) { return date }
-            let withoutFractional = ISO8601DateFormatter()
-            withoutFractional.formatOptions = [.withInternetDateTime]
-            if let date = withoutFractional.date(from: stringValue) { return date }
-            throw DecodingError.dataCorruptedError(
-                in: container,
-                debugDescription: "Expected ISO 8601 date string, got '\(stringValue)'"
-            )
-        }
+        decoder.dateDecodingStrategy = .custom(SnapperJSON.decodeFractionalOrPlainISO8601)
         return try decoder.decode(T.self, from: data)
     }
 

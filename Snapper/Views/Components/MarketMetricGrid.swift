@@ -36,23 +36,36 @@ struct MarketMetricGrid: View {
 
     private func formatPrice(_ value: Decimal?) -> String {
         guard let value else { return "—" }
-        let formatter = NumberFormatter()
-        formatter.minimumFractionDigits = 2
-        formatter.maximumFractionDigits = 6
-        formatter.numberStyle = .decimal
-        return formatter.string(from: value as NSDecimalNumber) ?? "—"
+        return Self.priceFormatter.string(from: value as NSDecimalNumber) ?? "—"
     }
 
     private func formatPercent(_ value: Decimal?) -> String {
         guard let value else { return "—" }
-        let formatter = NumberFormatter()
-        formatter.minimumFractionDigits = 2
-        formatter.maximumFractionDigits = 2
-        formatter.numberStyle = .decimal
         let sign = value >= 0 ? "+" : ""
-        let body = formatter.string(from: value as NSDecimalNumber) ?? "—"
+        let body = Self.percentFormatter.string(from: value as NSDecimalNumber) ?? "—"
         return "\(sign)\(body)%"
     }
+
+    /// Cached formatters reused across every metric refresh. The
+    /// chart re-renders on each WS frame (subject to the
+    /// 200 ms leading-edge throttle); re-allocating
+    /// ``NumberFormatter`` per call would dominate the render path
+    /// during an active stream.
+    private static let priceFormatter: NumberFormatter = {
+        let f = NumberFormatter()
+        f.minimumFractionDigits = 2
+        f.maximumFractionDigits = 6
+        f.numberStyle = .decimal
+        return f
+    }()
+
+    private static let percentFormatter: NumberFormatter = {
+        let f = NumberFormatter()
+        f.minimumFractionDigits = 2
+        f.maximumFractionDigits = 2
+        f.numberStyle = .decimal
+        return f
+    }()
 }
 
 /// Reusable KPI tile. The optional ``delta`` controls the value's

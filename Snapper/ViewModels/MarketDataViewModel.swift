@@ -144,6 +144,7 @@ final class MarketDataViewModel {
         pendingCandles.removeAll()
         metrics = .empty
         isReady = false
+        loadError = nil
         selectionGeneration &+= 1
         await loadInstruments(for: exchange)
     }
@@ -170,6 +171,7 @@ final class MarketDataViewModel {
         pendingCandles.removeAll()
         metrics = .empty
         isReady = false
+        loadError = nil
         showInstrumentPicker = false
         selectionGeneration &+= 1
         subscribeCurrentSelection()
@@ -186,6 +188,7 @@ final class MarketDataViewModel {
         candles.removeAll()
         pendingCandles.removeAll()
         isReady = false
+        loadError = nil
         selectionGeneration &+= 1
         subscribeCurrentSelection()
         await fetchChartAndMetrics()

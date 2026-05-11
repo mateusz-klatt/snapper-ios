@@ -1,5 +1,4 @@
 import SwiftUI
-import os
 
 /// Market data deep-view screen. Composes a selector bar, the 2x2
 /// metric grid, the candlestick chart, and a delayed/live status
@@ -43,7 +42,7 @@ struct MarketDataView: View {
 
                 MarketMetricGrid(metrics: vm.metrics)
 
-                CandlestickChartView(candles: vm.candles)
+                CandlestickChartView(candles: vm.candles, timeframe: vm.selectedTimeframe)
                     .frame(height: 280)
                     .padding(.horizontal, 4)
                     .background(Color.bgSurface)

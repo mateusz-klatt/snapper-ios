@@ -424,5 +424,6 @@ struct HomeView_Previews: PreviewProvider {
         HomeView()
             .environmentObject(WebSocketManager.shared)
             .environment(AppState.shared)
+            .environmentObject(AuthService.shared)
     }
 }

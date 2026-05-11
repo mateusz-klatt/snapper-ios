@@ -14,6 +14,10 @@ import SwiftUI
 /// VM-side storage stays precision-clean.
 struct CandlestickChartView: View {
     let candles: [MarketCandle]
+    /// Drives the X-axis label format. Hourly / daily candles
+    /// labelled as `HH:mm` collapse to repeated `00:00` rows; the
+    /// switch keeps the axis legible across the supported set.
+    var timeframe: MarketTimeframe = .oneHour
 
     var body: some View {
         if candles.isEmpty {
@@ -28,6 +32,22 @@ struct CandlestickChartView: View {
             .frame(maxWidth: .infinity, maxHeight: .infinity)
         } else {
             chart
+        }
+    }
+
+    /// Pick a Date.FormatStyle appropriate to the chart's
+    /// timeframe so X-axis labels stay legible. Intraday
+    /// timeframes show `HH:mm`; daily candles show `MMM d`
+    /// (e.g. `May 11`) — otherwise multiple daily candles
+    /// all render as `00:00` and the axis becomes useless.
+    private var xAxisFormat: Date.FormatStyle {
+        switch timeframe {
+        case .oneMinute, .fiveMinutes, .fifteenMinutes, .oneHour:
+            return .dateTime.hour().minute()
+        case .fourHours:
+            return .dateTime.month(.abbreviated).day().hour()
+        case .oneDay:
+            return .dateTime.month(.abbreviated).day()
         }
     }
 
@@ -76,9 +96,9 @@ struct CandlestickChartView: View {
         }
         .chartYScale(domain: yAxisDomain)
         .chartXAxis {
-            AxisMarks(values: .automatic(desiredCount: 4)) { value in
+            AxisMarks(values: .automatic(desiredCount: 4)) { _ in
                 AxisGridLine().foregroundStyle(Color.chartGrid)
-                AxisValueLabel(format: .dateTime.hour().minute(), centered: false)
+                AxisValueLabel(format: xAxisFormat, centered: false)
                     .foregroundStyle(Color.textSecondary)
             }
         }
