@@ -6,6 +6,24 @@ uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+## [0.7.1] — 2026-05-11
+
+Market Data first-render polish — the screen now lands on real data
+instead of an empty-state when reached from `HomeView`, mirroring the
+frontend's `MarketData` route.
+
+### Changed
+
+- **Default timeframe** is now `1m` (was `1h`). Matches the frontend
+  default and the cadence a user opening the screen most commonly
+  wants.
+- **`loadInstruments(for:)`** auto-picks a default instrument after
+  the picker list arrives. Preference order: `BTC-USD` → `BTC-USD-PERP`
+  → first market-data-capable instrument from the backend. No-op when
+  the user has already chosen an instrument or when the list is
+  empty. Removes the "tap the picker first" friction reviewers hit on
+  fresh launch.
+
 ## [0.7.0] — 2026-05-11
 
 Market data viewing — the iOS app gains its first read-only chart
