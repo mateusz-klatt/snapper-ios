@@ -37,15 +37,39 @@ final class WebSocketManagerEnvelopeTests: XCTestCase {
     /// back-to-back), so this drain polls the expected count with a generous
     /// upper bound on yields. Any test that calls this must pass the *total*
     /// number of frames it expects to have been sent up to this point.
+    ///
+    /// Reads ``FakeWebSocketTask.sentMessagesCount`` (lock-serialized)
+    /// rather than the underlying ``sentMessages`` array — ``send(_:)``
+    /// appends to that storage under the same lock from a detached task,
+    /// so an unlocked count read would be a TSan data race.
+    ///
+    /// On exhaustion ``XCTFail`` is raised with the observed/expected
+    /// counts so a real regression surfaces with a precise diagnostic
+    /// here, instead of cascading into a less-informative ``XCTAssertNotNil``
+    /// downstream.
     private func waitForFrames(
         _ fakeTask: FakeWebSocketTask,
         count: Int,
-        iterations: Int = 200
+        iterations: Int = 200,
+        file: StaticString = #filePath,
+        line: UInt = #line
     ) async {
         for _ in 0..<iterations {
             await Task.yield()
-            if fakeTask.sentMessages.count >= count { return }
+            if fakeTask.sentMessagesCount >= count { return }
         }
+        /// Capture the count ONCE here so the diagnostic message reflects
+        /// the state the loop saw. A late-arriving ``send`` task could land
+        /// between the loop's last check and this read; if it bumps the
+        /// count to ``>= count`` we treat that as a successful (slow)
+        /// drain rather than a misleading "expected N, observed N" failure.
+        let observed = fakeTask.sentMessagesCount
+        if observed >= count { return }
+        XCTFail(
+            "waitForFrames timed out: expected \(count) frames, observed \(observed) after \(iterations) yields",
+            file: file,
+            line: line
+        )
     }
 
     private func decodeFrame(_ message: URLSessionWebSocketTask.Message) -> [String: Any]? {
@@ -86,7 +110,7 @@ final class WebSocketManagerEnvelopeTests: XCTestCase {
         manager.subscribe(topics: ["orders.events.kraken."])
         await waitForFrames(fakeTask, count: 1)
 
-        let subscribeFrame = fakeTask.sentMessages.compactMap(decodeFrame).first { ($0["type"] as? String) == "subscribe" }
+        let subscribeFrame = fakeTask.sentMessagesSnapshot().compactMap(decodeFrame).first { ($0["type"] as? String) == "subscribe" }
         XCTAssertNotNil(subscribeFrame, "subscribe frame not found in outbound queue")
         guard let frame = subscribeFrame else { return }
         XCTAssertEqual(frame["topics"] as? [String], ["orders.events.kraken."])
@@ -102,7 +126,7 @@ final class WebSocketManagerEnvelopeTests: XCTestCase {
         manager.unsubscribe(topics: ["orders.events.kraken."])
         await waitForFrames(fakeTask, count: 2)
 
-        let unsubscribeFrame = fakeTask.sentMessages.compactMap(decodeFrame).first { ($0["type"] as? String) == "unsubscribe" }
+        let unsubscribeFrame = fakeTask.sentMessagesSnapshot().compactMap(decodeFrame).first { ($0["type"] as? String) == "unsubscribe" }
         XCTAssertNotNil(unsubscribeFrame, "unsubscribe frame not found in outbound queue")
         guard let frame = unsubscribeFrame else { return }
         XCTAssertEqual(frame["topics"] as? [String], ["orders.events.kraken."])
@@ -123,7 +147,7 @@ final class WebSocketManagerEnvelopeTests: XCTestCase {
         manager.sendEnvelope(["type": "reauth", "ws_token": "renewed-token"], counter: .control)
         await waitForFrames(fakeTask, count: 2)
 
-        let frames = fakeTask.sentMessages.compactMap(decodeFrame)
+        let frames = fakeTask.sentMessagesSnapshot().compactMap(decodeFrame)
         let authFrame = frames.first { ($0["type"] as? String) == "authenticate" }
         let reauthFrame = frames.first { ($0["type"] as? String) == "reauth" }
 
@@ -151,7 +175,7 @@ final class WebSocketManagerEnvelopeTests: XCTestCase {
         manager.sendEnvelope(["type": "ping"], counter: .telemetry)
         await waitForFrames(fakeTask, count: 1)
 
-        let pingFrame = fakeTask.sentMessages.compactMap(decodeFrame).first { ($0["type"] as? String) == "ping" }
+        let pingFrame = fakeTask.sentMessagesSnapshot().compactMap(decodeFrame).first { ($0["type"] as? String) == "ping" }
         XCTAssertNotNil(pingFrame, "ping frame not found in outbound queue")
         guard let frame = pingFrame else { return }
         assertProvenance(frame)
