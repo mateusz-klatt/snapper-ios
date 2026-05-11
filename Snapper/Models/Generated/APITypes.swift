@@ -3024,6 +3024,102 @@ struct RefreshResponse: Codable, Sendable {
     }
 }
 
+struct RelatedInstrumentData: Codable, Sendable {
+    let type: String?
+    let sequenceId: Int
+    let publicId: String
+    let timestamp: Date
+    let sessionId: String
+    let topic: String?
+    let instrumentPublicId: String
+    let nativeSymbol: String
+    let exchange: String
+    let assetType: String
+    let relationshipType: String
+    let contractFamily: String?
+    let isSelected: Bool
+
+    enum CodingKeys: String, CodingKey {
+        case type
+        case sequenceId = "sequence_id"
+        case publicId = "public_id"
+        case timestamp
+        case sessionId = "session_id"
+        case topic
+        case instrumentPublicId = "instrument_public_id"
+        case nativeSymbol = "native_symbol"
+        case exchange
+        case assetType = "asset_type"
+        case relationshipType = "relationship_type"
+        case contractFamily = "contract_family"
+        case isSelected = "is_selected"
+    }
+}
+
+struct RelatedInstrumentsGroup: Codable, Sendable {
+    let relationshipType: String
+    let label: String
+    let items: [RelatedInstrumentData]
+
+    enum CodingKeys: String, CodingKey {
+        case relationshipType = "relationship_type"
+        case label
+        case items
+    }
+}
+
+struct RelatedInstrumentsPayloadData: Codable, Sendable {
+    let selected: RelatedInstrumentsSelected
+    let underlying: RelatedInstrumentsUnderlying?
+    let groups: [RelatedInstrumentsGroup]
+}
+
+struct RelatedInstrumentsResponse: Codable, Sendable {
+    let type: String?
+    let sequenceId: Int
+    let publicId: String
+    let timestamp: Date
+    let sessionId: String
+    let topic: String?
+    let payload: RelatedInstrumentsPayloadData
+
+    enum CodingKeys: String, CodingKey {
+        case type
+        case sequenceId = "sequence_id"
+        case publicId = "public_id"
+        case timestamp
+        case sessionId = "session_id"
+        case topic
+        case payload
+    }
+}
+
+struct RelatedInstrumentsSelected: Codable, Sendable {
+    let exchange: String
+    let nativeSymbol: String
+
+    enum CodingKeys: String, CodingKey {
+        case exchange
+        case nativeSymbol = "native_symbol"
+    }
+}
+
+struct RelatedInstrumentsUnderlying: Codable, Sendable {
+    let publicId: String
+    let ticker: String
+    let name: String
+    let assetClass: String
+    let sector: String?
+
+    enum CodingKeys: String, CodingKey {
+        case publicId = "public_id"
+        case ticker
+        case name
+        case assetClass = "asset_class"
+        case sector
+    }
+}
+
 struct RestRateData: Codable, Sendable {
     let type: String?
     let sequenceId: Int
