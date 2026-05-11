@@ -33,6 +33,14 @@ protocol APIClientProtocol: Sendable {
     func createTrailingStop(command: TrailingStopCreateCommand) async throws -> ExecutionPlanResponse
 
     func fetchInstruments(exchange: String) async throws -> [InstrumentDetailData]
+    func fetchExchanges() async throws -> [String]
+    func fetchCandles(
+        exchange: String,
+        instrument: String,
+        timeframe: MarketTimeframe,
+        limit: Int,
+        asOf: Date?
+    ) async throws -> [MarketCandle]
     func fetchSystemStatus() async throws -> SystemStatus
     func fetchHealth() async throws -> HealthCheckResponse
 

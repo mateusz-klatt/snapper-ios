@@ -146,6 +146,85 @@ final class APIClient: Sendable, APIClientProtocol {
         return try decoder.decode(T.self, from: data)
     }
 
+    /// Variant of ``request(endpoint:)`` whose ``JSONDecoder``
+    /// accepts ISO 8601 timestamps with OR without fractional
+    /// seconds. The default ``request`` uses ``.iso8601`` which is
+    /// strict against the bare RFC 3339 grammar; candle envelopes
+    /// and ``CandleData`` rows can ship fractional precision
+    /// because they originate from the same dispatch path that
+    /// serializes WS frames.
+    ///
+    /// Two ``ISO8601DateFormatter`` instances are tried in order:
+    /// first with ``.withFractionalSeconds``, then without. A
+    /// malformed string throws ``DecodingError`` so the test in
+    /// ``APIClientMarketTests`` can pin the negative path.
+    private func requestWithFractionalSecondsDates<T: Decodable>(
+        endpoint: String,
+        method: String = "GET",
+        body: Encodable? = nil,
+        isRetry: Bool = false
+    ) async throws -> T {
+        guard let url = URL(string: "\(apiBaseURLProvider())\(endpoint)") else {
+            throw APIError.invalidURL
+        }
+
+        var request = URLRequest(url: url)
+        request.httpMethod = method
+        request.setValue(AppConfig.ContentType.json, forHTTPHeaderField: AppConfig.HTTPHeader.contentType)
+        Self.attachCSRFHeader(to: &request, method: method)
+
+        if let body = body {
+            let encoder = JSONEncoder()
+            encoder.keyEncodingStrategy = .convertToSnakeCase
+            encoder.dateEncodingStrategy = .iso8601
+            request.httpBody = try encoder.encode(body)
+        }
+
+        let (data, response) = try await session.data(for: request)
+
+        guard let httpResponse = response as? HTTPURLResponse else {
+            throw APIError.invalidResponse
+        }
+
+        if httpResponse.statusCode == 401 {
+            if isRetry {
+                await authService.logout()
+                throw APIError.httpError(401)
+            }
+            guard await authService.fetchFreshWsToken() != nil else {
+                await authService.logout()
+                throw APIError.httpError(401)
+            }
+            return try await self.requestWithFractionalSecondsDates(
+                endpoint: endpoint, method: method, body: body, isRetry: true
+            )
+        }
+
+        guard (200...299).contains(httpResponse.statusCode) else {
+            if let errorResponse = try? JSONDecoder().decode(ErrorResponse.self, from: data) {
+                throw APIError.serverError(errorResponse.detail)
+            }
+            throw APIError.httpError(httpResponse.statusCode)
+        }
+
+        let decoder = JSONDecoder()
+        decoder.dateDecodingStrategy = .custom { decoder in
+            let container = try decoder.singleValueContainer()
+            let stringValue = try container.decode(String.self)
+            let withFractional = ISO8601DateFormatter()
+            withFractional.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
+            if let date = withFractional.date(from: stringValue) { return date }
+            let withoutFractional = ISO8601DateFormatter()
+            withoutFractional.formatOptions = [.withInternetDateTime]
+            if let date = withoutFractional.date(from: stringValue) { return date }
+            throw DecodingError.dataCorruptedError(
+                in: container,
+                debugDescription: "Expected ISO 8601 date string, got '\(stringValue)'"
+            )
+        }
+        return try decoder.decode(T.self, from: data)
+    }
+
     func fetchOrders() async throws -> [OrderStatus] {
         let envelope: OrderListResponse = try await request(endpoint: AppConfig.Endpoints.orders)
         return envelope.payload
@@ -268,6 +347,57 @@ final class APIClient: Sendable, APIClientProtocol {
             endpoint: "/exchanges/\(Self.encodePathSegment(exchange))/instruments/detail"
         )
         return envelope.payload
+    }
+
+    /// Fetch the list of exchange names registered server-side via
+    /// ``GET /api/exchanges``. The envelope's ``payload`` is a
+    /// ``[String]`` of names (kraken, paper, kraken_futures,
+    /// walutomat, polygon) — these are the same values the
+    /// ``/exchanges/{exchange}/instruments/detail`` path segment
+    /// accepts.
+    func fetchExchanges() async throws -> [String] {
+        let envelope: ExchangeListResponse = try await request(endpoint: "/exchanges")
+        return envelope.payload
+    }
+
+    /// Fetch historical candle data via ``GET /api/candles``.
+    ///
+    /// Routes through ``requestWithFractionalSecondsDates`` rather
+    /// than the default ``request`` because the candle envelope and
+    /// individual ``CandleData`` rows ship ISO-8601 timestamps with
+    /// fractional seconds (e.g. `"2026-05-11T10:00:00.123456Z"`).
+    /// The default decoder's ``.iso8601`` strategy is strict against
+    /// the bare RFC 3339 grammar and rejects fractional seconds.
+    ///
+    /// ``asOf`` is optional and absent in the v0.7.0 UI; reserved
+    /// for a future time-travel affordance. When supplied it is
+    /// formatted as ISO 8601 with fractional seconds, matching the
+    /// backend's parsing expectations.
+    func fetchCandles(
+        exchange: String,
+        instrument: String,
+        timeframe: MarketTimeframe,
+        limit: Int = 100,
+        asOf: Date? = nil
+    ) async throws -> [MarketCandle] {
+        var components = URLComponents()
+        var items = [
+            URLQueryItem(name: "instrument", value: instrument),
+            URLQueryItem(name: "exchange", value: exchange),
+            URLQueryItem(name: "timeframe", value: timeframe.rawValue),
+            URLQueryItem(name: "limit", value: String(limit))
+        ]
+        if let asOf {
+            let formatter = ISO8601DateFormatter()
+            formatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
+            items.append(URLQueryItem(name: "as_of", value: formatter.string(from: asOf)))
+        }
+        components.queryItems = items
+        let path = "/candles?\(components.percentEncodedQuery ?? "")"
+        let envelope: CandleListResponseLocal = try await requestWithFractionalSecondsDates(
+            endpoint: path
+        )
+        return envelope.payload.compactMap(MarketCandle.from(wsCandleData:))
     }
 
     func fetchSystemStatus() async throws -> SystemStatus {
@@ -417,6 +547,43 @@ final class APIClient: Sendable, APIClientProtocol {
             method: "PATCH",
             body: command
         )
+    }
+}
+
+/// Local decode wrapper for ``GET /api/candles``.
+///
+/// NOT auto-generated: the FastAPI route at
+/// ``src/snapper/server/app.py:990`` declares
+/// ``response_model=None``, so the OpenAPI generator emits nothing
+/// for this endpoint. The wire shape mirrors
+/// ``snapper.api.schemas.data_responses.CandleListResponse``
+/// (extends ``PayloadListResponse``); ``payload`` carries the row
+/// list — NOT ``items``.
+///
+/// Rows are typed as ``CandleData`` (the generated WS frame type at
+/// ``Models/Generated/WSMessages.swift``) because backend `/candles`
+/// returns the same Pydantic model that drives the
+/// ``market.*.candles.*`` WS topics. One row type, one conversion
+/// helper (``MarketCandle.from(wsCandleData:)``).
+struct CandleListResponseLocal: Decodable, Sendable {
+    let type: String?
+    let sequenceId: Int
+    let publicId: String
+    let timestamp: Date
+    let sessionId: String
+    let topic: String?
+    let payload: [CandleData]
+    let count: Int
+
+    enum CodingKeys: String, CodingKey {
+        case type
+        case sequenceId = "sequence_id"
+        case publicId = "public_id"
+        case timestamp
+        case sessionId = "session_id"
+        case topic
+        case payload
+        case count
     }
 }
 

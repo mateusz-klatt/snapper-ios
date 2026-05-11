@@ -22,4 +22,12 @@ final class WSState: ObservableObject {
     @Published var lastUserDeactivated: UserDeactivatedData?
     @Published var wsTokenExp: Date?
     @Published var lastHeartbeatAt: Date?
+    /// Latest streaming candle frame from `market.*.candles.*`.
+    /// Observed by ``MarketDataViewModel`` via the Combine
+    /// `$lastCandle.values.dropFirst()` async-sequence pattern.
+    @Published var lastCandle: CandleData?
+    /// Latest streaming tick frame from `market.*.ticks`.
+    /// Drives the "delayed data" pill and feeds the metric
+    /// card's `lastPrice` field on the Market screen.
+    @Published var lastTick: TickData?
 }

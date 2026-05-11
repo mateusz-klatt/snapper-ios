@@ -68,6 +68,12 @@ final class MockAPIClient: APIClientProtocol, @unchecked Sendable {
         var fetchInstruments: @Sendable (String) async throws -> [InstrumentDetailData] = { _ in
             throw APIError.invalidResponse
         }
+        var fetchExchanges: @Sendable () async throws -> [String] = {
+            throw APIError.invalidResponse
+        }
+        var fetchCandles: @Sendable (String, String, MarketTimeframe, Int, Date?) async throws -> [MarketCandle] = { _, _, _, _, _ in
+            throw APIError.invalidResponse
+        }
         var fetchSystemStatus: @Sendable () async throws -> SystemStatus = {
             throw APIError.invalidResponse
         }
@@ -158,6 +164,14 @@ final class MockAPIClient: APIClientProtocol, @unchecked Sendable {
         get { read(\.fetchInstruments) }
         set { write(\.fetchInstruments, newValue) }
     }
+    var fetchExchangesHandler: @Sendable () async throws -> [String] {
+        get { read(\.fetchExchanges) }
+        set { write(\.fetchExchanges, newValue) }
+    }
+    var fetchCandlesHandler: @Sendable (String, String, MarketTimeframe, Int, Date?) async throws -> [MarketCandle] {
+        get { read(\.fetchCandles) }
+        set { write(\.fetchCandles, newValue) }
+    }
     var fetchSystemStatusHandler: @Sendable () async throws -> SystemStatus {
         get { read(\.fetchSystemStatus) }
         set { write(\.fetchSystemStatus, newValue) }
@@ -242,6 +256,20 @@ final class MockAPIClient: APIClientProtocol, @unchecked Sendable {
 
     func fetchInstruments(exchange: String) async throws -> [InstrumentDetailData] {
         return try await fetchInstrumentsHandler(exchange)
+    }
+
+    func fetchExchanges() async throws -> [String] {
+        return try await fetchExchangesHandler()
+    }
+
+    func fetchCandles(
+        exchange: String,
+        instrument: String,
+        timeframe: MarketTimeframe,
+        limit: Int,
+        asOf: Date?
+    ) async throws -> [MarketCandle] {
+        return try await fetchCandlesHandler(exchange, instrument, timeframe, limit, asOf)
     }
 
     func fetchSystemStatus() async throws -> SystemStatus {

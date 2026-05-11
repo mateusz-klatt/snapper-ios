@@ -198,17 +198,25 @@ class WebSocketManager: ObservableObject {
     /// ``orders.events.`` would persist into a VIEWER session and
     /// re-fire on the next reauth.
     ///
-    /// Filter semantics: roots-only. v0.6.0 subscriptions are
-    /// limited to TOPIC_REGISTRY roots (``system.heartbeats.``,
-    /// ``orders.events.``) which appear verbatim in
-    /// ``availableTopics``. Concrete sub-topic subscriptions are
-    /// not used by iOS today and would silently drop here; if a
-    /// future release subscribes to non-root topics, this filter
-    /// must be widened to a prefix match against the registry roots.
+    /// Filter semantics: roots-or-prefix. v0.6.0 root-only topics
+    /// (``system.heartbeats.``, ``orders.events.``) match exactly
+    /// against ``availableTopics``; v0.7.0 concrete market topics
+    /// like ``market.kraken.EUR-USD.candles.1m`` match by prefix
+    /// against the registry root ``market.`` shipped per-role.
+    ///
+    /// Both halves of the OR are evaluated: an exact match wins
+    /// when present so root-only topics keep their existing
+    /// semantics; otherwise the prefix sweep accepts a topic
+    /// whose first segments are an entry in ``availableTopics``.
+    /// A topic whose root is NOT in the allow-list is still
+    /// dropped — the server's per-role authorization remains the
+    /// single source of truth.
     private func replayPendingSubscriptions() {
         let allowed = Set(availableTopics)
         let merged = subscribedTopics.union(pendingSubscriptions)
-        let filtered = merged.filter { allowed.contains($0) }
+        let filtered = merged.filter { topic in
+            allowed.contains(topic) || allowed.contains(where: { topic.hasPrefix($0) })
+        }
         subscribedTopics = filtered
         pendingSubscriptions.removeAll()
         guard !filtered.isEmpty else { return }
@@ -393,9 +401,29 @@ class WebSocketManager: ObservableObject {
     }
 
     /// Decode typed payloads into `WSState` `@Published` properties.
+    ///
+    /// The decoder accepts ISO 8601 timestamps with OR without
+    /// fractional seconds — the backend's serializer ships
+    /// fractional precision for some frame types (e.g. `candle`,
+    /// `tick`) so a strict `.iso8601` strategy would silently
+    /// drop those frames. Matches the REST decoder used by
+    /// ``APIClient.requestWithFractionalSecondsDates``.
     private func dispatchTypedFrame(type: String, data: Data) {
         let decoder = JSONDecoder()
-        decoder.dateDecodingStrategy = .iso8601
+        decoder.dateDecodingStrategy = .custom { decoder in
+            let container = try decoder.singleValueContainer()
+            let stringValue = try container.decode(String.self)
+            let withFractional = ISO8601DateFormatter()
+            withFractional.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
+            if let date = withFractional.date(from: stringValue) { return date }
+            let withoutFractional = ISO8601DateFormatter()
+            withoutFractional.formatOptions = [.withInternetDateTime]
+            if let date = withoutFractional.date(from: stringValue) { return date }
+            throw DecodingError.dataCorruptedError(
+                in: container,
+                debugDescription: "Expected ISO 8601 date string, got '\(stringValue)'"
+            )
+        }
         switch type {
         case "trade":
             if let decoded = try? decoder.decode(TradeData.self, from: data) {
@@ -433,6 +461,18 @@ class WebSocketManager: ObservableObject {
                 state.lastUserDeactivated = decoded
             } else {
                 logger.warning("WS user_deactivated frame decode failed (\(data.count) bytes)")
+            }
+        case "candle":
+            if let decoded = try? decoder.decode(CandleData.self, from: data) {
+                state.lastCandle = decoded
+            } else {
+                logger.warning("WS candle frame decode failed (\(data.count) bytes)")
+            }
+        case "tick":
+            if let decoded = try? decoder.decode(TickData.self, from: data) {
+                state.lastTick = decoded
+            } else {
+                logger.warning("WS tick frame decode failed (\(data.count) bytes)")
             }
         default:
             logger.debug("WS frame type=\(type, privacy: .public) carries no Combine binding yet")

@@ -1,0 +1,135 @@
+import SwiftUI
+
+/// 2x2 grid of KPI cards: last price, 24h %Δ, 24h high, 24h low.
+/// Each card uses ``MarketMetricCard`` for consistent styling.
+struct MarketMetricGrid: View {
+    let metrics: MarketMetrics
+
+    var body: some View {
+        let columns = [
+            GridItem(.flexible(), spacing: 12),
+            GridItem(.flexible(), spacing: 12)
+        ]
+        LazyVGrid(columns: columns, spacing: 12) {
+            MarketMetricCard(
+                label: "Last price",
+                value: formatPrice(metrics.lastPrice),
+                delta: nil
+            )
+            MarketMetricCard(
+                label: "24h change",
+                value: formatPercent(metrics.changePct24h),
+                delta: metrics.changePct24h
+            )
+            MarketMetricCard(
+                label: "24h high",
+                value: formatPrice(metrics.high24h),
+                delta: nil
+            )
+            MarketMetricCard(
+                label: "24h low",
+                value: formatPrice(metrics.low24h),
+                delta: nil
+            )
+        }
+    }
+
+    private func formatPrice(_ value: Decimal?) -> String {
+        guard let value else { return "—" }
+        let formatter = NumberFormatter()
+        formatter.minimumFractionDigits = 2
+        formatter.maximumFractionDigits = 6
+        formatter.numberStyle = .decimal
+        return formatter.string(from: value as NSDecimalNumber) ?? "—"
+    }
+
+    private func formatPercent(_ value: Decimal?) -> String {
+        guard let value else { return "—" }
+        let formatter = NumberFormatter()
+        formatter.minimumFractionDigits = 2
+        formatter.maximumFractionDigits = 2
+        formatter.numberStyle = .decimal
+        let sign = value >= 0 ? "+" : ""
+        let body = formatter.string(from: value as NSDecimalNumber) ?? "—"
+        return "\(sign)\(body)%"
+    }
+}
+
+/// Reusable KPI tile. The optional ``delta`` controls the value's
+/// color tint (BrandGreen positive, BrandRed negative, neutral
+/// when ``nil``).
+struct MarketMetricCard: View {
+    let label: String
+    let value: String
+    let delta: Decimal?
+
+    private var valueColor: Color {
+        guard let delta else { return .textPrimary }
+        return delta >= 0 ? .brandGreen : .brandRed
+    }
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 4) {
+            Text(label)
+                .font(.caption)
+                .foregroundColor(.textSecondary)
+            Text(value)
+                .font(.system(.title3, design: .monospaced, weight: .semibold))
+                .foregroundColor(valueColor)
+                .lineLimit(1)
+                .minimumScaleFactor(0.6)
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(12)
+        .background(Color.bgSurface)
+        .clipShape(RoundedRectangle(cornerRadius: 12))
+    }
+}
+
+/// Status row below the chart. Surfaces:
+/// - "Delayed data" pill when ``isDelayed == true`` on the
+///   latest ``TickData`` frame.
+/// - Loading / error indicators driven by the VM.
+/// - "Live" badge when ``isReady`` is true and no error is
+///   present.
+struct MarketStatusRow: View {
+    let isDelayed: Bool
+    let isReady: Bool
+    let isLoading: Bool
+    let loadError: APIError?
+
+    var body: some View {
+        HStack(spacing: 8) {
+            if isLoading {
+                ProgressView().controlSize(.small)
+                Text("Loading…")
+                    .font(.caption)
+                    .foregroundColor(.textSecondary)
+            } else if let loadError {
+                Image(systemName: "exclamationmark.triangle.fill")
+                    .foregroundColor(.brandRed)
+                Text(loadError.errorDescription ?? "Failed to load")
+                    .font(.caption)
+                    .foregroundColor(.brandRed)
+                    .lineLimit(2)
+            } else if isReady {
+                Circle()
+                    .fill(Color.brandGreen)
+                    .frame(width: 8, height: 8)
+                Text("Live")
+                    .font(.caption)
+                    .foregroundColor(.textSecondary)
+            }
+            Spacer()
+            if isDelayed {
+                Text("Delayed")
+                    .font(.caption2.weight(.semibold))
+                    .padding(.horizontal, 8)
+                    .padding(.vertical, 3)
+                    .background(Color.brandRed.opacity(0.15))
+                    .foregroundColor(.brandRed)
+                    .clipShape(RoundedRectangle(cornerRadius: 6))
+            }
+        }
+    }
+}
