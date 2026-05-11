@@ -36,7 +36,7 @@ final class MarketDataViewModel {
     var instruments: [InstrumentDetailData] = []
     var selectedExchange: String?
     var selectedInstrument: InstrumentDetailData?
-    var selectedTimeframe: MarketTimeframe = .oneHour
+    var selectedTimeframe: MarketTimeframe = .oneMinute
     var candles: [MarketCandle] = []
     var metrics: MarketMetrics = .empty
     var isReady: Bool = false
@@ -155,6 +155,7 @@ final class MarketDataViewModel {
             let fetched = try await api.fetchInstruments(exchange: exchange)
             guard generation == selectionGeneration else { return }
             instruments = fetched.filter { $0.canMarketData }
+            await autoPickDefaultInstrumentIfNeeded()
         } catch let error as APIError {
             guard generation == selectionGeneration else { return }
             loadError = error
@@ -162,6 +163,24 @@ final class MarketDataViewModel {
             guard generation == selectionGeneration else { return }
             loadError = .serverError(error.localizedDescription)
         }
+    }
+
+    /// Auto-pick a market-data instrument after a successful
+    /// ``loadInstruments`` so the chart surface lands on real data
+    /// instead of an empty-state on first reach. Prefers a
+    /// high-recognition symbol (``BTC-USD`` then ``BTC-USD-PERP``);
+    /// falls back to the first market-data-capable instrument the
+    /// backend returns. No-op when the user has already chosen an
+    /// instrument or when the picker list is empty.
+    @MainActor
+    private func autoPickDefaultInstrumentIfNeeded() async {
+        guard selectedInstrument == nil else { return }
+        let preferredSymbols = ["BTC-USD", "BTC-USD-PERP"]
+        let preferred = preferredSymbols
+            .compactMap { sym in instruments.first(where: { $0.symbol == sym }) }
+            .first
+        guard let pick = preferred ?? instruments.first else { return }
+        await selectInstrument(pick)
     }
 
     func selectInstrument(_ instrument: InstrumentDetailData) async {
