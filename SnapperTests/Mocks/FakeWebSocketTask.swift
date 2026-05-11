@@ -23,6 +23,24 @@ final class FakeWebSocketTask: @unchecked Sendable, WebSocketTaskProtocol {
     private(set) var cancelCount = 0
     private(set) var lastCancelCode: URLSessionWebSocketTask.CloseCode?
 
+    /// Lock-serialized read of ``sentMessages.count``. ``send(_:)``
+    /// appends under ``lock`` from a detached ``Task``, so polling
+    /// the underlying ``private(set)`` storage directly is a data race
+    /// (compiler is silenced by ``@unchecked Sendable``, TSan is not).
+    /// Tests that poll for outbound frames between ``Task.yield()`` calls
+    /// must use this accessor.
+    var sentMessagesCount: Int {
+        lock.withLock { sentMessages.count }
+    }
+
+    /// Lock-serialized snapshot of ``sentMessages``. Returns a value-type
+    /// copy taken under the lock so callers iterate a stable array even
+    /// while a detached ``send`` task is still appending. Same rationale
+    /// as ``sentMessagesCount``.
+    func sentMessagesSnapshot() -> [URLSessionWebSocketTask.Message] {
+        lock.withLock { sentMessages }
+    }
+
     init(sendError: Error? = nil) {
         self.sendError = sendError
     }
