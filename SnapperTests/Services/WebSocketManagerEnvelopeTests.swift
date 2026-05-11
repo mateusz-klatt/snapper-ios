@@ -30,10 +30,22 @@ final class WebSocketManagerEnvelopeTests: XCTestCase {
         return .string(String(data: data, encoding: .utf8)!)
     }
 
-    /// `sendJSON` bounces through a detached Task; yield to let it run
-    /// before reading `sentMessages`.
-    private func drainSendTasks() async {
-        for _ in 0..<10 { await Task.yield() }
+    /// `sendJSON` bounces through a detached `Task { try await task.send(...) }`,
+    /// so outbound frames land in `sentMessages` only after the cooperative
+    /// scheduler runs each task to completion. A fixed yield count is racey
+    /// under CI load (observed on macOS-runner when two envelopes are minted
+    /// back-to-back), so this drain polls the expected count with a generous
+    /// upper bound on yields. Any test that calls this must pass the *total*
+    /// number of frames it expects to have been sent up to this point.
+    private func waitForFrames(
+        _ fakeTask: FakeWebSocketTask,
+        count: Int,
+        iterations: Int = 200
+    ) async {
+        for _ in 0..<iterations {
+            await Task.yield()
+            if fakeTask.sentMessages.count >= count { return }
+        }
     }
 
     private func decodeFrame(_ message: URLSessionWebSocketTask.Message) -> [String: Any]? {
@@ -72,7 +84,7 @@ final class WebSocketManagerEnvelopeTests: XCTestCase {
         manager.connect()
         manager.handleRawMessage(authCompleteFrame(sessionId: "s-sub"))
         manager.subscribe(topics: ["orders.events.kraken."])
-        await drainSendTasks()
+        await waitForFrames(fakeTask, count: 1)
 
         let subscribeFrame = fakeTask.sentMessages.compactMap(decodeFrame).first { ($0["type"] as? String) == "subscribe" }
         XCTAssertNotNil(subscribeFrame, "subscribe frame not found in outbound queue")
@@ -86,9 +98,9 @@ final class WebSocketManagerEnvelopeTests: XCTestCase {
         manager.connect()
         manager.handleRawMessage(authCompleteFrame(sessionId: "s-unsub"))
         manager.subscribe(topics: ["orders.events.kraken."])
-        await drainSendTasks()
+        await waitForFrames(fakeTask, count: 1)
         manager.unsubscribe(topics: ["orders.events.kraken."])
-        await drainSendTasks()
+        await waitForFrames(fakeTask, count: 2)
 
         let unsubscribeFrame = fakeTask.sentMessages.compactMap(decodeFrame).first { ($0["type"] as? String) == "unsubscribe" }
         XCTAssertNotNil(unsubscribeFrame, "unsubscribe frame not found in outbound queue")
@@ -109,7 +121,7 @@ final class WebSocketManagerEnvelopeTests: XCTestCase {
         manager.connect()
         manager.sendEnvelope(["type": "authenticate", "ws_token": "test-token"], counter: .control)
         manager.sendEnvelope(["type": "reauth", "ws_token": "renewed-token"], counter: .control)
-        await drainSendTasks()
+        await waitForFrames(fakeTask, count: 2)
 
         let frames = fakeTask.sentMessages.compactMap(decodeFrame)
         let authFrame = frames.first { ($0["type"] as? String) == "authenticate" }
@@ -137,7 +149,7 @@ final class WebSocketManagerEnvelopeTests: XCTestCase {
         manager.connect()
         manager.handleRawMessage(authCompleteFrame(sessionId: "s-ping"))
         manager.sendEnvelope(["type": "ping"], counter: .telemetry)
-        await drainSendTasks()
+        await waitForFrames(fakeTask, count: 1)
 
         let pingFrame = fakeTask.sentMessages.compactMap(decodeFrame).first { ($0["type"] as? String) == "ping" }
         XCTAssertNotNil(pingFrame, "ping frame not found in outbound queue")
