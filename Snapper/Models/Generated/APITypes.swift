@@ -28,6 +28,12 @@ enum AvailableProcessRole: String, Codable, Sendable {
     case backtest
 }
 
+enum CachedCandlesPayloadSource: String, Codable, Sendable {
+    case cache
+    case derived
+    case db
+}
+
 enum ConfiguredProcessMode: String, Codable, Sendable {
     case thread
     case process
@@ -987,6 +993,138 @@ struct BacktestTradeListResponse: Codable, Sendable {
         case topic
         case payload
         case count
+    }
+}
+
+struct CacheHealthPayload: Codable, Sendable {
+    let instrumentsCached: Int
+    let pairsCached: Int
+    let persistUniverseSize: Int
+
+    enum CodingKeys: String, CodingKey {
+        case instrumentsCached = "instruments_cached"
+        case pairsCached = "pairs_cached"
+        case persistUniverseSize = "persist_universe_size"
+    }
+}
+
+struct CacheHealthResponse: Codable, Sendable {
+    let type: String?
+    let sequenceId: Int
+    let publicId: String
+    let timestamp: Date
+    let sessionId: String
+    let topic: String?
+    let payload: CacheHealthPayload
+
+    enum CodingKeys: String, CodingKey {
+        case type
+        case sequenceId = "sequence_id"
+        case publicId = "public_id"
+        case timestamp
+        case sessionId = "session_id"
+        case topic
+        case payload
+    }
+}
+
+struct CachedCandle: Codable, Sendable {
+    let openAtMs: Int
+    let timeframe: String
+    let open: Double
+    let high: Double
+    let low: Double
+    let close: Double
+    let volume: Double
+
+    enum CodingKeys: String, CodingKey {
+        case openAtMs = "open_at_ms"
+        case timeframe
+        case open
+        case high
+        case low
+        case close
+        case volume
+    }
+}
+
+struct CachedCandlesPayload: Codable, Sendable {
+    let candles: [CachedCandle]
+    let sampleCount: Int
+    let isWarm: Bool
+    let source: String
+
+    enum CodingKeys: String, CodingKey {
+        case candles
+        case sampleCount = "sample_count"
+        case isWarm = "is_warm"
+        case source
+    }
+}
+
+struct CachedCandlesResponse: Codable, Sendable {
+    let type: String?
+    let sequenceId: Int
+    let publicId: String
+    let timestamp: Date
+    let sessionId: String
+    let topic: String?
+    let payload: CachedCandlesPayload
+
+    enum CodingKeys: String, CodingKey {
+        case type
+        case sequenceId = "sequence_id"
+        case publicId = "public_id"
+        case timestamp
+        case sessionId = "session_id"
+        case topic
+        case payload
+    }
+}
+
+struct CachedStatsPayload: Codable, Sendable {
+    let left: String
+    let right: String
+    let pearsonR: Double?
+    let pearsonN: Int
+    let cointT: Double?
+    let cointPvalue: Double?
+    let cointCriticalValues: [AnyCodable]?
+    let computedAt: Date?
+    let sampleCount: Int
+    let isWarm: Bool
+
+    enum CodingKeys: String, CodingKey {
+        case left
+        case right
+        case pearsonR = "pearson_r"
+        case pearsonN = "pearson_n"
+        case cointT = "coint_t"
+        case cointPvalue = "coint_pvalue"
+        case cointCriticalValues = "coint_critical_values"
+        case computedAt = "computed_at"
+        case sampleCount = "sample_count"
+        case isWarm = "is_warm"
+    }
+}
+
+struct CachedStatsResponse: Codable, Sendable {
+    let type: String?
+    let sequenceId: Int
+    let publicId: String
+    let timestamp: Date
+    let sessionId: String
+    let topic: String?
+    let payload: CachedStatsPayload
+
+    enum CodingKeys: String, CodingKey {
+        case type
+        case sequenceId = "sequence_id"
+        case publicId = "public_id"
+        case timestamp
+        case sessionId = "session_id"
+        case topic
+        case payload
     }
 }
 
