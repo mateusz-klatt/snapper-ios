@@ -26,14 +26,6 @@ enum BacktestProgressDataEvent: String, Codable, Sendable {
     case cancelled
 }
 
-enum CandleDataExchange: String, Codable, Sendable {
-    case kraken
-    case krakenFutures = "kraken_futures"
-    case krakenEquities = "kraken_equities"
-    case walutomat
-    case polygon
-}
-
 enum FundingAccrualDataExchange: String, Codable, Sendable {
     case paper
     case kraken
@@ -398,46 +390,6 @@ struct BacktestProgressData: Codable, Sendable {
     }
 }
 
-struct CandleData: Codable, Sendable {
-    let type: String
-    let sequenceId: Int
-    let publicId: String
-    let timestamp: Date
-    let sessionId: String
-    let topic: String?
-    let instrument: String
-    let exchange: String
-    let timeframe: String
-    let openAt: Date
-    let open: Double
-    let high: Double
-    let low: Double
-    let close: Double
-    let volume: Double
-    let vwap: Double?
-    let trades: Int?
-
-    enum CodingKeys: String, CodingKey {
-        case type
-        case sequenceId = "sequence_id"
-        case publicId = "public_id"
-        case timestamp
-        case sessionId = "session_id"
-        case topic
-        case instrument
-        case exchange
-        case timeframe
-        case openAt = "open_at"
-        case open
-        case high
-        case low
-        case close
-        case volume
-        case vwap
-        case trades
-    }
-}
-
 struct CapsViolationAfterAiApproveData: Codable, Sendable {
     let type: String
     let sequenceId: Int
@@ -591,58 +543,6 @@ struct HeartbeatData: Codable, Sendable {
         case status
         case lagMs = "lag_ms"
         case meta
-    }
-}
-
-struct InstrumentCapabilityData: Codable, Sendable {
-    let type: String
-    let sequenceId: Int
-    let publicId: String
-    let timestamp: Date
-    let sessionId: String
-    let topic: String?
-    let instrumentPublicId: String
-    let exchange: String
-    let supportedOrderTypes: [String]
-    let supportsPostOnly: Bool
-    let supportsReduceOnly: Bool
-    let supportsAmendInPlace: Bool
-    let supportsNativeStopLoss: Bool
-    let supportsNativeTakeProfit: Bool
-    let supportsTrailingStopClientSide: Bool
-    let supportsMarketMaking: Bool
-    let supportsShortSelling: Bool
-    let supportsLeverage: Bool
-    let maxLeverageLong: Double
-    let maxLeverageShort: Double
-    let minNotional: Double?
-    let maxOrderSize: Double?
-    let topOfBookQuality: String
-
-    enum CodingKeys: String, CodingKey {
-        case type
-        case sequenceId = "sequence_id"
-        case publicId = "public_id"
-        case timestamp
-        case sessionId = "session_id"
-        case topic
-        case instrumentPublicId = "instrument_public_id"
-        case exchange
-        case supportedOrderTypes = "supported_order_types"
-        case supportsPostOnly = "supports_post_only"
-        case supportsReduceOnly = "supports_reduce_only"
-        case supportsAmendInPlace = "supports_amend_in_place"
-        case supportsNativeStopLoss = "supports_native_stop_loss"
-        case supportsNativeTakeProfit = "supports_native_take_profit"
-        case supportsTrailingStopClientSide = "supports_trailing_stop_client_side"
-        case supportsMarketMaking = "supports_market_making"
-        case supportsShortSelling = "supports_short_selling"
-        case supportsLeverage = "supports_leverage"
-        case maxLeverageLong = "max_leverage_long"
-        case maxLeverageShort = "max_leverage_short"
-        case minNotional = "min_notional"
-        case maxOrderSize = "max_order_size"
-        case topOfBookQuality = "top_of_book_quality"
     }
 }
 
@@ -1083,38 +983,6 @@ struct UserDeactivatedData: Codable, Sendable {
         case userPublicId = "user_public_id"
         case deactivatedAt = "deactivated_at"
         case reason
-    }
-}
-
-struct VenueFeeScheduleData: Codable, Sendable {
-    let type: String
-    let sequenceId: Int
-    let publicId: String
-    let timestamp: Date
-    let sessionId: String
-    let topic: String?
-    let exchange: String
-    let instrumentPublicId: String?
-    let feeTier: String
-    let makerBps: Double
-    let takerBps: Double
-    let minVolume30D: Double?
-    let currency: String
-
-    enum CodingKeys: String, CodingKey {
-        case type
-        case sequenceId = "sequence_id"
-        case publicId = "public_id"
-        case timestamp
-        case sessionId = "session_id"
-        case topic
-        case exchange
-        case instrumentPublicId = "instrument_public_id"
-        case feeTier = "fee_tier"
-        case makerBps = "maker_bps"
-        case takerBps = "taker_bps"
-        case minVolume30D = "min_volume_30d"
-        case currency
     }
 }
 
