@@ -24,6 +24,8 @@ struct SnapperApp: App {
                 }
             }
             .environment(AppState.shared)
+            .environment(\.locale, LocaleEnvironmentResolver.environmentLocale(for: AppState.shared.locale))
+            .environment(\.layoutDirection, LocaleEnvironmentResolver.layoutDirection(for: AppState.shared.locale))
             .tint(.brandGreen)
             .onChange(of: scenePhase) { _, newPhase in
                 handleScenePhase(newPhase)

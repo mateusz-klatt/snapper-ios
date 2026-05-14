@@ -1,4 +1,4 @@
-.PHONY: setup build test coverage archive clean check-all check-no-comments check-no-comments-strict
+.PHONY: setup build test coverage archive clean check-all check-no-comments check-no-comments-strict ios-i18n-check
 
 DEVELOPMENT_TEAM ?=
 PRODUCT_BUNDLE_IDENTIFIER ?= com.example.snapper
@@ -38,7 +38,10 @@ check-no-comments:
 check-no-comments-strict:
 	python3 scripts/check_no_comments.py --strict
 
-check-all: build test check-no-comments-strict
+ios-i18n-check:
+	bash scripts/check_i18n.sh
+
+check-all: build test check-no-comments-strict ios-i18n-check
 
 archive: setup
 	@test -n "$(DEVELOPMENT_TEAM)" || (echo "Set DEVELOPMENT_TEAM env var (your Apple Developer team)" && exit 1)

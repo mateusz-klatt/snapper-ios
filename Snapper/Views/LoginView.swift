@@ -1,6 +1,7 @@
 import SwiftUI
 
 struct LoginView: View {
+    @Environment(AppState.self) private var appState
     @State private var viewModel = LoginViewModel()
     @State private var advancedExpanded = false
     @State private var backendDraft = ""
@@ -14,6 +15,12 @@ struct LoginView: View {
 
                 VStack(spacing: 24) {
 
+                    HStack {
+                        Spacer()
+                        LocaleSwitcher()
+                    }
+                    .padding(.horizontal, 24)
+
                     VStack(spacing: 8) {
                         Image("AppLogo")
                             .resizable()
@@ -21,24 +28,24 @@ struct LoginView: View {
                             .frame(width: 80, height: 80)
                             .clipShape(RoundedRectangle(cornerRadius: 16))
 
-                        Text("Snapper")
+                        Text(verbatim: "Snapper")
                             .font(.largeTitle)
                             .fontWeight(.bold)
                             .foregroundColor(.textPrimary)
 
-                        Text("Trading Platform")
+                        Text(LocalizedStringKey("auth.login.subtitle"))
                             .font(.subheadline)
                             .foregroundColor(.textSecondary)
                     }
                     .padding(.bottom, 32)
 
                     VStack(spacing: 16) {
-                        TextField("Username", text: $viewModel.username)
+                        TextField(LocalizedStringKey("auth.login.usernamePlaceholder"), text: $viewModel.username)
                             .textFieldStyle(.roundedBorder)
                             .textInputAutocapitalization(.never)
                             .autocorrectionDisabled()
 
-                        SecureField("Password", text: $viewModel.password)
+                        SecureField(LocalizedStringKey("auth.login.passwordPlaceholder"), text: $viewModel.password)
                             .textFieldStyle(.roundedBorder)
 
                         if let errorMessage = viewModel.errorMessage {
@@ -54,7 +61,7 @@ struct LoginView: View {
                                     ProgressView()
                                         .progressViewStyle(CircularProgressViewStyle(tint: .white))
                                 } else {
-                                    Text("Sign In")
+                                    Text(LocalizedStringKey("auth.login.signIn"))
                                         .fontWeight(.semibold)
                                 }
                             }
@@ -70,7 +77,7 @@ struct LoginView: View {
 
                     DisclosureGroup(isExpanded: $advancedExpanded) {
                         VStack(alignment: .leading, spacing: 12) {
-                            Text("Current backend: \(displayedBackendURL)")
+                            Text(currentBackendCaption)
                                 .font(.caption)
                                 .foregroundColor(.secondary)
 
@@ -97,7 +104,7 @@ struct LoginView: View {
                         }
                         .padding(.vertical, 8)
                     } label: {
-                        Text("Advanced (custom backend)")
+                        Text(LocalizedStringKey("auth.login.advancedDisclosure"))
                             .font(.footnote)
                             .foregroundColor(.textSecondary)
                     }
@@ -105,11 +112,28 @@ struct LoginView: View {
 
                     Spacer()
                 }
-                .padding(.top, 80)
+                .padding(.top, 16)
             }
             .navigationBarHidden(true)
             .task { await runDevAutoLoginIfRequested() }
         }
+    }
+
+    /// Render the "Current backend: <URL>" caption against the
+    /// active catalog language. ``LocalizedStringKey`` is not used
+    /// because the result is a single ``String`` interpolated into
+    /// a ``Text``; using the helper keeps the lookup language
+    /// consistent across runtime-picked locales.
+    private var currentBackendCaption: String {
+        let template = LocaleStrings.localized(
+            "auth.login.currentBackend",
+            in: appState.locale.catalogLanguage
+        )
+        return String(
+            format: template,
+            locale: appState.locale.nativeLocale,
+            displayedBackendURL
+        )
     }
 
     /// DEBUG-only hook to skip manual credential entry when the
@@ -139,5 +163,6 @@ struct LoginView: View {
 struct LoginView_Previews: PreviewProvider {
     static var previews: some View {
         LoginView()
+            .environment(AppState.shared)
     }
 }

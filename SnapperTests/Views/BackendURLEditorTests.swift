@@ -6,6 +6,10 @@ import SwiftUI
 /// (canonicalize preview reactivity, save-button enable/disable per
 /// validity). Body rendering is exercised via ``BackendURLEditor_Previews``
 /// at compile time but not asserted here.
+///
+/// The previously-static ``invalidURLMessage`` and ``helpMessage``
+/// are now catalog-driven instance vars (read via ``LocaleStrings``);
+/// catalog presence + EN/PL parity is covered by ``CatalogParityTests``.
 final class BackendURLEditorTests: XCTestCase {
 
     func testCanonicalizedURLIsNilForEmptyDraft() {
@@ -34,19 +38,29 @@ final class BackendURLEditorTests: XCTestCase {
         XCTAssertNil(editor.canonicalizedURL)
     }
 
-    func testInvalidURLMessageMatchesBuildPolicy() {
-        let message = BackendURLEditor.invalidURLMessage
+    func testEnglishInvalidURLMessageMatchesBuildPolicy() {
+        let message = BackendURLEditor.invalidURLMessage(in: .en)
         XCTAssertFalse(message.isEmpty)
-        #if DEBUG
         XCTAssertTrue(message.contains("https://"))
-        #else
-        XCTAssertTrue(message.contains("https://"))
-        XCTAssertTrue(message.contains("App Store"))
-        #endif
     }
 
-    func testHelpMessageIsNonEmpty() {
-        XCTAssertFalse(BackendURLEditor.helpMessage.isEmpty)
+    func testEnglishHelpMessageIsNonEmpty() {
+        XCTAssertFalse(BackendURLEditor.helpMessage(in: .en).isEmpty)
+    }
+
+    func testPolishHelpMessageDiffersFromEnglish() {
+        let pl = BackendURLEditor.helpMessage(in: .pl)
+        XCTAssertFalse(pl.isEmpty)
+        XCTAssertNotEqual(pl, BackendURLEditor.helpMessage(in: .en))
+    }
+
+    func testWillSaveAsCaptionFillsPreview() {
+        let caption = BackendURLEditor.willSaveAsCaption(
+            preview: "https://api.example.com",
+            in: .en
+        )
+        XCTAssertTrue(caption.contains("https://api.example.com"))
+        XCTAssertTrue(caption.contains("Will save as"))
     }
 
     /// Build an editor with a frozen draft binding for pure-helper tests.

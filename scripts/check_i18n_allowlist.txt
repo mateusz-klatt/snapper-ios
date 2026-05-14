@@ -1,0 +1,14 @@
+# Files exempt from the make ios-i18n-check rule. Each line is a
+# substring match against the offending file path; if any line
+# matches, the hit is ignored.
+
+# LocaleStrings is the canonical wrapper that holds the only
+# allowed `NSLocalizedString(...)` call. It does not use
+# `String(localized:)` itself, but the allowlist keeps the file
+# exempt in case future maintainers extend it.
+Snapper/I18n/LocaleStrings.swift
+
+# Test helpers are free to use the SDK form because tests do not
+# need runtime-picked catalog lookup — they pass explicit Bundle
+# instances or assert against compiled-in defaults.
+SnapperTests/

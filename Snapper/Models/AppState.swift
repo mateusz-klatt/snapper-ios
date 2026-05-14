@@ -21,7 +21,9 @@ final class AppState {
     static let shared = AppState()
 
     private static let walletKey = "selected_wallet_public_id"
+    private static let localeKey = "snapper-locale"
     private let userDefaults: UserDefaults
+    private let preferredLanguagesProvider: () -> [String]
 
     var selectedWalletPublicId: String? {
         didSet {
@@ -42,8 +44,35 @@ final class AppState {
     /// stale catalogs do not narrow the scope picker.
     var availableOperators: [OperatorInfo] = []
 
-    init(userDefaults: UserDefaults = .standard) {
+    /// User-selected country code that drives the SwiftUI
+    /// environment locale (``Text`` / ``LocalizedStringKey``
+    /// resolution + date formatting) and the catalog-language
+    /// fallback. Persisted to UserDefaults under ``"snapper-locale"``
+    /// (matches web v3 localStorage key). Mutating this triggers
+    /// the SwiftUI environment chain at the app root to re-resolve
+    /// every ``Text(LocalizedStringKey(...))`` in the view tree.
+    var locale: AppLocale {
+        didSet {
+            userDefaults.set(locale.rawValue, forKey: Self.localeKey)
+        }
+    }
+
+    /// Initialize app state. ``preferredLanguagesProvider`` is
+    /// injected (rather than reading ``Locale.preferredLanguages``
+    /// directly) so XCTest can pass deterministic literal arrays
+    /// without process-wide ``setenv("AppleLanguages", ...)``
+    /// mutations.
+    init(
+        userDefaults: UserDefaults = .standard,
+        preferredLanguagesProvider: @escaping () -> [String] = { Locale.preferredLanguages }
+    ) {
         self.userDefaults = userDefaults
+        self.preferredLanguagesProvider = preferredLanguagesProvider
         self.selectedWalletPublicId = userDefaults.string(forKey: Self.walletKey)
+        self.locale = LocaleResolver.resolveInitialLocale(
+            userDefaults: userDefaults,
+            preferredLanguages: preferredLanguagesProvider(),
+            localeKey: Self.localeKey
+        )
     }
 }
