@@ -30,16 +30,16 @@ final class LocaleEnvironmentResolverTests: XCTestCase {
         )
     }
 
-    func testEnvironmentLocaleForBacktickedISisEnIS() {
+    func testEnvironmentLocaleForIcelandIsEnIS() {
         XCTAssertEqual(
-            LocaleEnvironmentResolver.environmentLocale(for: .`is`).identifier,
+            LocaleEnvironmentResolver.environmentLocale(for: .iceland).identifier,
             "en-IS"
         )
     }
 
-    func testEnvironmentLocaleForBacktickedINisEnIN() {
+    func testEnvironmentLocaleForIndiaIsEnIN() {
         XCTAssertEqual(
-            LocaleEnvironmentResolver.environmentLocale(for: .`in`).identifier,
+            LocaleEnvironmentResolver.environmentLocale(for: .india).identifier,
             "en-IN"
         )
     }
