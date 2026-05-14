@@ -1,4 +1,13 @@
 #!/usr/bin/env bash
+# Single-pattern lint for ios-i18n-check (v1 — preserved at Phase A
+# bootstrap). Forbids bare `String(localized: "...")` callsites under
+# ios/Snapper which would not switch catalog lookup language on iOS
+# 26.2 (the SDK reads ``Locale.current`` rather than the SwiftUI
+# environment's locale).
+#
+# The multi-pattern v2 lint at `check_i18n_strict.sh` covers all
+# SwiftUI string-taking APIs and activates after Phase B-J catalog
+# migration completes (wired into `check-all` at Phase J).
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"

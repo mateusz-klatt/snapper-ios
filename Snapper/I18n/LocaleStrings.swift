@@ -45,4 +45,61 @@ enum LocaleStrings {
         let value = NSLocalizedString(key, tableName: nil, bundle: bundle, value: key, comment: "")
         return value == key ? nil : value
     }
+
+    /// Look up a raw-String display value under a catalog namespace.
+    ///
+    /// Used for ViewModel-level ``[String]`` tables (``alertTypes``,
+    /// ``priorityValues``, ``orderTypes`` etc.) where the iOS surface
+    /// keeps the API rawValue rather than decoding into a typed enum.
+    /// ``namespace`` is the catalog hierarchy (e.g. ``"alerts.alertType"``);
+    /// ``rawValue`` is the API rawValue (e.g. ``"order_fill_full"``).
+    /// Falls back to the rawValue itself on catalog miss.
+    static func localizedRawValue(
+        _ rawValue: String,
+        namespace: String,
+        in language: CatalogLanguage
+    ) -> String {
+        let key = "\(namespace).\(rawValue)"
+        let value = localized(key, in: language)
+        return value == key ? rawValue : value
+    }
+
+    /// Look up a plural-variation catalog key with a count argument.
+    ///
+    /// Uses ``String.localizedStringWithFormat(_:_:)`` against
+    /// ``NSLocalizedString(_:tableName:bundle:value:comment:)`` resolved
+    /// from the lproj path for ``language``. Xcode compiles the
+    /// ``Localizable.xcstrings`` plural variations into per-language
+    /// ``Localizable.stringsdict`` files; ``localizedStringWithFormat``
+    /// honors the bundle's stringsdict and selects the plural category
+    /// using the bundle's CLDR plural rules (EN ``one``/``other``,
+    /// PL ``one``/``few``/``many``).
+    ///
+    /// Falls back to the EN bundle when the requested language's
+    /// resource path is missing; falls back to the key itself when the
+    /// EN bundle is also missing.
+    static func localizedPlural(_ key: String, count: Int, in language: CatalogLanguage) -> String {
+        let bundle = resolveBundle(for: language)
+        let template = NSLocalizedString(key, tableName: nil, bundle: bundle, value: key, comment: "")
+        if template == key { return key }
+        return String.localizedStringWithFormat(template, count)
+    }
+
+    /// Resolve a ``Bundle`` for ``language`` with the same fallback
+    /// chain as ``localized(_:in:)`` — requested language -> EN ->
+    /// main bundle. Public-private because ``localizedPlural`` needs to
+    /// call ``NSLocalizedString`` directly (the format-string variant
+    /// path) rather than going through ``lookup``.
+    private static func resolveBundle(for language: CatalogLanguage) -> Bundle {
+        if let path = Bundle.main.path(forResource: language.rawValue, ofType: "lproj"),
+           let bundle = Bundle(path: path) {
+            return bundle
+        }
+        if language != .en,
+           let path = Bundle.main.path(forResource: CatalogLanguage.en.rawValue, ofType: "lproj"),
+           let bundle = Bundle(path: path) {
+            return bundle
+        }
+        return .main
+    }
 }

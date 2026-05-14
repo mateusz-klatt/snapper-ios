@@ -1,14 +1,11 @@
-# Files exempt from the make ios-i18n-check rule. Each line is a
-# substring match against the offending file path; if any line
-# matches, the hit is ignored.
+# Files exempt from the make ios-i18n-check rule (v1 single-pattern).
+# Each non-comment, non-blank line is a substring match against the
+# offending file path; any match causes the hit to be ignored.
+#
+# When the v2 multi-pattern lint (check_i18n_strict.sh) activates at
+# Phase J completion, this file may be reformatted to the v2 spec
+# `<path>:<line>:<reason>` form documented in the strict-script
+# header. Until then, lines are substring prefixes per v1 semantics.
 
-# LocaleStrings is the canonical wrapper that holds the only
-# allowed `NSLocalizedString(...)` call. It does not use
-# `String(localized:)` itself, but the allowlist keeps the file
-# exempt in case future maintainers extend it.
 Snapper/I18n/LocaleStrings.swift
-
-# Test helpers are free to use the SDK form because tests do not
-# need runtime-picked catalog lookup — they pass explicit Bundle
-# instances or assert against compiled-in defaults.
 SnapperTests/
