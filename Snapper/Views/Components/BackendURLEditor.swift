@@ -17,16 +17,13 @@ import SwiftUI
 ///   stateless beyond the typing draft.
 struct BackendURLEditor: View {
 
-    /// Placeholder URL surfaced to the user inside the input field.
-    /// Not connected to anywhere — purely a visual hint about the
-    /// expected origin shape (`https://host[:port]`).
-    static let inputPlaceholder = "https://your-backend.example"
-
     @Binding var draft: String
     let allowReset: Bool
     let onSave: (URL) -> Void
     let onReset: () -> Void
     let onCancel: () -> Void
+
+    @Environment(AppState.self) private var appState
 
     init(
         draft: Binding<String>,
@@ -44,38 +41,38 @@ struct BackendURLEditor: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
-            TextField(Self.inputPlaceholder, text: $draft)
+            TextField(LocalizedStringKey("backend.url.placeholder"), text: $draft)
                 .textFieldStyle(.roundedBorder)
                 .textInputAutocapitalization(.never)
                 .keyboardType(.URL)
                 .autocorrectionDisabled()
 
             if let preview = canonicalizedPreview {
-                Text("Will save as: \(preview)")
+                Text(Self.willSaveAsCaption(preview: preview, in: appState.locale.catalogLanguage))
                     .font(.caption)
                     .foregroundColor(.secondary)
             } else if !draft.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
-                Text(BackendURLEditor.invalidURLMessage)
+                Text(Self.invalidURLMessage(in: appState.locale.catalogLanguage))
                     .font(.caption)
                     .foregroundColor(Color.lossRed)
             } else {
-                Text(BackendURLEditor.helpMessage)
+                Text(Self.helpMessage(in: appState.locale.catalogLanguage))
                     .font(.caption)
                     .foregroundColor(.secondary)
             }
 
             HStack(spacing: 12) {
-                Button("Cancel") { onCancel() }
+                Button(LocalizedStringKey("backend.url.cancel")) { onCancel() }
                     .buttonStyle(.bordered)
 
                 if allowReset {
-                    Button("Reset to default") { onReset() }
+                    Button(LocalizedStringKey("backend.url.resetToDefault")) { onReset() }
                         .buttonStyle(.bordered)
                 }
 
                 Spacer()
 
-                Button("Save") {
+                Button(LocalizedStringKey("backend.url.save")) {
                     if let url = canonicalizedURL {
                         onSave(url)
                     }
@@ -98,18 +95,33 @@ struct BackendURLEditor: View {
         return BackendURLStore.canonicalize(draft)
     }
 
+    /// "Will save as: <URL>" caption rendered against the requested
+    /// catalog language. Static so the test path (which does not need
+    /// runtime locale wiring) can call it without constructing an
+    /// ``AppState`` instance.
+    static func willSaveAsCaption(preview: String, in language: CatalogLanguage) -> String {
+        let template = LocaleStrings.localized("backend.url.willSaveAs", in: language)
+        return String(
+            format: template,
+            locale: Locale(identifier: "\(language.rawValue)"),
+            preview
+        )
+    }
+
     /// User-facing copy explaining a failed canonicalization. Kept
-    /// in sync with ``BackendURLStore.canonicalize`` rules.
-    static var invalidURLMessage: String {
+    /// in sync with ``BackendURLStore.canonicalize`` rules; the
+    /// Debug + Release variants are separate catalog keys so the
+    /// Polish translation can tailor each.
+    static func invalidURLMessage(in language: CatalogLanguage) -> String {
         #if DEBUG
-        return "Use https:// (or http:// for localhost in Debug). Origin only — no path, query, or fragment."
+        return LocaleStrings.localized("backend.url.invalidDebug", in: language)
         #else
-        return "Use https://your-backend.example. Origin only — no path, query, or fragment. App Store builds reject http:// and self-signed certificates."
+        return LocaleStrings.localized("backend.url.invalidRelease", in: language)
         #endif
     }
 
-    static var helpMessage: String {
-        return "Casual users can ignore this. Self-hosters set the URL of their own Snapper backend."
+    static func helpMessage(in language: CatalogLanguage) -> String {
+        return LocaleStrings.localized("backend.url.help", in: language)
     }
 }
 
@@ -141,5 +153,6 @@ struct BackendURLEditor_Previews: PreviewProvider {
 
     static var previews: some View {
         Container()
+            .environment(AppState.shared)
     }
 }
