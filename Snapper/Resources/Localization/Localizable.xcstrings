@@ -120,6 +120,74 @@
         }
       }
     },
+    "alerts.detail.navTitle": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Alert detail"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Szczegóły alertu"
+          }
+        }
+      }
+    },
+    "alerts.detail.sourceTopic": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Source topic"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Topic źródłowy"
+          }
+        }
+      }
+    },
+    "alerts.detail.thread": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Thread"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Wątek"
+          }
+        }
+      }
+    },
+    "alerts.detail.timestamp": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Timestamp"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Czas"
+          }
+        }
+      }
+    },
     "alerts.empty.count.count": {
       "extractionState": "manual",
       "localizations": {
@@ -197,6 +265,40 @@
           "stringUnit": {
             "state": "translated",
             "value": "Brak alertów"
+          }
+        }
+      }
+    },
+    "alerts.error.loadFailed": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Couldn't load alerts"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nie udało się załadować alertów"
+          }
+        }
+      }
+    },
+    "alerts.loading": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Loading alerts…"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ładowanie alertów…"
           }
         }
       }
@@ -571,6 +673,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "Zmień język"
+          }
+        }
+      }
+    },
+    "common.retry": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Retry"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Spróbuj ponownie"
           }
         }
       }
@@ -3913,6 +4032,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "Obserwator"
+          }
+        }
+      }
+    },
+    "wallet.error.loadFailed": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Couldn't load wallets"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nie udało się załadować portfeli"
           }
         }
       }

@@ -32,22 +32,22 @@ struct AlertsView: View {
             ScrollViewReader { proxy in
                 Group {
                     if isLoading && alerts.isEmpty {
-                        ProgressView("Loading alerts…")
+                        ProgressView(LocalizedStringKey("alerts.loading"))
                     } else if let message = errorMessage, alerts.isEmpty {
                         VStack(spacing: 12) {
-                            Text("Couldn't load alerts")
+                            Text(LocalizedStringKey("alerts.error.loadFailed"))
                                 .font(.headline)
                             Text(message)
                                 .font(.subheadline)
                                 .foregroundStyle(.secondary)
-                            Button("Retry", action: reload)
+                            Button(LocalizedStringKey("common.retry"), action: reload)
                         }
                         .padding()
                     } else if alerts.isEmpty {
                         ContentUnavailableView(
-                            "No alerts",
+                            LocalizedStringKey("alerts.empty.title"),
                             systemImage: "bell.slash",
-                            description: Text("You haven't received any notifications yet.")
+                            description: Text(LocalizedStringKey("alerts.empty.message"))
                         )
                     } else {
                         List {
@@ -69,7 +69,7 @@ struct AlertsView: View {
                     handleDeepLink(alertPublicId: newValue, proxy: proxy)
                 }
             }
-            .navigationTitle("Alerts")
+            .navigationTitle(LocalizedStringKey("alerts.navTitle"))
             .task {
                 if alerts.isEmpty {
                     await load()
@@ -142,17 +142,17 @@ private struct AlertDetailView: View {
                     LabeledContent("Type", value: alert.alertType)
                     LabeledContent("Priority", value: alert.priority)
                     LabeledContent("Safety-critical", value: alert.isSafetyCritical ? "Yes" : "No")
-                    LabeledContent("Timestamp", value: alert.timestamp.formatted(date: .abbreviated, time: .standard))
+                    LabeledContent(LocalizedStringKey("alerts.detail.timestamp"), value: alert.timestamp.formatted(date: .abbreviated, time: .standard))
                     if let threadKey = alert.threadKey {
-                        LabeledContent("Thread", value: threadKey)
+                        LabeledContent(LocalizedStringKey("alerts.detail.thread"), value: threadKey)
                     }
                     if let topic = alert.sourceTopic {
-                        LabeledContent("Source topic", value: topic)
+                        LabeledContent(LocalizedStringKey("alerts.detail.sourceTopic"), value: topic)
                     }
                 }
                 .padding()
             }
-            .navigationTitle("Alert detail")
+            .navigationTitle(LocalizedStringKey("alerts.detail.navTitle"))
             .navigationBarTitleDisplayMode(.inline)
         }
     }
