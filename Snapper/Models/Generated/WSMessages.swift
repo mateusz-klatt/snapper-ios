@@ -700,6 +700,98 @@ struct OrderRequestData: Codable, Sendable {
     }
 }
 
+struct ProcessConfiguredEventData: Codable, Sendable {
+    let type: String
+    let sequenceId: Int
+    let publicId: String
+    let timestamp: Date
+    let sessionId: String
+    let topic: String?
+    let processNames: [String]
+    let snapshotAt: Date
+
+    enum CodingKeys: String, CodingKey {
+        case type
+        case sequenceId = "sequence_id"
+        case publicId = "public_id"
+        case timestamp
+        case sessionId = "session_id"
+        case topic
+        case processNames = "process_names"
+        case snapshotAt = "snapshot_at"
+    }
+}
+
+struct ProcessRunEventData: Codable, Sendable {
+    let type: String
+    let sequenceId: Int
+    let publicId: String
+    let timestamp: Date
+    let sessionId: String
+    let topic: String?
+    let processName: String
+    let runId: String
+    let status: String
+    let startedAt: Date
+    let completedAt: Date?
+    let exitCode: Int?
+
+    enum CodingKeys: String, CodingKey {
+        case type
+        case sequenceId = "sequence_id"
+        case publicId = "public_id"
+        case timestamp
+        case sessionId = "session_id"
+        case topic
+        case processName = "process_name"
+        case runId = "run_id"
+        case status
+        case startedAt = "started_at"
+        case completedAt = "completed_at"
+        case exitCode = "exit_code"
+    }
+}
+
+struct ProcessSummaryItem: Codable, Sendable {
+    let name: String
+    let running: Bool
+    let enabled: Bool
+    let role: String
+    let lifecycle: String
+    let activePublicId: String?
+
+    enum CodingKeys: String, CodingKey {
+        case name
+        case running
+        case enabled
+        case role
+        case lifecycle
+        case activePublicId = "active_public_id"
+    }
+}
+
+struct ProcessSummaryEventData: Codable, Sendable {
+    let type: String
+    let sequenceId: Int
+    let publicId: String
+    let timestamp: Date
+    let sessionId: String
+    let topic: String?
+    let processes: [ProcessSummaryItem]
+    let snapshotAt: Date
+
+    enum CodingKeys: String, CodingKey {
+        case type
+        case sequenceId = "sequence_id"
+        case publicId = "public_id"
+        case timestamp
+        case sessionId = "session_id"
+        case topic
+        case processes
+        case snapshotAt = "snapshot_at"
+    }
+}
+
 struct ReplayEndData: Codable, Sendable {
     let type: String
     let sequenceId: Int
@@ -871,6 +963,28 @@ struct SettingChangedData: Codable, Sendable {
         case value
         case category
         case updatedBy = "updated_by"
+    }
+}
+
+struct StrategyListEventData: Codable, Sendable {
+    let type: String
+    let sequenceId: Int
+    let publicId: String
+    let timestamp: Date
+    let sessionId: String
+    let topic: String?
+    let strategyClasses: [String]
+    let snapshotAt: Date
+
+    enum CodingKeys: String, CodingKey {
+        case type
+        case sequenceId = "sequence_id"
+        case publicId = "public_id"
+        case timestamp
+        case sessionId = "session_id"
+        case topic
+        case strategyClasses = "strategy_classes"
+        case snapshotAt = "snapshot_at"
     }
 }
 
