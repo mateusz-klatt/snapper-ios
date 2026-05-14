@@ -1,6 +1,6 @@
 import SwiftUI
 
-/// Compact "latest alert" card on the Home tab (iOS-2).
+/// Compact "latest alert" card on the Home tab.
 ///
 /// Displays the single most recent ``AlertEventInfo`` — typically
 /// fetched via ``APIClient.fetchAlertHistory(limit: 1)`` from

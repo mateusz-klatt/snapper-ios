@@ -1,7 +1,7 @@
 import SwiftUI
 import os
 
-/// Alerts tab — renders the user's recent alert history (iOS-4).
+/// Alerts tab — renders the user's recent alert history.
 ///
 /// On appear, fetches `/api/alerts` via ``APIClient.fetchAlertHistory()``
 /// and populates an in-memory list. Pull-to-refresh re-fetches. Tap

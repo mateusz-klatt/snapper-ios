@@ -1,6 +1,6 @@
 import SwiftUI
 
-/// Orders + executions list, segmented by lifecycle state (iOS-3).
+/// Orders + executions list, segmented by lifecycle state.
 ///
 /// Refactored to MVVM in v0.3.1 — data, async I/O, and submit
 /// flows live in `OrdersViewModel`. The View binds segment

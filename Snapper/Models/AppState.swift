@@ -1,7 +1,7 @@
 import Foundation
 import Observation
 
-/// Per-user UX state shared across tabs (iOS-2).
+/// Per-user UX state shared across tabs.
 ///
 /// Lives outside `WSState` because it does not track live WebSocket
 /// frames — only the wallet the user picked from `WalletPicker`. The

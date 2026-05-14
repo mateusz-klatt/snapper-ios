@@ -232,8 +232,8 @@ final class APIClient: Sendable, APIClientProtocol {
         return envelope.payload
     }
 
-    /// Fetch wallets visible to the current user (iOS-2 / Phase A
-    /// backend ``GET /api/wallets``).
+    /// Fetch wallets visible to the current user (backend
+    /// ``GET /api/wallets``).
     ///
     /// Powers ``WalletPicker``. Returns the full list; the picker
     /// caches it on ``AppState.availableWallets`` and surfaces every
@@ -260,7 +260,7 @@ final class APIClient: Sendable, APIClientProtocol {
     }
 
     /// Submit a manual order via the existing ``POST /api/orders``
-    /// route (iOS-Position-Mutations).
+    /// route.
     ///
     /// Used by ``PositionsView`` to fire reduce / close actions and
     /// by ``NewOrderSheet`` to enter fresh orders — the caller
@@ -396,7 +396,7 @@ final class APIClient: Sendable, APIClientProtocol {
         return try await request(endpoint: AppConfig.Endpoints.health)
     }
 
-    /// Register an APNs device token with the backend (BE-1c / iOS-1).
+    /// Register an APNs device token with the backend.
     ///
     /// Sends ``POST /api/devices`` with a full ``RegisterDeviceCommand``
     /// envelope (the handler strips everything but the ``payload`` and
@@ -420,9 +420,9 @@ final class APIClient: Sendable, APIClientProtocol {
         )
     }
 
-    /// Fetch the authenticated user's recent alert history (BE-1c).
+    /// Fetch the authenticated user's recent alert history.
     ///
-    /// Powers the Alerts tab (iOS-4). ``limit`` caps page size; the
+    /// Powers the Alerts tab. ``limit`` caps page size; the
     /// backend enforces its own upper bound. ``before`` is the opaque
     /// cursor from the previous page's ``next_cursor`` — pass ``nil``
     /// for the first page.
@@ -445,7 +445,7 @@ final class APIClient: Sendable, APIClientProtocol {
         )
     }
 
-    /// Fetch a single alert by ``public_id`` (BE-1c — used for deep-linking).
+    /// Fetch a single alert by ``public_id`` (used for deep-linking).
     ///
     /// Args:
     ///   publicId: UUID7 of the alert event to load.

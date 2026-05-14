@@ -1,6 +1,6 @@
 import SwiftUI
 
-/// Compact wallet selector surfaced in the Home tab toolbar (iOS-2).
+/// Compact wallet selector surfaced in the Home tab toolbar.
 ///
 /// Refactored to MVVM in v0.3.1 — the View is a thin Menu binder
 /// over `WalletPickerViewModel`. Async `loadWallets()`, error
