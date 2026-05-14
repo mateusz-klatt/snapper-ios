@@ -14,7 +14,7 @@ import os
 ///   is expected to re-deliver on its own or next launch).
 /// - `userNotificationCenter(_:willPresent:)` → suppresses banner /
 ///   sound / badge when the WebSocket is connected (the app already
-///   renders live alerts inline — §D10 foreground-suppression).
+///   renders live alerts inline — foreground-suppression).
 /// - `userNotificationCenter(_:didReceive:)` → routes the tap into
 ///   `NavigationCoordinator` so `MainTabView` can deep-link to the
 ///   target row.

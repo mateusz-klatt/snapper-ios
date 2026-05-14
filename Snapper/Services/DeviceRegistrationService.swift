@@ -112,7 +112,7 @@ actor DeviceRegistrationService {
     /// down. The backend-side device row is NOT deleted on logout
     /// (the user may log back in on the same device within minutes);
     /// deletion happens on explicit user-initiated unregister via
-    /// `DELETE /api/devices/{public_id}` (covered by iOS-5 Settings).
+    /// `DELETE /api/devices/{public_id}` (covered by Settings).
     ///
     /// `lastRegisteredDevicePublicId` is cleared to prevent a
     /// cross-user leak: if user A registered, then logged out, then

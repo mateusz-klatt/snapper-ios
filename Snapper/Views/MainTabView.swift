@@ -1,20 +1,20 @@
 import SwiftUI
 
-/// 5-tab root after iOS-3: Home, Positions, Orders, Alerts, Settings.
+/// 5-tab root: Home, Positions, Orders, Alerts, Settings.
 ///
 /// Permission gating per tab:
 /// - Home: ``canAccess("overview")``.
 /// - Positions: ``readPositions`` / ``managePositions`` (every role
 ///   above ``aiDelegate`` already grants ``readPositions``).
 /// - Orders: ``canAccess("orders")``.
-/// - Alerts: ``readNotifications`` (preserves the iOS-4 push gating).
+/// - Alerts: ``readNotifications`` (push gating).
 /// - Settings: ``canAccess("overview")`` — every authenticated role
-///   per the permission catalog (preserves the iOS-5 contract that
+///   per the permission catalog (contract that
 ///   any user can self-manage push notifications + device).
 ///
 /// Deep-link routing pulls a pending path off
 /// ``NavigationCoordinator.pendingDeepLink`` and selects the matching
-/// tab. The mapping was generalised from the iOS-4 contract so the
+/// tab. The mapping was generalised so the
 /// dedicated Positions tab gets ``/positions*``, Home picks up
 /// ``/system*``, and the existing ``/alerts*`` / ``/orders*`` rules
 /// stay byte-identical to keep the APNs tap → AlertsView
@@ -105,11 +105,11 @@ struct MainTabView: View {
         }
     }
 
-    /// Deep-link routing path-prefix mapping (post-iOS-3):
-    /// - ``/alerts*`` → ``alerts`` (UNCHANGED, preserves iOS-4
+    /// Deep-link routing path-prefix mapping:
+    /// - ``/alerts*`` → ``alerts`` (UNCHANGED, preserves
     ///   AlertsView scroll-to-anchor contract).
     /// - ``/orders*`` → ``orders`` (renamed from "trading").
-    /// - ``/positions*`` → ``positions`` (now its own tab — pre-iOS-3
+    /// - ``/positions*`` → ``positions`` (now its own tab — previously
     ///   this fell back to Dashboard).
     /// - ``/system*`` → ``home`` (renamed from "dashboard").
     /// - anything else → ``nil``, leaving the current tab unchanged.

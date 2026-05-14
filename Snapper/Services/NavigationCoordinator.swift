@@ -40,8 +40,8 @@ final class NavigationCoordinator: ObservableObject {
     /// - ``deep_link_path: str`` — target route (e.g.
     ///   ``/orders/{client_order_id}``).
     /// - ``alert_event_public_id: str | None`` — optional anchor
-    ///   (currently not minted by BE-3b rules; reserved for BE-3c /
-    ///   future rules that want row-level navigation).
+    ///   (currently not minted by alert rules; reserved for future
+    ///   rules that want row-level navigation).
     ///
     /// A missing / non-string `deep_link_path` logs a warning and
     /// leaves the coordinator's state untouched.
