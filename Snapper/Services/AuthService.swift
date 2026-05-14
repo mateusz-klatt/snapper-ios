@@ -10,7 +10,7 @@ class AuthService: ObservableObject {
 
     @Published var isAuthenticated = false
     @Published var currentUser: UserProfile?
-    @Published var errorMessage: String?
+    @Published var error: LoginViewError?
 
     private var wsToken: String?
     private let session: URLSession
@@ -43,7 +43,7 @@ class AuthService: ObservableObject {
 
     func login(username: String, password: String) async {
         guard let url = URL(string: "\(apiBaseURLProvider())\(AppConfig.Endpoints.login)") else {
-            errorMessage = "Invalid URL"
+            error = .invalidURL
             return
         }
 
@@ -64,7 +64,7 @@ class AuthService: ObservableObject {
         do {
             request.httpBody = try Self.envelopeEncoder.encode(envelope)
         } catch {
-            errorMessage = "Failed to serialize login request"
+            self.error = .serializationFailed
             return
         }
 
@@ -72,7 +72,7 @@ class AuthService: ObservableObject {
             let (data, response) = try await session.data(for: request)
 
             guard let httpResponse = response as? HTTPURLResponse else {
-                errorMessage = "Invalid response"
+                self.error = .invalidResponse
                 return
             }
 
@@ -81,15 +81,15 @@ class AuthService: ObservableObject {
                 decoder.dateDecodingStrategy = .iso8601
                 let loginResponse = try decoder.decode(LoginResponse.self, from: data)
                 currentUser = loginResponse.payload.user
-                errorMessage = nil
+                self.error = nil
                 isAuthenticated = true
                 await DeviceRegistrationService.shared().onLogin()
             } else {
                 let errorResponse = try? JSONDecoder().decode(ErrorResponse.self, from: data)
-                errorMessage = errorResponse?.detail ?? "Login failed"
+                self.error = errorResponse.map { .serverDetail($0.detail) } ?? .loginFailed
             }
         } catch {
-            errorMessage = "Network error: \(error.localizedDescription)"
+            self.error = .network(error.localizedDescription)
         }
     }
 

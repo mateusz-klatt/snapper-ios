@@ -10,12 +10,17 @@ import Observation
 /// `SnapperApp` root and several other services bind to it via
 /// `@StateObject`, and migrating it sits outside this PR's scope.
 ///
-/// `errorMessage` and `isAuthenticated` are computed passthroughs to
-/// the underlying `AuthService` so tests keep their existing
-/// assertions without needing Combine bridging. The View observes
+/// `errorMessage(in:)` and `isAuthenticated` are computed passthroughs
+/// to the underlying `AuthService` so tests keep their existing
+/// assertion shape without needing Combine bridging. The View observes
 /// the VM through `@State` (iOS 17+ `@Observable` integration) and
 /// implicitly observes `AuthService` through the parent `@StateObject`
 /// in `SnapperApp`, so passthrough reads stay reactive.
+///
+/// Login errors flow through `AuthService.error: LoginViewError?`
+/// which the VM localizes against the user's current `CatalogLanguage`
+/// when the view asks for a string. `.serverDetail` errors render the
+/// server-provided detail VERBATIM (per Phase H L1).
 @MainActor
 @Observable
 final class LoginViewModel {
@@ -34,8 +39,12 @@ final class LoginViewModel {
         return !username.isEmpty && !password.isEmpty && !isLoading
     }
 
-    var errorMessage: String? {
-        return authService.errorMessage
+    func errorMessage(in language: CatalogLanguage) -> String? {
+        return authService.error?.localizedMessage(in: language)
+    }
+
+    var error: LoginViewError? {
+        return authService.error
     }
 
     var isAuthenticated: Bool {
@@ -44,13 +53,13 @@ final class LoginViewModel {
 
     func login() async {
         isLoading = true
-        /// Clear the prior error before firing a retry. `errorMessage`
-        /// is now a computed passthrough to AuthService, so without
-        /// this reset the previous attempt's error stays visible
-        /// until the new request finishes — that's a UX regression
-        /// from the pre-`@Observable` flow where the VM held its own
+        /// Clear the prior error before firing a retry. `error` is a
+        /// computed passthrough to AuthService, so without this reset
+        /// the previous attempt's error stays visible until the new
+        /// request finishes — that's a UX regression from the
+        /// pre-`@Observable` flow where the VM held its own
         /// `@Published` slot and zeroed it here on every entry.
-        authService.errorMessage = nil
+        authService.error = nil
 
         await authService.login(username: username, password: password)
 

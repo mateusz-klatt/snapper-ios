@@ -34,30 +34,40 @@ final class LoginViewErrorTests: XCTestCase {
         XCTAssertNotEqual(LoginViewError.network("X"), LoginViewError.network("Y"))
     }
 
-    func testInvalidURLMessageWithoutCatalogEntryReturnsKey() {
+    func testInvalidURLMessageInEnglish() {
         let error = LoginViewError.invalidURL
-        XCTAssertEqual(error.localizedMessage(in: .en), "errors.login.invalidURL")
+        XCTAssertEqual(error.localizedMessage(in: .en), "Invalid URL")
     }
 
-    func testSerializationFailedMessageWithoutCatalogReturnsKey() {
+    func testInvalidURLMessageInPolish() {
+        let error = LoginViewError.invalidURL
+        XCTAssertEqual(error.localizedMessage(in: .pl), "Nieprawidłowy URL")
+    }
+
+    func testSerializationFailedMessageInEnglish() {
         let error = LoginViewError.serializationFailed
-        XCTAssertEqual(error.localizedMessage(in: .en), "errors.login.serializationFailed")
+        XCTAssertEqual(error.localizedMessage(in: .en), "Failed to serialize login request")
     }
 
-    func testInvalidResponseMessageWithoutCatalogReturnsKey() {
+    func testInvalidResponseMessageInPolish() {
         let error = LoginViewError.invalidResponse
-        XCTAssertEqual(error.localizedMessage(in: .pl), "errors.login.invalidResponse")
+        XCTAssertEqual(error.localizedMessage(in: .pl), "Nieprawidłowa odpowiedź serwera")
     }
 
-    func testLoginFailedMessageWithoutCatalogReturnsKey() {
+    func testLoginFailedMessageInEnglish() {
         let error = LoginViewError.loginFailed
-        XCTAssertEqual(error.localizedMessage(in: .en), "errors.login.loginFailed")
+        XCTAssertEqual(error.localizedMessage(in: .en), "Login failed")
     }
 
-    func testNetworkMessageWithoutCatalogReturnsKeyTemplate() {
-        let error = LoginViewError.network("timeout")
+    func testNetworkMessageSubstitutesUnderlyingDetail() {
+        let error = LoginViewError.network("timeout after 30s")
         let result = error.localizedMessage(in: .en)
-        XCTAssertTrue(result.contains("errors.login.network") || result.contains("timeout"),
-                      "Network error message should reference key or contain underlying detail: got \(result)")
+        XCTAssertEqual(result, "Network error: timeout after 30s")
+    }
+
+    func testNetworkMessageInPolish() {
+        let error = LoginViewError.network("przekroczenie czasu")
+        let result = error.localizedMessage(in: .pl)
+        XCTAssertEqual(result, "Błąd sieci: przekroczenie czasu")
     }
 }
