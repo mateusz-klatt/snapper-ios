@@ -24,10 +24,25 @@ enum LocaleStrings {
     /// the language's resources, which the catalog parity test
     /// catches at build time.
     static func localized(_ key: String, in language: CatalogLanguage) -> String {
-        if let path = Bundle.main.path(forResource: language.rawValue, ofType: "lproj"),
-           let bundle = Bundle(path: path) {
-            return NSLocalizedString(key, bundle: bundle, comment: "")
+        if let value = lookup(key, in: language.rawValue) {
+            return value
         }
-        return NSLocalizedString(key, comment: "")
+        if language != .en, let value = lookup(key, in: CatalogLanguage.en.rawValue) {
+            return value
+        }
+        return key
+    }
+
+    /// Resolve ``key`` against a specific lproj folder. Returns ``nil``
+    /// when either the resource path or the lookup itself misses
+    /// (``NSLocalizedString`` echoes the key on miss, so we
+    /// distinguish a real hit by comparing the result to the key).
+    private static func lookup(_ key: String, in lang: String) -> String? {
+        guard let path = Bundle.main.path(forResource: lang, ofType: "lproj"),
+              let bundle = Bundle(path: path) else {
+            return nil
+        }
+        let value = NSLocalizedString(key, tableName: nil, bundle: bundle, value: key, comment: "")
+        return value == key ? nil : value
     }
 }
