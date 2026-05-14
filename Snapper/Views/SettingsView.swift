@@ -22,6 +22,13 @@ struct SettingsView: View {
         NavigationView {
             Form {
 
+                Section {
+                    LocaleSwitcher()
+                        .frame(maxWidth: .infinity, alignment: .trailing)
+                } header: {
+                    Text(LocalizedStringKey("settings.section.language"))
+                }
+
                 Section("Account") {
                     if let user = authService.currentUser {
                         HStack {
