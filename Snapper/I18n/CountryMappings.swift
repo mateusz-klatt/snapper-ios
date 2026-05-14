@@ -16,10 +16,10 @@ enum CountryMappings {
     /// as the source language and Polish as the only translation;
     /// every code except ``pl`` falls back to ``en``.
     static func catalogLanguage(for code: AppLocale) -> CatalogLanguage {
-        switch code {
-        case .pl: return .pl
-        default:  return .en
+        if code == .pl {
+            return .pl
         }
+        return .en
     }
 
     /// BCP-47 identifier ``<catalogLanguage>-<COUNTRY>`` produced

@@ -3,8 +3,8 @@ import XCTest
 
 /// Locks the structural invariants of ``AppLocale``: count, row
 /// layout, RTL set, default, and the regional-indicator flag
-/// emoji composition (including the backticked ``is`` / ``in``
-/// cases that fail at compile time without the escape).
+/// emoji composition, including the raw ``is`` / ``in`` country
+/// codes whose enum cases use non-keyword names.
 final class AppLocaleTests: XCTestCase {
 
     func testCountIs45() {
@@ -30,8 +30,8 @@ final class AppLocaleTests: XCTestCase {
 
     func testIdentifiableIdMatchesRawValue() {
         XCTAssertEqual(AppLocale.pl.id, "pl")
-        XCTAssertEqual(AppLocale.`is`.id, "is")
-        XCTAssertEqual(AppLocale.`in`.id, "in")
+        XCTAssertEqual(AppLocale.iceland.id, "is")
+        XCTAssertEqual(AppLocale.india.id, "in")
     }
 
     func testRTLSetIsAeIlIr() {
@@ -54,12 +54,11 @@ final class AppLocaleTests: XCTestCase {
         XCTAssertEqual(AppLocale.ae.flagEmoji, "🇦🇪")
     }
 
-    /// Regression for the Swift-reserved-keyword backtick rule:
-    /// ``is`` and ``in`` must be referenced via the escaped form
-    /// at every call site. Both raw values resolve into the
-    /// regional-indicator pair the same way as any other code.
-    func testFlagEmojiBacktickedCodes() {
-        XCTAssertEqual(AppLocale.`is`.flagEmoji, "🇮🇸")
-        XCTAssertEqual(AppLocale.`in`.flagEmoji, "🇮🇳")
+    /// Regression for the Swift-reserved-keyword ISO codes: both
+    /// raw values resolve into the regional-indicator pair the same
+    /// way as any other code.
+    func testFlagEmojiKeywordRawValueCodes() {
+        XCTAssertEqual(AppLocale.iceland.flagEmoji, "🇮🇸")
+        XCTAssertEqual(AppLocale.india.flagEmoji, "🇮🇳")
     }
 }

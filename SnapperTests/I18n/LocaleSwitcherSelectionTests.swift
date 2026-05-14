@@ -30,13 +30,13 @@ final class LocaleSwitcherSelectionTests: XCTestCase {
         XCTAssertEqual(defaults.string(forKey: Self.localeKey), "pl")
     }
 
-    func testSelectingBacktickedISPersistsCorrectly() {
+    func testSelectingIcelandPersistsCorrectly() {
         let defaults = makeIsolatedDefaults()
         let state = AppState(
             userDefaults: defaults,
             preferredLanguagesProvider: { [] }
         )
-        state.locale = .`is`
+        state.locale = .iceland
         XCTAssertEqual(defaults.string(forKey: Self.localeKey), "is")
     }
 

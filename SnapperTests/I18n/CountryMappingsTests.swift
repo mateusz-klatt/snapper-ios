@@ -29,12 +29,12 @@ final class CountryMappingsTests: XCTestCase {
         XCTAssertEqual(CountryMappings.intlLocaleIdentifier(for: .us), "en-US")
     }
 
-    /// Backtick regression — both reserved-keyword cases must
-    /// resolve to ``en-IS`` / ``en-IN`` (not the unrelated Icelandic
-    /// / Hindi language tags that ``is`` / ``in`` are also valid for).
-    func testIntlLocaleIdentifierBacktickedCodes() {
-        XCTAssertEqual(CountryMappings.intlLocaleIdentifier(for: .`is`), "en-IS")
-        XCTAssertEqual(CountryMappings.intlLocaleIdentifier(for: .`in`), "en-IN")
+    /// Reserved-keyword raw-value regression: both cases must resolve
+    /// to ``en-IS`` / ``en-IN`` (not the unrelated Icelandic / Hindi
+    /// language tags that ``is`` / ``in`` are also valid for).
+    func testIntlLocaleIdentifierKeywordRawValueCodes() {
+        XCTAssertEqual(CountryMappings.intlLocaleIdentifier(for: .iceland), "en-IS")
+        XCTAssertEqual(CountryMappings.intlLocaleIdentifier(for: .india), "en-IN")
     }
 
     func testIntlLocaleIdentifierAlwaysHasCatalogLanguagePrefix() {

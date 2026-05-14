@@ -59,17 +59,17 @@ final class LocaleResolverTests: XCTestCase {
         )
     }
 
-    func testBacktickedISResolvesFromTag() {
+    func testIcelandResolvesFromTag() {
         XCTAssertEqual(
             LocaleResolver.resolveFromPreferredLanguages(["is-IS"]),
-            .`is`
+            .iceland
         )
     }
 
-    func testBacktickedINResolvesFromTag() {
+    func testIndiaResolvesFromTag() {
         XCTAssertEqual(
             LocaleResolver.resolveFromPreferredLanguages(["hi-IN"]),
-            .`in`
+            .india
         )
     }
 

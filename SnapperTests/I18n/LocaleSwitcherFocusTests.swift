@@ -12,14 +12,14 @@ final class LocaleSwitcherFocusTests: XCTestCase {
         XCTAssertEqual(pos?.col, 0)
     }
 
-    func testPositionForBacktickedISIsRow1Col13() {
-        let pos = LocaleSwitcherFocus.position(of: .`is`)
+    func testPositionForIcelandIsRow1Col13() {
+        let pos = LocaleSwitcherFocus.position(of: .iceland)
         XCTAssertEqual(pos?.row, 0)
         XCTAssertEqual(pos?.col, 13)
     }
 
-    func testPositionForRow2BacktickedINIsCol10() {
-        let pos = LocaleSwitcherFocus.position(of: .`in`)
+    func testPositionForIndiaIsRow2Col10() {
+        let pos = LocaleSwitcherFocus.position(of: .india)
         XCTAssertEqual(pos?.row, 1)
         XCTAssertEqual(pos?.col, 10)
     }
@@ -62,13 +62,13 @@ final class LocaleSwitcherFocusTests: XCTestCase {
         XCTAssertEqual(LocaleSwitcherFocus.next(from: .cz, by: -1, vertical: true), .cn)
     }
 
-    func testDownFromBacktickedISStaysInColumn() {
-        let down = LocaleSwitcherFocus.next(from: .`is`, by: 1, vertical: true)
+    func testDownFromIcelandStaysInColumn() {
+        let down = LocaleSwitcherFocus.next(from: .iceland, by: 1, vertical: true)
         XCTAssertEqual(down, AppLocale.row2[13])
         XCTAssertEqual(down, .ae)
     }
 
-    func testRightFromBacktickedINGoesToBD() {
-        XCTAssertEqual(LocaleSwitcherFocus.next(from: .`in`, by: 1, vertical: false), .bd)
+    func testRightFromIndiaGoesToBD() {
+        XCTAssertEqual(LocaleSwitcherFocus.next(from: .india, by: 1, vertical: false), .bd)
     }
 }

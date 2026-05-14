@@ -14,17 +14,17 @@ final class LocaleSwitcherStylingTests: XCTestCase {
         XCTAssertFalse(LocaleSwitcherStyling.isSelected(code: .us, current: .pl))
     }
 
-    func testIsSelectedTrueForBacktickedIS() {
-        XCTAssertTrue(LocaleSwitcherStyling.isSelected(code: .`is`, current: .`is`))
+    func testIsSelectedTrueForIceland() {
+        XCTAssertTrue(LocaleSwitcherStyling.isSelected(code: .iceland, current: .iceland))
     }
 
-    func testIsSelectedTrueForBacktickedIN() {
-        XCTAssertTrue(LocaleSwitcherStyling.isSelected(code: .`in`, current: .`in`))
+    func testIsSelectedTrueForIndia() {
+        XCTAssertTrue(LocaleSwitcherStyling.isSelected(code: .india, current: .india))
     }
 
-    func testIsSelectedFalseAcrossBacktickedCodes() {
-        XCTAssertFalse(LocaleSwitcherStyling.isSelected(code: .`is`, current: .`in`))
-        XCTAssertFalse(LocaleSwitcherStyling.isSelected(code: .`in`, current: .`is`))
+    func testIsSelectedFalseAcrossKeywordRawValueCodes() {
+        XCTAssertFalse(LocaleSwitcherStyling.isSelected(code: .iceland, current: .india))
+        XCTAssertFalse(LocaleSwitcherStyling.isSelected(code: .india, current: .iceland))
     }
 
     func testExactlyOneCodeIsSelectedPerCurrent() {

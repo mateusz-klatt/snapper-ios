@@ -81,23 +81,23 @@ final class AppStateLocaleTests: XCTestCase {
         XCTAssertEqual(reader.locale, .ie)
     }
 
-    func testBacktickedISCodePersistsCorrectly() {
+    func testIcelandCodePersistsCorrectly() {
         let defaults = makeIsolatedDefaults()
         let state = AppState(
             userDefaults: defaults,
             preferredLanguagesProvider: { [] }
         )
-        state.locale = .`is`
+        state.locale = .iceland
         XCTAssertEqual(defaults.string(forKey: Self.localeKey), "is")
     }
 
-    func testBacktickedINCodePersistsCorrectly() {
+    func testIndiaCodePersistsCorrectly() {
         let defaults = makeIsolatedDefaults()
         let state = AppState(
             userDefaults: defaults,
             preferredLanguagesProvider: { [] }
         )
-        state.locale = .`in`
+        state.locale = .india
         XCTAssertEqual(defaults.string(forKey: Self.localeKey), "in")
     }
 

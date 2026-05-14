@@ -7,26 +7,24 @@ import Foundation
 /// ``frontend/src/i18n/types.ts``.
 ///
 /// Row layout (3×15) matches the LanguageSwitcher grid on
-/// ``www.klatt.ie``. Swift reserved keywords ``is`` and ``in``
-/// are declared with backticks; every call site MUST reference
-/// them via the backticked form (``.\`is\```, ``.\`in\```) or
-/// the file fails to compile.
+/// ``www.klatt.ie``. Iceland and India use descriptive case names
+/// because their ISO country codes are Swift reserved keywords.
 ///
 /// ``rawValue`` is the lowercase ISO-3166-1 alpha-2 country
 /// code. ``Identifiable`` conformance via ``id == rawValue`` is
 /// required by SwiftUI's ``ForEach(_:content:)`` initializer.
 enum AppLocale: String, CaseIterable, Codable, Sendable, Hashable, Identifiable {
-    case ie, us, pl, de, fr, es, it, nl, br, se, no, dk, fi, `is`, gr
-    case cn, hk, jp, kr, th, vn, ph, my, id, mm, `in`, bd, ke, ae, il
+    case ie, us, pl, de, fr, es, it, nl, br, se, no, dk, fi, iceland = "is", gr
+    case cn, hk, jp, kr, th, vn, ph, my, id, mm, india = "in", bd, ke, ae, il
     case cz, sk, hu, ro, ua, ru, lt, lv, hr, rs, ba, al, tr, ir, am
 
     var id: String { rawValue }
 
     /// Row 1: Western Europe + Americas (15 codes).
-    static let row1: [AppLocale] = [.ie, .us, .pl, .de, .fr, .es, .it, .nl, .br, .se, .no, .dk, .fi, .`is`, .gr]
+    static let row1: [AppLocale] = [.ie, .us, .pl, .de, .fr, .es, .it, .nl, .br, .se, .no, .dk, .fi, .iceland, .gr]
 
     /// Row 2: Asia + Middle East (15 codes).
-    static let row2: [AppLocale] = [.cn, .hk, .jp, .kr, .th, .vn, .ph, .my, .id, .mm, .`in`, .bd, .ke, .ae, .il]
+    static let row2: [AppLocale] = [.cn, .hk, .jp, .kr, .th, .vn, .ph, .my, .id, .mm, .india, .bd, .ke, .ae, .il]
 
     /// Row 3: CEE + Balkans + Caucasus (15 codes).
     static let row3: [AppLocale] = [.cz, .sk, .hu, .ro, .ua, .ru, .lt, .lv, .hr, .rs, .ba, .al, .tr, .ir, .am]

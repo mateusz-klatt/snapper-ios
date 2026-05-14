@@ -19,14 +19,14 @@ final class LocaleSwitcherLabelsTests: XCTestCase {
         XCTAssertTrue(label.contains("Polska"), "Expected Polish country name, got: \(label)")
     }
 
-    func testSwitchToIcelandUsesBacktickedIS() {
-        let label = LocaleSwitcherLabels.accessibilityLabel(for: .`is`, current: .us)
+    func testSwitchToIcelandUsesIcelandCase() {
+        let label = LocaleSwitcherLabels.accessibilityLabel(for: .iceland, current: .us)
         XCTAssertTrue(label.contains("Switch to"), "Expected EN template, got: \(label)")
         XCTAssertTrue(label.contains("Iceland"), "Expected Iceland, got: \(label)")
     }
 
-    func testSwitchToIndiaUsesBacktickedINInPolishCurrent() {
-        let label = LocaleSwitcherLabels.accessibilityLabel(for: .`in`, current: .pl)
+    func testSwitchToIndiaUsesIndiaCaseInPolishCurrent() {
+        let label = LocaleSwitcherLabels.accessibilityLabel(for: .india, current: .pl)
         XCTAssertTrue(label.contains("Przełącz na"), "Expected Polish template, got: \(label)")
         XCTAssertTrue(label.contains("Indie"), "Expected Polish country name for India, got: \(label)")
     }
