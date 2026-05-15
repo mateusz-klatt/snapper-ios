@@ -28,53 +28,54 @@ enum CountryMappings {
     /// ``.ie`` and ``.us`` (which share ``en``) now has a dedicated
     /// catalog translation.
     static func catalogLanguage(for code: AppLocale) -> CatalogLanguage {
-        switch code {
-        case .pl: return .pl
-        case .de: return .de
-        case .fr: return .fr
-        case .es: return .es
-        case .it: return .it
-        case .nl: return .nl
-        case .br: return .ptBR
-        case .se: return .sv
-        case .no: return .nb
-        case .dk: return .da
-        case .fi: return .fi
-        case .cz: return .cs
-        case .sk: return .sk
-        case .hu: return .hu
-        case .ro: return .ro
-        case .hr: return .hr
-        case .ua: return .uk
-        case .ru: return .ru
-        case .lt: return .lt
-        case .lv: return .lv
-        case .rs: return .srLatn
-        case .ba: return .bs
-        case .al: return .sq
-        case .iceland: return .`is`
-        case .gr: return .el
-        case .tr: return .tr
-        case .ph: return .fil
-        case .my: return .ms
-        case .id: return .id
-        case .ke: return .sw
-        case .bd: return .bn
-        case .cn: return .zhHans
-        case .hk: return .zhHant
-        case .jp: return .ja
-        case .kr: return .ko
-        case .th: return .th
-        case .vn: return .vi
-        case .mm: return .my
-        case .india: return .hi
-        case .ae: return .ar
-        case .il: return .he
-        case .ir: return .fa
-        case .am: return .hy
-        default: return .en
-        }
+        return catalogLanguagesByCode[code, default: .en]
     }
+
+    private static let catalogLanguagesByCode: [AppLocale: CatalogLanguage] = [
+        .pl: .pl,
+        .de: .de,
+        .fr: .fr,
+        .es: .es,
+        .it: .it,
+        .nl: .nl,
+        .br: .ptBR,
+        .se: .sv,
+        .no: .nb,
+        .dk: .da,
+        .fi: .fi,
+        .cz: .cs,
+        .sk: .sk,
+        .hu: .hu,
+        .ro: .ro,
+        .hr: .hr,
+        .ua: .uk,
+        .ru: .ru,
+        .lt: .lt,
+        .lv: .lv,
+        .rs: .srLatn,
+        .ba: .bs,
+        .al: .sq,
+        .iceland: .icelandic,
+        .gr: .el,
+        .tr: .tr,
+        .ph: .fil,
+        .my: .ms,
+        .id: .id,
+        .ke: .sw,
+        .bd: .bn,
+        .cn: .zhHans,
+        .hk: .zhHant,
+        .jp: .ja,
+        .kr: .ko,
+        .th: .th,
+        .vn: .vi,
+        .mm: .my,
+        .india: .hi,
+        .ae: .ar,
+        .il: .he,
+        .ir: .fa,
+        .am: .hy,
+    ]
 
     /// BCP-47 identifier ``<catalogLanguage>-<COUNTRY>`` produced
     /// by joining the catalog language with the uppercased country
