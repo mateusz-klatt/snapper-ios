@@ -44,7 +44,9 @@ final class CatalogParityTests: XCTestCase {
         "cs", "sk", "hu", "ro", "hr",
         "uk", "ru", "lt", "lv", "sr-Latn", "bs",
         "sq", "is", "el", "tr",
-        "fil", "ms", "id", "sw", "bn"
+        "fil", "ms", "id", "sw", "bn",
+        "zh-Hans", "zh-Hant", "ja", "ko", "th", "vi",
+        "my", "hi", "ar", "he", "fa", "hy"
     ]
 
     /// CLDR plural categories required per language for the 7 plural
@@ -97,6 +99,18 @@ final class CatalogParityTests: XCTestCase {
         "id": ["other"],
         "sw": ["one", "other"],
         "bn": ["one", "other"],
+        "zh-Hans": ["other"],
+        "zh-Hant": ["other"],
+        "ja": ["other"],
+        "ko": ["other"],
+        "th": ["other"],
+        "vi": ["other"],
+        "my": ["other"],
+        "hi": ["one", "other"],
+        "ar": ["zero", "one", "two", "few", "many", "other"],
+        "he": ["one", "two", "many", "other"],
+        "fa": ["one", "other"],
+        "hy": ["one", "other"],
     ]
 
     private static let catalogURL: URL = {

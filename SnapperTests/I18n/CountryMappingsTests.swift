@@ -44,6 +44,18 @@ final class CountryMappingsTests: XCTestCase {
         (.id, .id),
         (.ke, .sw),
         (.bd, .bn),
+        (.cn, .zhHans),
+        (.hk, .zhHant),
+        (.jp, .ja),
+        (.kr, .ko),
+        (.th, .th),
+        (.vn, .vi),
+        (.mm, .my),
+        (.india, .hi),
+        (.ae, .ar),
+        (.il, .he),
+        (.ir, .fa),
+        (.am, .hy),
     ]
 
     func testTranslatedLanguagesMapToTheirOwnCatalog() {
@@ -72,16 +84,17 @@ final class CountryMappingsTests: XCTestCase {
         XCTAssertEqual(CountryMappings.intlLocaleIdentifier(for: .pl), "pl-PL")
         XCTAssertEqual(CountryMappings.intlLocaleIdentifier(for: .de), "de-DE")
         XCTAssertEqual(CountryMappings.intlLocaleIdentifier(for: .br), "pt-BR")
-        XCTAssertEqual(CountryMappings.intlLocaleIdentifier(for: .ae), "en-AE")
+        XCTAssertEqual(CountryMappings.intlLocaleIdentifier(for: .ae), "ar-AE")
         XCTAssertEqual(CountryMappings.intlLocaleIdentifier(for: .us), "en-US")
     }
 
-    /// Reserved-keyword raw-value regression: India still falls back
-    /// to ``en-IN`` (no Hindi translation yet); Iceland now maps to
-    /// its own Icelandic translation column ``is-IS`` per batch-2.
+    /// Reserved-keyword raw-value regression: both Iceland (`.iceland`,
+    /// raw value "is") and India (`.india`, raw value "in") now map
+    /// to dedicated catalog languages — Iceland → Icelandic (``is-IS``)
+    /// in batch-2 and India → Hindi (``hi-IN``) in batch-3.
     func testIntlLocaleIdentifierKeywordRawValueCodes() {
         XCTAssertEqual(CountryMappings.intlLocaleIdentifier(for: .iceland), "is-IS")
-        XCTAssertEqual(CountryMappings.intlLocaleIdentifier(for: .india), "en-IN")
+        XCTAssertEqual(CountryMappings.intlLocaleIdentifier(for: .india), "hi-IN")
     }
 
     func testIntlLocaleIdentifierAlwaysHasCatalogLanguagePrefix() {

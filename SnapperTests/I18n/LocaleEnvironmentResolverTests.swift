@@ -37,10 +37,10 @@ final class LocaleEnvironmentResolverTests: XCTestCase {
         )
     }
 
-    func testEnvironmentLocaleForIndiaIsEnIN() {
+    func testEnvironmentLocaleForIndiaIsHiIN() {
         XCTAssertEqual(
             LocaleEnvironmentResolver.environmentLocale(for: .india).identifier,
-            "en-IN"
+            "hi-IN"
         )
     }
 
