@@ -1413,6 +1413,23 @@
         }
       }
     },
+    "market.entry.subtitle": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Live candles · cross-exchange"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Świece na żywo · wielogiełdowe"
+          }
+        }
+      }
+    },
     "market.data.timeframe.label": {
       "extractionState": "manual",
       "localizations": {

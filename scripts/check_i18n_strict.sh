@@ -20,7 +20,7 @@ set -u
 
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 PATTERNS="$ROOT/scripts/check_i18n_patterns.txt"
-ALLOWLIST="$ROOT/scripts/check_i18n_allowlist.txt"
+ALLOWLIST="$ROOT/scripts/check_i18n_strict_allowlist.txt"
 
 if [ ! -f "$PATTERNS" ]; then
     echo "i18n-check: patterns file missing: $PATTERNS" >&2

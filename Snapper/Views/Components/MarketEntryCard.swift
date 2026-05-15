@@ -14,10 +14,10 @@ struct MarketEntryCard: View {
                 .clipShape(RoundedRectangle(cornerRadius: 10))
 
             VStack(alignment: .leading, spacing: 2) {
-                Text("Market data")
+                Text(LocalizedStringKey("market.data.navTitle"))
                     .font(.system(.headline, weight: .semibold))
                     .foregroundColor(.textPrimary)
-                Text("Live candles • cross-exchange")
+                Text(LocalizedStringKey("market.entry.subtitle"))
                     .font(.caption)
                     .foregroundColor(.textSecondary)
             }

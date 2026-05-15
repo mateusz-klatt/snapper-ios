@@ -110,6 +110,7 @@ enum ExpectedKeys {
         "market.data.metric.volume",
         "market.data.navTitle",
         "market.data.timeframe.label",
+        "market.entry.subtitle",
         "notifications.devicePref.accessibility.label.scopePicker",
         "notifications.devicePref.alertType.label",
         "notifications.devicePref.minPriority.label",
