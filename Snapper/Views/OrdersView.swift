@@ -219,8 +219,8 @@ enum OrdersSegment: String, CaseIterable, Identifiable {
     var titleKey: String {
         switch self {
         case .open: return "orders.segment.open"
-        case .recent: return "orders.segment.all"
-        case .fills: return "orders.segment.history"
+        case .recent: return "orders.segment.recent"
+        case .fills: return "orders.segment.fills"
         }
     }
 }

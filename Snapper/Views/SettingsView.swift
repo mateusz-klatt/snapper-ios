@@ -48,10 +48,12 @@ struct SettingsView: View {
                         }
 
                         HStack {
-                            Text(LocalizedStringKey("settings.account.role"))
-                            Spacer()
-                            Text(user.role.displayName(in: appState.locale.catalogLanguage))
-                                .foregroundColor(.secondary)
+                            Text(
+                                String(
+                                    format: LocaleStrings.localized("settings.account.role", in: appState.locale.catalogLanguage),
+                                    user.role.displayName(in: appState.locale.catalogLanguage)
+                                )
+                            )
                         }
                     }
                 }

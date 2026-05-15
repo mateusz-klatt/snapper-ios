@@ -45,4 +45,29 @@ final class LocaleStringsPluralTests: XCTestCase {
         )
         XCTAssertEqual(result, "negative.count.miss")
     }
+
+    /// ``home.heartbeatAge.seconds`` is wired live in
+    /// ``HomeView.connectionText(at:)``. Guard the compiled
+    /// ``.xcstrings`` plural path so a future catalog edit that drops
+    /// the EN ``other`` or PL ``many`` category surfaces here instead
+    /// of silently producing the wrong UI string.
+    func testHeartbeatPluralEnglishOther() {
+        let result = LocaleStrings.localizedPlural(
+            "home.heartbeatAge.seconds",
+            count: 5,
+            in: .en
+        )
+        XCTAssertNotEqual(result, "home.heartbeatAge.seconds")
+        XCTAssertTrue(result.contains("5"), "EN plural value should contain the count: \(result)")
+    }
+
+    func testHeartbeatPluralPolishMany() {
+        let result = LocaleStrings.localizedPlural(
+            "home.heartbeatAge.seconds",
+            count: 5,
+            in: .pl
+        )
+        XCTAssertNotEqual(result, "home.heartbeatAge.seconds")
+        XCTAssertTrue(result.contains("5"), "PL plural value should contain the count: \(result)")
+    }
 }

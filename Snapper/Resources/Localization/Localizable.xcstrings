@@ -2221,6 +2221,40 @@
         }
       }
     },
+    "orders.segment.recent": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Recent"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ostatnie"
+          }
+        }
+      }
+    },
+    "orders.segment.fills": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fills"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Realizacje"
+          }
+        }
+      }
+    },
     "positions.accessibility.hint.row": {
       "extractionState": "manual",
       "localizations": {

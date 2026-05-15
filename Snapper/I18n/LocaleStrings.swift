@@ -66,14 +66,15 @@ enum LocaleStrings {
 
     /// Look up a plural-variation catalog key with a count argument.
     ///
-    /// Uses ``String.localizedStringWithFormat(_:_:)`` against
-    /// ``NSLocalizedString(_:tableName:bundle:value:comment:)`` resolved
-    /// from the lproj path for ``language``. Xcode compiles the
-    /// ``Localizable.xcstrings`` plural variations into per-language
-    /// ``Localizable.stringsdict`` files; ``localizedStringWithFormat``
-    /// honors the bundle's stringsdict and selects the plural category
-    /// using the bundle's CLDR plural rules (EN ``one``/``other``,
-    /// PL ``one``/``few``/``many``).
+    /// Resolves the language-specific ``.stringsdict`` template via
+    /// ``NSLocalizedString(_:tableName:bundle:value:comment:)`` against
+    /// the lproj path for ``language``, then formats it with a
+    /// ``Locale``-scoped ``String(format:locale:_)`` call so the CLDR
+    /// plural rules of the LOOKUP language are honored — not the
+    /// process locale (Polish needs ``one``/``few``/``many`` even when
+    /// the system locale is English, otherwise the macro expansion
+    /// asks the bundle for an EN ``other`` entry that does not exist
+    /// in the PL stringsdict and returns ``(null)``).
     ///
     /// Falls back to the EN bundle when the requested language's
     /// resource path is missing; falls back to the key itself when the
@@ -82,7 +83,8 @@ enum LocaleStrings {
         let bundle = resolveBundle(for: language)
         let template = NSLocalizedString(key, tableName: nil, bundle: bundle, value: key, comment: "")
         if template == key { return key }
-        return String.localizedStringWithFormat(template, count)
+        let locale = Locale(identifier: language.rawValue)
+        return String(format: template, locale: locale, count)
     }
 
     /// Resolve a ``Bundle`` for ``language`` with the same fallback
