@@ -132,7 +132,7 @@ struct PositionsView: View {
             }
         } message: { position in
             Text(
-                "\(PositionCard.direction(for: position.quantity)) \(String(format: "%.4f", position.quantity)) @ \(String(format: "%.4f", position.averagePrice))"
+                "\(PositionCard.direction(for: position.quantity)) \(position.quantity.formattedDecimal(in: appState.locale, fractionDigits: 4)) @ \(position.averagePrice.formattedDecimal(in: appState.locale, fractionDigits: 4))"
             )
         }
         .alert(
@@ -151,7 +151,7 @@ struct PositionsView: View {
             }
         } message: { position in
             Text(
-                "Submits a reduce-only market order for \(String(format: "%.4f", abs(position.quantity))) \(position.instrument)."
+                "Submits a reduce-only market order for \(abs(position.quantity).formattedDecimal(in: appState.locale, fractionDigits: 4)) \(position.instrument)."
             )
         }
         .sheet(item: $reduceModalPosition) { wrapper in
@@ -210,6 +210,7 @@ struct ReducePositionView: View {
     let onSubmit: (Double) async -> Bool
 
     @Environment(\.dismiss) private var dismiss
+    @Environment(AppState.self) private var appState
     @State private var quantity: Double
     @State private var isSubmitting = false
 
@@ -234,13 +235,13 @@ struct ReducePositionView: View {
                         Text(position.instrument)
                             .font(.headline)
                         Spacer()
-                        Text("\(PositionCard.direction(for: position.quantity)) \(String(format: "%.4f", position.quantity))")
+                        Text("\(PositionCard.direction(for: position.quantity)) \(position.quantity.formattedDecimal(in: appState.locale, fractionDigits: 4))")
                             .foregroundStyle(.secondary)
                     }
                     HStack {
                         Text(LocalizedStringKey("common.averagePrice.label"))
                         Spacer()
-                        Text(String(format: "%.4f", position.averagePrice))
+                        Text(position.averagePrice.formattedDecimal(in: appState.locale, fractionDigits: 4))
                             .foregroundStyle(.secondary)
                     }
                 }
@@ -248,13 +249,13 @@ struct ReducePositionView: View {
                     HStack {
                         Text(LocalizedStringKey("positions.reduce.sizeLabel"))
                         Spacer()
-                        Text(String(format: "%.4f", quantity))
+                        Text(quantity.formattedDecimal(in: appState.locale, fractionDigits: 4))
                             .font(.body.monospaced())
                     }
                     Slider(value: $quantity, in: 0...maxQuantity)
                     HStack {
                         ForEach([0.25, 0.5, 0.75, 1.0], id: \.self) { ratio in
-                            Button(String(format: "%.0f%%", ratio * 100)) {
+                            Button(ratio.formattedPercent(in: appState.locale, fractionDigits: 0)) {
                                 quantity = maxQuantity * ratio
                             }
                             .buttonStyle(.bordered)
@@ -299,6 +300,8 @@ struct ReducePositionView: View {
 struct PositionCard: View {
     let position: PositionSnapshot
 
+    @Environment(AppState.self) private var appState
+
     var body: some View {
         HStack(spacing: 12) {
             VStack(alignment: .leading, spacing: 4) {
@@ -310,10 +313,13 @@ struct PositionCard: View {
             }
             Spacer()
             VStack(alignment: .trailing, spacing: 4) {
-                Text(String(format: "%.2f", position.unrealizedPnl))
+                Text(position.unrealizedPnl.formattedCurrency(in: appState.locale, code: "USD", fractionDigits: 2))
                     .font(.body.monospaced())
                     .foregroundStyle(position.unrealizedPnl >= 0 ? Color.profitGreen : Color.lossRed)
-                Text(String(format: "Avg %.4f", position.averagePrice))
+                Text(String(
+                    format: LocaleStrings.localized("positions.row.avgPrice", in: appState.locale.catalogLanguage),
+                    position.averagePrice.formattedDecimal(in: appState.locale, fractionDigits: 4)
+                ))
                     .font(.caption)
                     .foregroundStyle(.secondary)
             }
@@ -328,7 +334,7 @@ struct PositionCard: View {
     }
 
     private var directionLabel: String {
-        return "\(Self.direction(for: position.quantity)) · \(String(format: "%.4f", position.quantity))"
+        return "\(Self.direction(for: position.quantity)) · \(position.quantity.formattedDecimal(in: appState.locale, fractionDigits: 4))"
     }
 
     private var directionColor: Color {

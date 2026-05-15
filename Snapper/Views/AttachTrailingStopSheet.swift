@@ -18,6 +18,7 @@ struct AttachTrailingStopSheet: View {
     let onSubmit: (Double, Double?, String) async -> Bool
 
     @Environment(\.dismiss) private var dismiss
+    @Environment(AppState.self) private var appState
     @State private var viewModel = AttachTrailingStopSheetViewModel()
 
     var body: some View {
@@ -27,7 +28,7 @@ struct AttachTrailingStopSheet: View {
                     HStack {
                         Text(position.instrument).font(.headline)
                         Spacer()
-                        Text("\(PositionCard.direction(for: position.quantity)) \(String(format: "%.4f", position.quantity))")
+                        Text("\(PositionCard.direction(for: position.quantity)) \(position.quantity.formattedDecimal(in: appState.locale, fractionDigits: 4))")
                             .foregroundStyle(.secondary)
                     }
                 }

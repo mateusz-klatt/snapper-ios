@@ -317,7 +317,11 @@ struct HomeView: View {
                             .font(.subheadline)
                             .fontWeight(.medium)
 
-                        Text(String(format: "Qty: %.4f @ %.2f", position.quantity, position.averagePrice))
+                        Text(String(
+                            format: LocaleStrings.localized("home.position.qtyAtPrice", in: appState.locale.catalogLanguage),
+                            position.quantity.formattedDecimal(in: appState.locale, fractionDigits: 4),
+                            position.averagePrice.formattedDecimal(in: appState.locale, fractionDigits: 2)
+                        ))
                             .font(.caption)
                             .foregroundColor(.secondary)
                     }
@@ -325,7 +329,7 @@ struct HomeView: View {
                     Spacer()
 
                     VStack(alignment: .trailing, spacing: 4) {
-                        Text(String(format: "$%.2f", position.unrealizedPnl))
+                        Text(position.unrealizedPnl.formattedCurrency(in: appState.locale, code: "USD", fractionDigits: 2))
                             .font(.subheadline)
                             .foregroundColor(position.unrealizedPnl >= 0 ? .profitGreen : .lossRed)
 
@@ -355,7 +359,7 @@ struct HomeView: View {
                             .font(.subheadline)
                             .fontWeight(.medium)
 
-                        Text(String(format: "%@ %.4f", order.side.uppercased(), order.size))
+                        Text("\(order.side.uppercased()) \(order.size.formattedDecimal(in: appState.locale, fractionDigits: 4))")
                             .font(.caption)
                             .foregroundColor(.secondary)
                     }
