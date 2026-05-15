@@ -53,7 +53,7 @@ struct MarketSelectorBar: View {
                 .disabled(vm.instruments.isEmpty)
             }
 
-            Picker("Timeframe", selection: Binding(
+            Picker(LocalizedStringKey("market.data.timeframe.label"), selection: Binding(
                 get: { vm.selectedTimeframe },
                 set: { tf in Task { await vm.selectTimeframe(tf) } }
             )) {

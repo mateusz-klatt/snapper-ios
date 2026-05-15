@@ -36,7 +36,7 @@ struct OrdersView: View {
             VStack(spacing: 0) {
                 Picker("Segment", selection: $segment) {
                     ForEach(OrdersSegment.allCases) { seg in
-                        Text(seg.title).tag(seg)
+                        Text(LocalizedStringKey(seg.titleKey)).tag(seg)
                     }
                 }
                 .pickerStyle(.segmented)
@@ -88,7 +88,7 @@ struct OrdersView: View {
                                             Button(role: .destructive) {
                                                 pendingCancelOrder = order
                                             } label: {
-                                                Label("Cancel", systemImage: "xmark.circle")
+                                                Label(LocalizedStringKey("orders.row.swipeCancel"), systemImage: "xmark.circle")
                                             }
                                             .disabled(order.planPublicId == nil)
                                         }
@@ -112,7 +112,7 @@ struct OrdersView: View {
                 .background(Color.bgBase)
                 .refreshable { await viewModel?.load() }
             }
-            .navigationTitle("Orders")
+            .navigationTitle(LocalizedStringKey("orders.navTitle"))
             .toolbar {
                 if authService.hasPermission(.createOrders) {
                     ToolbarItem(placement: .topBarTrailing) {
@@ -208,6 +208,18 @@ enum OrdersSegment: String, CaseIterable, Identifiable {
         case .open: return "Open"
         case .recent: return "Recent"
         case .fills: return "Fills"
+        }
+    }
+
+    /// Catalog key for the segment title — drives the Picker's
+    /// localized rendering via ``LocalizedStringKey``. Keep parallel
+    /// to ``title`` until the raw-string ``title`` callers are
+    /// migrated.
+    var titleKey: String {
+        switch self {
+        case .open: return "orders.segment.open"
+        case .recent: return "orders.segment.all"
+        case .fills: return "orders.segment.history"
         }
     }
 }

@@ -48,11 +48,11 @@ struct InstrumentPickerSheet: View {
                 }
             }
             .searchable(text: $query, prompt: "Search instruments")
-            .navigationTitle("Select instrument")
+            .navigationTitle(LocalizedStringKey("market.data.instrumentPicker.title"))
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button("Cancel") { dismiss() }
+                    Button(LocalizedStringKey("trading.order.cancel")) { dismiss() }
                 }
             }
         }

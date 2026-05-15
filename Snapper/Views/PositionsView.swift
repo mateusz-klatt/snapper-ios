@@ -44,7 +44,7 @@ struct PositionsView: View {
                             description: Text(loadError.localizedDescription)
                         )
                         .overlay(alignment: .bottom) {
-                            Button("Retry") {
+                            Button(LocalizedStringKey("common.retry")) {
                                 Task { await viewModel.load() }
                             }
                             .buttonStyle(.borderedProminent)
@@ -52,9 +52,9 @@ struct PositionsView: View {
                         }
                     } else if viewModel.filteredPositions.isEmpty {
                         ContentUnavailableView(
-                            "No positions",
+                            LocalizedStringKey("positions.empty.title"),
                             systemImage: "chart.line.flattrend.xyaxis",
-                            description: Text("Open positions will appear here.")
+                            description: Text(LocalizedStringKey("positions.empty.message"))
                         )
                     } else {
                         List(viewModel.filteredPositions, id: \.publicId) { position in
@@ -76,7 +76,7 @@ struct PositionsView: View {
                     }
                 }
             }
-            .navigationTitle("Positions")
+            .navigationTitle(LocalizedStringKey("positions.navTitle"))
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
                     WalletPicker()
@@ -109,10 +109,10 @@ struct PositionsView: View {
         ) { position in
             if authService.hasPermission(.managePositions) {
                 if PositionsViewModel.canSubmitReduce(position: position) {
-                    Button("Close position", role: .destructive) {
+                    Button(LocalizedStringKey("positions.row.actions.close"), role: .destructive) {
                         pendingClosePosition = position
                     }
-                    Button("Reduce position") {
+                    Button(LocalizedStringKey("positions.row.actions.reduce")) {
                         reduceModalPosition = IdentifiedPosition(position: position)
                     }
                 }
@@ -125,7 +125,7 @@ struct PositionsView: View {
                     }
                 }
             }
-            Button("Cancel", role: .cancel) {
+            Button(LocalizedStringKey("positions.reduce.cancel"), role: .cancel) {
                 actionSheetPosition = nil
             }
         } message: { position in
@@ -141,10 +141,10 @@ struct PositionsView: View {
             ),
             presenting: pendingClosePosition
         ) { position in
-            Button("Close", role: .destructive) {
+            Button(LocalizedStringKey("positions.row.actions.close"), role: .destructive) {
                 Task { await viewModel?.submitMarketReduce(position: position, quantity: abs(position.quantity)) }
             }
-            Button("Cancel", role: .cancel) {
+            Button(LocalizedStringKey("positions.reduce.cancel"), role: .cancel) {
                 pendingClosePosition = nil
             }
         } message: { position in
@@ -244,7 +244,7 @@ struct ReducePositionView: View {
                 }
                 Section {
                     HStack {
-                        Text("Reduce by")
+                        Text(LocalizedStringKey("positions.reduce.sizeLabel"))
                         Spacer()
                         Text(String(format: "%.4f", quantity))
                             .font(.body.monospaced())
@@ -265,14 +265,14 @@ struct ReducePositionView: View {
                     Text("100% closes the position. Submits a reduce-only market order against the opposite side.")
                 }
             }
-            .navigationTitle("Reduce position")
+            .navigationTitle(LocalizedStringKey("positions.reduce.title"))
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button("Cancel") { dismiss() }
+                    Button(LocalizedStringKey("positions.reduce.cancel")) { dismiss() }
                 }
                 ToolbarItem(placement: .confirmationAction) {
-                    Button("Submit") {
+                    Button(LocalizedStringKey("positions.reduce.confirm")) {
                         Task {
                             isSubmitting = true
                             let succeeded = await onSubmit(quantity)

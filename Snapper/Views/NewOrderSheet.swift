@@ -62,7 +62,7 @@ struct NewOrderSheet: View {
                             Text(exchange).tag(exchange)
                         }
                     }
-                    Picker("Instrument", selection: Binding(
+                    Picker(LocalizedStringKey("trading.order.instrumentLabel"), selection: Binding(
                         get: { viewModel.selectedInstrument?.instrumentPublicId ?? "" },
                         set: { newId in
                             viewModel.selectedInstrument = viewModel.availableInstruments.first {
@@ -79,20 +79,20 @@ struct NewOrderSheet: View {
                 }
 
                 Section("Order") {
-                    Picker("Side", selection: $viewModel.side) {
-                        Text("Buy").tag("buy")
-                        Text("Sell").tag("sell")
+                    Picker(LocalizedStringKey("trading.order.sideLabel"), selection: $viewModel.side) {
+                        Text(LocalizedStringKey("trading.side.buy")).tag("buy")
+                        Text(LocalizedStringKey("trading.side.sell")).tag("sell")
                     }
                     .pickerStyle(.segmented)
 
-                    Picker("Type", selection: $viewModel.orderType) {
+                    Picker(LocalizedStringKey("trading.order.orderTypeLabel"), selection: $viewModel.orderType) {
                         ForEach(NewOrderSheetViewModel.orderTypes, id: \.self) { type in
                             Text(NewOrderSheetViewModel.displayName(forOrderType: type)).tag(type)
                         }
                     }
 
                     HStack {
-                        Text("Quantity")
+                        Text(LocalizedStringKey("trading.order.quantityLabel"))
                         Spacer()
                         TextField("0.0", text: $viewModel.quantityText)
                             .keyboardType(.decimalPad)
@@ -102,7 +102,7 @@ struct NewOrderSheet: View {
 
                     if viewModel.needsPrice {
                         HStack {
-                            Text("Price")
+                            Text(LocalizedStringKey("trading.order.priceLabel"))
                             Spacer()
                             TextField("0.0", text: $viewModel.priceText)
                                 .keyboardType(.decimalPad)
@@ -113,7 +113,7 @@ struct NewOrderSheet: View {
 
                     if viewModel.needsStopPrice {
                         HStack {
-                            Text("Stop price")
+                            Text(LocalizedStringKey("trading.order.stopPriceLabel"))
                             Spacer()
                             TextField("0.0", text: $viewModel.stopPriceText)
                                 .keyboardType(.decimalPad)
@@ -132,17 +132,17 @@ struct NewOrderSheet: View {
                             .multilineTextAlignment(.trailing)
                             .frame(minWidth: 80)
                     }
-                    Toggle("Reduce-only", isOn: $viewModel.reduceOnly)
+                    Toggle(LocalizedStringKey("trading.order.reduceOnlyLabel"), isOn: $viewModel.reduceOnly)
                 }
             }
-            .navigationTitle("New order")
+            .navigationTitle(LocalizedStringKey("trading.order.title"))
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button("Cancel") { dismiss() }
+                    Button(LocalizedStringKey("trading.order.cancel")) { dismiss() }
                 }
                 ToolbarItem(placement: .confirmationAction) {
-                    Button("Submit") {
+                    Button(LocalizedStringKey("trading.order.submit")) {
                         Task {
                             /// Keep the sheet open on failure so the user can correct
                             /// input and retry under the same idempotency key.

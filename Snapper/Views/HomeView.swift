@@ -39,10 +39,10 @@ struct HomeView: View {
                     if let status = systemStatus {
                         systemStatusView(status: status)
                     } else if isLoading {
-                        ProgressView("Loading status...")
+                        ProgressView(LocalizedStringKey("home.refreshing"))
                             .padding()
                     } else if let error = errorMessage {
-                        Text("Error: \(error)")
+                        Text(String(format: LocaleStrings.localized("home.error.loadFailed", in: appState.locale.catalogLanguage), error))
                             .foregroundColor(.red)
                             .padding()
                     }
@@ -58,7 +58,7 @@ struct HomeView: View {
                 .padding()
             }
             .background(Color.bgBase)
-            .navigationTitle("Home")
+            .navigationTitle(LocalizedStringKey("tabs.home"))
             .refreshable {
                 await loadData()
                 await loadLatestAlert()
@@ -229,23 +229,22 @@ struct HomeView: View {
     }
 
     private func connectionText(at now: Date) -> String {
+        let language = appState.locale.catalogLanguage
         switch webSocketManager.connectionState {
         case .connected:
+            let connectedLabel = webSocketManager.connectionState.displayName(in: language)
             if let last = webSocketManager.state.lastHeartbeatAt {
                 let age = Int(now.timeIntervalSince(last))
-                return "Connected · last heartbeat \(age)s ago"
+                let heartbeat = LocaleStrings.localizedPlural(
+                    "home.heartbeatAge.seconds",
+                    count: age,
+                    in: language
+                )
+                return "\(connectedLabel) · \(heartbeat)"
             }
-            return "Connected · waiting for heartbeat"
-        case .connecting:
-            return "Connecting..."
-        case .authenticating:
-            return "Authenticating..."
-        case .disconnected:
-            return "Disconnected"
-        case .error(let message):
-            return "Error: \(message)"
-        case .authFailed(let message):
-            return "Auth failed: \(message)"
+            return connectedLabel
+        default:
+            return webSocketManager.connectionState.displayName(in: language)
         }
     }
 
@@ -278,7 +277,10 @@ struct HomeView: View {
             Divider()
 
             LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 16) {
-                statView(title: "Open Positions", value: "\(filteredPositions.count)")
+                statView(
+                    title: LocaleStrings.localized("home.section.openPositions", in: appState.locale.catalogLanguage),
+                    value: "\(filteredPositions.count)"
+                )
                 statView(title: "Active Orders", value: "\(filteredActiveOrders.count)")
             }
         }
@@ -302,7 +304,7 @@ struct HomeView: View {
 
     private var positionsView: some View {
         VStack(alignment: .leading, spacing: 12) {
-            Text("Open Positions")
+            Text(LocalizedStringKey("home.section.openPositions"))
                 .font(.headline)
 
             ForEach(filteredPositions, id: \.id) { position in
@@ -340,7 +342,7 @@ struct HomeView: View {
 
     private var recentOrdersView: some View {
         VStack(alignment: .leading, spacing: 12) {
-            Text("Recent Orders")
+            Text(LocalizedStringKey("home.section.recentOrders"))
                 .font(.headline)
 
             ForEach(filteredOrders.prefix(5), id: \.id) { order in

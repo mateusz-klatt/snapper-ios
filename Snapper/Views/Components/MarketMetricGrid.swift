@@ -17,17 +17,17 @@ struct MarketMetricGrid: View {
                 delta: nil
             )
             MarketMetricCard(
-                label: "24h change",
+                label: "market.data.metric.change24h",
                 value: formatPercent(metrics.changePct24h),
                 delta: metrics.changePct24h
             )
             MarketMetricCard(
-                label: "24h high",
+                label: "market.data.metric.high",
                 value: formatPrice(metrics.high24h),
                 delta: nil
             )
             MarketMetricCard(
-                label: "24h low",
+                label: "market.data.metric.low",
                 value: formatPrice(metrics.low24h),
                 delta: nil
             )
@@ -83,7 +83,7 @@ struct MarketMetricCard: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 4) {
-            Text(label)
+            Text(LocalizedStringKey(label))
                 .font(.caption)
                 .foregroundColor(.textSecondary)
             Text(value)

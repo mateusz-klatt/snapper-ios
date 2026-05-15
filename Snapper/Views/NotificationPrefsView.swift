@@ -47,7 +47,7 @@ struct NotificationPrefsView: View {
                     )
                 }
             } header: {
-                Text("User defaults")
+                Text(LocalizedStringKey("notifications.prefs.section.userDefaults"))
             } footer: {
                 Text(
                     "Defaults apply when no per-device override matches an inbound alert."
@@ -65,7 +65,7 @@ struct NotificationPrefsView: View {
                     )
                 } else {
                     if viewModel.devicePrefs.isEmpty {
-                        Text("No overrides yet — defaults apply to every alert.")
+                        Text(LocalizedStringKey("notifications.prefs.empty.message"))
                             .font(.caption)
                             .foregroundStyle(.secondary)
                     } else {
@@ -94,10 +94,10 @@ struct NotificationPrefsView: View {
                     .disabled(viewModel.devicePublicId == nil)
                 }
             } header: {
-                Text("Device overrides")
+                Text(LocalizedStringKey("notifications.prefs.section.deviceOverrides"))
             }
         }
-        .navigationTitle("Notification preferences")
+        .navigationTitle(LocalizedStringKey("notifications.prefs.navTitle"))
         .navigationBarTitleDisplayMode(.inline)
         .task {
             await viewModel.load()
@@ -157,7 +157,7 @@ private struct AlertDefaultRow: View {
                     ProgressView().controlSize(.small)
                 }
             }
-            Toggle("Enabled", isOn: $enabled)
+            Toggle(LocalizedStringKey("notifications.prefs.row.enabled"), isOn: $enabled)
                 .disabled(isInflight || localInflight)
                 .onChange(of: enabled) { oldValue, newValue in
                     let baseline = existing?.enabled ?? true
@@ -172,7 +172,7 @@ private struct AlertDefaultRow: View {
                         }
                     }
                 }
-            Picker("Minimum priority", selection: $minPriority) {
+            Picker(LocalizedStringKey("notifications.prefs.row.minPriority"), selection: $minPriority) {
                 ForEach(NotificationPrefsViewModel.priorityValues, id: \.self) { priority in
                     Text(NotificationPrefsViewModel.priorityDisplayName(for: priority)).tag(priority)
                 }

@@ -16,12 +16,12 @@ struct MarketDataView: View {
             if let vm {
                 content(vm: vm)
             } else {
-                ProgressView("Loading market data…")
+                ProgressView(LocalizedStringKey("market.data.loading"))
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
                     .background(Color.bgBase)
             }
         }
-        .navigationTitle("Market data")
+        .navigationTitle(LocalizedStringKey("market.data.navTitle"))
         .navigationBarTitleDisplayMode(.inline)
         .task {
             if vm == nil {
