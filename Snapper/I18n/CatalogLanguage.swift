@@ -13,8 +13,12 @@ import Foundation
 /// follows the regional convention, but the catalog falls back to
 /// English when the country code does not map to a translated language.
 ///
-/// Batch-1 rollout (2026-05-15) adds 15 European languages:
+/// Batch-1 (2026-05-15) added 15 European languages:
 /// de, fr, es, it, nl, pt-BR, sv, nb, da, fi, cs, sk, hu, ro, hr.
+///
+/// Batch-2 (2026-05-15) adds 15 more: uk, ru, lt, lv, sr-Latn, bs,
+/// sq, is, el, tr, fil, ms, id, sw, bn — covering Slavic East, Baltic,
+/// Balkan, Anatolian, Maritime SE-Asia, East Africa, and Indic regions.
 enum CatalogLanguage: String, CaseIterable, Codable, Sendable {
     case en
     case pl
@@ -33,4 +37,19 @@ enum CatalogLanguage: String, CaseIterable, Codable, Sendable {
     case hu
     case ro
     case hr
+    case uk
+    case ru
+    case lt
+    case lv
+    case srLatn = "sr-Latn"
+    case bs
+    case sq
+    case `is`
+    case el
+    case tr
+    case fil
+    case ms
+    case id
+    case sw
+    case bn
 }
