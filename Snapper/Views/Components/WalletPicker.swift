@@ -26,9 +26,9 @@ struct WalletPicker: View {
         Menu {
             if let viewModel {
                 if viewModel.shouldShowLoadError, let loadError = viewModel.loadError {
-                    Text("Couldn't load wallets")
+                    Text(LocalizedStringKey("wallet.error.loadFailed"))
                     Text(loadError.localizedDescription)
-                    Button("Retry") {
+                    Button(LocalizedStringKey("common.retry")) {
                         Task { await viewModel.loadWallets() }
                     }
                 } else {

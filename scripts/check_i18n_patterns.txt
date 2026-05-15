@@ -1,0 +1,40 @@
+# Multi-pattern lint for ios-i18n-check (v2 — Phase H).
+# Each non-comment line is one ripgrep pattern executed against
+# ios/Snapper/Views, ios/Snapper/Views/Components, ios/Snapper/ViewModels.
+# Patterns target user-visible string literals that must be routed
+# through the catalog. Hits are filtered against check_i18n_allowlist.txt.
+
+# v1 LOCKED — bare String(localized:) doesn't switch lookup on iOS 26.2
+String\(localized:\s*"[^"\\]+"
+
+# Single-arg SwiftUI APIs (first-arg literal). rg -U covers multi-line.
+Text\(\s*"[^"\\]+"
+Label\(\s*"[^"\\]+"
+Button\(\s*"[^"\\]+"
+Picker\(\s*"[^"\\]+"
+Section\(\s*"[^"\\]+"
+Toggle\(\s*"[^"\\]+"
+Stepper\(\s*"[^"\\]+"
+Menu\(\s*"[^"\\]+"
+NavigationLink\(\s*"[^"\\]+"
+ProgressView\(\s*"[^"\\]+"
+ContentUnavailableView\(\s*"[^"\\]+"
+TextField\(\s*"[^"\\]+"
+SecureField\(\s*"[^"\\]+"
+DatePicker\(\s*"[^"\\]+"
+
+# Modifier-based string APIs (single-line typical).
+\.navigationTitle\(\s*"[^"\\]+"
+\.navigationBarTitle\(\s*"[^"\\]+"
+\.alert\(\s*"[^"\\]+"
+\.confirmationDialog\(\s*"[^"\\]+"
+
+# Kwarg-position-independent (catch text: first, prompt: second).
+\.searchable\([^)]*?prompt:\s*"[^"\\]+"
+\.alert\([^)]*?title:\s*"[^"\\]+"
+
+# Format-string templates producing user-facing strings.
+Text\(\s*String\(\s*format:\s*"[^"\\]+"
+
+# Interpolation-leading templates: Text("\(value) suffix").
+Text\(\s*"\\\\\(

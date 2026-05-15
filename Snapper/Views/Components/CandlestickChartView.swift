@@ -19,6 +19,9 @@ struct CandlestickChartView: View {
     /// switch keeps the axis legible across the supported set.
     var timeframe: MarketTimeframe = .oneHour
 
+    @Environment(AppState.self) private var appState
+    @Environment(\.layoutDirection) private var layoutDirection
+
     var body: some View {
         if candles.isEmpty {
             VStack(spacing: 8) {
@@ -49,6 +52,18 @@ struct CandlestickChartView: View {
         case .oneDay:
             return .dateTime.month(.abbreviated).day()
         }
+    }
+
+    /// Position the y-axis on the leading edge under RTL locales /
+    /// environment layout, trailing edge otherwise. Honors both the
+    /// ``AppLocale.isRTL`` set (UAE/IL/IR) and the SwiftUI
+    /// ``\.layoutDirection`` env so RTL accessibility traits and
+    /// preview overrides flip the axis correctly.
+    private var yAxisPosition: AxisMarkPosition {
+        return ChartRTLBehavior.yAxisEdge(
+            locale: appState.locale,
+            environmentLayout: layoutDirection
+        ) == .leading ? .leading : .trailing
     }
 
     /// Compute a tight Y-axis range from the actual candle highs
@@ -103,7 +118,10 @@ struct CandlestickChartView: View {
             }
         }
         .chartYAxis {
-            AxisMarks(values: .automatic(desiredCount: 5)) { _ in
+            AxisMarks(
+                position: yAxisPosition,
+                values: .automatic(desiredCount: 5)
+            ) { _ in
                 AxisGridLine().foregroundStyle(Color.chartGrid)
                 AxisValueLabel().foregroundStyle(Color.textSecondary)
             }

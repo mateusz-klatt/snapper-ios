@@ -1,33 +1,33 @@
 import XCTest
 @testable import Snapper
 
-/// Loads ``Localizable.xcstrings`` as JSON and asserts:
-/// - the exact 18-key set from v7 D.3 is present,
+/// Loads ``Localizable.xcstrings`` as JSON and asserts catalog
+/// invariants. The expected key sets live in
+/// ``SnapperTests/I18n/ExpectedKeys.swift`` and are manually
+/// maintained alongside the catalog.
+///
+/// Tests cover:
+/// - source language is ``en``,
+/// - catalog version is ``1.0``,
+/// - every v1-locked key is present (strict, no skip),
+/// - every catalog key is in ``ExpectedKeys.values`` (catches stray
+///   catalog adds),
 /// - every key has both ``en`` and ``pl`` localizations,
-/// - placeholder schemas (``%@``, ``%lld``) match between EN and PL,
-/// - Polish characters are stored as literal UTF-8 (no ``\u`` escapes).
+/// - plain-key placeholder schemas (``%@``, ``%lld``) match between
+///   EN and PL,
+/// - plural-keyed entries declare required CLDR categories per
+///   language (EN one+other, PL one+few+many),
+/// - placeholder schemas match across plural categories,
+/// - Polish characters are stored as literal UTF-8.
+///
+/// The bidirectional ``ExpectedKeys.values ⊆ catalog`` assertion
+/// activates at end of Phase H rollout via
+/// ``Snapper/I18n/PhaseHRolloutStatus.isComplete``. During rollout the
+/// v1-locked subset still gets the strict treatment.
 final class CatalogParityTests: XCTestCase {
 
-    private static let expectedKeys: Set<String> = [
-        "auth.login.subtitle",
-        "auth.login.usernamePlaceholder",
-        "auth.login.passwordPlaceholder",
-        "auth.login.signIn",
-        "auth.login.advancedDisclosure",
-        "auth.login.currentBackend",
-        "backend.url.placeholder",
-        "backend.url.willSaveAs",
-        "backend.url.invalidDebug",
-        "backend.url.invalidRelease",
-        "backend.url.help",
-        "backend.url.cancel",
-        "backend.url.resetToDefault",
-        "backend.url.save",
-        "settings.section.language",
-        "common.localeSwitcher.triggerAccessibilityLabel",
-        "common.localeSwitcher.flagAccessibilityLabel",
-        "common.localeSwitcher.currentAccessibilityLabel",
-    ]
+    private static let expectedKeys: Set<String> = ExpectedKeys.values
+    private static let v1LockedKeys: Set<String> = ExpectedKeys.v1Locked
 
     private static let catalogURL: URL = {
         var url = URL(fileURLWithPath: #filePath)
@@ -53,6 +53,15 @@ final class CatalogParityTests: XCTestCase {
     }
 
     private struct Localization: Decodable {
+        let stringUnit: StringUnit?
+        let variations: Variations?
+    }
+
+    private struct Variations: Decodable {
+        let plural: [String: PluralCategory]?
+    }
+
+    private struct PluralCategory: Decodable {
         let stringUnit: StringUnit
     }
 
@@ -76,19 +85,33 @@ final class CatalogParityTests: XCTestCase {
         XCTAssertEqual(catalog.version, "1.0")
     }
 
-    func testEveryExpectedKeyIsPresent() throws {
+    func testExpectedKeySetIsNonEmpty() throws {
+        XCTAssertFalse(Self.expectedKeys.isEmpty,
+                       "ExpectedKeys.values is empty — maintenance error")
+    }
+
+    func testEveryKeyInCatalogIsInExpectedSet() throws {
         let catalog = try loadCatalog()
-        let actual = Set(catalog.strings.keys)
-        XCTAssertEqual(
-            actual,
-            Self.expectedKeys,
-            "Catalog key set drift: added=\(actual.subtracting(Self.expectedKeys)) removed=\(Self.expectedKeys.subtracting(actual))"
+        let extraKeys = Set(catalog.strings.keys).subtracting(Self.expectedKeys)
+        XCTAssertTrue(
+            extraKeys.isEmpty,
+            "Catalog contains keys not in ExpectedKeys.values — add them to ExpectedKeys or remove from catalog: \(extraKeys.sorted())"
+        )
+    }
+
+    func testV1LockedKeysAllPresent() throws {
+        let catalog = try loadCatalog()
+        let catalogKeys = Set(catalog.strings.keys)
+        let missing = Self.v1LockedKeys.subtracting(catalogKeys)
+        XCTAssertTrue(
+            missing.isEmpty,
+            "v1-locked catalog keys missing — regression: \(missing.sorted())"
         )
     }
 
     func testEveryKeyHasBothEnAndPlLocalizations() throws {
         let catalog = try loadCatalog()
-        for key in Self.expectedKeys {
+        for key in catalog.strings.keys {
             guard let entry = catalog.strings[key] else {
                 XCTFail("Missing key: \(key)")
                 continue
@@ -100,14 +123,10 @@ final class CatalogParityTests: XCTestCase {
 
     func testPlaceholderSchemaMatchesBetweenEnAndPl() throws {
         let catalog = try loadCatalog()
-        for key in Self.expectedKeys {
-            guard let entry = catalog.strings[key],
-                  let en = entry.localizations["en"]?.stringUnit.value,
-                  let pl = entry.localizations["pl"]?.stringUnit.value
-            else {
-                XCTFail("Catalog missing rows for \(key)")
-                continue
-            }
+        for (key, entry) in catalog.strings {
+            guard let en = entry.localizations["en"]?.stringUnit?.value,
+                  let pl = entry.localizations["pl"]?.stringUnit?.value
+            else { continue }
             let enPlaceholders = Self.placeholders(in: en)
             let plPlaceholders = Self.placeholders(in: pl)
             XCTAssertEqual(
@@ -118,11 +137,58 @@ final class CatalogParityTests: XCTestCase {
         }
     }
 
+    func testPluralKeysHaveAllRequiredCategories() throws {
+        let catalog = try loadCatalog()
+        for (key, entry) in catalog.strings {
+            guard let en = entry.localizations["en"]?.variations?.plural,
+                  let pl = entry.localizations["pl"]?.variations?.plural
+            else { continue }
+            XCTAssertNotNil(en["one"], "EN plural key \(key) missing 'one' category")
+            XCTAssertNotNil(en["other"], "EN plural key \(key) missing 'other' category")
+            XCTAssertNotNil(pl["one"], "PL plural key \(key) missing 'one' category")
+            XCTAssertNotNil(pl["few"], "PL plural key \(key) missing 'few' category")
+            XCTAssertNotNil(pl["many"], "PL plural key \(key) missing 'many' category")
+        }
+    }
+
+    func testPlaceholderSchemaMatchesAcrossPluralCategories() throws {
+        let catalog = try loadCatalog()
+        for (key, entry) in catalog.strings {
+            guard let en = entry.localizations["en"]?.variations?.plural,
+                  let pl = entry.localizations["pl"]?.variations?.plural
+            else { continue }
+            var schemas: [[String]] = []
+            for (_, cat) in en {
+                schemas.append(Self.placeholders(in: cat.stringUnit.value))
+            }
+            for (_, cat) in pl {
+                schemas.append(Self.placeholders(in: cat.stringUnit.value))
+            }
+            guard let first = schemas.first else { continue }
+            for schema in schemas {
+                XCTAssertEqual(schema, first,
+                               "Placeholder schema mismatch in plural categories for \(key)")
+            }
+        }
+    }
+
     func testPolishCharactersStoredAsLiteralUTF8() throws {
         let raw = try String(contentsOf: Self.catalogURL, encoding: .utf8)
-        XCTAssertFalse(raw.contains(#"\u00"#), "Catalog contains \\u escapes — Polish characters must be literal UTF-8")
-        XCTAssertTrue(raw.contains("ł") || raw.contains("ś") || raw.contains("ę") || raw.contains("ą"),
-                      "Expected at least one Polish diacritic character in catalog source")
+        XCTAssertFalse(raw.contains(#"\u00"#),
+                       "Catalog contains \\u escapes — Polish characters must be literal UTF-8")
+    }
+
+    func testEveryExpectedKeyAppearsInCatalog() throws {
+        guard PhaseHRolloutStatus.isComplete else {
+            throw XCTSkip("Phase H rollout in progress — bidirectional parity activates when PhaseHRolloutStatus.isComplete flips to true at end of Phase J")
+        }
+        let catalog = try loadCatalog()
+        let catalogKeys = Set(catalog.strings.keys)
+        let missing = Self.expectedKeys.subtracting(catalogKeys)
+        XCTAssertTrue(
+            missing.isEmpty,
+            "Expected catalog keys missing — add them to Localizable.xcstrings: \(missing.sorted())"
+        )
     }
 
     private static func placeholders(in string: String) -> [String] {

@@ -68,7 +68,7 @@ final class AuthServiceNetworkTests: XCTestCase {
 
         await MainActor.run {
             XCTAssertTrue(authService.isAuthenticated)
-            XCTAssertNil(authService.errorMessage)
+            XCTAssertNil(authService.error)
             XCTAssertEqual(authService.currentUser?.username, "testuser")
         }
     }
@@ -93,7 +93,7 @@ final class AuthServiceNetworkTests: XCTestCase {
 
         await MainActor.run {
             XCTAssertFalse(authService.isAuthenticated)
-            XCTAssertEqual(authService.errorMessage, "Invalid credentials")
+            XCTAssertEqual(authService.error, .serverDetail("Invalid credentials"))
             XCTAssertNil(authService.currentUser)
         }
     }
@@ -108,8 +108,11 @@ final class AuthServiceNetworkTests: XCTestCase {
 
         await MainActor.run {
             XCTAssertFalse(authService.isAuthenticated)
-            XCTAssertNotNil(authService.errorMessage)
-            XCTAssertTrue(authService.errorMessage?.contains("Network") ?? false)
+            if case .network = authService.error {
+                /// network case carries underlying error description.
+            } else {
+                XCTFail("Expected .network LoginViewError case, got \(String(describing: authService.error))")
+            }
         }
     }
 
@@ -133,7 +136,7 @@ final class AuthServiceNetworkTests: XCTestCase {
 
         await MainActor.run {
             XCTAssertFalse(authService.isAuthenticated)
-            XCTAssertEqual(authService.errorMessage, "Internal server error")
+            XCTAssertEqual(authService.error, .serverDetail("Internal server error"))
         }
     }
 
@@ -152,7 +155,7 @@ final class AuthServiceNetworkTests: XCTestCase {
         await authService.login(username: "testuser", password: "testpass")
 
         XCTAssertFalse(authService.isAuthenticated)
-        XCTAssertEqual(authService.errorMessage, "Login failed")
+        XCTAssertEqual(authService.error, .loginFailed)
     }
 
     func testLoginNonHTTPResponseSetsInvalidResponse() async {
@@ -163,7 +166,7 @@ final class AuthServiceNetworkTests: XCTestCase {
         await service.login(username: "testuser", password: "testpass")
 
         XCTAssertFalse(service.isAuthenticated)
-        XCTAssertEqual(service.errorMessage, "Invalid response")
+        XCTAssertEqual(service.error, .invalidResponse)
     }
 
     func testLoginInvalidBaseURLSetsInvalidURL() async {
@@ -175,7 +178,7 @@ final class AuthServiceNetworkTests: XCTestCase {
         await service.login(username: "testuser", password: "testpass")
 
         XCTAssertFalse(service.isAuthenticated)
-        XCTAssertEqual(service.errorMessage, "Invalid URL")
+        XCTAssertEqual(service.error, .invalidURL)
     }
 
     func testLogoutNetworkFailureStillClearsLocalState() async {

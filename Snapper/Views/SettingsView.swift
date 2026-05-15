@@ -29,7 +29,7 @@ struct SettingsView: View {
                     Text(LocalizedStringKey("settings.section.language"))
                 }
 
-                Section("Account") {
+                Section(LocalizedStringKey("settings.section.account")) {
                     if let user = authService.currentUser {
                         HStack {
                             Text("Username")
@@ -48,36 +48,38 @@ struct SettingsView: View {
                         }
 
                         HStack {
-                            Text("Role")
-                            Spacer()
-                            Text(user.role.rawValue.capitalized)
-                                .foregroundColor(.secondary)
+                            Text(
+                                String(
+                                    format: LocaleStrings.localized("settings.account.role", in: appState.locale.catalogLanguage),
+                                    user.role.displayName(in: appState.locale.catalogLanguage)
+                                )
+                            )
                         }
                     }
                 }
 
-                Section("Connection") {
+                Section(LocalizedStringKey("settings.section.connection")) {
                     HStack {
-                        Text("WebSocket Status")
+                        Text(LocalizedStringKey("settings.connection.status"))
                         Spacer()
                         connectionStatusView
                     }
 
                     HStack {
-                        Text("Backend URL")
+                        Text(LocalizedStringKey("settings.connection.backend"))
                         Spacer()
                         Text(displayedBackendURL)
                             .font(.caption)
                             .foregroundColor(.secondary)
                     }
 
-                    Button("Change backend…") {
+                    Button(LocalizedStringKey("settings.connection.changeBackend")) {
                         showingBackendChangeAlert = true
                     }
                     .disabled(isSwitchingBackend)
                 }
 
-                Section("Notifications") {
+                Section(LocalizedStringKey("settings.section.notifications")) {
                     HStack {
                         Text("Permission")
                         Spacer()
@@ -112,21 +114,21 @@ struct SettingsView: View {
                         .disabled(isRetrying)
                     }
 
-                    NavigationLink("Manage preferences") {
+                    NavigationLink(LocalizedStringKey("settings.notifications.managePreferences")) {
                         NotificationPrefsView()
                     }
                 }
 
-                Section("App Information") {
+                Section(LocalizedStringKey("settings.section.appInfo")) {
                     HStack {
-                        Text("Version")
+                        Text(LocalizedStringKey("settings.appInfo.version"))
                         Spacer()
                         Text(Bundle.main.appVersion)
                             .foregroundColor(.secondary)
                     }
 
                     HStack {
-                        Text("Build")
+                        Text(LocalizedStringKey("settings.appInfo.build"))
                         Spacer()
                         Text(Bundle.main.buildVersion)
                             .foregroundColor(.secondary)
@@ -137,13 +139,15 @@ struct SettingsView: View {
                     Button(role: .destructive, action: { showingLogoutAlert = true }) {
                         HStack {
                             Spacer()
-                            Text("Logout")
+                            Text(LocalizedStringKey("settings.logout.button"))
                             Spacer()
                         }
                     }
+                    .accessibilityLabel(LocalizedStringKey("settings.accessibility.label.logoutButton"))
+                    .accessibilityHint(LocalizedStringKey("settings.accessibility.hint.logoutButton"))
                 }
             }
-            .navigationTitle("Settings")
+            .navigationTitle(LocalizedStringKey("tabs.settings"))
             .scrollContentBackground(.hidden)
             .background(Color.bgBase)
             .task {
@@ -151,9 +155,9 @@ struct SettingsView: View {
                 await refreshDeviceState()
             }
         }
-        .alert("Logout", isPresented: $showingLogoutAlert) {
-            Button("Cancel", role: .cancel, action: dismissLogoutAlert)
-            Button("Logout", role: .destructive) {
+        .alert(LocalizedStringKey("settings.logout.confirmTitle"), isPresented: $showingLogoutAlert) {
+            Button(LocalizedStringKey("backend.url.cancel"), role: .cancel, action: dismissLogoutAlert)
+            Button(LocalizedStringKey("settings.logout.button"), role: .destructive) {
                 logout()
             }
         } message: {
@@ -332,20 +336,7 @@ struct SettingsView: View {
     }
 
     private var connectionText: String {
-        switch webSocketManager.connectionState {
-        case .connected:
-            return "Connected"
-        case .connecting:
-            return "Connecting"
-        case .authenticating:
-            return "Authenticating"
-        case .disconnected:
-            return "Disconnected"
-        case .error:
-            return "Error"
-        case .authFailed:
-            return "Auth failed"
-        }
+        return webSocketManager.connectionState.displayName(in: appState.locale.catalogLanguage)
     }
 
     private func logout() {

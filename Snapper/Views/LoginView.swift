@@ -48,7 +48,7 @@ struct LoginView: View {
                         SecureField(LocalizedStringKey("auth.login.passwordPlaceholder"), text: $viewModel.password)
                             .textFieldStyle(.roundedBorder)
 
-                        if let errorMessage = viewModel.errorMessage {
+                        if let errorMessage = viewModel.errorMessage(in: appState.locale.catalogLanguage) {
                             Text(errorMessage)
                                 .font(.caption)
                                 .foregroundColor(Color.lossRed)

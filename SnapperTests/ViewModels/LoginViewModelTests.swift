@@ -35,7 +35,8 @@ final class LoginViewModelTests: XCTestCase {
             XCTAssertEqual(viewModel.username, "")
             XCTAssertEqual(viewModel.password, "")
             XCTAssertFalse(viewModel.isLoading)
-            XCTAssertNil(viewModel.errorMessage)
+            XCTAssertNil(viewModel.error)
+            XCTAssertNil(viewModel.errorMessage(in: .en))
             XCTAssertFalse(viewModel.isAuthenticated)
         }
     }
@@ -163,7 +164,8 @@ final class LoginViewModelTests: XCTestCase {
 
         await MainActor.run {
             XCTAssertTrue(viewModel.isAuthenticated)
-            XCTAssertNil(viewModel.errorMessage)
+            XCTAssertNil(viewModel.error)
+            XCTAssertNil(viewModel.errorMessage(in: .en))
             XCTAssertFalse(viewModel.isLoading)
             XCTAssertEqual(
                 viewModel.password,
@@ -189,7 +191,8 @@ final class LoginViewModelTests: XCTestCase {
 
         await MainActor.run {
             XCTAssertFalse(viewModel.isAuthenticated)
-            XCTAssertEqual(viewModel.errorMessage, "Invalid credentials")
+            XCTAssertEqual(viewModel.error, .serverDetail("Invalid credentials"))
+            XCTAssertEqual(viewModel.errorMessage(in: .en), "Invalid credentials")
             XCTAssertFalse(viewModel.isLoading)
             XCTAssertEqual(
                 viewModel.password,
@@ -215,8 +218,15 @@ final class LoginViewModelTests: XCTestCase {
 
         await MainActor.run {
             XCTAssertFalse(viewModel.isAuthenticated)
-            XCTAssertNotNil(viewModel.errorMessage)
-            XCTAssertTrue(viewModel.errorMessage?.contains("Network") ?? false)
+            if case .network = viewModel.error {
+                /// network case carries the underlying error description.
+            } else {
+                XCTFail("Expected .network LoginViewError case, got \(String(describing: viewModel.error))")
+            }
+            let message = viewModel.errorMessage(in: .en)
+            XCTAssertNotNil(message)
+            XCTAssertTrue(message?.contains("Network") ?? false || message?.contains("errors.login.network") ?? false,
+                          "Expected Network-tagged message, got: \(String(describing: message))")
             XCTAssertFalse(viewModel.isLoading)
         }
     }

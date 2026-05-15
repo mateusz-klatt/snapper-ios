@@ -20,7 +20,7 @@ struct LatestAlertCard: View {
                 HStack(spacing: 6) {
                     Image(systemName: "bell.badge.fill")
                         .foregroundStyle(.tint)
-                    Text("Latest alert")
+                    Text(LocalizedStringKey("home.section.latestAlert"))
                         .font(.caption)
                         .foregroundStyle(.secondary)
                     Spacer()

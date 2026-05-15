@@ -30,7 +30,7 @@ struct AttachBracketSheet: View {
     var body: some View {
         NavigationStack {
             Form {
-                Section("Position") {
+                Section(LocalizedStringKey("common.position.label")) {
                     HStack {
                         Text(position.instrument).font(.headline)
                         Spacer()
@@ -38,7 +38,7 @@ struct AttachBracketSheet: View {
                             .foregroundStyle(.secondary)
                     }
                     HStack {
-                        Text("Average price")
+                        Text(LocalizedStringKey("common.averagePrice.label"))
                         Spacer()
                         Text(String(format: "%.4f", position.averagePrice))
                             .foregroundStyle(.secondary)
@@ -46,35 +46,35 @@ struct AttachBracketSheet: View {
                 }
                 Section {
                     HStack {
-                        Text("Stop loss")
+                        Text(LocalizedStringKey("trading.bracket.stopLossLabel"))
                         Spacer()
-                        TextField("0.00", text: $viewModel.slPriceText)
+                        TextField(LocalizedStringKey("trading.bracket.stopLossPlaceholder"), text: $viewModel.slPriceText)
                             .keyboardType(.decimalPad)
                             .multilineTextAlignment(.trailing)
                             .frame(minWidth: 100)
                     }
                     HStack {
-                        Text("Take profit")
+                        Text(LocalizedStringKey("trading.bracket.takeProfitLabel"))
                         Spacer()
-                        TextField("0.00", text: $viewModel.tpPriceText)
+                        TextField(LocalizedStringKey("trading.bracket.takeProfitPlaceholder"), text: $viewModel.tpPriceText)
                             .keyboardType(.decimalPad)
                             .multilineTextAlignment(.trailing)
                             .frame(minWidth: 100)
                     }
                 } header: {
-                    Text("Bracket")
+                    Text(LocalizedStringKey("trading.bracket.section.bracket"))
                 } footer: {
                     Text("At least one of stop loss / take profit is required. Backend fires reduce-only protective orders when price crosses either level.")
                 }
             }
-            .navigationTitle("Attach bracket")
+            .navigationTitle(LocalizedStringKey("trading.bracket.title"))
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button("Cancel") { dismiss() }
+                    Button(LocalizedStringKey("trading.bracket.cancel")) { dismiss() }
                 }
                 ToolbarItem(placement: .confirmationAction) {
-                    Button("Submit") {
+                    Button(LocalizedStringKey("trading.bracket.submit")) {
                         Task {
                             /// Keep the sheet open on failure so the user can correct
                             /// input and retry under the same idempotency key.
@@ -83,6 +83,7 @@ struct AttachBracketSheet: View {
                             }
                         }
                     }
+                    .accessibilityLabel(LocalizedStringKey("trading.bracket.accessibility.label.submitButton"))
                     .disabled(!viewModel.canSubmit)
                 }
             }

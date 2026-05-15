@@ -23,7 +23,7 @@ struct AttachTrailingStopSheet: View {
     var body: some View {
         NavigationStack {
             Form {
-                Section("Position") {
+                Section(LocalizedStringKey("common.position.label")) {
                     HStack {
                         Text(position.instrument).font(.headline)
                         Spacer()
@@ -33,7 +33,7 @@ struct AttachTrailingStopSheet: View {
                 }
                 Section {
                     HStack {
-                        Text("Trailing distance")
+                        Text(LocalizedStringKey("trading.trailingStop.trailAmountLabel"))
                         Spacer()
                         TextField("1.5", text: $viewModel.trailingPctText)
                             .keyboardType(.decimalPad)
@@ -42,7 +42,7 @@ struct AttachTrailingStopSheet: View {
                         Text("%").foregroundStyle(.secondary)
                     }
                     HStack {
-                        Text("Min lock-in")
+                        Text(LocalizedStringKey("trading.trailingStop.activationLabel"))
                         Spacer()
                         TextField("optional", text: $viewModel.minLockPctText)
                             .keyboardType(.decimalPad)
@@ -51,19 +51,19 @@ struct AttachTrailingStopSheet: View {
                         Text("%").foregroundStyle(.secondary)
                     }
                 } header: {
-                    Text("Trailing stop")
+                    Text(LocalizedStringKey("trading.trailingStop.section.trailingStop"))
                 } footer: {
                     Text("Trailing distance is the gap the stop maintains as price moves favourably. Min lock-in (optional) prevents the stop from moving below that profit threshold once reached.")
                 }
             }
-            .navigationTitle("Attach trailing stop")
+            .navigationTitle(LocalizedStringKey("trading.trailingStop.title"))
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button("Cancel") { dismiss() }
+                    Button(LocalizedStringKey("trading.trailingStop.cancel")) { dismiss() }
                 }
                 ToolbarItem(placement: .confirmationAction) {
-                    Button("Submit") {
+                    Button(LocalizedStringKey("trading.trailingStop.submit")) {
                         Task {
                             /// Keep the sheet open on failure so the user can correct
                             /// input and retry under the same idempotency key.
@@ -72,6 +72,7 @@ struct AttachTrailingStopSheet: View {
                             }
                         }
                     }
+                    .accessibilityLabel(LocalizedStringKey("trading.trailingStop.accessibility.label.submitButton"))
                     .disabled(!viewModel.canSubmit)
                 }
             }

@@ -32,15 +32,16 @@ struct MainTabView: View {
             if authService.canAccess("overview") {
                 HomeView()
                     .tabItem {
-                        Label("Home", systemImage: "house.fill")
+                        Label(LocalizedStringKey("tabs.home"), systemImage: "house.fill")
                     }
                     .tag("home")
+                    .accessibilityLabel(LocalizedStringKey("tabs.accessibility.label.home"))
             }
 
             if authService.hasPermission(.readPositions) {
                 PositionsView()
                     .tabItem {
-                        Label("Positions", systemImage: "chart.line.uptrend.xyaxis")
+                        Label(LocalizedStringKey("tabs.positions"), systemImage: "chart.line.uptrend.xyaxis")
                     }
                     .tag("positions")
             }
@@ -48,7 +49,7 @@ struct MainTabView: View {
             if authService.canAccess("orders") {
                 OrdersView()
                     .tabItem {
-                        Label("Orders", systemImage: "arrow.left.arrow.right")
+                        Label(LocalizedStringKey("tabs.orders"), systemImage: "arrow.left.arrow.right")
                     }
                     .tag("orders")
             }
@@ -56,7 +57,7 @@ struct MainTabView: View {
             if authService.hasPermission(.readNotifications) {
                 AlertsView()
                     .tabItem {
-                        Label("Alerts", systemImage: "bell.fill")
+                        Label(LocalizedStringKey("tabs.alerts"), systemImage: "bell.fill")
                     }
                     .tag("alerts")
             }
@@ -64,7 +65,7 @@ struct MainTabView: View {
             if authService.canAccess("overview") {
                 SettingsView()
                     .tabItem {
-                        Label("Settings", systemImage: "gearshape.fill")
+                        Label(LocalizedStringKey("tabs.settings"), systemImage: "gearshape.fill")
                     }
                     .tag("settings")
             }
