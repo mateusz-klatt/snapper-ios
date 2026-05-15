@@ -72,6 +72,7 @@ struct AttachTrailingStopSheet: View {
                             }
                         }
                     }
+                    .accessibilityLabel(LocalizedStringKey("trading.trailingStop.accessibility.label.submitButton"))
                     .disabled(!viewModel.canSubmit)
                 }
             }

@@ -90,6 +90,7 @@ struct OrdersView: View {
                                             } label: {
                                                 Label(LocalizedStringKey("orders.row.swipeCancel"), systemImage: "xmark.circle")
                                             }
+                                            .accessibilityLabel(LocalizedStringKey("orders.accessibility.label.cancelButton"))
                                             .disabled(order.planPublicId == nil)
                                         }
                                 } else {

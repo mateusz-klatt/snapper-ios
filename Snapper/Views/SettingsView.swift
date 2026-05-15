@@ -141,6 +141,8 @@ struct SettingsView: View {
                             Spacer()
                         }
                     }
+                    .accessibilityLabel(LocalizedStringKey("settings.accessibility.label.logoutButton"))
+                    .accessibilityHint(LocalizedStringKey("settings.accessibility.hint.logoutButton"))
                 }
             }
             .navigationTitle(LocalizedStringKey("tabs.settings"))

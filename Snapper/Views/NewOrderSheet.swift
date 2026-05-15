@@ -151,6 +151,7 @@ struct NewOrderSheet: View {
                             }
                         }
                     }
+                    .accessibilityLabel(LocalizedStringKey("trading.order.accessibility.label.submitButton"))
                     .disabled(!viewModel.canSubmit)
                 }
             }

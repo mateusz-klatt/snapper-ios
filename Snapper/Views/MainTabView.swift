@@ -35,6 +35,7 @@ struct MainTabView: View {
                         Label(LocalizedStringKey("tabs.home"), systemImage: "house.fill")
                     }
                     .tag("home")
+                    .accessibilityLabel(LocalizedStringKey("tabs.accessibility.label.home"))
             }
 
             if authService.hasPermission(.readPositions) {

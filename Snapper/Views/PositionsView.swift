@@ -112,9 +112,11 @@ struct PositionsView: View {
                     Button(LocalizedStringKey("positions.row.actions.close"), role: .destructive) {
                         pendingClosePosition = position
                     }
+                    .accessibilityLabel(LocalizedStringKey("positions.accessibility.label.closeButton"))
                     Button(LocalizedStringKey("positions.row.actions.reduce")) {
                         reduceModalPosition = IdentifiedPosition(position: position)
                     }
+                    .accessibilityLabel(LocalizedStringKey("positions.accessibility.label.reduceButton"))
                 }
                 if position.positionCyclePublicId != nil {
                     Button("Attach SL / TP") {

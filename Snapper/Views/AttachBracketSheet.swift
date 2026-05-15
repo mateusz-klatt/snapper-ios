@@ -83,6 +83,7 @@ struct AttachBracketSheet: View {
                             }
                         }
                     }
+                    .accessibilityLabel(LocalizedStringKey("trading.bracket.accessibility.label.submitButton"))
                     .disabled(!viewModel.canSubmit)
                 }
             }

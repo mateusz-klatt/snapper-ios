@@ -13,5 +13,5 @@ import Foundation
 /// key has shipped and every view callsite has migrated.
 enum PhaseHRolloutStatus {
 
-    static let isComplete: Bool = false
+    static let isComplete: Bool = true
 }
