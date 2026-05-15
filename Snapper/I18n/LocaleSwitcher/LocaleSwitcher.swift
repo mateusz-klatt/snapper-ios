@@ -28,6 +28,7 @@ struct LocaleSwitcher: View {
         } label: {
             Text(verbatim: appState.locale.flagEmoji).font(.title3)
         }
+        .accessibilityIdentifier("localeSwitcher.trigger")
         .accessibilityLabel(
             LocaleStrings.localized(
                 "common.localeSwitcher.triggerAccessibilityLabel",
@@ -144,6 +145,7 @@ private struct FlagButton: View {
                 )
                 .cornerRadius(8)
         }
+        .accessibilityIdentifier("localeSwitcher.flag.\(code.rawValue)")
         .accessibilityLabel(
             LocaleSwitcherLabels.accessibilityLabel(for: code, current: currentLocale)
         )

@@ -40,7 +40,7 @@ targets:
         INFOPLIST_KEY_LSApplicationCategoryType: "public.app-category.finance"
         ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
         CODE_SIGN_STYLE: Automatic
-        TARGETED_DEVICE_FAMILY: "1"
+        TARGETED_DEVICE_FAMILY: "1,2"
         DEFINES_MODULE: YES
         ENABLE_MODULE_VERIFIER: YES
         MODULE_VERIFIER_SUPPORTED_LANGUAGE_STANDARDS: "gnu11 gnu++14"
@@ -52,6 +52,7 @@ targets:
     scheme:
       testTargets:
         - SnapperTests
+        - SnapperUITests
       gatherCoverageData: true
 
   SnapperTests:
@@ -71,3 +72,21 @@ targets:
         SWIFT_VERSION: "6.0"
         GENERATE_INFOPLIST_FILE: YES
         CODE_SIGN_STYLE: Automatic
+
+  SnapperUITests:
+    type: bundle.ui-testing
+    platform: iOS
+    sources:
+      - SnapperUITests
+    dependencies:
+      - target: Snapper
+    settings:
+      base:
+        PRODUCT_NAME: SnapperUITests
+        PRODUCT_MODULE_NAME: SnapperUITests
+        PRODUCT_BUNDLE_IDENTIFIER: com.example.snapper.uitests
+        TEST_TARGET_NAME: Snapper
+        SWIFT_VERSION: "6.0"
+        GENERATE_INFOPLIST_FILE: YES
+        CODE_SIGN_STYLE: Automatic
+        TARGETED_DEVICE_FAMILY: "1,2"
