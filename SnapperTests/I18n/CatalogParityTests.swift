@@ -29,6 +29,44 @@ final class CatalogParityTests: XCTestCase {
     private static let expectedKeys: Set<String> = ExpectedKeys.values
     private static let v1LockedKeys: Set<String> = ExpectedKeys.v1Locked
 
+    /// Languages with FULL catalog coverage. Every key in
+    /// ``Localizable.xcstrings`` MUST have a localization entry for
+    /// each language in this set. Batch-1 rollout (2026-05-15) adds
+    /// 15 European languages alongside the v1 Polish translation.
+    private static let fullyTranslatedLanguages: [String] = [
+        "en", "pl",
+        "de", "fr", "es", "it", "nl", "pt-BR",
+        "sv", "nb", "da", "fi",
+        "cs", "sk", "hu", "ro", "hr"
+    ]
+
+    /// CLDR plural categories required per language for the 7 plural
+    /// keys in the catalog. Languages with simpler plural systems
+    /// (one + other) MUST NOT include `few` or `many`. Slavic
+    /// languages with one/few/many/other (cs, sk, pl) require all 4.
+    /// Romance languages with one/many/other (fr, es, it, pt-BR)
+    /// require `many` for compact-million ranges. Croatian uses
+    /// one/few/other.
+    private static let requiredPluralCategories: [String: Set<String>] = [
+        "en": ["one", "other"],
+        "pl": ["one", "few", "many"],
+        "de": ["one", "other"],
+        "fr": ["one", "many", "other"],
+        "es": ["one", "many", "other"],
+        "it": ["one", "many", "other"],
+        "nl": ["one", "other"],
+        "pt-BR": ["one", "many", "other"],
+        "sv": ["one", "other"],
+        "nb": ["one", "other"],
+        "da": ["one", "other"],
+        "fi": ["one", "other"],
+        "cs": ["one", "few", "many", "other"],
+        "sk": ["one", "few", "many", "other"],
+        "hu": ["one", "other"],
+        "ro": ["one", "few", "other"],
+        "hr": ["one", "few", "other"],
+    ]
+
     private static let catalogURL: URL = {
         var url = URL(fileURLWithPath: #filePath)
         for _ in 0..<3 {
@@ -168,6 +206,68 @@ final class CatalogParityTests: XCTestCase {
             for schema in schemas {
                 XCTAssertEqual(schema, first,
                                "Placeholder schema mismatch in plural categories for \(key)")
+            }
+        }
+    }
+
+    /// Batch-1 multi-language sweep — every key in the catalog has
+    /// a localization entry for every fully-translated language.
+    /// Failures indicate a missing translation that the merge step
+    /// (``/tmp/snapper-i18n/merge.py``) did not pick up; the new
+    /// language was added to ``CatalogLanguage`` / ``CountryMappings``
+    /// but a row in ``Localizable.xcstrings`` was missed.
+    func testEveryKeyHasAllFullyTranslatedLanguages() throws {
+        let catalog = try loadCatalog()
+        for language in Self.fullyTranslatedLanguages {
+            for (key, entry) in catalog.strings {
+                XCTAssertNotNil(
+                    entry.localizations[language],
+                    "Missing \(language) localization for key '\(key)'"
+                )
+            }
+        }
+    }
+
+    /// Placeholder schema parity across all fully-translated
+    /// languages. A typo in any translation that drops a `%@` or
+    /// reorders positional placeholders is caught here.
+    func testPlaceholderSchemaMatchesAcrossAllLanguages() throws {
+        let catalog = try loadCatalog()
+        for (key, entry) in catalog.strings {
+            guard let enValue = entry.localizations["en"]?.stringUnit?.value else { continue }
+            let enSchema = Self.placeholders(in: enValue)
+            for language in Self.fullyTranslatedLanguages where language != "en" {
+                guard let value = entry.localizations[language]?.stringUnit?.value else { continue }
+                let schema = Self.placeholders(in: value)
+                XCTAssertEqual(
+                    schema, enSchema,
+                    "Placeholder mismatch for '\(key)' in \(language): EN=\(enSchema) \(language)=\(schema)"
+                )
+            }
+        }
+    }
+
+    /// Plural keys honor the CLDR plural categories required by
+    /// each language. Slavic (cs/sk) require 4 (one/few/many/other);
+    /// Polish requires 3 (one/few/many — no `other` per the v1
+    /// shipped pattern); Romance with compact-million `many`
+    /// (fr/es/it/pt-BR) require 3; Romanian/Croatian require 3
+    /// (one/few/other); Germanic + Finnic + Hungarian require 2
+    /// (one/other).
+    func testPluralCategoriesMatchPerLanguageCLDR() throws {
+        let catalog = try loadCatalog()
+        for (key, entry) in catalog.strings {
+            for (language, requiredCategories) in Self.requiredPluralCategories {
+                guard let plural = entry.localizations[language]?.variations?.plural else {
+                    continue
+                }
+                let presentCategories = Set(plural.keys)
+                for required in requiredCategories {
+                    XCTAssertTrue(
+                        presentCategories.contains(required),
+                        "Plural key '\(key)' missing '\(required)' CLDR category for language \(language) (has: \(presentCategories.sorted()))"
+                    )
+                }
             }
         }
     }
