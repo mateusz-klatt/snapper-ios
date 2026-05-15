@@ -19,6 +19,10 @@ enum CountryMappings {
     /// Batch-1 (2026-05-15) adds 15 European languages alongside
     /// the v1 Polish translation: de, fr, es, it, nl, pt-BR (Brazil),
     /// sv, nb (Norway), da, fi, cs, sk, hu, ro, hr.
+    ///
+    /// Batch-2 (2026-05-15) adds 15 more: uk, ru, lt, lv, sr-Latn,
+    /// bs, sq, is, el, tr, fil, ms, id, sw, bn. Countries not in
+    /// either batch still fall back to ``.en``.
     static func catalogLanguage(for code: AppLocale) -> CatalogLanguage {
         switch code {
         case .pl: return .pl
@@ -37,6 +41,21 @@ enum CountryMappings {
         case .hu: return .hu
         case .ro: return .ro
         case .hr: return .hr
+        case .ua: return .uk
+        case .ru: return .ru
+        case .lt: return .lt
+        case .lv: return .lv
+        case .rs: return .srLatn
+        case .ba: return .bs
+        case .al: return .sq
+        case .iceland: return .`is`
+        case .gr: return .el
+        case .tr: return .tr
+        case .ph: return .fil
+        case .my: return .ms
+        case .id: return .id
+        case .ke: return .sw
+        case .bd: return .bn
         default: return .en
         }
     }

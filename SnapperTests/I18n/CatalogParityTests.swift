@@ -31,22 +31,39 @@ final class CatalogParityTests: XCTestCase {
 
     /// Languages with FULL catalog coverage. Every key in
     /// ``Localizable.xcstrings`` MUST have a localization entry for
-    /// each language in this set. Batch-1 rollout (2026-05-15) adds
-    /// 15 European languages alongside the v1 Polish translation.
+    /// each language in this set.
+    ///
+    /// Batch-1 (2026-05-15) added 15 European languages alongside
+    /// the v1 Polish translation. Batch-2 (2026-05-15) adds 15 more:
+    /// East-Slavic, Baltic, Balkan, Anatolian, Maritime SE-Asia,
+    /// East African, and Indic regions.
     private static let fullyTranslatedLanguages: [String] = [
         "en", "pl",
         "de", "fr", "es", "it", "nl", "pt-BR",
         "sv", "nb", "da", "fi",
-        "cs", "sk", "hu", "ro", "hr"
+        "cs", "sk", "hu", "ro", "hr",
+        "uk", "ru", "lt", "lv", "sr-Latn", "bs",
+        "sq", "is", "el", "tr",
+        "fil", "ms", "id", "sw", "bn"
     ]
 
     /// CLDR plural categories required per language for the 7 plural
     /// keys in the catalog. Languages with simpler plural systems
-    /// (one + other) MUST NOT include `few` or `many`. Slavic
-    /// languages with one/few/many/other (cs, sk, pl) require all 4.
-    /// Romance languages with one/many/other (fr, es, it, pt-BR)
-    /// require `many` for compact-million ranges. Croatian uses
-    /// one/few/other.
+    /// (one + other) MUST NOT include `few` or `many`.
+    ///
+    /// Plural-rule families covered:
+    /// - Slavic 4-category (cs, sk, uk, ru): one/few/many/other
+    /// - Polish 3-category (pl): one/few/many (no `other`)
+    /// - Slavic 3-category (hr, sr-Latn, bs): one/few/other
+    /// - Lithuanian 4-category (lt): one/few/many/other (decimals)
+    /// - Latvian 3-category (lv): zero/one/other
+    /// - Romanian (ro): one/few/other
+    /// - Romance compact-million `many` (fr, es, it, pt-BR): one/many/other
+    /// - Germanic + Finnic + Hungarian + Greek + Turkish + Albanian
+    ///   + Icelandic + Swahili + Bengali (de, nl, sv, nb, da, fi,
+    ///   hu, el, tr, sq, is, sw, bn): one/other
+    /// - Malay-Polynesian invariant (ms, id): other only
+    /// - Filipino (fil): one (1-2) + other
     private static let requiredPluralCategories: [String: Set<String>] = [
         "en": ["one", "other"],
         "pl": ["one", "few", "many"],
@@ -65,6 +82,21 @@ final class CatalogParityTests: XCTestCase {
         "hu": ["one", "other"],
         "ro": ["one", "few", "other"],
         "hr": ["one", "few", "other"],
+        "uk": ["one", "few", "many", "other"],
+        "ru": ["one", "few", "many", "other"],
+        "lt": ["one", "few", "many", "other"],
+        "lv": ["zero", "one", "other"],
+        "sr-Latn": ["one", "few", "other"],
+        "bs": ["one", "few", "other"],
+        "sq": ["one", "other"],
+        "is": ["one", "other"],
+        "el": ["one", "other"],
+        "tr": ["one", "other"],
+        "fil": ["one", "other"],
+        "ms": ["other"],
+        "id": ["other"],
+        "sw": ["one", "other"],
+        "bn": ["one", "other"],
     ]
 
     private static let catalogURL: URL = {

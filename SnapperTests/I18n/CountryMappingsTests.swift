@@ -29,6 +29,21 @@ final class CountryMappingsTests: XCTestCase {
         (.hu, .hu),
         (.ro, .ro),
         (.hr, .hr),
+        (.ua, .uk),
+        (.ru, .ru),
+        (.lt, .lt),
+        (.lv, .lv),
+        (.rs, .srLatn),
+        (.ba, .bs),
+        (.al, .sq),
+        (.iceland, .`is`),
+        (.gr, .el),
+        (.tr, .tr),
+        (.ph, .fil),
+        (.my, .ms),
+        (.id, .id),
+        (.ke, .sw),
+        (.bd, .bn),
     ]
 
     func testTranslatedLanguagesMapToTheirOwnCatalog() {
@@ -61,11 +76,11 @@ final class CountryMappingsTests: XCTestCase {
         XCTAssertEqual(CountryMappings.intlLocaleIdentifier(for: .us), "en-US")
     }
 
-    /// Reserved-keyword raw-value regression: both cases must resolve
-    /// to ``en-IS`` / ``en-IN`` (not the unrelated Icelandic / Hindi
-    /// language tags that ``is`` / ``in`` are also valid for).
+    /// Reserved-keyword raw-value regression: India still falls back
+    /// to ``en-IN`` (no Hindi translation yet); Iceland now maps to
+    /// its own Icelandic translation column ``is-IS`` per batch-2.
     func testIntlLocaleIdentifierKeywordRawValueCodes() {
-        XCTAssertEqual(CountryMappings.intlLocaleIdentifier(for: .iceland), "en-IS")
+        XCTAssertEqual(CountryMappings.intlLocaleIdentifier(for: .iceland), "is-IS")
         XCTAssertEqual(CountryMappings.intlLocaleIdentifier(for: .india), "en-IN")
     }
 

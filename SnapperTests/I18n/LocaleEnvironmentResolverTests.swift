@@ -30,10 +30,10 @@ final class LocaleEnvironmentResolverTests: XCTestCase {
         )
     }
 
-    func testEnvironmentLocaleForIcelandIsEnIS() {
+    func testEnvironmentLocaleForIcelandIsIsIS() {
         XCTAssertEqual(
             LocaleEnvironmentResolver.environmentLocale(for: .iceland).identifier,
-            "en-IS"
+            "is-IS"
         )
     }
 
