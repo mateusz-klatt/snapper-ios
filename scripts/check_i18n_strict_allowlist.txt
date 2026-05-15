@@ -3,67 +3,40 @@
 # Each non-comment, non-blank line is `<path>:<line>:<reason>`. A hit
 # whose <path>:<line> prefix matches an entry here is ignored.
 #
-# Entries below are the legacy raw string literals that landed BEFORE
-# the strict-mode lint activated. They are documented gaps from Phase H
-# rollout: catalog entries either don't exist yet for these phrases,
-# or the strings are intentionally English-only (technical debug
-# labels, system-state values, format-template fragments). Migrate
-# incrementally — when a string is routed through the catalog, remove
-# its entry here. The v1 single-pattern lint (check_i18n.sh) still
-# guards against the most dangerous `String(localized: "...")` pattern
-# via the simpler check_i18n_allowlist.txt format.
+# Two categories of allowed hits remain:
+#   1. "phase-d formatter follow-up — <fragment>" — String(format:)
+#      hits that need locale-aware NumberFormatter / DateFormatter
+#      via the LocaleFormatters helper. Phase D is the planned PR
+#      that wires these through.
+#   2. "numeric placeholder — locale-neutral" — single-token numeric
+#      hints in TextField placeholders ("0.0", "1.5"). Decimal
+#      separator semantics come from the keyboard input parser, not
+#      the placeholder string, so translating them adds no value.
+#
+# The v1 single-pattern lint (check_i18n.sh) still guards against the
+# most dangerous `String(localized: "...")` pattern via the simpler
+# check_i18n_allowlist.txt format.
 
-Snapper/Views/AttachBracketSheet.swift:43:legacy phase-h follow-up
-Snapper/Views/AttachBracketSheet.swift:67:legacy phase-h follow-up
-Snapper/Views/AttachTrailingStopSheet.swift:38:legacy phase-h follow-up
-Snapper/Views/AttachTrailingStopSheet.swift:42:legacy phase-h follow-up
-Snapper/Views/AttachTrailingStopSheet.swift:47:legacy phase-h follow-up
-Snapper/Views/AttachTrailingStopSheet.swift:51:legacy phase-h follow-up
-Snapper/Views/AttachTrailingStopSheet.swift:56:legacy phase-h follow-up
-Snapper/Views/Components/CandlestickChartView.swift:31:legacy phase-h follow-up
-Snapper/Views/Components/InstrumentPickerSheet.swift:39:legacy phase-h follow-up
-Snapper/Views/Components/InstrumentPickerSheet.swift:50:legacy phase-h follow-up
-Snapper/Views/Components/MarketMetricGrid.swift:118:legacy phase-h follow-up
-Snapper/Views/Components/MarketMetricGrid.swift:132:legacy phase-h follow-up
-Snapper/Views/Components/MarketMetricGrid.swift:138:legacy phase-h follow-up
-Snapper/Views/EditDevicePrefView.swift:134:legacy phase-h follow-up
-Snapper/Views/EditDevicePrefView.swift:168:legacy phase-h follow-up
-Snapper/Views/EditDevicePrefView.swift:178:legacy phase-h follow-up
-Snapper/Views/EditDevicePrefView.swift:190:legacy phase-h follow-up
-Snapper/Views/EditDevicePrefView.swift:192:legacy phase-h follow-up
-Snapper/Views/EditDevicePrefView.swift:194:legacy phase-h follow-up
-Snapper/Views/EditDevicePrefView.swift:208:legacy phase-h follow-up
-Snapper/Views/EditDevicePrefView.swift:228:legacy phase-h follow-up
-Snapper/Views/EditDevicePrefView.swift:232:legacy phase-h follow-up
-Snapper/Views/EditDevicePrefView.swift:244:legacy phase-h follow-up
-Snapper/Views/HomeView.swift:254:legacy phase-h follow-up
-Snapper/Views/HomeView.swift:268:legacy phase-h follow-up
-Snapper/Views/HomeView.swift:317:legacy phase-h follow-up
-Snapper/Views/HomeView.swift:325:legacy phase-h follow-up
-Snapper/Views/HomeView.swift:329:legacy phase-h follow-up
-Snapper/Views/HomeView.swift:355:legacy phase-h follow-up
-Snapper/Views/NewOrderSheet.swift:59:legacy phase-h follow-up
-Snapper/Views/NewOrderSheet.swift:60:legacy phase-h follow-up
-Snapper/Views/NewOrderSheet.swift:81:legacy phase-h follow-up
-Snapper/Views/NewOrderSheet.swift:97:legacy phase-h follow-up
-Snapper/Views/NewOrderSheet.swift:107:legacy phase-h follow-up
-Snapper/Views/NewOrderSheet.swift:118:legacy phase-h follow-up
-Snapper/Views/NewOrderSheet.swift:126:legacy phase-h follow-up
-Snapper/Views/NewOrderSheet.swift:128:legacy phase-h follow-up
-Snapper/Views/NewOrderSheet.swift:130:legacy phase-h follow-up
-Snapper/Views/NotificationPrefsView.swift:52:legacy phase-h follow-up
-Snapper/Views/NotificationPrefsView.swift:53:legacy phase-h follow-up
-Snapper/Views/NotificationPrefsView.swift:59:legacy phase-h follow-up
-Snapper/Views/NotificationPrefsView.swift:60:legacy phase-h follow-up
-Snapper/Views/NotificationPrefsView.swift:62:legacy phase-h follow-up
-Snapper/Views/NotificationPrefsView.swift:63:legacy phase-h follow-up
-Snapper/Views/NotificationPrefsView.swift:83:legacy phase-h follow-up
-Snapper/Views/NotificationPrefsView.swift:92:legacy phase-h follow-up
+# Phase D — locale-aware number formatting (HomeView + AttachBracketSheet)
+Snapper/Views/AttachBracketSheet.swift:43:phase-d formatter follow-up — String(format: "%.4f", position.averagePrice)
+Snapper/Views/HomeView.swift:320:phase-d formatter follow-up — String(format: "Qty: %.4f @ %.2f", quantity, averagePrice)
+Snapper/Views/HomeView.swift:328:phase-d formatter follow-up — String(format: "$%.2f", unrealizedPnl)
+Snapper/Views/HomeView.swift:358:phase-d formatter follow-up — String(format: "%@ %.4f", side, size)
+
+# Phase D — locale-aware number formatting (OrdersView)
 Snapper/Views/OrdersView.swift:247:phase-d formatter follow-up — String(format: "Size: %.4f", order.size)
 Snapper/Views/OrdersView.swift:252:phase-d formatter follow-up — String(format: "Price: %.4f", price)
 Snapper/Views/OrdersView.swift:288:phase-d formatter follow-up — String(format: "Filled %.4f @ %.4f", ...)
 Snapper/Views/OrdersView.swift:290:phase-d formatter follow-up — String(format: "Fee: %.4f %@", fee, asset)
+
+# Phase D — locale-aware number formatting (PositionsView)
 Snapper/Views/PositionsView.swift:243:phase-d formatter follow-up — String(format: "%.4f", averagePrice)
 Snapper/Views/PositionsView.swift:251:phase-d formatter follow-up — String(format: "%.4f", quantity)
 Snapper/Views/PositionsView.swift:313:phase-d formatter follow-up — String(format: "%.2f", unrealizedPnl)
 Snapper/Views/PositionsView.swift:316:phase-d formatter follow-up — String(format: "Avg %.4f", averagePrice)
+
+# Numeric placeholder examples — locale-neutral, no value in translating
+Snapper/Views/AttachTrailingStopSheet.swift:38:numeric placeholder — locale-neutral "1.5"
+Snapper/Views/NewOrderSheet.swift:97:numeric placeholder — locale-neutral "0.0"
+Snapper/Views/NewOrderSheet.swift:107:numeric placeholder — locale-neutral "0.0"
+Snapper/Views/NewOrderSheet.swift:118:numeric placeholder — locale-neutral "0.0"

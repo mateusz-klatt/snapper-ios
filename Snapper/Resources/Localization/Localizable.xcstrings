@@ -4682,6 +4682,567 @@
         }
       }
     },
+    "common.optional.placeholder": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "optional"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "opcjonalnie"
+          }
+        }
+      }
+    },
+    "common.percentSymbol": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%"
+          }
+        }
+      }
+    },
+    "common.picker.selectPlaceholder": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Select…"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Wybierz…"
+          }
+        }
+      }
+    },
+    "home.position.unrealizedPnl": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Unrealized P&L"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Niezrealizowany P&L"
+          }
+        }
+      }
+    },
+    "home.systemStatus.activeOrders": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Active Orders"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aktywne zlecenia"
+          }
+        }
+      }
+    },
+    "home.systemStatus.activeStrategies": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Active Strategies"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aktywne strategie"
+          }
+        }
+      }
+    },
+    "home.systemStatus.traderStatus": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Trader Status"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Status tradera"
+          }
+        }
+      }
+    },
+    "market.data.chart.emptyState": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No candles yet"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Brak świec"
+          }
+        }
+      }
+    },
+    "market.data.instrumentPicker.searchPrompt": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Search instruments"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Szukaj instrumentów"
+          }
+        }
+      }
+    },
+    "market.data.instrumentPicker.viewOnlyBadge": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "View only"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tylko podgląd"
+          }
+        }
+      }
+    },
+    "market.data.status.delayed": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Delayed"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Opóźnione"
+          }
+        }
+      }
+    },
+    "market.data.status.live": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Live"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Na żywo"
+          }
+        }
+      }
+    },
+    "notifications.devicePref.alertType.lockedBadge": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Locked"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Zablokowane"
+          }
+        }
+      }
+    },
+    "notifications.devicePref.delivery.header": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Delivery"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dostarczanie"
+          }
+        }
+      }
+    },
+    "notifications.devicePref.hardMute.footer": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hard mute overrides quiet hours and disables every alert in this scope until the chosen time."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pełne wyciszenie pomija ciche godziny i wyłącza wszystkie alerty w tym zakresie do wybranego czasu."
+          }
+        }
+      }
+    },
+    "notifications.devicePref.hardMute.label": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hard mute"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pełne wyciszenie"
+          }
+        }
+      }
+    },
+    "notifications.devicePref.quietHours.footer": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Non-critical alerts are deferred during this window, using the device timezone."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Alerty inne niż krytyczne są wstrzymywane w tym oknie czasowym, według strefy czasowej urządzenia."
+          }
+        }
+      }
+    },
+    "notifications.devicePref.scope.footer.editLocked": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Edit mode preserves the original scope. The selected operator and wallet are part of the alert's identity and cannot be changed here."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tryb edycji zachowuje pierwotny zakres. Wybrany operator i portfel są częścią tożsamości alertu i nie można ich tutaj zmienić."
+          }
+        }
+      }
+    },
+    "notifications.devicePref.scope.footer.loadingOperators": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Loading operators… If the list stays empty, your account has no operator memberships and only Device scope is available."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Wczytywanie operatorów… Jeśli lista pozostanie pusta, Twoje konto nie ma przypisanych operatorów i dostępny jest tylko zakres Urządzenie."
+          }
+        }
+      }
+    },
+    "notifications.devicePref.scope.footer.walletNeedsOperator": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Wallet scope requires a selected operator."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aby użyć zakresu „Portfel”, wybierz operatora."
+          }
+        }
+      }
+    },
+    "notifications.prefs.action.addOverride": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Add override"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dodaj nadpisanie"
+          }
+        }
+      }
+    },
+    "notifications.prefs.action.remove": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Remove"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Usuń"
+          }
+        }
+      }
+    },
+    "notifications.prefs.noDevice.description": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Enable push notifications in Settings → Notifications to register this device."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Włącz powiadomienia push w Ustawienia → Powiadomienia, aby zarejestrować to urządzenie."
+          }
+        }
+      }
+    },
+    "notifications.prefs.noDevice.title": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No device registered"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nie zarejestrowano urządzenia"
+          }
+        }
+      }
+    },
+    "notifications.prefs.section.userDefaults.footer": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Defaults apply when no per-device override matches an inbound alert."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ustawienia domyślne mają zastosowanie, gdy żadne nadpisanie dla urządzenia nie pasuje do przychodzącego alertu."
+          }
+        }
+      }
+    },
+    "trading.bracket.footer.requirement": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "At least one of stop loss / take profit is required. Backend fires reduce-only protective orders when price crosses either level."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Wymagany jest co najmniej stop loss lub take profit. Backend wysyła ochronne zlecenia reduce-only, gdy cena przekroczy któryś z poziomów."
+          }
+        }
+      }
+    },
+    "trading.order.exchangeLabel": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Exchange"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Giełda"
+          }
+        }
+      }
+    },
+    "trading.order.leverageLabel": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Leverage"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dźwignia"
+          }
+        }
+      }
+    },
+    "trading.order.orderSection": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Order"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Zlecenie"
+          }
+        }
+      }
+    },
+    "trading.order.selectInstrument": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Select instrument"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Wybierz instrument"
+          }
+        }
+      }
+    },
+    "trading.order.riskSection": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Risk"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ryzyko"
+          }
+        }
+      }
+    },
+    "trading.order.venueSection": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Venue"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rynek"
+          }
+        }
+      }
+    },
+    "trading.trailingStop.footer.explanation": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Trailing distance is the gap the stop maintains as price moves favourably. Min lock-in (optional) prevents the stop from moving below that profit threshold once reached."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Odległość trailing stopu to odstęp, jaki stop utrzymuje względem ceny, gdy rynek porusza się na Twoją korzyść. Minimalne zabezpieczenie zysku (opcjonalne) zapobiega cofnięciu stopu poniżej wyznaczonego progu po jego osiągnięciu."
+          }
+        }
+      }
+    },
     "wallet.picker.label": {
       "extractionState": "manual",
       "localizations": {

@@ -251,7 +251,7 @@ struct HomeView: View {
     private func systemStatusView(status: SystemStatus) -> some View {
         VStack(spacing: 16) {
             HStack {
-                Text("Trader Status")
+                Text(LocalizedStringKey("home.systemStatus.traderStatus"))
                     .font(.headline)
                 Spacer()
                 Text(status.trader.status)
@@ -265,7 +265,7 @@ struct HomeView: View {
             if let strategies = status.strategies, !strategies.isEmpty {
                 Divider()
                 HStack {
-                    Text("Active Strategies")
+                    Text(LocalizedStringKey("home.systemStatus.activeStrategies"))
                         .font(.subheadline)
                     Spacer()
                     Text("\(strategies.count)")
@@ -281,7 +281,10 @@ struct HomeView: View {
                     title: LocaleStrings.localized("home.section.openPositions", in: appState.locale.catalogLanguage),
                     value: "\(filteredPositions.count)"
                 )
-                statView(title: "Active Orders", value: "\(filteredActiveOrders.count)")
+                statView(
+                    title: LocaleStrings.localized("home.systemStatus.activeOrders", in: appState.locale.catalogLanguage),
+                    value: "\(filteredActiveOrders.count)"
+                )
             }
         }
         .padding()
@@ -326,7 +329,7 @@ struct HomeView: View {
                             .font(.subheadline)
                             .foregroundColor(position.unrealizedPnl >= 0 ? .profitGreen : .lossRed)
 
-                        Text("Unrealized P&L")
+                        Text(LocalizedStringKey("home.position.unrealizedPnl"))
                             .font(.caption2)
                             .foregroundColor(.secondary)
                     }

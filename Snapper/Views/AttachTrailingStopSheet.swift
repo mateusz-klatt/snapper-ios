@@ -39,21 +39,21 @@ struct AttachTrailingStopSheet: View {
                             .keyboardType(.decimalPad)
                             .multilineTextAlignment(.trailing)
                             .frame(minWidth: 80)
-                        Text("%").foregroundStyle(.secondary)
+                        Text(LocalizedStringKey("common.percentSymbol")).foregroundStyle(.secondary)
                     }
                     HStack {
                         Text(LocalizedStringKey("trading.trailingStop.activationLabel"))
                         Spacer()
-                        TextField("optional", text: $viewModel.minLockPctText)
+                        TextField(LocalizedStringKey("common.optional.placeholder"), text: $viewModel.minLockPctText)
                             .keyboardType(.decimalPad)
                             .multilineTextAlignment(.trailing)
                             .frame(minWidth: 80)
-                        Text("%").foregroundStyle(.secondary)
+                        Text(LocalizedStringKey("common.percentSymbol")).foregroundStyle(.secondary)
                     }
                 } header: {
                     Text(LocalizedStringKey("trading.trailingStop.section.trailingStop"))
                 } footer: {
-                    Text("Trailing distance is the gap the stop maintains as price moves favourably. Min lock-in (optional) prevents the stop from moving below that profit threshold once reached.")
+                    Text(LocalizedStringKey("trading.trailingStop.footer.explanation"))
                 }
             }
             .navigationTitle(LocalizedStringKey("trading.trailingStop.title"))

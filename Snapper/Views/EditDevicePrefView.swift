@@ -131,7 +131,7 @@ struct EditDevicePrefView: View {
                         HStack {
                             Text(NotificationPrefsViewModel.displayName(for: alertType))
                             Spacer()
-                            Text("locked")
+                            Text(LocalizedStringKey("notifications.devicePref.alertType.lockedBadge"))
                                 .font(.caption)
                                 .foregroundStyle(.secondary)
                         }
@@ -165,7 +165,7 @@ struct EditDevicePrefView: View {
 
                         if scopeKind == .operator_ || scopeKind == .wallet {
                             Picker(LocalizedStringKey("notifications.devicePref.operatorPicker.title"), selection: $selectedOperatorId) {
-                                Text("Select…").tag(Optional<String>.none)
+                                Text(LocalizedStringKey("common.picker.selectPlaceholder")).tag(Optional<String>.none)
                                 ForEach(appState.availableOperators, id: \.publicId) { operatorInfo in
                                     Text(operatorInfo.label)
                                         .tag(Optional(operatorInfo.publicId))
@@ -175,7 +175,7 @@ struct EditDevicePrefView: View {
 
                         if scopeKind == .wallet {
                             Picker(LocalizedStringKey("notifications.devicePref.walletPicker.title"), selection: $selectedWalletId) {
-                                Text("Select…").tag(Optional<String>.none)
+                                Text(LocalizedStringKey("common.picker.selectPlaceholder")).tag(Optional<String>.none)
                                 ForEach(appState.availableWallets, id: \.publicId) { wallet in
                                     Text(WalletPickerViewModel.walletDisplayName(wallet))
                                         .tag(Optional(wallet.publicId))
@@ -187,11 +187,11 @@ struct EditDevicePrefView: View {
                     Text(LocalizedStringKey("notifications.devicePref.scope.label"))
                 } footer: {
                     if isAlertTypeLocked {
-                        Text("Edit mode preserves the original scope tuple — the SCD2 key includes the (operator, wallet) tuple, so changing it would silently create a sibling row.")
+                        Text(LocalizedStringKey("notifications.devicePref.scope.footer.editLocked"))
                     } else if appState.availableOperators.isEmpty && scopeKind != .deviceGlobal {
-                        Text("Loading operator catalog… If empty after a few seconds, your account has no operator memberships and only Device scope is available.")
+                        Text(LocalizedStringKey("notifications.devicePref.scope.footer.loadingOperators"))
                     } else {
-                        Text("Wallet scope requires an accompanying Operator (backend ck_device_alert_valid_scope CHECK).")
+                        Text(LocalizedStringKey("notifications.devicePref.scope.footer.walletNeedsOperator"))
                     }
                 }
 
@@ -205,7 +205,7 @@ struct EditDevicePrefView: View {
                     }
                     .pickerStyle(.segmented)
                 } header: {
-                    Text("Delivery")
+                    Text(LocalizedStringKey("notifications.devicePref.delivery.header"))
                 }
 
                 Section {
@@ -225,11 +225,11 @@ struct EditDevicePrefView: View {
                 } header: {
                     Text(LocalizedStringKey("notifications.devicePref.quietHours.label"))
                 } footer: {
-                    Text("Non-safety-critical alerts are deferred during the window, in the device timezone.")
+                    Text(LocalizedStringKey("notifications.devicePref.quietHours.footer"))
                 }
 
                 Section {
-                    Toggle("Hard mute", isOn: $muteEnabled)
+                    Toggle(LocalizedStringKey("notifications.devicePref.hardMute.label"), isOn: $muteEnabled)
                     if muteEnabled {
                         DatePicker(
                             LocalizedStringKey("notifications.devicePref.muteUntil.label"),
@@ -241,7 +241,7 @@ struct EditDevicePrefView: View {
                 } header: {
                     Text(LocalizedStringKey("notifications.devicePref.muteUntil.label"))
                 } footer: {
-                    Text("Hard mute overrides quiet hours and disables every alert in this scope until the chosen time.")
+                    Text(LocalizedStringKey("notifications.devicePref.hardMute.footer"))
                 }
 
                 if let saveError {
