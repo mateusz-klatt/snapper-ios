@@ -13,17 +13,12 @@
 # guards against the most dangerous `String(localized: "...")` pattern
 # via the simpler check_i18n_allowlist.txt format.
 
-Snapper/Views/AttachBracketSheet.swift:33:legacy phase-h follow-up
-Snapper/Views/AttachBracketSheet.swift:41:legacy phase-h follow-up
 Snapper/Views/AttachBracketSheet.swift:43:legacy phase-h follow-up
-Snapper/Views/AttachBracketSheet.swift:65:legacy phase-h follow-up
 Snapper/Views/AttachBracketSheet.swift:67:legacy phase-h follow-up
-Snapper/Views/AttachTrailingStopSheet.swift:26:legacy phase-h follow-up
 Snapper/Views/AttachTrailingStopSheet.swift:38:legacy phase-h follow-up
 Snapper/Views/AttachTrailingStopSheet.swift:42:legacy phase-h follow-up
 Snapper/Views/AttachTrailingStopSheet.swift:47:legacy phase-h follow-up
 Snapper/Views/AttachTrailingStopSheet.swift:51:legacy phase-h follow-up
-Snapper/Views/AttachTrailingStopSheet.swift:54:legacy phase-h follow-up
 Snapper/Views/AttachTrailingStopSheet.swift:56:legacy phase-h follow-up
 Snapper/Views/Components/CandlestickChartView.swift:31:legacy phase-h follow-up
 Snapper/Views/Components/InstrumentPickerSheet.swift:39:legacy phase-h follow-up

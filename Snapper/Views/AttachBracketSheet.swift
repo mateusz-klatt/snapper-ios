@@ -30,7 +30,7 @@ struct AttachBracketSheet: View {
     var body: some View {
         NavigationStack {
             Form {
-                Section("Position") {
+                Section(LocalizedStringKey("common.position.label")) {
                     HStack {
                         Text(position.instrument).font(.headline)
                         Spacer()
@@ -38,7 +38,7 @@ struct AttachBracketSheet: View {
                             .foregroundStyle(.secondary)
                     }
                     HStack {
-                        Text("Average price")
+                        Text(LocalizedStringKey("common.averagePrice.label"))
                         Spacer()
                         Text(String(format: "%.4f", position.averagePrice))
                             .foregroundStyle(.secondary)
@@ -62,7 +62,7 @@ struct AttachBracketSheet: View {
                             .frame(minWidth: 100)
                     }
                 } header: {
-                    Text("Bracket")
+                    Text(LocalizedStringKey("trading.bracket.section.bracket"))
                 } footer: {
                     Text("At least one of stop loss / take profit is required. Backend fires reduce-only protective orders when price crosses either level.")
                 }

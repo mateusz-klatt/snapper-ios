@@ -23,7 +23,7 @@ struct AttachTrailingStopSheet: View {
     var body: some View {
         NavigationStack {
             Form {
-                Section("Position") {
+                Section(LocalizedStringKey("common.position.label")) {
                     HStack {
                         Text(position.instrument).font(.headline)
                         Spacer()
@@ -51,7 +51,7 @@ struct AttachTrailingStopSheet: View {
                         Text("%").foregroundStyle(.secondary)
                     }
                 } header: {
-                    Text("Trailing stop")
+                    Text(LocalizedStringKey("trading.trailingStop.section.trailingStop"))
                 } footer: {
                     Text("Trailing distance is the gap the stop maintains as price moves favourably. Min lock-in (optional) prevents the stop from moving below that profit threshold once reached.")
                 }
