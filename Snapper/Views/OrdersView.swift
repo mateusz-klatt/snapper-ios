@@ -170,7 +170,7 @@ struct OrdersView: View {
                 pendingCancelOrder = nil
             }
         } message: { order in
-            Text("\(order.instrument) \(order.side.uppercased()) \(String(format: "%.4f", order.size)) @ \(order.price.map { String(format: "%.4f", $0) } ?? "market") will be cancelled at the venue.")
+            Text("\(order.instrument) \(order.side.uppercased()) \(order.size.formattedDecimal(in: appState.locale, fractionDigits: 4)) @ \(order.price.map { $0.formattedDecimal(in: appState.locale, fractionDigits: 4) } ?? "market") will be cancelled at the venue.")
         }
         .alert(
             LocalizedStringKey("common.error.submissionFailed"),
@@ -228,6 +228,8 @@ enum OrdersSegment: String, CaseIterable, Identifiable {
 private struct OrderRow: View {
     let order: OrderStatus
 
+    @Environment(AppState.self) private var appState
+
     var body: some View {
         VStack(alignment: .leading, spacing: 4) {
             HStack {
@@ -244,12 +246,18 @@ private struct OrderRow: View {
             HStack {
                 Text("\(order.side) \(order.orderType)")
                 Spacer()
-                Text(String(format: "Size: %.4f", order.size))
+                Text(String(
+                    format: LocaleStrings.localized("orders.row.size", in: appState.locale.catalogLanguage),
+                    order.size.formattedDecimal(in: appState.locale, fractionDigits: 4)
+                ))
             }
             .font(.caption)
             .foregroundColor(.secondary)
             if let price = order.price {
-                Text(String(format: "Price: %.4f", price))
+                Text(String(
+                    format: LocaleStrings.localized("orders.row.price", in: appState.locale.catalogLanguage),
+                    price.formattedDecimal(in: appState.locale, fractionDigits: 4)
+                ))
                     .font(.caption2)
                     .foregroundColor(.secondary)
             }
@@ -274,6 +282,8 @@ private struct OrderRow: View {
 private struct ExecutionRow: View {
     let execution: ExecutionRecord
 
+    @Environment(AppState.self) private var appState
+
     var body: some View {
         VStack(alignment: .leading, spacing: 4) {
             HStack {
@@ -285,9 +295,17 @@ private struct ExecutionRow: View {
                     .foregroundColor(execution.side == "buy" ? .profitGreen : .lossRed)
             }
             HStack {
-                Text(String(format: "Filled %.4f @ %.4f", execution.lastSize, execution.lastPrice))
+                Text(String(
+                    format: LocaleStrings.localized("orders.execution.filledAtPrice", in: appState.locale.catalogLanguage),
+                    execution.lastSize.formattedDecimal(in: appState.locale, fractionDigits: 4),
+                    execution.lastPrice.formattedDecimal(in: appState.locale, fractionDigits: 4)
+                ))
                 Spacer()
-                Text(String(format: "Fee: %.4f %@", execution.fee, execution.feeAsset))
+                Text(String(
+                    format: LocaleStrings.localized("orders.execution.feeWithAsset", in: appState.locale.catalogLanguage),
+                    execution.fee.formattedDecimal(in: appState.locale, fractionDigits: 4),
+                    execution.feeAsset
+                ))
             }
             .font(.caption)
             .foregroundColor(.secondary)

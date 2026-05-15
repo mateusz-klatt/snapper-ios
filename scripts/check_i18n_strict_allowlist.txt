@@ -3,40 +3,18 @@
 # Each non-comment, non-blank line is `<path>:<line>:<reason>`. A hit
 # whose <path>:<line> prefix matches an entry here is ignored.
 #
-# Two categories of allowed hits remain:
-#   1. "phase-d formatter follow-up — <fragment>" — String(format:)
-#      hits that need locale-aware NumberFormatter / DateFormatter
-#      via the LocaleFormatters helper. Phase D is the planned PR
-#      that wires these through.
-#   2. "numeric placeholder — locale-neutral" — single-token numeric
-#      hints in TextField placeholders ("0.0", "1.5"). Decimal
-#      separator semantics come from the keyboard input parser, not
-#      the placeholder string, so translating them adds no value.
+# After Phase D shipped (PR #59 — locale-aware decimal/currency), only
+# the locale-neutral numeric placeholders remain: single-token numeric
+# hints in TextField placeholders ("0.0", "1.5"). Decimal separator
+# semantics come from the keyboard input parser, not the placeholder
+# string, so translating them adds no value.
 #
 # The v1 single-pattern lint (check_i18n.sh) still guards against the
 # most dangerous `String(localized: "...")` pattern via the simpler
 # check_i18n_allowlist.txt format.
 
-# Phase D — locale-aware number formatting (HomeView + AttachBracketSheet)
-Snapper/Views/AttachBracketSheet.swift:43:phase-d formatter follow-up — String(format: "%.4f", position.averagePrice)
-Snapper/Views/HomeView.swift:320:phase-d formatter follow-up — String(format: "Qty: %.4f @ %.2f", quantity, averagePrice)
-Snapper/Views/HomeView.swift:328:phase-d formatter follow-up — String(format: "$%.2f", unrealizedPnl)
-Snapper/Views/HomeView.swift:358:phase-d formatter follow-up — String(format: "%@ %.4f", side, size)
-
-# Phase D — locale-aware number formatting (OrdersView)
-Snapper/Views/OrdersView.swift:247:phase-d formatter follow-up — String(format: "Size: %.4f", order.size)
-Snapper/Views/OrdersView.swift:252:phase-d formatter follow-up — String(format: "Price: %.4f", price)
-Snapper/Views/OrdersView.swift:288:phase-d formatter follow-up — String(format: "Filled %.4f @ %.4f", ...)
-Snapper/Views/OrdersView.swift:290:phase-d formatter follow-up — String(format: "Fee: %.4f %@", fee, asset)
-
-# Phase D — locale-aware number formatting (PositionsView)
-Snapper/Views/PositionsView.swift:243:phase-d formatter follow-up — String(format: "%.4f", averagePrice)
-Snapper/Views/PositionsView.swift:251:phase-d formatter follow-up — String(format: "%.4f", quantity)
-Snapper/Views/PositionsView.swift:313:phase-d formatter follow-up — String(format: "%.2f", unrealizedPnl)
-Snapper/Views/PositionsView.swift:316:phase-d formatter follow-up — String(format: "Avg %.4f", averagePrice)
-
 # Numeric placeholder examples — locale-neutral, no value in translating
-Snapper/Views/AttachTrailingStopSheet.swift:38:numeric placeholder — locale-neutral "1.5"
+Snapper/Views/AttachTrailingStopSheet.swift:39:numeric placeholder — locale-neutral "1.5"
 Snapper/Views/NewOrderSheet.swift:97:numeric placeholder — locale-neutral "0.0"
 Snapper/Views/NewOrderSheet.swift:107:numeric placeholder — locale-neutral "0.0"
 Snapper/Views/NewOrderSheet.swift:118:numeric placeholder — locale-neutral "0.0"
