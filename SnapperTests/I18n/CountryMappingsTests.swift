@@ -36,7 +36,7 @@ final class CountryMappingsTests: XCTestCase {
         (.rs, .srLatn),
         (.ba, .bs),
         (.al, .sq),
-        (.iceland, .`is`),
+        (.iceland, .icelandic),
         (.gr, .el),
         (.tr, .tr),
         (.ph, .fil),

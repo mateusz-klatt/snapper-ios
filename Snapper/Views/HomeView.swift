@@ -230,8 +230,7 @@ struct HomeView: View {
 
     private func connectionText(at now: Date) -> String {
         let language = appState.locale.catalogLanguage
-        switch webSocketManager.connectionState {
-        case .connected:
+        if webSocketManager.connectionState == .connected {
             let connectedLabel = webSocketManager.connectionState.displayName(in: language)
             if let last = webSocketManager.state.lastHeartbeatAt {
                 let age = Int(now.timeIntervalSince(last))
@@ -243,9 +242,8 @@ struct HomeView: View {
                 return "\(connectedLabel) · \(heartbeat)"
             }
             return connectedLabel
-        default:
-            return webSocketManager.connectionState.displayName(in: language)
         }
+        return webSocketManager.connectionState.displayName(in: language)
     }
 
     private func systemStatusView(status: SystemStatus) -> some View {

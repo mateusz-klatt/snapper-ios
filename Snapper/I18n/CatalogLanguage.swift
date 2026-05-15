@@ -49,7 +49,7 @@ enum CatalogLanguage: String, CaseIterable, Codable, Sendable {
     case srLatn = "sr-Latn"
     case bs
     case sq
-    case `is`
+    case icelandic = "is"
     case el
     case tr
     case fil
