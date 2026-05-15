@@ -1,22 +1,53 @@
+import Foundation
 import XCTest
 @testable import Snapper
 
 /// Locks the catalog-language fallback and BCP-47 identifier
-/// derivation for every ``AppLocale`` code. Only ``.pl`` resolves
-/// to a non-English catalog in v1; every other code falls back to
-/// ``.en`` while keeping its country-region suffix.
+/// derivation for every ``AppLocale`` code. Batch-1 rollout
+/// (2026-05-15) adds 15 European languages on top of v1 Polish;
+/// country codes outside this set still fall back to ``.en`` while
+/// keeping their country-region suffix for date formatting.
 final class CountryMappingsTests: XCTestCase {
 
-    func testPolandMapsToPolishCatalog() {
-        XCTAssertEqual(CountryMappings.catalogLanguage(for: .pl), .pl)
+    /// Country code → catalog language, in the same order the
+    /// rows render on the locale picker. Updated each time a new
+    /// language ships translations.
+    private static let translatedLanguageMappings: [(AppLocale, CatalogLanguage)] = [
+        (.pl, .pl),
+        (.de, .de),
+        (.fr, .fr),
+        (.es, .es),
+        (.it, .it),
+        (.nl, .nl),
+        (.br, .ptBR),
+        (.se, .sv),
+        (.no, .nb),
+        (.dk, .da),
+        (.fi, .fi),
+        (.cz, .cs),
+        (.sk, .sk),
+        (.hu, .hu),
+        (.ro, .ro),
+        (.hr, .hr),
+    ]
+
+    func testTranslatedLanguagesMapToTheirOwnCatalog() {
+        for (code, expected) in Self.translatedLanguageMappings {
+            XCTAssertEqual(
+                CountryMappings.catalogLanguage(for: code),
+                expected,
+                "Expected \(code.rawValue) → .\(expected.rawValue)"
+            )
+        }
     }
 
-    func testEveryOtherCodeMapsToEnglishCatalog() {
-        for code in AppLocale.allCases where code != .pl {
+    func testUntranslatedCodesFallBackToEnglishCatalog() {
+        let translatedCodes = Set(Self.translatedLanguageMappings.map { $0.0 })
+        for code in AppLocale.allCases where !translatedCodes.contains(code) {
             XCTAssertEqual(
                 CountryMappings.catalogLanguage(for: code),
                 .en,
-                "Expected \(code.rawValue) → .en"
+                "Expected \(code.rawValue) → .en (no translation column yet)"
             )
         }
     }
@@ -24,7 +55,8 @@ final class CountryMappingsTests: XCTestCase {
     func testIntlLocaleIdentifierSampledCodes() {
         XCTAssertEqual(CountryMappings.intlLocaleIdentifier(for: .ie), "en-IE")
         XCTAssertEqual(CountryMappings.intlLocaleIdentifier(for: .pl), "pl-PL")
-        XCTAssertEqual(CountryMappings.intlLocaleIdentifier(for: .de), "en-DE")
+        XCTAssertEqual(CountryMappings.intlLocaleIdentifier(for: .de), "de-DE")
+        XCTAssertEqual(CountryMappings.intlLocaleIdentifier(for: .br), "pt-BR")
         XCTAssertEqual(CountryMappings.intlLocaleIdentifier(for: .ae), "en-AE")
         XCTAssertEqual(CountryMappings.intlLocaleIdentifier(for: .us), "en-US")
     }
@@ -42,8 +74,8 @@ final class CountryMappingsTests: XCTestCase {
             let id = CountryMappings.intlLocaleIdentifier(for: code)
             let catalog = CountryMappings.catalogLanguage(for: code).rawValue
             XCTAssertTrue(
-                id.hasPrefix("\(catalog)-"),
-                "\(code.rawValue) → \(id) should start with \(catalog)-"
+                id == catalog || id.hasPrefix("\(catalog)-"),
+                "\(code.rawValue) → \(id) should be \(catalog) or start with \(catalog)-"
             )
         }
     }

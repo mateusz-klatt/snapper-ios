@@ -12,27 +12,55 @@ import Foundation
 /// ``AppLocale+ParityTests``.
 enum CountryMappings {
 
-    /// Catalog language for a given country code. v1 ships English
-    /// as the source language and Polish as the only translation;
-    /// every code except ``pl`` falls back to ``en``.
+    /// Catalog language for a given country code. Defaults to
+    /// ``CatalogLanguage/en`` when the country does not have a
+    /// dedicated translation column in ``Localizable.xcstrings``.
+    ///
+    /// Batch-1 (2026-05-15) adds 15 European languages alongside
+    /// the v1 Polish translation: de, fr, es, it, nl, pt-BR (Brazil),
+    /// sv, nb (Norway), da, fi, cs, sk, hu, ro, hr.
     static func catalogLanguage(for code: AppLocale) -> CatalogLanguage {
-        if code == .pl {
-            return .pl
+        switch code {
+        case .pl: return .pl
+        case .de: return .de
+        case .fr: return .fr
+        case .es: return .es
+        case .it: return .it
+        case .nl: return .nl
+        case .br: return .ptBR
+        case .se: return .sv
+        case .no: return .nb
+        case .dk: return .da
+        case .fi: return .fi
+        case .cz: return .cs
+        case .sk: return .sk
+        case .hu: return .hu
+        case .ro: return .ro
+        case .hr: return .hr
+        default: return .en
         }
-        return .en
     }
 
     /// BCP-47 identifier ``<catalogLanguage>-<COUNTRY>`` produced
     /// by joining the catalog language with the uppercased country
     /// code. Example: ``.ie`` → ``"en-IE"``, ``.pl`` → ``"pl-PL"``,
-    /// ``.de`` → ``"en-DE"``.
+    /// ``.de`` → ``"de-DE"``.
     ///
     /// Country codes like ``ie`` / ``br`` / ``se`` are themselves
     /// valid BCP-47 LANGUAGE tags for unrelated languages (Irish
     /// Gaelic, Breton, Northern Sami), so passing the raw country
     /// code to ``Intl.DateTimeFormat`` / ``Locale`` would produce
     /// wrong semantics. Always prefix with the catalog language.
+    ///
+    /// Special case: when the catalog language rawValue already
+    /// encodes a region (e.g. ``"pt-BR"`` for Brazilian Portuguese),
+    /// the language tag is returned as-is rather than appended with
+    /// another country suffix — ``"pt-BR-BR"`` is invalid BCP-47.
     static func intlLocaleIdentifier(for code: AppLocale) -> String {
-        "\(catalogLanguage(for: code).rawValue)-\(code.rawValue.uppercased())"
+        let language = catalogLanguage(for: code).rawValue
+        if language.contains("-") {
+            return language
+        }
+        return "\(language)-\(code.rawValue.uppercased())"
     }
 }

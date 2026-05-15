@@ -23,10 +23,10 @@ final class LocaleEnvironmentResolverTests: XCTestCase {
         )
     }
 
-    func testEnvironmentLocaleForDEisEnDE() {
+    func testEnvironmentLocaleForDEisDeDE() {
         XCTAssertEqual(
             LocaleEnvironmentResolver.environmentLocale(for: .de).identifier,
-            "en-DE"
+            "de-DE"
         )
     }
 
