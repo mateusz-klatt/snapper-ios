@@ -32,14 +32,14 @@ struct PositionsView: View {
             Group {
                 if let viewModel {
                     if viewModel.isLoading && viewModel.filteredPositions.isEmpty {
-                        ProgressView("Loading positions…")
+                        ProgressView(LocalizedStringKey("positions.loading"))
                     } else if PositionsViewModel.shouldShowLoadError(
                         filteredCount: viewModel.filteredPositions.count,
                         loadError: viewModel.loadError,
                         isLoading: viewModel.isLoading
                     ), let loadError = viewModel.loadError {
                         ContentUnavailableView(
-                            "Couldn't load positions",
+                            LocalizedStringKey("positions.error.loadFailed.title"),
                             systemImage: "exclamationmark.triangle",
                             description: Text(loadError.localizedDescription)
                         )
@@ -119,10 +119,10 @@ struct PositionsView: View {
                     .accessibilityLabel(LocalizedStringKey("positions.accessibility.label.reduceButton"))
                 }
                 if position.positionCyclePublicId != nil {
-                    Button("Attach SL / TP") {
+                    Button(LocalizedStringKey("trading.bracket.attach")) {
                         bracketModalPosition = IdentifiedPosition(position: position)
                     }
-                    Button("Attach trailing stop") {
+                    Button(LocalizedStringKey("trading.trailingStop.attach")) {
                         trailingStopModalPosition = IdentifiedPosition(position: position)
                     }
                 }
@@ -189,14 +189,14 @@ struct PositionsView: View {
             )
         }
         .alert(
-            "Submission failed",
+            LocalizedStringKey("common.error.submissionFailed"),
             isPresented: Binding(
                 get: { viewModel?.submitError != nil },
                 set: { if !$0 { viewModel?.submitError = nil } }
             ),
             presenting: viewModel?.submitError
         ) { _ in
-            Button("OK", role: .cancel) {
+            Button(LocalizedStringKey("common.ok"), role: .cancel) {
                 viewModel?.submitError = nil
             }
         } message: { error in
@@ -229,7 +229,7 @@ struct ReducePositionView: View {
     var body: some View {
         NavigationStack {
             Form {
-                Section("Position") {
+                Section(LocalizedStringKey("common.position.label")) {
                     HStack {
                         Text(position.instrument)
                             .font(.headline)
@@ -238,7 +238,7 @@ struct ReducePositionView: View {
                             .foregroundStyle(.secondary)
                     }
                     HStack {
-                        Text("Average price")
+                        Text(LocalizedStringKey("common.averagePrice.label"))
                         Spacer()
                         Text(String(format: "%.4f", position.averagePrice))
                             .foregroundStyle(.secondary)
@@ -262,9 +262,9 @@ struct ReducePositionView: View {
                         }
                     }
                 } header: {
-                    Text("Quantity")
+                    Text(LocalizedStringKey("trading.order.quantityLabel"))
                 } footer: {
-                    Text("100% closes the position. Submits a reduce-only market order against the opposite side.")
+                    Text(LocalizedStringKey("positions.reduce.footer"))
                 }
             }
             .navigationTitle(LocalizedStringKey("positions.reduce.title"))

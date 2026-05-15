@@ -32,7 +32,7 @@ struct SettingsView: View {
                 Section(LocalizedStringKey("settings.section.account")) {
                     if let user = authService.currentUser {
                         HStack {
-                            Text("Username")
+                            Text(LocalizedStringKey("settings.account.username"))
                             Spacer()
                             Text(user.username)
                                 .foregroundColor(.secondary)
@@ -40,7 +40,7 @@ struct SettingsView: View {
 
                         if let email = user.email {
                             HStack {
-                                Text("Email")
+                                Text(LocalizedStringKey("settings.account.email"))
                                 Spacer()
                                 Text(email)
                                     .foregroundColor(.secondary)
@@ -81,19 +81,19 @@ struct SettingsView: View {
 
                 Section(LocalizedStringKey("settings.section.notifications")) {
                     HStack {
-                        Text("Permission")
+                        Text(LocalizedStringKey("settings.notifications.permission"))
                         Spacer()
                         notificationStatusView
                     }
 
                     if notificationService.authorizationStatus == .notDetermined {
-                        Button("Enable push notifications") {
+                        Button(LocalizedStringKey("settings.notifications.enableButton")) {
                             Task {
                                 await notificationService.requestAuthorization()
                             }
                         }
                     } else if notificationService.authorizationStatus == .denied {
-                        Button("Open Settings") {
+                        Button(LocalizedStringKey("settings.notifications.openSystemSettings")) {
                             if let url = URL(string: UIApplication.openSettingsURLString) {
                                 UIApplication.shared.open(url)
                             }
@@ -161,16 +161,16 @@ struct SettingsView: View {
                 logout()
             }
         } message: {
-            Text("Are you sure you want to logout?")
+            Text(LocalizedStringKey("settings.logout.confirmMessage"))
         }
-        .alert("Change backend?", isPresented: $showingBackendChangeAlert) {
-            Button("Cancel", role: .cancel, action: dismissBackendChangeAlert)
-            Button("Continue") {
+        .alert(LocalizedStringKey("settings.connection.changeBackendTitle"), isPresented: $showingBackendChangeAlert) {
+            Button(LocalizedStringKey("backend.url.cancel"), role: .cancel, action: dismissBackendChangeAlert)
+            Button(LocalizedStringKey("common.continue")) {
                 backendDraft = ""
                 showingBackendEditor = true
             }
         } message: {
-            Text("Switching backend signs you out and clears local app state. You'll need to sign in again at the new URL.")
+            Text(LocalizedStringKey("settings.connection.changeBackendMessage"))
         }
         .sheet(isPresented: $showingBackendEditor) {
             backendEditorSheet
@@ -181,7 +181,7 @@ struct SettingsView: View {
     private var backendEditorSheet: some View {
         NavigationView {
             Form {
-                Section("Custom backend URL") {
+                Section(LocalizedStringKey("settings.connection.customBackendURL")) {
                     BackendURLEditor(
                         draft: $backendDraft,
                         allowReset: BackendURLStore.shared.hasOverride(),
@@ -199,7 +199,7 @@ struct SettingsView: View {
                     )
                 }
             }
-            .navigationTitle("Change backend")
+            .navigationTitle(LocalizedStringKey("settings.connection.changeBackendNavTitle"))
             .navigationBarTitleDisplayMode(.inline)
         }
     }
@@ -349,7 +349,7 @@ struct SettingsView: View {
     @ViewBuilder
     private var deviceStatusRow: some View {
         HStack {
-            Text("Device")
+            Text(LocalizedStringKey("settings.notifications.device"))
             Spacer()
             switch registrationStatus {
             case .succeeded:
@@ -358,12 +358,12 @@ struct SettingsView: View {
                         .font(.caption.monospaced())
                         .foregroundColor(.secondary)
                 } else {
-                    Text("Registered")
+                    Text(LocalizedStringKey("settings.notifications.registered"))
                         .font(.caption)
                         .foregroundColor(.secondary)
                 }
             case .inFlight:
-                Text("Registering…")
+                Text(LocalizedStringKey("settings.notifications.registering"))
                     .font(.caption)
                     .foregroundColor(.secondary)
             case .failed(let attempt, _):
@@ -371,7 +371,7 @@ struct SettingsView: View {
                     .font(.caption)
                     .foregroundColor(.brandRed)
             case .awaitingLogin, .awaitingToken, .idle:
-                Text("Not registered")
+                Text(LocalizedStringKey("settings.notifications.notRegistered"))
                     .font(.caption)
                     .foregroundColor(.secondary)
             }

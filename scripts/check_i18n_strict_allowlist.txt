@@ -59,51 +59,11 @@ Snapper/Views/NotificationPrefsView.swift:62:legacy phase-h follow-up
 Snapper/Views/NotificationPrefsView.swift:63:legacy phase-h follow-up
 Snapper/Views/NotificationPrefsView.swift:83:legacy phase-h follow-up
 Snapper/Views/NotificationPrefsView.swift:92:legacy phase-h follow-up
-Snapper/Views/OrdersView.swift:37:legacy phase-h follow-up
-Snapper/Views/OrdersView.swift:54:legacy phase-h follow-up
-Snapper/Views/OrdersView.swift:68:legacy phase-h follow-up
-Snapper/Views/OrdersView.swift:75:legacy phase-h follow-up
-Snapper/Views/OrdersView.swift:123:legacy phase-h follow-up
-Snapper/Views/OrdersView.swift:158:legacy phase-h follow-up
-Snapper/Views/OrdersView.swift:159:legacy phase-h follow-up
-Snapper/Views/OrdersView.swift:166:legacy phase-h follow-up
-Snapper/Views/OrdersView.swift:169:legacy phase-h follow-up
-Snapper/Views/OrdersView.swift:175:legacy phase-h follow-up
-Snapper/Views/OrdersView.swift:176:legacy phase-h follow-up
-Snapper/Views/OrdersView.swift:183:legacy phase-h follow-up
-Snapper/Views/OrdersView.swift:247:legacy phase-h follow-up
-Snapper/Views/OrdersView.swift:252:legacy phase-h follow-up
-Snapper/Views/OrdersView.swift:288:legacy phase-h follow-up
-Snapper/Views/OrdersView.swift:290:legacy phase-h follow-up
-Snapper/Views/PositionsView.swift:35:legacy phase-h follow-up
-Snapper/Views/PositionsView.swift:41:legacy phase-h follow-up
-Snapper/Views/PositionsView.swift:42:legacy phase-h follow-up
-Snapper/Views/PositionsView.swift:122:legacy phase-h follow-up
-Snapper/Views/PositionsView.swift:125:legacy phase-h follow-up
-Snapper/Views/PositionsView.swift:191:legacy phase-h follow-up
-Snapper/Views/PositionsView.swift:192:legacy phase-h follow-up
-Snapper/Views/PositionsView.swift:199:legacy phase-h follow-up
-Snapper/Views/PositionsView.swift:232:legacy phase-h follow-up
-Snapper/Views/PositionsView.swift:241:legacy phase-h follow-up
-Snapper/Views/PositionsView.swift:243:legacy phase-h follow-up
-Snapper/Views/PositionsView.swift:251:legacy phase-h follow-up
-Snapper/Views/PositionsView.swift:265:legacy phase-h follow-up
-Snapper/Views/PositionsView.swift:267:legacy phase-h follow-up
-Snapper/Views/PositionsView.swift:313:legacy phase-h follow-up
-Snapper/Views/PositionsView.swift:316:legacy phase-h follow-up
-Snapper/Views/SettingsView.swift:35:legacy phase-h follow-up
-Snapper/Views/SettingsView.swift:43:legacy phase-h follow-up
-Snapper/Views/SettingsView.swift:84:legacy phase-h follow-up
-Snapper/Views/SettingsView.swift:90:legacy phase-h follow-up
-Snapper/Views/SettingsView.swift:96:legacy phase-h follow-up
-Snapper/Views/SettingsView.swift:164:legacy phase-h follow-up
-Snapper/Views/SettingsView.swift:166:legacy phase-h follow-up
-Snapper/Views/SettingsView.swift:167:legacy phase-h follow-up
-Snapper/Views/SettingsView.swift:168:legacy phase-h follow-up
-Snapper/Views/SettingsView.swift:173:legacy phase-h follow-up
-Snapper/Views/SettingsView.swift:184:legacy phase-h follow-up
-Snapper/Views/SettingsView.swift:202:legacy phase-h follow-up
-Snapper/Views/SettingsView.swift:352:legacy phase-h follow-up
-Snapper/Views/SettingsView.swift:361:legacy phase-h follow-up
-Snapper/Views/SettingsView.swift:366:legacy phase-h follow-up
-Snapper/Views/SettingsView.swift:374:legacy phase-h follow-up
+Snapper/Views/OrdersView.swift:247:phase-d formatter follow-up — String(format: "Size: %.4f", order.size)
+Snapper/Views/OrdersView.swift:252:phase-d formatter follow-up — String(format: "Price: %.4f", price)
+Snapper/Views/OrdersView.swift:288:phase-d formatter follow-up — String(format: "Filled %.4f @ %.4f", ...)
+Snapper/Views/OrdersView.swift:290:phase-d formatter follow-up — String(format: "Fee: %.4f %@", fee, asset)
+Snapper/Views/PositionsView.swift:243:phase-d formatter follow-up — String(format: "%.4f", averagePrice)
+Snapper/Views/PositionsView.swift:251:phase-d formatter follow-up — String(format: "%.4f", quantity)
+Snapper/Views/PositionsView.swift:313:phase-d formatter follow-up — String(format: "%.2f", unrealizedPnl)
+Snapper/Views/PositionsView.swift:316:phase-d formatter follow-up — String(format: "Avg %.4f", averagePrice)

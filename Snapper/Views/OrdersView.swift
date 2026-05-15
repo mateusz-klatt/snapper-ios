@@ -34,7 +34,7 @@ struct OrdersView: View {
     var body: some View {
         NavigationStack {
             VStack(spacing: 0) {
-                Picker("Segment", selection: $segment) {
+                Picker(LocalizedStringKey("orders.segment.label"), selection: $segment) {
                     ForEach(OrdersSegment.allCases) { seg in
                         Text(LocalizedStringKey(seg.titleKey)).tag(seg)
                     }
@@ -51,7 +51,7 @@ struct OrdersView: View {
                             Section {
                                 HStack(spacing: 8) {
                                     ProgressView()
-                                    Text("Loading…")
+                                    Text(LocalizedStringKey("common.loading"))
                                         .font(.subheadline)
                                         .foregroundStyle(.secondary)
                                 }
@@ -65,14 +65,14 @@ struct OrdersView: View {
                                     Image(systemName: "exclamationmark.triangle")
                                         .foregroundStyle(.orange)
                                     VStack(alignment: .leading, spacing: 2) {
-                                        Text("Couldn't load")
+                                        Text(LocalizedStringKey("common.error.loadFailed.title"))
                                             .font(.subheadline.weight(.semibold))
                                         Text(errorMessage)
                                             .font(.caption)
                                             .foregroundStyle(.secondary)
                                     }
                                     Spacer()
-                                    Button("Retry") {
+                                    Button(LocalizedStringKey("common.retry")) {
                                         Task { await viewModel.load() }
                                     }
                                     .buttonStyle(.bordered)
@@ -120,7 +120,7 @@ struct OrdersView: View {
                         Button {
                             presentingNewOrder = true
                         } label: {
-                            Label("New order", systemImage: "plus.circle")
+                            Label(LocalizedStringKey("orders.newOrder.button"), systemImage: "plus.circle")
                         }
                         .disabled(viewModel?.resolvedWallet == nil)
                     }
@@ -156,31 +156,31 @@ struct OrdersView: View {
             }
         }
         .alert(
-            "Cancel order?",
+            LocalizedStringKey("orders.cancel.confirmTitle"),
             isPresented: Binding(
                 get: { pendingCancelOrder != nil },
                 set: { if !$0 { pendingCancelOrder = nil } }
             ),
             presenting: pendingCancelOrder
         ) { order in
-            Button("Cancel order", role: .destructive) {
+            Button(LocalizedStringKey("orders.cancel.confirmButton"), role: .destructive) {
                 Task { await viewModel?.submitCancel(order: order) }
             }
-            Button("Keep open", role: .cancel) {
+            Button(LocalizedStringKey("orders.cancel.keepOpen"), role: .cancel) {
                 pendingCancelOrder = nil
             }
         } message: { order in
             Text("\(order.instrument) \(order.side.uppercased()) \(String(format: "%.4f", order.size)) @ \(order.price.map { String(format: "%.4f", $0) } ?? "market") will be cancelled at the venue.")
         }
         .alert(
-            "Submission failed",
+            LocalizedStringKey("common.error.submissionFailed"),
             isPresented: Binding(
                 get: { viewModel?.submitError != nil },
                 set: { if !$0 { viewModel?.submitError = nil } }
             ),
             presenting: viewModel?.submitError
         ) { _ in
-            Button("OK", role: .cancel) {
+            Button(LocalizedStringKey("common.ok"), role: .cancel) {
                 viewModel?.submitError = nil
             }
         } message: { error in
