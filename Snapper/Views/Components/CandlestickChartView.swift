@@ -28,7 +28,7 @@ struct CandlestickChartView: View {
                 Image(systemName: "chart.bar.xaxis")
                     .font(.largeTitle)
                     .foregroundColor(.textSecondary)
-                Text("No candles yet")
+                Text(LocalizedStringKey("market.data.chart.emptyState"))
                     .font(.subheadline)
                     .foregroundColor(.textSecondary)
             }

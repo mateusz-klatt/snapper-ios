@@ -64,7 +64,7 @@ struct AttachBracketSheet: View {
                 } header: {
                     Text(LocalizedStringKey("trading.bracket.section.bracket"))
                 } footer: {
-                    Text("At least one of stop loss / take profit is required. Backend fires reduce-only protective orders when price crosses either level.")
+                    Text(LocalizedStringKey("trading.bracket.footer.requirement"))
                 }
             }
             .navigationTitle(LocalizedStringKey("trading.bracket.title"))

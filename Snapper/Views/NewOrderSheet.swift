@@ -56,8 +56,8 @@ struct NewOrderSheet: View {
                     }
                 }
 
-                Section("Venue") {
-                    Picker("Exchange", selection: $viewModel.selectedExchange) {
+                Section(LocalizedStringKey("trading.order.venueSection")) {
+                    Picker(LocalizedStringKey("trading.order.exchangeLabel"), selection: $viewModel.selectedExchange) {
                         ForEach(viewModel.exchanges, id: \.self) { exchange in
                             Text(exchange).tag(exchange)
                         }
@@ -70,7 +70,7 @@ struct NewOrderSheet: View {
                             }
                         }
                     )) {
-                        Text(viewModel.isLoadingInstruments ? "Loading…" : "Select instrument")
+                        Text(LocalizedStringKey(viewModel.isLoadingInstruments ? "common.loading" : "trading.order.selectInstrument"))
                             .tag("")
                         ForEach(viewModel.availableInstruments.filter { $0.canTrade }, id: \.instrumentPublicId) { row in
                             Text(row.symbol).tag(row.instrumentPublicId)
@@ -78,7 +78,7 @@ struct NewOrderSheet: View {
                     }
                 }
 
-                Section("Order") {
+                Section(LocalizedStringKey("trading.order.orderSection")) {
                     Picker(LocalizedStringKey("trading.order.sideLabel"), selection: $viewModel.side) {
                         Text(LocalizedStringKey("trading.side.buy")).tag("buy")
                         Text(LocalizedStringKey("trading.side.sell")).tag("sell")
@@ -123,11 +123,11 @@ struct NewOrderSheet: View {
                     }
                 }
 
-                Section("Risk") {
+                Section(LocalizedStringKey("trading.order.riskSection")) {
                     HStack {
-                        Text("Leverage")
+                        Text(LocalizedStringKey("trading.order.leverageLabel"))
                         Spacer()
-                        TextField("optional", text: $viewModel.leverageText)
+                        TextField(LocalizedStringKey("common.optional.placeholder"), text: $viewModel.leverageText)
                             .keyboardType(.numberPad)
                             .multilineTextAlignment(.trailing)
                             .frame(minWidth: 80)

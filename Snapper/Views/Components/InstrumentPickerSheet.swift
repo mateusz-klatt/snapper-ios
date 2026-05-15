@@ -36,7 +36,7 @@ struct InstrumentPickerSheet: View {
                         }
                         Spacer()
                         if !instrument.canTrade {
-                            Text("View only")
+                            Text(LocalizedStringKey("market.data.instrumentPicker.viewOnlyBadge"))
                                 .font(.caption2)
                                 .padding(.horizontal, 6)
                                 .padding(.vertical, 2)
@@ -47,7 +47,7 @@ struct InstrumentPickerSheet: View {
                     }
                 }
             }
-            .searchable(text: $query, prompt: "Search instruments")
+            .searchable(text: $query, prompt: Text(LocalizedStringKey("market.data.instrumentPicker.searchPrompt")))
             .navigationTitle(LocalizedStringKey("market.data.instrumentPicker.title"))
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {

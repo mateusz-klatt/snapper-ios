@@ -115,7 +115,7 @@ struct MarketStatusRow: View {
         HStack(spacing: 8) {
             if isLoading {
                 ProgressView().controlSize(.small)
-                Text("Loading…")
+                Text(LocalizedStringKey("common.loading"))
                     .font(.caption)
                     .foregroundColor(.textSecondary)
             } else if let loadError {
@@ -129,13 +129,13 @@ struct MarketStatusRow: View {
                 Circle()
                     .fill(Color.brandGreen)
                     .frame(width: 8, height: 8)
-                Text("Live")
+                Text(LocalizedStringKey("market.data.status.live"))
                     .font(.caption)
                     .foregroundColor(.textSecondary)
             }
             Spacer()
             if isDelayed {
-                Text("Delayed")
+                Text(LocalizedStringKey("market.data.status.delayed"))
                     .font(.caption2.weight(.semibold))
                     .padding(.horizontal, 8)
                     .padding(.vertical, 3)

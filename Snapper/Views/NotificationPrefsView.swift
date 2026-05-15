@@ -49,19 +49,15 @@ struct NotificationPrefsView: View {
             } header: {
                 Text(LocalizedStringKey("notifications.prefs.section.userDefaults"))
             } footer: {
-                Text(
-                    "Defaults apply when no per-device override matches an inbound alert."
-                )
+                Text(LocalizedStringKey("notifications.prefs.section.userDefaults.footer"))
             }
 
             Section {
                 if viewModel.devicePublicId == nil {
                     ContentUnavailableView(
-                        "No device registered",
+                        LocalizedStringKey("notifications.prefs.noDevice.title"),
                         systemImage: "iphone.slash",
-                        description: Text(
-                            "Enable push notifications in Settings → Notifications to register this device."
-                        )
+                        description: Text(LocalizedStringKey("notifications.prefs.noDevice.description"))
                     )
                 } else {
                     if viewModel.devicePrefs.isEmpty {
@@ -80,7 +76,7 @@ struct NotificationPrefsView: View {
                                 Button(role: .destructive) {
                                     Task { await viewModel.revokeDevicePref(prefPublicId: pref.publicId) }
                                 } label: {
-                                    Label("Remove", systemImage: "trash")
+                                    Label(LocalizedStringKey("notifications.prefs.action.remove"), systemImage: "trash")
                                 }
                             }
                         }
@@ -89,7 +85,7 @@ struct NotificationPrefsView: View {
                     Button {
                         sheetMode = .create
                     } label: {
-                        Label("Add override", systemImage: "plus.circle")
+                        Label(LocalizedStringKey("notifications.prefs.action.addOverride"), systemImage: "plus.circle")
                     }
                     .disabled(viewModel.devicePublicId == nil)
                 }
