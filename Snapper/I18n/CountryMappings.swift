@@ -21,8 +21,12 @@ enum CountryMappings {
     /// sv, nb (Norway), da, fi, cs, sk, hu, ro, hr.
     ///
     /// Batch-2 (2026-05-15) adds 15 more: uk, ru, lt, lv, sr-Latn,
-    /// bs, sq, is, el, tr, fil, ms, id, sw, bn. Countries not in
-    /// either batch still fall back to ``.en``.
+    /// bs, sq, is, el, tr, fil, ms, id, sw, bn.
+    ///
+    /// Batch-3 (2026-05-15) closes the 45-country picker with 12
+    /// more languages — every country code in ``AppLocale`` except
+    /// ``.ie`` and ``.us`` (which share ``en``) now has a dedicated
+    /// catalog translation.
     static func catalogLanguage(for code: AppLocale) -> CatalogLanguage {
         switch code {
         case .pl: return .pl
@@ -56,6 +60,18 @@ enum CountryMappings {
         case .id: return .id
         case .ke: return .sw
         case .bd: return .bn
+        case .cn: return .zhHans
+        case .hk: return .zhHant
+        case .jp: return .ja
+        case .kr: return .ko
+        case .th: return .th
+        case .vn: return .vi
+        case .mm: return .my
+        case .india: return .hi
+        case .ae: return .ar
+        case .il: return .he
+        case .ir: return .fa
+        case .am: return .hy
         default: return .en
         }
     }

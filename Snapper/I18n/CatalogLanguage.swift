@@ -19,6 +19,11 @@ import Foundation
 /// Batch-2 (2026-05-15) adds 15 more: uk, ru, lt, lv, sr-Latn, bs,
 /// sq, is, el, tr, fil, ms, id, sw, bn — covering Slavic East, Baltic,
 /// Balkan, Anatolian, Maritime SE-Asia, East Africa, and Indic regions.
+///
+/// Batch-3 (2026-05-15) closes the 45-country picker with 12 more
+/// languages: zh-Hans (mainland Chinese), zh-Hant (HK/TW Chinese),
+/// ja, ko, th, vi, my (Burmese), hi, ar (RTL), he (RTL), fa (RTL),
+/// hy — adding CJK, Indic, Arabic-script RTL, and Armenian coverage.
 enum CatalogLanguage: String, CaseIterable, Codable, Sendable {
     case en
     case pl
@@ -52,4 +57,16 @@ enum CatalogLanguage: String, CaseIterable, Codable, Sendable {
     case id
     case sw
     case bn
+    case zhHans = "zh-Hans"
+    case zhHant = "zh-Hant"
+    case ja
+    case ko
+    case th
+    case vi
+    case my
+    case hi
+    case ar
+    case he
+    case fa
+    case hy
 }
