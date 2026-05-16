@@ -181,16 +181,33 @@ final class I18nScreenshotUITests: XCTestCase {
             sleep(3)
             return true
         }
+        // Race guard (id-ID and other cached-session locales): the
+        // auto-login can complete between `waitForExistence` and `tap`,
+        // tearing down the login form. Re-check `.exists` right before
+        // each interaction so we don't crash trying to tap an element
+        // that's already gone.
+        if !username.exists {
+            sleep(3)
+            return true
+        }
         username.tap()
         username.typeText(demoUsername)
 
         let password = app.secureTextFields["login.password"]
         if !password.waitForExistence(timeout: 5) { return false }
+        if !password.exists {
+            sleep(3)
+            return true
+        }
         password.tap()
         password.typeText(demoPassword)
 
         let signInButton = app.buttons["login.signIn"]
         if !signInButton.waitForExistence(timeout: 5) { return false }
+        if !signInButton.exists {
+            sleep(3)
+            return true
+        }
         signInButton.tap()
 
         // Brute force: give the app 15s for login + navigation, then
