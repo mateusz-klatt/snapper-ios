@@ -41,6 +41,6 @@ final class WebSocketConnectionStateDisplayNameTests: XCTestCase {
     func testAuthFailedSubstitutesServerDetailVerbatim() {
         let state = WebSocketManager.ConnectionState.authFailed("token expired")
         XCTAssertEqual(state.displayName(in: .en), "Auth failed: token expired")
-        XCTAssertEqual(state.displayName(in: .pl), "Uwierzytelnianie nieudane: token expired")
+        XCTAssertEqual(state.displayName(in: .pl), "Uwierzytelnianie nie powiodło się: token expired")
     }
 }
