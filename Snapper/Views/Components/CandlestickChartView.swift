@@ -43,12 +43,18 @@ struct CandlestickChartView: View {
     /// timeframes show `HH:mm`; daily candles show `MMM d`
     /// (e.g. `May 11`) — otherwise multiple daily candles
     /// all render as `00:00` and the axis becomes useless.
+    ///
+    /// Hour formatting forces 24-hour clock via
+    /// ``.twoDigits(amPM: .omitted)`` regardless of locale —
+    /// trading data uses 24h universally and the locale-default
+    /// 12h fallback in en-US / hk / kr truncated the rightmost
+    /// tick (` PM` suffix overflows the axis width).
     private var xAxisFormat: Date.FormatStyle {
         switch timeframe {
         case .oneMinute, .fiveMinutes, .fifteenMinutes, .oneHour:
-            return .dateTime.hour().minute()
+            return .dateTime.hour(.twoDigits(amPM: .omitted)).minute(.twoDigits)
         case .fourHours:
-            return .dateTime.month(.abbreviated).day().hour()
+            return .dateTime.month(.abbreviated).day().hour(.twoDigits(amPM: .omitted))
         case .oneDay:
             return .dateTime.month(.abbreviated).day()
         }

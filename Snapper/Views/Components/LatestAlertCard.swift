@@ -13,6 +13,12 @@ import SwiftUI
 /// summary on Home stays consistent with the full Alerts tab list.
 struct LatestAlertCard: View {
     let alert: AlertEventInfo?
+    /// The user-selected app locale, used to render the relative
+    /// timestamp in the catalog language rather than the host
+    /// process's preferred-language list. Defaults to ``.us``
+    /// (English) so plain previews and legacy callers continue to
+    /// render English without explicit injection.
+    var locale: AppLocale = .us
 
     var body: some View {
         if let alert {
@@ -24,7 +30,7 @@ struct LatestAlertCard: View {
                         .font(.caption)
                         .foregroundStyle(.secondary)
                     Spacer()
-                    Text(Self.relativeTimestamp(for: alert.timestamp))
+                    Text(Self.relativeTimestamp(for: alert.timestamp, locale: locale))
                         .font(.caption2)
                         .foregroundStyle(.tertiary)
                 }
@@ -52,10 +58,18 @@ struct LatestAlertCard: View {
         }
     }
 
-    /// Relative-time helper extracted as a static so it can be unit
-    /// tested independently of the SwiftUI view body.
-    static func relativeTimestamp(for date: Date, relativeTo reference: Date = Date()) -> String {
+    /// Locale-scoped relative-time helper. Setting ``locale`` makes
+    /// the formatter pick the user-selected catalog language
+    /// (e.g. Irish ``ga-IE``) rather than the host process's
+    /// preferred-language list — without it, an English-speaking
+    /// host renders "1 wk ago" even when the user picked Irish.
+    static func relativeTimestamp(
+        for date: Date,
+        locale: AppLocale,
+        relativeTo reference: Date = Date()
+    ) -> String {
         let formatter = RelativeDateTimeFormatter()
+        formatter.locale = locale.nativeLocale
         formatter.unitsStyle = .short
         return formatter.localizedString(for: date, relativeTo: reference)
     }

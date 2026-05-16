@@ -19,7 +19,7 @@ struct SettingsView: View {
     @State private var isSwitchingBackend = false
 
     var body: some View {
-        NavigationView {
+        NavigationStack {
             Form {
 
                 Section {
@@ -179,7 +179,7 @@ struct SettingsView: View {
 
     @ViewBuilder
     private var backendEditorSheet: some View {
-        NavigationView {
+        NavigationStack {
             Form {
                 Section(LocalizedStringKey("settings.connection.customBackendURL")) {
                     BackendURLEditor(

@@ -15,7 +15,7 @@ struct HomeView: View {
     @State private var errorMessage: String?
 
     var body: some View {
-        NavigationView {
+        NavigationStack {
             ScrollView {
                 VStack(spacing: 20) {
                     HStack {
@@ -23,7 +23,7 @@ struct HomeView: View {
                         Spacer()
                     }
 
-                    LatestAlertCard(alert: latestAlert)
+                    LatestAlertCard(alert: latestAlert, locale: appState.locale)
 
                     if authService.hasPermission(.readMarketData) {
                         NavigationLink {
