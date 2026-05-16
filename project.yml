@@ -52,6 +52,7 @@ targets:
     scheme:
       testTargets:
         - SnapperTests
+        - SnapperUITests
       gatherCoverageData: true
 
   SnapperTests:
@@ -68,6 +69,23 @@ targets:
         PRODUCT_BUNDLE_IDENTIFIER: com.example.snapper.tests
         TEST_HOST: $(BUILT_PRODUCTS_DIR)/Snapper.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Snapper
         BUNDLE_LOADER: $(TEST_HOST)
+        SWIFT_VERSION: "6.0"
+        GENERATE_INFOPLIST_FILE: YES
+        CODE_SIGN_STYLE: Automatic
+
+  SnapperUITests:
+    type: bundle.ui-testing
+    platform: iOS
+    sources:
+      - SnapperUITests
+    dependencies:
+      - target: Snapper
+    settings:
+      base:
+        PRODUCT_NAME: SnapperUITests
+        PRODUCT_MODULE_NAME: SnapperUITests
+        PRODUCT_BUNDLE_IDENTIFIER: com.example.snapper.uitests
+        TEST_TARGET_NAME: Snapper
         SWIFT_VERSION: "6.0"
         GENERATE_INFOPLIST_FILE: YES
         CODE_SIGN_STYLE: Automatic

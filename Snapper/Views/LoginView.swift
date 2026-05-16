@@ -44,9 +44,13 @@ struct LoginView: View {
                             .textFieldStyle(.roundedBorder)
                             .textInputAutocapitalization(.never)
                             .autocorrectionDisabled()
+                            .keyboardType(.asciiCapable)
+                            .accessibilityIdentifier("login.username")
 
                         SecureField(LocalizedStringKey("auth.login.passwordPlaceholder"), text: $viewModel.password)
                             .textFieldStyle(.roundedBorder)
+                            .keyboardType(.asciiCapable)
+                            .accessibilityIdentifier("login.password")
 
                         if let errorMessage = viewModel.errorMessage(in: appState.locale.catalogLanguage) {
                             Text(errorMessage)
@@ -72,6 +76,7 @@ struct LoginView: View {
                         .foregroundColor(.white)
                         .cornerRadius(10)
                         .disabled(!viewModel.isLoginEnabled)
+                        .accessibilityIdentifier("login.signIn")
                     }
                     .padding(.horizontal, 32)
 

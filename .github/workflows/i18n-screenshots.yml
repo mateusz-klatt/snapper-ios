@@ -1,0 +1,80 @@
+name: i18n-screenshots
+
+# Opt-in workflow that runs the SnapperUITests screenshot harness across 45
+# AppLocale codes, attaching every PNG to the xcresult bundle. NOT triggered
+# automatically on push/PR — these runs require a live backend tunnel and
+# take ~20 min, so they run only on explicit manual dispatch.
+#
+# To run:
+#   - GitHub UI: Actions → i18n-screenshots → Run workflow → paste backend URL.
+#   - gh CLI: gh workflow run i18n-screenshots -f backend_url=https://your-tunnel
+#
+# The default test run in ci.yml skips the SnapperUITests target via
+# XCTSkipUnless when SNAPPER_UITEST_BACKEND_URL is unset.
+
+on:
+  workflow_dispatch:
+    inputs:
+      backend_url:
+        description: 'Live backend URL (cloudflared tunnel or staging). Required.'
+        required: true
+        type: string
+      test_method:
+        description: 'Which test method to run (full 45-locale sweep / smoke 2-locale / retry 3-locale)'
+        required: true
+        default: 'testCaptureAllLocales'
+        type: choice
+        options:
+          - testCaptureAllLocales
+          - testCaptureSmoke
+          - testCaptureRetryFailures
+
+concurrency:
+  group: i18n-screenshots-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  screenshots:
+    name: i18n screenshot capture
+    runs-on: macos-26
+    timeout-minutes: 60
+    env:
+      SNAPPER_UITEST_BACKEND_URL: ${{ inputs.backend_url }}
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
+
+      - name: Show Xcode + simulator state
+        run: |
+          xcodebuild -version
+          xcrun simctl list devices available iOS
+
+      - name: Install XcodeGen
+        run: brew install xcodegen
+
+      - name: Generate project
+        run: make setup
+
+      - name: Build for testing
+        run: |
+          xcodebuild build-for-testing \
+            -scheme Snapper \
+            -destination 'platform=iOS Simulator,name=iPhone 17 Pro,OS=26.2'
+
+      - name: Run i18n screenshot test
+        run: |
+          xcodebuild test-without-building \
+            -scheme Snapper \
+            -destination 'platform=iOS Simulator,name=iPhone 17 Pro,OS=26.2' \
+            -only-testing:"SnapperUITests/I18nScreenshotUITests/${{ inputs.test_method }}" \
+            -resultBundlePath build/i18n-screenshots.xcresult
+
+      - name: Upload xcresult bundle
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: i18n-screenshots-xcresult
+          path: build/i18n-screenshots.xcresult
+          retention-days: 14
