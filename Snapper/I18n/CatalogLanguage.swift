@@ -24,8 +24,13 @@ import Foundation
 /// languages: zh-Hans (mainland Chinese), zh-Hant (HK/TW Chinese),
 /// ja, ko, th, vi, my (Burmese), hi, ar (RTL), he (RTL), fa (RTL),
 /// hy — adding CJK, Indic, Arabic-script RTL, and Armenian coverage.
+///
+/// Batch-4 (2026-05-16) adds Irish (Gaeilge / ga) — switches the
+/// ``AppLocale/ie`` country code from the English fallback to a
+/// proper native catalog.
 enum CatalogLanguage: String, CaseIterable, Codable, Sendable {
     case en
+    case ga
     case pl
     case de
     case fr

@@ -9,10 +9,10 @@ import SwiftUI
 /// ``MainTabView.routeDeepLink(...)``).
 final class LocaleEnvironmentResolverTests: XCTestCase {
 
-    func testEnvironmentLocaleForIEisEnIE() {
+    func testEnvironmentLocaleForIEisGaIE() {
         XCTAssertEqual(
             LocaleEnvironmentResolver.environmentLocale(for: .ie).identifier,
-            "en-IE"
+            "ga-IE"
         )
     }
 

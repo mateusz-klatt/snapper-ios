@@ -48,9 +48,9 @@ final class LocaleFormattersTests: XCTestCase {
     }
 
     func testRelativeDateTimeFormatterIsLocaleBound() {
-        let formatterEN = LocaleFormatters.relativeDateTime(for: .ie)
+        let formatterIE = LocaleFormatters.relativeDateTime(for: .ie)
         let formatterPL = LocaleFormatters.relativeDateTime(for: .pl)
-        XCTAssertEqual(formatterEN.locale.identifier, "en-IE")
+        XCTAssertEqual(formatterIE.locale.identifier, "ga-IE")
         XCTAssertEqual(formatterPL.locale.identifier, "pl-PL")
     }
 

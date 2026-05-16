@@ -267,6 +267,12 @@
             "state": "translated",
             "value": "Կրկնակի հպեք՝ ազդանշանի մանրամասները բացելու համար"
           }
+        },
+        "ga": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tapáil faoi dhó chun sonraí an fholáirimh a oscailt"
+          }
         }
       }
     },
@@ -535,6 +541,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Հեռացնել ազդանշանը"
+          }
+        },
+        "ga": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dún foláireamh"
           }
         }
       }
@@ -805,6 +817,12 @@
             "state": "translated",
             "value": "Համակարգային սխալ"
           }
+        },
+        "ga": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Earráid chórais"
+          }
         }
       }
     },
@@ -1073,6 +1091,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Մարժայի զգուշացում"
+          }
+        },
+        "ga": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rabhadh corrlaigh"
           }
         }
       }
@@ -1343,6 +1367,12 @@
             "state": "translated",
             "value": "Հանձնարարականը կատարված է"
           }
+        },
+        "ga": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ordú comhlíonta"
+          }
         }
       }
     },
@@ -1611,6 +1641,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Հանձնարարականը մերժվել է"
+          }
+        },
+        "ga": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ordú diúltaithe"
           }
         }
       }
@@ -1881,6 +1917,12 @@
             "state": "translated",
             "value": "Կորստի սահմանափակումը գործարկվեց"
           }
+        },
+        "ga": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Spreagadh stopchaillteanas"
+          }
         }
       }
     },
@@ -2149,6 +2191,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Ազդանշանի մանրամասներ"
+          }
+        },
+        "ga": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sonraí an fholáirimh"
           }
         }
       }
@@ -2419,6 +2467,12 @@
             "state": "translated",
             "value": "Աղբյուրի թեմա"
           }
+        },
+        "ga": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Topaic foinse"
+          }
         }
       }
     },
@@ -2687,6 +2741,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Շղթա"
+          }
+        },
+        "ga": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Snáithe"
           }
         }
       }
@@ -2957,6 +3017,12 @@
             "state": "translated",
             "value": "Ժամանակի նշում"
           }
+        },
+        "ga": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Stampa ama"
+          }
         }
       }
     },
@@ -3225,6 +3291,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Նոր ազդանշանները այստեղ կհայտնվեն, երբ գործարկվեն։"
+          }
+        },
+        "ga": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Beidh foláirimh nua le feiceáil anseo nuair a spreagfar iad."
           }
         }
       }
@@ -3495,6 +3567,12 @@
             "state": "translated",
             "value": "Ազդանշաններ չկան"
           }
+        },
+        "ga": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gan foláirimh"
+          }
         }
       }
     },
@@ -3763,6 +3841,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Չհաջողվեց բեռնել ազդանշանները"
+          }
+        },
+        "ga": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Níorbh fhéidir foláirimh a luchtú"
           }
         }
       }
@@ -4033,6 +4117,12 @@
             "state": "translated",
             "value": "Ազդանշանները բեռնվում են…"
           }
+        },
+        "ga": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Foláirimh á luchtú…"
+          }
         }
       }
     },
@@ -4301,6 +4391,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Ազդանշաններ"
+          }
+        },
+        "ga": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Foláirimh"
           }
         }
       }
@@ -4571,6 +4667,12 @@
             "state": "translated",
             "value": "Բարձր"
           }
+        },
+        "ga": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ard"
+          }
         }
       }
     },
@@ -4839,6 +4941,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Ցածր"
+          }
+        },
+        "ga": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Íseal"
           }
         }
       }
@@ -5109,6 +5217,12 @@
             "state": "translated",
             "value": "Միջին"
           }
+        },
+        "ga": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Meánach"
+          }
         }
       }
     },
@@ -5377,6 +5491,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Հեռացնել"
+          }
+        },
+        "ga": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dún"
           }
         }
       }
@@ -5647,6 +5767,12 @@
             "state": "translated",
             "value": "Ընդլայնված (սեփական սերվերային մաս)"
           }
+        },
+        "ga": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Casta (backend saincheaptha)"
+          }
         }
       }
     },
@@ -5915,6 +6041,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Ընթացիկ սերվերային մաս՝ %@"
+          }
+        },
+        "ga": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Backend reatha: %@"
           }
         }
       }
@@ -6185,6 +6317,12 @@
             "state": "translated",
             "value": "Գաղտնաբառ"
           }
+        },
+        "ga": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pasfhocal"
+          }
         }
       }
     },
@@ -6453,6 +6591,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Մուտք գործել"
+          }
+        },
+        "ga": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sínigh isteach"
           }
         }
       }
@@ -6723,6 +6867,12 @@
             "state": "translated",
             "value": "Թրեյդինգի հարթակ"
           }
+        },
+        "ga": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ardán trádála"
+          }
         }
       }
     },
@@ -6991,6 +7141,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Օգտանուն"
+          }
+        },
+        "ga": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ainm úsáideora"
           }
         }
       }
@@ -7261,6 +7417,12 @@
             "state": "translated",
             "value": "Չեղարկել"
           }
+        },
+        "ga": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cealaigh"
+          }
         }
       }
     },
@@ -7529,6 +7691,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Սովորական օգտատերերը կարող են անտեսել սա։ Ինքնուրույն հոսթինգ օգտագործողները սահմանում են իրենց Snapper սերվերային մասի URL-ը։"
+          }
+        },
+        "ga": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Is féidir le húsáideoirí ócáideacha neamhaird a dhéanamh de seo. Socraíonn féinóstálaithe URL a mbacainn Snapper féin."
           }
         }
       }
@@ -7799,6 +7967,12 @@
             "state": "translated",
             "value": "Օգտագործեք https:// (կամ http://՝ localhost-ի համար Debug ռեժիմում)։ Միայն սկզբնաղբյուրը՝ առանց ուղու, հարցման կամ հատվածի։"
           }
+        },
+        "ga": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Úsáid https:// (nó http:// le haghaidh localhost in Debug). Bunfhoinse amháin - gan cosán, iarratas ná blúire."
+          }
         }
       }
     },
@@ -8068,6 +8242,12 @@
             "state": "translated",
             "value": "Օգտագործեք https://your-backend.example։ Միայն սկզբնաղբյուրը՝ առանց ուղու, հարցման կամ հատվածի։ App Store-ի թողարկման կառուցումները մերժում են http:// և ինքնաստորագրված վկայականները։"
           }
+        },
+        "ga": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Úsáid https://your-backend.example. Bunfhoinse amháin - gan cosán, iarratas ná blúire. Diúltaíonn tógálacha App Store do http:// agus do dheimhnithe féinsínithe."
+          }
         }
       }
     },
@@ -8333,6 +8513,12 @@
           }
         },
         "hy": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "https://your-backend.example"
+          }
+        },
+        "ga": {
           "stringUnit": {
             "state": "translated",
             "value": "https://your-backend.example"
@@ -8606,6 +8792,12 @@
             "state": "translated",
             "value": "Վերադառնալ լռելյայնին"
           }
+        },
+        "ga": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Athshocraigh mar réamhshocrú"
+          }
         }
       }
     },
@@ -8874,6 +9066,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Պահպանել"
+          }
+        },
+        "ga": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sábháil"
           }
         }
       }
@@ -9144,6 +9342,12 @@
             "state": "translated",
             "value": "Կպահպանվի որպես՝ %@"
           }
+        },
+        "ga": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sábhálfar mar: %@"
+          }
         }
       }
     },
@@ -9412,6 +9616,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Ընթացիկ լեզու՝ %@"
+          }
+        },
+        "ga": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Teanga reatha: %@"
           }
         }
       }
@@ -9682,6 +9892,12 @@
             "state": "translated",
             "value": "Անցնել %@-ին"
           }
+        },
+        "ga": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Athraigh go %@"
+          }
         }
       }
     },
@@ -9950,6 +10166,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Փոխել լեզուն"
+          }
+        },
+        "ga": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Athraigh teanga"
           }
         }
       }
@@ -10220,6 +10442,12 @@
             "state": "translated",
             "value": "Կրկին փորձել"
           }
+        },
+        "ga": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bain triail eile as"
+          }
         }
       }
     },
@@ -10488,6 +10716,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Սերվերից անվավեր պատասխան"
+          }
+        },
+        "ga": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Freagra neamhbhailí ón bhfreastalaí"
           }
         }
       }
@@ -10758,6 +10992,12 @@
             "state": "translated",
             "value": "Անվավեր URL"
           }
+        },
+        "ga": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "URL neamhbhailí"
+          }
         }
       }
     },
@@ -11026,6 +11266,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Մուտքը չհաջողվեց"
+          }
+        },
+        "ga": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Theip ar logáil isteach"
           }
         }
       }
@@ -11296,6 +11542,12 @@
             "state": "translated",
             "value": "Ցանցի սխալ՝ %@"
           }
+        },
+        "ga": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Earráid líonra: %@"
+          }
         }
       }
     },
@@ -11564,6 +11816,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Չհաջողվեց սերիալիզացնել մուտքի հարցումը"
+          }
+        },
+        "ga": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Theip ar iarratas logála isteach a shraitheáil"
           }
         }
       }
@@ -11834,6 +12092,12 @@
             "state": "translated",
             "value": "Միացում՝ %@"
           }
+        },
+        "ga": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ceangal: %@"
+          }
         }
       }
     },
@@ -12102,6 +12366,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Վերջին ազդանշան՝ %@"
+          }
+        },
+        "ga": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Foláireamh is déanaí: %@"
           }
         }
       }
@@ -12372,6 +12642,12 @@
             "state": "translated",
             "value": "Թարմացնել տվյալները"
           }
+        },
+        "ga": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Athnuaigh sonraí"
+          }
         }
       }
     },
@@ -12640,6 +12916,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Նույնականացումը չհաջողվեց՝ %@"
+          }
+        },
+        "ga": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Theip ar fhíordheimhniú: %@"
           }
         }
       }
@@ -12910,6 +13192,12 @@
             "state": "translated",
             "value": "Նույնականացում…"
           }
+        },
+        "ga": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Á fhíordheimhniú…"
+          }
         }
       }
     },
@@ -13178,6 +13466,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Միացված"
+          }
+        },
+        "ga": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ceangailte"
           }
         }
       }
@@ -13448,6 +13742,12 @@
             "state": "translated",
             "value": "Միացում…"
           }
+        },
+        "ga": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Á cheangal…"
+          }
         }
       }
     },
@@ -13716,6 +14016,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Անջատված"
+          }
+        },
+        "ga": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dícheangailte"
           }
         }
       }
@@ -13986,6 +14292,12 @@
             "state": "translated",
             "value": "Սխալ՝ %@"
           }
+        },
+        "ga": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Earráid: %@"
+          }
         }
       }
     },
@@ -14255,6 +14567,12 @@
             "state": "translated",
             "value": "Կապիտալ"
           }
+        },
+        "ga": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cothromas"
+          }
         }
       }
     },
@@ -14523,6 +14841,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Չհաջողվեց բեռնել՝ %@"
+          }
+        },
+        "ga": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Theip ar luchtú - %@"
           }
         }
       }
@@ -15447,6 +15771,42 @@
               }
             }
           }
+        },
+        "ga": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld soicind ó shin"
+                }
+              },
+              "two": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld shoicind ó shin"
+                }
+              },
+              "few": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld shoicind ó shin"
+                }
+              },
+              "many": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld soicind ó shin"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld soicind ó shin"
+                }
+              }
+            }
+          }
         }
       }
     },
@@ -15715,6 +16075,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Թարմացվում է…"
+          }
+        },
+        "ga": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Á athnuachan…"
           }
         }
       }
@@ -15985,6 +16351,12 @@
             "state": "translated",
             "value": "Վերջին ազդանշան"
           }
+        },
+        "ga": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Foláireamh is déanaí"
+          }
         }
       }
     },
@@ -16253,6 +16625,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Վերջին ազդանշաններ չկան"
+          }
+        },
+        "ga": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gan foláirimh le déanaí"
           }
         }
       }
@@ -16523,6 +16901,12 @@
             "state": "translated",
             "value": "Բաց դիրքեր"
           }
+        },
+        "ga": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Suíomhanna oscailte"
+          }
         }
       }
     },
@@ -16791,6 +17175,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Վերջին հանձնարարականներ"
+          }
+        },
+        "ga": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Orduithe le déanaí"
           }
         }
       }
@@ -17061,6 +17451,12 @@
             "state": "translated",
             "value": "Բարի գալուստ, %@"
           }
+        },
+        "ga": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fáilte, %@"
+          }
         }
       }
     },
@@ -17329,6 +17725,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Սահեցրեք՝ գրաֆիկի արժեքները դիտելու համար"
+          }
+        },
+        "ga": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Svaidhpeáil chun luachanna na cairte a iniúchadh"
           }
         }
       }
@@ -17599,6 +18001,12 @@
             "state": "translated",
             "value": "Մոմային գրաֆիկ, %lld մոմ, %@-ից մինչև %@"
           }
+        },
+        "ga": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cairt choinnleach, %lld barra, %@ go %@"
+          }
         }
       }
     },
@@ -17867,6 +18275,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Ժամանակային միջակայք՝ %@"
+          }
+        },
+        "ga": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fráma ama: %@"
           }
         }
       }
@@ -18137,6 +18551,12 @@
             "state": "translated",
             "value": "Ընտրել գործիքը"
           }
+        },
+        "ga": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Roghnaigh ionstraim"
+          }
         }
       }
     },
@@ -18405,6 +18825,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Շուկայի տվյալները բեռնվում են…"
+          }
+        },
+        "ga": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sonraí margaidh á luchtú…"
           }
         }
       }
@@ -18675,6 +19101,12 @@
             "state": "translated",
             "value": "24ժ փոփոխություն"
           }
+        },
+        "ga": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Athrú 24u"
+          }
         }
       }
     },
@@ -18943,6 +19375,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Փակում"
+          }
+        },
+        "ga": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dúnadh"
           }
         }
       }
@@ -19213,6 +19651,12 @@
             "state": "translated",
             "value": "Առավելագույն"
           }
+        },
+        "ga": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ard"
+          }
         }
       }
     },
@@ -19481,6 +19925,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Նվազագույն"
+          }
+        },
+        "ga": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Íseal"
           }
         }
       }
@@ -19751,6 +20201,12 @@
             "state": "translated",
             "value": "Բացում"
           }
+        },
+        "ga": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Oscailt"
+          }
         }
       }
     },
@@ -20019,6 +20475,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Ծավալ"
+          }
+        },
+        "ga": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Toirt"
           }
         }
       }
@@ -20289,6 +20751,12 @@
             "state": "translated",
             "value": "Շուկայի տվյալներ"
           }
+        },
+        "ga": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sonraí margaidh"
+          }
         }
       }
     },
@@ -20557,6 +21025,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Դիրք"
+          }
+        },
+        "ga": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Suíomh"
           }
         }
       }
@@ -20827,6 +21301,12 @@
             "state": "translated",
             "value": "Միջին գին"
           }
+        },
+        "ga": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Meánphraghas"
+          }
         }
       }
     },
@@ -21095,6 +21575,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Պաշտպանական զույգ"
+          }
+        },
+        "ga": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bracket"
           }
         }
       }
@@ -21365,6 +21851,12 @@
             "state": "translated",
             "value": "Հետևող ստոպ"
           }
+        },
+        "ga": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Stop leantach"
+          }
         }
       }
     },
@@ -21633,6 +22125,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Ուղիղ մոմեր · միջբորսայական"
+          }
+        },
+        "ga": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Coinnle beo · tras-mhalartán"
           }
         }
       }
@@ -21903,6 +22401,12 @@
             "state": "translated",
             "value": "Ժամանակային միջակայք"
           }
+        },
+        "ga": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fráma ama"
+          }
         }
       }
     },
@@ -22171,6 +22675,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Շրջանակ՝ %@"
+          }
+        },
+        "ga": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Raon feidhme: %@"
           }
         }
       }
@@ -22441,6 +22951,12 @@
             "state": "translated",
             "value": "Ազդանշանի տեսակ"
           }
+        },
+        "ga": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cineál foláirimh"
+          }
         }
       }
     },
@@ -22709,6 +23225,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Նվազագույն առաջնահերթություն"
+          }
+        },
+        "ga": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tosaíocht íosta"
           }
         }
       }
@@ -22979,6 +23501,12 @@
             "state": "translated",
             "value": "1 ժամ"
           }
+        },
+        "ga": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "1 uair an chloig"
+          }
         }
       }
     },
@@ -23247,6 +23775,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "30 րոպե"
+          }
+        },
+        "ga": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "30 nóim"
           }
         }
       }
@@ -23517,6 +24051,12 @@
             "state": "translated",
             "value": "5 րոպե"
           }
+        },
+        "ga": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "5 nóim"
+          }
         }
       }
     },
@@ -23785,6 +24325,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Անհատական…"
+          }
+        },
+        "ga": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Saincheaptha…"
           }
         }
       }
@@ -24055,6 +24601,12 @@
             "state": "translated",
             "value": "Լռեցնել մինչև"
           }
+        },
+        "ga": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Balbhaigh go dtí"
+          }
         }
       }
     },
@@ -24323,6 +24875,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Սարքի նախապատվություն"
+          }
+        },
+        "ga": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rogha gléis"
           }
         }
       }
@@ -24593,6 +25151,12 @@
             "state": "translated",
             "value": "Օպերատոր"
           }
+        },
+        "ga": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Oibreoir"
+          }
         }
       }
     },
@@ -24861,6 +25425,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Սկսած"
+          }
+        },
+        "ga": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ó"
           }
         }
       }
@@ -25131,6 +25701,12 @@
             "state": "translated",
             "value": "Լռության ժամեր"
           }
+        },
+        "ga": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Uaireanta ciúine"
+          }
         }
       }
     },
@@ -25399,6 +25975,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Մինչև"
+          }
+        },
+        "ga": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Go dtí"
           }
         }
       }
@@ -25669,6 +26251,12 @@
             "state": "translated",
             "value": "Ընդհանուր՝ սարքի համար"
           }
+        },
+        "ga": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gléas iomlán"
+          }
         }
       }
     },
@@ -25937,6 +26525,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Շրջանակ"
+          }
+        },
+        "ga": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Raon feidhme"
           }
         }
       }
@@ -26207,6 +26801,12 @@
             "state": "translated",
             "value": "Օպերատոր"
           }
+        },
+        "ga": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Oibreoir"
+          }
         }
       }
     },
@@ -26475,6 +27075,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Դրամապանակ"
+          }
+        },
+        "ga": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sparán"
           }
         }
       }
@@ -26745,6 +27351,12 @@
             "state": "translated",
             "value": "Դրամապանակ"
           }
+        },
+        "ga": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sparán"
+          }
         }
       }
     },
@@ -27013,6 +27625,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Նվազագույն առաջնահերթություն՝ %@"
+          }
+        },
+        "ga": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tosaíocht íosta: %@"
           }
         }
       }
@@ -27283,6 +27901,12 @@
             "state": "translated",
             "value": "Այս սարքը սարքի մակարդակի վերագրումներ չունի։"
           }
+        },
+        "ga": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Níl aon sáruithe in aghaidh an ghléis ar an ngléas seo."
+          }
         }
       }
     },
@@ -27551,6 +28175,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Չհաջողվեց բեռնել նախապատվությունները"
+          }
+        },
+        "ga": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Theip ar roghanna a luchtú"
           }
         }
       }
@@ -27821,6 +28451,12 @@
             "state": "translated",
             "value": "Չհաջողվեց պահպանել նախապատվությունները"
           }
+        },
+        "ga": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Theip ar roghanna a shábháil"
+          }
         }
       }
     },
@@ -28089,6 +28725,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Ծանուցումների նախապատվություններ"
+          }
+        },
+        "ga": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Roghanna fógraí"
           }
         }
       }
@@ -28359,6 +29001,12 @@
             "state": "translated",
             "value": "Միացված"
           }
+        },
+        "ga": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cumasaithe"
+          }
         }
       }
     },
@@ -28627,6 +29275,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Նվազագույն առաջնահերթություն"
+          }
+        },
+        "ga": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tosaíocht íosta"
           }
         }
       }
@@ -28897,6 +29551,12 @@
             "state": "translated",
             "value": "Սարքի վերագրումներ"
           }
+        },
+        "ga": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sáruithe gléis"
+          }
         }
       }
     },
@@ -29165,6 +29825,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Օգտատիրոջ լռելյայն կարգավորումներ"
+          }
+        },
+        "ga": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Réamhshocruithe úsáideora"
           }
         }
       }
@@ -29435,6 +30101,12 @@
             "state": "translated",
             "value": "Անջատել լռեցումը"
           }
+        },
+        "ga": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dí-bhalbhaigh"
+          }
         }
       }
     },
@@ -29703,6 +30375,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Կրկնակի հպեք՝ հանձնարարականի մանրամասները դիտելու համար"
+          }
+        },
+        "ga": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tapáil faoi dhó chun sonraí an ordaithe a fheiceáil"
           }
         }
       }
@@ -29973,6 +30651,12 @@
             "state": "translated",
             "value": "Չեղարկել հանձնարարականը"
           }
+        },
+        "ga": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cealaigh ordú"
+          }
         }
       }
     },
@@ -30241,6 +30925,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Կատարված"
+          }
+        },
+        "ga": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Comhlíonta"
           }
         }
       }
@@ -30511,6 +31201,12 @@
             "state": "translated",
             "value": "Գործիք"
           }
+        },
+        "ga": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ionstraim"
+          }
         }
       }
     },
@@ -30779,6 +31475,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Գին"
+          }
+        },
+        "ga": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Praghas"
           }
         }
       }
@@ -31049,6 +31751,12 @@
             "state": "translated",
             "value": "Քանակ"
           }
+        },
+        "ga": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cainníocht"
+          }
         }
       }
     },
@@ -31317,6 +32025,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Ուղղություն"
+          }
+        },
+        "ga": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Taobh"
           }
         }
       }
@@ -31587,6 +32301,12 @@
             "state": "translated",
             "value": "Կարգավիճակ"
           }
+        },
+        "ga": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Stádas"
+          }
         }
       }
     },
@@ -31855,6 +32575,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Հանձնարարականներ"
+          }
+        },
+        "ga": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Orduithe"
           }
         }
       }
@@ -32125,6 +32851,12 @@
             "state": "translated",
             "value": "Չեղարկել"
           }
+        },
+        "ga": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cealaigh"
+          }
         }
       }
     },
@@ -32393,6 +33125,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Բոլորը"
+          }
+        },
+        "ga": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Uile"
           }
         }
       }
@@ -32663,6 +33401,12 @@
             "state": "translated",
             "value": "Պատմություն"
           }
+        },
+        "ga": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Stair"
+          }
         }
       }
     },
@@ -32931,6 +33675,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Բաց"
+          }
+        },
+        "ga": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Oscailte"
           }
         }
       }
@@ -33201,6 +33951,12 @@
             "state": "translated",
             "value": "Վերջին"
           }
+        },
+        "ga": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Le déanaí"
+          }
         }
       }
     },
@@ -33469,6 +34225,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Կատարումներ"
+          }
+        },
+        "ga": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Comhlíontaí"
           }
         }
       }
@@ -33739,6 +34501,12 @@
             "state": "translated",
             "value": "Կրկնակի հպեք՝ դիրքի գործողությունները բացելու համար"
           }
+        },
+        "ga": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tapáil faoi dhó chun gníomhartha suímh a oscailt"
+          }
         }
       }
     },
@@ -34007,6 +34775,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Փակել դիրքը"
+          }
+        },
+        "ga": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dún suíomh"
           }
         }
       }
@@ -34277,6 +35051,12 @@
             "state": "translated",
             "value": "Նվազեցնել դիրքը"
           }
+        },
+        "ga": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Laghdaigh suíomh"
+          }
         }
       }
     },
@@ -34545,6 +35325,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Փակե՞լ ամբողջ %@-ը։"
+          }
+        },
+        "ga": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dún %@ ar fad?"
           }
         }
       }
@@ -34815,6 +35601,12 @@
             "state": "translated",
             "value": "Դիրքը փակվեց"
           }
+        },
+        "ga": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dúnadh an suíomh"
+          }
         }
       }
     },
@@ -35083,6 +35875,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "% փոփոխություն"
+          }
+        },
+        "ga": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Athrú %"
           }
         }
       }
@@ -35353,6 +36151,12 @@
             "state": "translated",
             "value": "Մուտքի գին"
           }
+        },
+        "ga": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Praghas iontrála"
+          }
         }
       }
     },
@@ -35621,6 +36425,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Գործիք"
+          }
+        },
+        "ga": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ionstraim"
           }
         }
       }
@@ -35891,6 +36701,12 @@
             "state": "translated",
             "value": "Հաշվարկային գին"
           }
+        },
+        "ga": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Praghas marcála"
+          }
         }
       }
     },
@@ -36159,6 +36975,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Չիրացված PnL"
+          }
+        },
+        "ga": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "PnL neamhréadaithe"
           }
         }
       }
@@ -36429,6 +37251,12 @@
             "state": "translated",
             "value": "Չափ"
           }
+        },
+        "ga": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Méid"
+          }
         }
       }
     },
@@ -36697,6 +37525,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Դիրքերը այստեղ կհայտնվեն, երբ բաց հանձնարարականներ ունենաք։"
+          }
+        },
+        "ga": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Beidh do shuíomhanna oscailte le feiceáil anseo."
           }
         }
       }
@@ -36967,6 +37801,12 @@
             "state": "translated",
             "value": "Բաց դիրքեր չկան"
           }
+        },
+        "ga": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gan suíomhanna oscailte"
+          }
         }
       }
     },
@@ -37235,6 +38075,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Դիրքեր"
+          }
+        },
+        "ga": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Suíomhanna"
           }
         }
       }
@@ -37505,6 +38351,12 @@
             "state": "translated",
             "value": "Չեղարկել"
           }
+        },
+        "ga": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cealaigh"
+          }
         }
       }
     },
@@ -37773,6 +38625,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Ներկայացնել նվազեցումը"
+          }
+        },
+        "ga": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cuir laghdú isteach"
           }
         }
       }
@@ -38043,6 +38901,12 @@
             "state": "translated",
             "value": "Նվազեցնե՞լ %@-ը %@ %@-ով։"
           }
+        },
+        "ga": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Laghdaigh %@ faoi %@ %@?"
+          }
         }
       }
     },
@@ -38311,6 +39175,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Նվազեցման չափ"
+          }
+        },
+        "ga": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Laghdaigh méid"
           }
         }
       }
@@ -38581,6 +39451,12 @@
             "state": "translated",
             "value": "Նվազեցնել դիրքը"
           }
+        },
+        "ga": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Laghdaigh suíomh"
+          }
         }
       }
     },
@@ -38849,6 +39725,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Փակել"
+          }
+        },
+        "ga": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dún"
           }
         }
       }
@@ -39119,6 +40001,12 @@
             "state": "translated",
             "value": "Դիրքի գործողություն"
           }
+        },
+        "ga": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gníomh suímh"
+          }
         }
       }
     },
@@ -39387,6 +40275,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Նվազեցնել"
+          }
+        },
+        "ga": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Laghdaigh"
           }
         }
       }
@@ -39657,6 +40551,12 @@
             "state": "translated",
             "value": "Կրկնակի հպեք՝ դուրս գալու և մուտքի էկրան վերադառնալու համար"
           }
+        },
+        "ga": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tapáil faoi dhó chun síniú amach agus filleadh ar logáil isteach"
+          }
         }
       }
     },
@@ -39925,6 +40825,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Լեզվի բաժին, ընթացիկ՝ %@"
+          }
+        },
+        "ga": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rannán teanga, reatha: %@"
           }
         }
       }
@@ -40195,6 +41101,12 @@
             "state": "translated",
             "value": "Դուրս գալ"
           }
+        },
+        "ga": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Logáil amach"
+          }
         }
       }
     },
@@ -40463,6 +41375,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Խմբագրել պրոֆիլը"
+          }
+        },
+        "ga": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cuir próifíl in eagar"
           }
         }
       }
@@ -40733,6 +41651,12 @@
             "state": "translated",
             "value": "Էլ. փոստ"
           }
+        },
+        "ga": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ríomhphost"
+          }
         }
       }
     },
@@ -41001,6 +41925,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Օգտանուն"
+          }
+        },
+        "ga": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ainm úsáideora"
           }
         }
       }
@@ -41271,6 +42201,12 @@
             "state": "translated",
             "value": "Սերվերային մասի փոփոխությունը ձեզ դուրս կբերի և կջնջի հավելվածի տեղային վիճակը։ Նոր URL-ով պետք է կրկին մուտք գործեք։"
           }
+        },
+        "ga": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Síneoidh athrú backend amach thú agus glanfaidh sé staid áitiúil na haipe. Beidh ort síniú isteach arís ag an URL nua."
+          }
         }
       }
     },
@@ -41539,6 +42475,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Փոխել սերվերային մասը"
+          }
+        },
+        "ga": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Athraigh backend"
           }
         }
       }
@@ -41809,6 +42751,12 @@
             "state": "translated",
             "value": "Փոխե՞լ սերվերային մասը։"
           }
+        },
+        "ga": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Athraigh backend?"
+          }
         }
       }
     },
@@ -42077,6 +43025,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Սեփական սերվերային մասի URL"
+          }
+        },
+        "ga": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "URL backend saincheaptha"
           }
         }
       }
@@ -42347,6 +43301,12 @@
             "state": "translated",
             "value": "Վստա՞հ եք, որ ուզում եք դուրս գալ։"
           }
+        },
+        "ga": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "An bhfuil tú cinnte gur mhaith leat logáil amach?"
+          }
         }
       }
     },
@@ -42615,6 +43575,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Սարք"
+          }
+        },
+        "ga": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gléas"
           }
         }
       }
@@ -42885,6 +43851,12 @@
             "state": "translated",
             "value": "Միացնել հրումային ծանուցումները"
           }
+        },
+        "ga": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cumasaigh brúfhógraí"
+          }
         }
       }
     },
@@ -43153,6 +44125,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Գրանցված չէ"
+          }
+        },
+        "ga": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gan chlárú"
           }
         }
       }
@@ -43423,6 +44401,12 @@
             "state": "translated",
             "value": "Բացել Կարգավորումները"
           }
+        },
+        "ga": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Oscail Socruithe"
+          }
         }
       }
     },
@@ -43691,6 +44675,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Թույլտվություն"
+          }
+        },
+        "ga": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cead"
           }
         }
       }
@@ -43961,6 +44951,12 @@
             "state": "translated",
             "value": "Գրանցված"
           }
+        },
+        "ga": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cláraithe"
+          }
         }
       }
     },
@@ -44229,6 +45225,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Գրանցվում է…"
+          }
+        },
+        "ga": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Á chlárú…"
           }
         }
       }
@@ -44499,6 +45501,12 @@
             "state": "translated",
             "value": "Չհաջողվեց բեռնել"
           }
+        },
+        "ga": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Níorbh fhéidir luchtú"
+          }
         }
       }
     },
@@ -44767,6 +45775,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Բեռնվում է…"
+          }
+        },
+        "ga": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Á luchtú…"
           }
         }
       }
@@ -45037,6 +46051,12 @@
             "state": "translated",
             "value": "Չեղարկել հանձնարարականը"
           }
+        },
+        "ga": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cealaigh ordú"
+          }
         }
       }
     },
@@ -45305,6 +46325,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Չեղարկե՞լ հանձնարարականը։"
+          }
+        },
+        "ga": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cealaigh ordú?"
           }
         }
       }
@@ -45575,6 +46601,12 @@
             "state": "translated",
             "value": "Թողնել բաց"
           }
+        },
+        "ga": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Coinnigh oscailte"
+          }
         }
       }
     },
@@ -45843,6 +46875,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Նոր հանձնարարական"
+          }
+        },
+        "ga": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ordú nua"
           }
         }
       }
@@ -46113,6 +47151,12 @@
             "state": "translated",
             "value": "Սեգմենտ"
           }
+        },
+        "ga": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Deighleog"
+          }
         }
       }
     },
@@ -46382,6 +47426,12 @@
             "state": "translated",
             "value": "Ներկայացումը չհաջողվեց"
           }
+        },
+        "ga": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Theip ar chur isteach"
+          }
         }
       }
     },
@@ -46647,6 +47697,12 @@
           }
         },
         "hy": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "OK"
+          }
+        },
+        "ga": {
           "stringUnit": {
             "state": "translated",
             "value": "OK"
@@ -46920,6 +47976,12 @@
             "state": "translated",
             "value": "Չհաջողվեց բեռնել դիրքերը"
           }
+        },
+        "ga": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Níorbh fhéidir suíomhanna a luchtú"
+          }
         }
       }
     },
@@ -47188,6 +48250,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Դիրքերը բեռնվում են…"
+          }
+        },
+        "ga": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Suíomhanna á luchtú…"
           }
         }
       }
@@ -47458,6 +48526,12 @@
             "state": "translated",
             "value": "100%-ը փակում է դիրքը։ Ուղարկում է միայն նվազեցման շուկայական հանձնարարական հակառակ ուղղությամբ։"
           }
+        },
+        "ga": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dúnann 100% an suíomh. Cuireann sé ordú margaidh laghdaithe-amháin isteach i gcoinne an taoibh eile."
+          }
         }
       }
     },
@@ -47726,6 +48800,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Կցել SL / TP"
+          }
+        },
+        "ga": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ceangail SL / TP"
           }
         }
       }
@@ -47996,6 +49076,12 @@
             "state": "translated",
             "value": "Կցել հետևող ստոպ"
           }
+        },
+        "ga": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ceangail stop leantach"
+          }
         }
       }
     },
@@ -48264,6 +49350,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Շարունակել"
+          }
+        },
+        "ga": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Lean ar aghaidh"
           }
         }
       }
@@ -48534,6 +49626,12 @@
             "state": "translated",
             "value": "Դեր՝ %@"
           }
+        },
+        "ga": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ról: %@"
+          }
         }
       }
     },
@@ -48802,6 +49900,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Մուտք՝ %@ անունով"
+          }
+        },
+        "ga": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sínithe isteach mar %@"
           }
         }
       }
@@ -49072,6 +50176,12 @@
             "state": "translated",
             "value": "Կառուցում"
           }
+        },
+        "ga": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tógáil"
+          }
         }
       }
     },
@@ -49340,6 +50450,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Բաց կոդով ծրագրերի լիցենզիաներ"
+          }
+        },
+        "ga": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ceadúnais foinse oscailte"
           }
         }
       }
@@ -49610,6 +50726,12 @@
             "state": "translated",
             "value": "Աղբյուր կոդ"
           }
+        },
+        "ga": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cód foinseach"
+          }
         }
       }
     },
@@ -49878,6 +51000,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Տարբերակ"
+          }
+        },
+        "ga": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Leagan"
           }
         }
       }
@@ -50148,6 +51276,12 @@
             "state": "translated",
             "value": "Սերվերային մաս"
           }
+        },
+        "ga": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Backend"
+          }
         }
       }
     },
@@ -50416,6 +51550,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Փոխել սերվերային մասը"
+          }
+        },
+        "ga": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Athraigh backend"
           }
         }
       }
@@ -50686,6 +51826,12 @@
             "state": "translated",
             "value": "Կարգավիճակ"
           }
+        },
+        "ga": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Stádas"
+          }
         }
       }
     },
@@ -50954,6 +52100,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Դուրս գալ"
+          }
+        },
+        "ga": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Logáil amach"
           }
         }
       }
@@ -51224,6 +52376,12 @@
             "state": "translated",
             "value": "Դուրս գա՞լ։"
           }
+        },
+        "ga": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sínigh amach?"
+          }
         }
       }
     },
@@ -51492,6 +52650,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Սարքի վերագրումներ"
+          }
+        },
+        "ga": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sáruithe gléis"
           }
         }
       }
@@ -51762,6 +52926,12 @@
             "state": "translated",
             "value": "Կառավարել նախապատվությունները"
           }
+        },
+        "ga": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bainistigh roghanna"
+          }
         }
       }
     },
@@ -52030,6 +53200,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Անջատված"
+          }
+        },
+        "ga": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Díchumasaithe"
           }
         }
       }
@@ -52300,6 +53476,12 @@
             "state": "translated",
             "value": "Միացված"
           }
+        },
+        "ga": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cumasaithe"
+          }
         }
       }
     },
@@ -52568,6 +53750,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Հրումային ծանուցումներ"
+          }
+        },
+        "ga": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Brúfhógraí"
           }
         }
       }
@@ -52838,6 +54026,12 @@
             "state": "translated",
             "value": "Հաշիվ"
           }
+        },
+        "ga": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cuntas"
+          }
         }
       }
     },
@@ -53106,6 +54300,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Հավելվածի մասին"
+          }
+        },
+        "ga": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Maidir leis"
           }
         }
       }
@@ -53376,6 +54576,12 @@
             "state": "translated",
             "value": "Միացում"
           }
+        },
+        "ga": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ceangal"
+          }
         }
       }
     },
@@ -53644,6 +54850,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Ընդհանուր"
+          }
+        },
+        "ga": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ginearálta"
           }
         }
       }
@@ -53914,6 +55126,12 @@
             "state": "translated",
             "value": "Լեզու"
           }
+        },
+        "ga": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Teanga"
+          }
         }
       }
     },
@@ -54182,6 +55400,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Ծանուցումներ"
+          }
+        },
+        "ga": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fógraí"
           }
         }
       }
@@ -54452,6 +55676,12 @@
             "state": "translated",
             "value": "Ազդանշանների ներդիր։ %@ չկարդացված"
           }
+        },
+        "ga": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cluaisín foláireamh. Neamhléite: %@"
+          }
         }
       }
     },
@@ -54720,6 +55950,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Գլխավոր ներդիր"
+          }
+        },
+        "ga": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cluaisín baile"
           }
         }
       }
@@ -54990,6 +56226,12 @@
             "state": "translated",
             "value": "Դիրքերի ներդիր։ %@ բաց"
           }
+        },
+        "ga": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cluaisín suíomhanna. Oscailte: %@"
+          }
         }
       }
     },
@@ -55258,6 +56500,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Ազդանշաններ"
+          }
+        },
+        "ga": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Foláirimh"
           }
         }
       }
@@ -55528,6 +56776,12 @@
             "state": "translated",
             "value": "Գլխավոր"
           }
+        },
+        "ga": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Baile"
+          }
         }
       }
     },
@@ -55796,6 +57050,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Հանձնարարականներ"
+          }
+        },
+        "ga": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Orduithe"
           }
         }
       }
@@ -56066,6 +57326,12 @@
             "state": "translated",
             "value": "Դիրքեր"
           }
+        },
+        "ga": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Suíomhanna"
+          }
         }
       }
     },
@@ -56334,6 +57600,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Կարգավորումներ"
+          }
+        },
+        "ga": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Socruithe"
           }
         }
       }
@@ -56604,6 +57876,12 @@
             "state": "translated",
             "value": "Կցել պաշտպանական զույգ"
           }
+        },
+        "ga": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ceangail bracket"
+          }
         }
       }
     },
@@ -56872,6 +58150,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Չեղարկել"
+          }
+        },
+        "ga": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cealaigh"
           }
         }
       }
@@ -57142,6 +58426,12 @@
             "state": "translated",
             "value": "Պաշտպանական զույգն արդեն կցված է"
           }
+        },
+        "ga": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tá bracket ceangailte cheana"
+          }
         }
       }
     },
@@ -57410,6 +58700,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Անվավեր կորստի սահմանափակման գին"
+          }
+        },
+        "ga": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Praghas stopchaillteanais neamhbhailí"
           }
         }
       }
@@ -57680,6 +58976,12 @@
             "state": "translated",
             "value": "Անվավեր շահույթի ֆիքսման գին"
           }
+        },
+        "ga": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Praghas tógála brabúis neamhbhailí"
+          }
         }
       }
     },
@@ -57948,6 +59250,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Կորստի սահմանափակում"
+          }
+        },
+        "ga": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Stopchaillteanas"
           }
         }
       }
@@ -58218,6 +59526,12 @@
             "state": "translated",
             "value": "Ստոպ գին"
           }
+        },
+        "ga": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Praghas stoptha"
+          }
         }
       }
     },
@@ -58486,6 +59800,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Կցել"
+          }
+        },
+        "ga": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ceangail"
           }
         }
       }
@@ -58756,6 +60076,12 @@
             "state": "translated",
             "value": "Շահույթի ֆիքսում"
           }
+        },
+        "ga": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tóg brabús"
+          }
         }
       }
     },
@@ -59024,6 +60350,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Թիրախային գին"
+          }
+        },
+        "ga": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Spriocphraghas"
           }
         }
       }
@@ -59294,6 +60626,12 @@
             "state": "translated",
             "value": "Կցել պաշտպանական զույգ"
           }
+        },
+        "ga": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ceangail bracket"
+          }
         }
       }
     },
@@ -59562,6 +60900,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Ուղղություն՝ %@"
+          }
+        },
+        "ga": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Taobh: %@"
           }
         }
       }
@@ -59832,6 +61176,12 @@
             "state": "translated",
             "value": "Ներկայացնել հանձնարարականը"
           }
+        },
+        "ga": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cuir ordú isteach"
+          }
         }
       }
     },
@@ -60100,6 +61450,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Չեղարկել"
+          }
+        },
+        "ga": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cealaigh"
           }
         }
       }
@@ -60370,6 +61726,12 @@
             "state": "translated",
             "value": "Անվավեր գին"
           }
+        },
+        "ga": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Praghas neamhbhailí"
+          }
         }
       }
     },
@@ -60638,6 +62000,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Անվավեր քանակ"
+          }
+        },
+        "ga": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cainníocht neamhbhailí"
           }
         }
       }
@@ -60908,6 +62276,12 @@
             "state": "translated",
             "value": "Գործիք"
           }
+        },
+        "ga": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ionstraim"
+          }
         }
       }
     },
@@ -61176,6 +62550,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Տեսակ"
+          }
+        },
+        "ga": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cineál"
           }
         }
       }
@@ -61446,6 +62826,12 @@
             "state": "translated",
             "value": "Գին"
           }
+        },
+        "ga": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Praghas"
+          }
         }
       }
     },
@@ -61714,6 +63100,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Քանակ"
+          }
+        },
+        "ga": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cainníocht"
           }
         }
       }
@@ -61984,6 +63376,12 @@
             "state": "translated",
             "value": "Միայն նվազեցում"
           }
+        },
+        "ga": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Laghdú amháin"
+          }
         }
       }
     },
@@ -62252,6 +63650,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Ուղղություն"
+          }
+        },
+        "ga": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Taobh"
           }
         }
       }
@@ -62522,6 +63926,12 @@
             "state": "translated",
             "value": "Ստոպ գին"
           }
+        },
+        "ga": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Praghas stoptha"
+          }
         }
       }
     },
@@ -62790,6 +64200,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Ներկայացնել"
+          }
+        },
+        "ga": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cuir isteach"
           }
         }
       }
@@ -63060,6 +64476,12 @@
             "state": "translated",
             "value": "Նոր հանձնարարական"
           }
+        },
+        "ga": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ordú nua"
+          }
         }
       }
     },
@@ -63328,6 +64750,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Կատարված"
+          }
+        },
+        "ga": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Comhlíonta"
           }
         }
       }
@@ -63598,6 +65026,12 @@
             "state": "translated",
             "value": "Մասամբ կատարված"
           }
+        },
+        "ga": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Comhlíonta go páirteach"
+          }
         }
       }
     },
@@ -63866,6 +65300,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Լիմիտային"
+          }
+        },
+        "ga": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Teorainn"
           }
         }
       }
@@ -64136,6 +65576,12 @@
             "state": "translated",
             "value": "Շուկայական"
           }
+        },
+        "ga": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Margadh"
+          }
         }
       }
     },
@@ -64404,6 +65850,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Ստոպ"
+          }
+        },
+        "ga": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Stop"
           }
         }
       }
@@ -64674,6 +66126,12 @@
             "state": "translated",
             "value": "Ստոպ-լիմիտային"
           }
+        },
+        "ga": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Stop-theorainn"
+          }
         }
       }
     },
@@ -64942,6 +66400,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Գնել"
+          }
+        },
+        "ga": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ceannaigh"
           }
         }
       }
@@ -65212,6 +66676,12 @@
             "state": "translated",
             "value": "Վաճառել"
           }
+        },
+        "ga": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Díol"
+          }
         }
       }
     },
@@ -65480,6 +66950,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Կցել հետևող ստոպ"
+          }
+        },
+        "ga": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ceangail stop leantach"
           }
         }
       }
@@ -65750,6 +67226,12 @@
             "state": "translated",
             "value": "Ակտիվացման գին"
           }
+        },
+        "ga": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Praghas gníomhachtaithe"
+          }
         }
       }
     },
@@ -66018,6 +67500,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Չեղարկել"
+          }
+        },
+        "ga": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cealaigh"
           }
         }
       }
@@ -66288,6 +67776,12 @@
             "state": "translated",
             "value": "Հետևող ստոպն արդեն կցված է"
           }
+        },
+        "ga": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tá stop leantach ceangailte cheana"
+          }
         }
       }
     },
@@ -66556,6 +68050,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Անվավեր հետևման չափ"
+          }
+        },
+        "ga": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Méid leanta neamhbhailí"
           }
         }
       }
@@ -66826,6 +68326,12 @@
             "state": "translated",
             "value": "Բացարձակ"
           }
+        },
+        "ga": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Absalóideach"
+          }
         }
       }
     },
@@ -67094,6 +68600,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Ռեժիմ"
+          }
+        },
+        "ga": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mód"
           }
         }
       }
@@ -67364,6 +68876,12 @@
             "state": "translated",
             "value": "Տոկոս"
           }
+        },
+        "ga": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Céatadán"
+          }
         }
       }
     },
@@ -67632,6 +69150,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Կցել"
+          }
+        },
+        "ga": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ceangail"
           }
         }
       }
@@ -67902,6 +69426,12 @@
             "state": "translated",
             "value": "Կցել հետևող ստոպ"
           }
+        },
+        "ga": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ceangail stop leantach"
+          }
         }
       }
     },
@@ -68170,6 +69700,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Հետևման չափ"
+          }
+        },
+        "ga": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Méid leanta"
           }
         }
       }
@@ -68440,6 +69976,12 @@
             "state": "translated",
             "value": "Ադմին"
           }
+        },
+        "ga": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Riarthóir"
+          }
         }
       }
     },
@@ -68708,6 +70250,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "AI պատվիրակ"
+          }
+        },
+        "ga": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Toscaire IS"
           }
         }
       }
@@ -68978,6 +70526,12 @@
             "state": "translated",
             "value": "Օպերատոր"
           }
+        },
+        "ga": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Oibreoir"
+          }
         }
       }
     },
@@ -69246,6 +70800,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Դիտող"
+          }
+        },
+        "ga": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Breathnóir"
           }
         }
       }
@@ -69516,6 +71076,12 @@
             "state": "translated",
             "value": "Չհաջողվեց բեռնել դրամապանակները"
           }
+        },
+        "ga": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Níorbh fhéidir sparáin a luchtú"
+          }
         }
       }
     },
@@ -69784,6 +71350,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Բոլոր դրամապանակները"
+          }
+        },
+        "ga": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gach sparán"
           }
         }
       }
@@ -70054,6 +71626,12 @@
             "state": "translated",
             "value": "ոչ պարտադիր"
           }
+        },
+        "ga": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "roghnach"
+          }
         }
       }
     },
@@ -70319,6 +71897,12 @@
           }
         },
         "hy": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%"
+          }
+        },
+        "ga": {
           "stringUnit": {
             "state": "translated",
             "value": "%"
@@ -70592,6 +72176,12 @@
             "state": "translated",
             "value": "Ընտրել…"
           }
+        },
+        "ga": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Roghnaigh…"
+          }
         }
       }
     },
@@ -70860,6 +72450,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Չիրացված P&L"
+          }
+        },
+        "ga": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Brabús agus caillteanas neamhréadaithe"
           }
         }
       }
@@ -71130,6 +72726,12 @@
             "state": "translated",
             "value": "Ակտիվ հանձնարարականներ"
           }
+        },
+        "ga": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Orduithe gníomhacha"
+          }
         }
       }
     },
@@ -71398,6 +73000,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Ակտիվ ռազմավարություններ"
+          }
+        },
+        "ga": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Straitéisí gníomhacha"
           }
         }
       }
@@ -71668,6 +73276,12 @@
             "state": "translated",
             "value": "Թրեյդերի կարգավիճակ"
           }
+        },
+        "ga": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Stádas trádálaí"
+          }
         }
       }
     },
@@ -71936,6 +73550,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Դեռ մոմեր չկան"
+          }
+        },
+        "ga": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gan coinnle fós"
           }
         }
       }
@@ -72206,6 +73826,12 @@
             "state": "translated",
             "value": "Որոնել գործիքներ"
           }
+        },
+        "ga": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cuardaigh ionstraimí"
+          }
         }
       }
     },
@@ -72474,6 +74100,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Միայն դիտում"
+          }
+        },
+        "ga": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Amharc amháin"
           }
         }
       }
@@ -72744,6 +74376,12 @@
             "state": "translated",
             "value": "Ուշացված"
           }
+        },
+        "ga": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Moillithe"
+          }
         }
       }
     },
@@ -73012,6 +74650,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Ուղիղ"
+          }
+        },
+        "ga": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Beo"
           }
         }
       }
@@ -73282,6 +74926,12 @@
             "state": "translated",
             "value": "Կողպված"
           }
+        },
+        "ga": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Faoi ghlas"
+          }
         }
       }
     },
@@ -73550,6 +75200,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Առաքում"
+          }
+        },
+        "ga": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Seachadadh"
           }
         }
       }
@@ -73820,6 +75476,12 @@
             "state": "translated",
             "value": "Ամբողջական լռեցումը գերակայում է լռության ժամերին և անջատում է այս շրջանակի բոլոր ազդանշանները մինչև ընտրված ժամը։"
           }
+        },
+        "ga": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sáraíonn balbhú crua uaireanta ciúine agus díchumasaíonn sé gach foláireamh sa raon feidhme seo go dtí an t-am roghnaithe."
+          }
         }
       }
     },
@@ -74088,6 +75750,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Ամբողջական լռեցում"
+          }
+        },
+        "ga": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Balbhú crua"
           }
         }
       }
@@ -74358,6 +76026,12 @@
             "state": "translated",
             "value": "Ոչ կրիտիկական ազդանշանները հետաձգվում են այս ժամանակահատվածում՝ սարքի ժամային գոտիով։"
           }
+        },
+        "ga": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cuirtear foláirimh neamhchriticiúla siar le linn na fuinneoige seo, ag úsáid chrios ama an ghléis."
+          }
         }
       }
     },
@@ -74626,6 +76300,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Խմբագրման ռեժիմը պահպանում է սկզբնական շրջանակը։ Ընտրված օպերատորը և դրամապանակը ազդանշանի ինքնության մաս են և այստեղ չեն կարող փոխվել։"
+          }
+        },
+        "ga": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Coinníonn mód eagarthóireachta an raon feidhme bunaidh. Is cuid d'aitheantas an fholáirimh iad an t-oibreoir agus an sparán roghnaithe agus ní féidir iad a athrú anseo."
           }
         }
       }
@@ -74896,6 +76576,12 @@
             "state": "translated",
             "value": "Օպերատորները բեռնվում են… Եթե ցանկը դատարկ մնա, ձեր հաշիվը օպերատորային անդամակցություններ չունի, և հասանելի է միայն Սարքի շրջանակը։"
           }
+        },
+        "ga": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Oibreoirí á luchtú… Má fhanann an liosta folamh, níl aon bhallraíocht oibreora ag do chuntas agus níl ar fáil ach raon feidhme Gléis."
+          }
         }
       }
     },
@@ -75164,6 +76850,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Դրամապանակի շրջանակի համար պետք է ընտրված օպերատոր։"
+          }
+        },
+        "ga": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Teastaíonn oibreoir roghnaithe ó raon feidhme Sparáin."
           }
         }
       }
@@ -75434,6 +77126,12 @@
             "state": "translated",
             "value": "Ավելացնել վերագրում"
           }
+        },
+        "ga": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cuir sárú leis"
+          }
         }
       }
     },
@@ -75702,6 +77400,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Հեռացնել"
+          }
+        },
+        "ga": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bain"
           }
         }
       }
@@ -75972,6 +77676,12 @@
             "state": "translated",
             "value": "Միացրեք հրումային ծանուցումները Կարգավորումներ → Ծանուցումներ բաժնում՝ այս սարքը գրանցելու համար։"
           }
+        },
+        "ga": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cumasaigh brúfhógraí i Socruithe → Fógraí chun an gléas seo a chlárú."
+          }
         }
       }
     },
@@ -76240,6 +77950,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Սարք գրանցված չէ"
+          }
+        },
+        "ga": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Níl aon ghléas cláraithe"
           }
         }
       }
@@ -76510,6 +78226,12 @@
             "state": "translated",
             "value": "Լռելյայնները կիրառվում են, երբ սարքի որևէ վերագրում չի համապատասխանում մուտքային ազդանշանին։"
           }
+        },
+        "ga": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cuirtear réamhshocruithe i bhfeidhm nuair nach meaitseálann aon sárú in aghaidh an ghléis foláireamh isteach."
+          }
         }
       }
     },
@@ -76778,6 +78500,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Պահանջվում է կորստի սահմանափակում կամ շահույթի ֆիքսում։ Սերվերային մասը գործարկում է միայն նվազեցման պաշտպանական հանձնարարականներ, երբ գինը հատում է մակարդակներից որևէ մեկը։"
+          }
+        },
+        "ga": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tá ceann amháin ar a laghad de stopchaillteanas / tóg brabús riachtanach. Spreagann an backend orduithe cosanta laghdaithe-amháin nuair a thrasnaíonn an praghas ceachtar leibhéal."
           }
         }
       }
@@ -77048,6 +78776,12 @@
             "state": "translated",
             "value": "Բորսա"
           }
+        },
+        "ga": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Malartán"
+          }
         }
       }
     },
@@ -77316,6 +79050,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Լծակ"
+          }
+        },
+        "ga": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Giaráil"
           }
         }
       }
@@ -77586,6 +79326,12 @@
             "state": "translated",
             "value": "Հանձնարարական"
           }
+        },
+        "ga": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ordú"
+          }
         }
       }
     },
@@ -77854,6 +79600,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Ընտրել գործիքը"
+          }
+        },
+        "ga": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Roghnaigh ionstraim"
           }
         }
       }
@@ -78124,6 +79876,12 @@
             "state": "translated",
             "value": "Ռիսկ"
           }
+        },
+        "ga": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Riosca"
+          }
         }
       }
     },
@@ -78392,6 +80150,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Շուկա"
+          }
+        },
+        "ga": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ionad"
           }
         }
       }
@@ -78662,6 +80426,12 @@
             "state": "translated",
             "value": "Հետևող ստոպի հեռավորությունն այն բացն է, որը ստոպը պահպանում է, երբ գինը շարժվում է շահավետ ուղղությամբ։ Նվազագույն ֆիքսումը (ոչ պարտադիր) թույլ չի տալիս, որ ստոպը իջնի այդ շահույթի շեմից ցածր՝ դրան հասնելուց հետո։"
           }
+        },
+        "ga": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Is é an fad leanta an bhearna a choinníonn an stop de réir mar a bhogann an praghas go fabhrach. Cuireann íosghlasáil isteach (roghnach) cosc ar an stop bogadh faoi bhun na tairsí brabúis sin tar éis í a bhaint amach."
+          }
         }
       }
     },
@@ -78930,6 +80700,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Դրամապանակ"
+          }
+        },
+        "ga": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sparán"
           }
         }
       }
@@ -79200,6 +80976,12 @@
             "state": "translated",
             "value": "Քանակ՝ %@ @ %@"
           }
+        },
+        "ga": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cain.: %@ @ %@"
+          }
         }
       }
     },
@@ -79468,6 +81250,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Վճար՝ %@ %@"
+          }
+        },
+        "ga": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Táille: %@ %@"
           }
         }
       }
@@ -79738,6 +81526,12 @@
             "state": "translated",
             "value": "Կատարված %@ @ %@"
           }
+        },
+        "ga": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Comhlíonta %@ @ %@"
+          }
         }
       }
     },
@@ -80006,6 +81800,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Գին՝ %@"
+          }
+        },
+        "ga": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Praghas: %@"
           }
         }
       }
@@ -80276,6 +82076,12 @@
             "state": "translated",
             "value": "Չափ՝ %@"
           }
+        },
+        "ga": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Méid: %@"
+          }
         }
       }
     },
@@ -80544,6 +82350,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Միջին %@"
+          }
+        },
+        "ga": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Meán %@"
           }
         }
       }

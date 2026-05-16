@@ -38,7 +38,7 @@ final class CatalogParityTests: XCTestCase {
     /// East-Slavic, Baltic, Balkan, Anatolian, Maritime SE-Asia,
     /// East African, and Indic regions.
     private static let fullyTranslatedLanguages: [String] = [
-        "en", "pl",
+        "en", "ga", "pl",
         "de", "fr", "es", "it", "nl", "pt-BR",
         "sv", "nb", "da", "fi",
         "cs", "sk", "hu", "ro", "hr",
@@ -68,6 +68,7 @@ final class CatalogParityTests: XCTestCase {
     /// - Filipino (fil): one (1-2) + other
     private static let requiredPluralCategories: [String: Set<String>] = [
         "en": ["one", "other"],
+        "ga": ["one", "two", "few", "many", "other"],
         "pl": ["one", "few", "many"],
         "de": ["one", "other"],
         "fr": ["one", "many", "other"],

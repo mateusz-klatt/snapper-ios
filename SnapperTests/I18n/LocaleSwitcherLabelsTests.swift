@@ -31,9 +31,9 @@ final class LocaleSwitcherLabelsTests: XCTestCase {
         XCTAssertTrue(label.contains("Indie"), "Expected Polish country name for India, got: \(label)")
     }
 
-    func testCurrentLanguageEnglishWhenCurrentIsIE() {
+    func testCurrentLanguageIrishWhenCurrentIsIE() {
         let label = LocaleSwitcherLabels.accessibilityLabel(for: .ie, current: .ie)
-        XCTAssertTrue(label.contains("Current language"), "Expected EN template, got: \(label)")
-        XCTAssertTrue(label.contains("Ireland"), "Expected English country name, got: \(label)")
+        XCTAssertTrue(label.contains("Teanga reatha"), "Expected Irish template, got: \(label)")
+        XCTAssertTrue(label.contains("Éire"), "Expected Irish country name, got: \(label)")
     }
 }

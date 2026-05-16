@@ -32,6 +32,7 @@ enum CountryMappings {
     }
 
     private static let catalogLanguagesByCode: [AppLocale: CatalogLanguage] = [
+        .ie: .ga,
         .pl: .pl,
         .de: .de,
         .fr: .fr,
@@ -79,7 +80,7 @@ enum CountryMappings {
 
     /// BCP-47 identifier ``<catalogLanguage>-<COUNTRY>`` produced
     /// by joining the catalog language with the uppercased country
-    /// code. Example: ``.ie`` → ``"en-IE"``, ``.pl`` → ``"pl-PL"``,
+    /// code. Example: ``.ie`` → ``"ga-IE"``, ``.pl`` → ``"pl-PL"``,
     /// ``.de`` → ``"de-DE"``.
     ///
     /// Country codes like ``ie`` / ``br`` / ``se`` are themselves

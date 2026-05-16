@@ -13,6 +13,7 @@ final class CountryMappingsTests: XCTestCase {
     /// rows render on the locale picker. Updated each time a new
     /// language ships translations.
     private static let translatedLanguageMappings: [(AppLocale, CatalogLanguage)] = [
+        (.ie, .ga),
         (.pl, .pl),
         (.de, .de),
         (.fr, .fr),
@@ -80,7 +81,7 @@ final class CountryMappingsTests: XCTestCase {
     }
 
     func testIntlLocaleIdentifierSampledCodes() {
-        XCTAssertEqual(CountryMappings.intlLocaleIdentifier(for: .ie), "en-IE")
+        XCTAssertEqual(CountryMappings.intlLocaleIdentifier(for: .ie), "ga-IE")
         XCTAssertEqual(CountryMappings.intlLocaleIdentifier(for: .pl), "pl-PL")
         XCTAssertEqual(CountryMappings.intlLocaleIdentifier(for: .de), "de-DE")
         XCTAssertEqual(CountryMappings.intlLocaleIdentifier(for: .br), "pt-BR")
