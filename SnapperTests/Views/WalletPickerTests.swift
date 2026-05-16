@@ -67,6 +67,40 @@ final class WalletPickerTests: XCTestCase {
         )
     }
 
+    /// Non-English paperLabel coverage — the `(paper)` suffix is
+    /// catalog-keyed (`wallet.picker.paperLabel`), so swapping
+    /// catalog language must swap the suffix. We exercise two
+    /// scripts (Polish Latin + Burmese, the latter being the
+    /// recent-addition locale most likely to regress).
+    func testWalletDisplayNameNonEnglishPaperSuffix() {
+        let paper = makeWallet(publicId: "p-5", label: "firm", isPaper: true)
+
+        let plRendered = WalletPickerViewModel.walletDisplayName(paper, language: .pl)
+        XCTAssertTrue(
+            plRendered.hasPrefix("firm "),
+            "User-controlled label must lead the rendered string in every locale; got \(plRendered)"
+        )
+        XCTAssertNotEqual(
+            plRendered,
+            "firm (paper)",
+            "Polish paperLabel must NOT fall back to the English suffix; the catalog value is `%@ (papierowy)`."
+        )
+        XCTAssertTrue(
+            plRendered.contains("papierowy"),
+            "Polish paperLabel must render the native `(papierowy)` suffix; got \(plRendered)"
+        )
+
+        let myRendered = WalletPickerViewModel.walletDisplayName(paper, language: .my)
+        XCTAssertTrue(
+            myRendered.hasPrefix("firm "),
+            "User-controlled label must lead the rendered string in every locale; got \(myRendered)"
+        )
+        XCTAssertTrue(
+            myRendered.contains("စက္ကူ"),
+            "Burmese paperLabel must render the native `(စက္ကူ)` suffix; got \(myRendered)"
+        )
+    }
+
     /// Surface-load-errors branch (PR #2): when the wallet fetch
     /// fails before any wallet is cached, the menu opens to a
     /// "couldn't load" prompt with retry instead of an empty
