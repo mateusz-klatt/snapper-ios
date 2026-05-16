@@ -177,7 +177,10 @@ struct EditDevicePrefView: View {
                             Picker(LocalizedStringKey("notifications.devicePref.walletPicker.title"), selection: $selectedWalletId) {
                                 Text(LocalizedStringKey("common.picker.selectPlaceholder")).tag(Optional<String>.none)
                                 ForEach(appState.availableWallets, id: \.publicId) { wallet in
-                                    Text(WalletPickerViewModel.walletDisplayName(wallet))
+                                    Text(verbatim: WalletPickerViewModel.walletDisplayName(
+                                        wallet,
+                                        language: appState.locale.catalogLanguage
+                                    ))
                                         .tag(Optional(wallet.publicId))
                                 }
                             }

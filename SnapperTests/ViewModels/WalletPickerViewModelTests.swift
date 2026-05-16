@@ -24,6 +24,10 @@ final class WalletPickerViewModelTests: XCTestCase {
         let userDefaults = UserDefaults(suiteName: suiteName)!
         userDefaults.removePersistentDomain(forName: suiteName)
         appState = AppState(userDefaults: userDefaults)
+        /// Pin the locale to ``.us`` so the picker's catalog lookups
+        /// resolve to English regardless of the host machine's
+        /// preferred-language list. ``.us`` maps to ``CatalogLanguage.en``.
+        appState.locale = .us
     }
 
     override func tearDown() {
