@@ -45,7 +45,8 @@ final class WalletPickerViewModel {
         return Self.currentLabel(
             wallets: appState.availableWallets,
             selected: appState.selectedWalletPublicId,
-            loadError: loadError
+            loadError: loadError,
+            language: appState.locale.catalogLanguage
         )
     }
 
@@ -96,18 +97,20 @@ final class WalletPickerViewModel {
     static func currentLabel(
         wallets: [WalletInfo],
         selected: String?,
-        loadError: APIError? = nil
+        loadError: APIError? = nil,
+        language: CatalogLanguage = .en
     ) -> String {
         guard
             let id = selected,
             let wallet = wallets.first(where: { $0.publicId == id })
         else {
             if wallets.isEmpty, loadError != nil {
-                return "Wallets unavailable"
+                return LocaleStrings.localized("wallet.picker.unavailable", in: language)
             }
-            return wallets.isEmpty ? "Loading wallets..." : "Select wallet"
+            let key = wallets.isEmpty ? "wallet.picker.loading" : "wallet.picker.selectWallet"
+            return LocaleStrings.localized(key, in: language)
         }
-        return walletDisplayName(wallet)
+        return walletDisplayName(wallet, language: language)
     }
 
     /// Decision helper for the error-state branch — returns `true`
@@ -123,7 +126,12 @@ final class WalletPickerViewModel {
         return wallets.isEmpty
     }
 
-    static func walletDisplayName(_ wallet: WalletInfo) -> String {
-        return wallet.isPaper ? "\(wallet.label) (paper)" : wallet.label
+    static func walletDisplayName(
+        _ wallet: WalletInfo,
+        language: CatalogLanguage = .en
+    ) -> String {
+        guard wallet.isPaper else { return wallet.label }
+        let template = LocaleStrings.localized("wallet.picker.paperLabel", in: language)
+        return String(format: template, locale: Locale(identifier: language.rawValue), wallet.label)
     }
 }

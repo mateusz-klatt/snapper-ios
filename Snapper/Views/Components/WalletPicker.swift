@@ -37,7 +37,10 @@ struct WalletPicker: View {
                             viewModel.selectWallet(wallet.publicId)
                         } label: {
                             HStack {
-                                Text(WalletPickerViewModel.walletDisplayName(wallet))
+                                Text(verbatim: WalletPickerViewModel.walletDisplayName(
+                                    wallet,
+                                    language: appState.locale.catalogLanguage
+                                ))
                                 if wallet.publicId == viewModel.selectedWalletPublicId {
                                     Image(systemName: "checkmark")
                                 }
@@ -51,7 +54,11 @@ struct WalletPicker: View {
                 Image(systemName: (viewModel?.shouldShowLoadError ?? false)
                     ? "exclamationmark.triangle"
                     : "wallet.bifold")
-                Text(viewModel?.currentLabel ?? "Loading wallets...")
+                if let label = viewModel?.currentLabel {
+                    Text(verbatim: label)
+                } else {
+                    Text(LocalizedStringKey("wallet.picker.loading"))
+                }
                 Image(systemName: "chevron.down")
             }
             .padding(.horizontal, 12)

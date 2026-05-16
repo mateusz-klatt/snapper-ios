@@ -12,7 +12,7 @@ struct MarketMetricGrid: View {
         ]
         LazyVGrid(columns: columns, spacing: 12) {
             MarketMetricCard(
-                label: "Last price",
+                label: "market.data.metric.lastPrice",
                 value: formatPrice(metrics.lastPrice),
                 delta: nil
             )

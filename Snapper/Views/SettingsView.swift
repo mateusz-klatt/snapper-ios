@@ -297,20 +297,22 @@ struct SettingsView: View {
     }
 
     private var notificationStatusText: String {
+        let key: String
         switch notificationService.authorizationStatus {
         case .authorized:
-            return "Enabled"
+            key = "settings.notifications.permission.enabled"
         case .provisional:
-            return "Quiet"
+            key = "settings.notifications.permission.quiet"
         case .ephemeral:
-            return "Ephemeral"
+            key = "settings.notifications.permission.ephemeral"
         case .notDetermined:
-            return "Not set"
+            key = "settings.notifications.permission.notSet"
         case .denied:
-            return "Disabled"
+            key = "settings.notifications.permission.disabled"
         @unknown default:
-            return "Unknown"
+            key = "settings.notifications.permission.unknown"
         }
+        return LocaleStrings.localized(key, in: appState.locale.catalogLanguage)
     }
 
     private var connectionStatusView: some View {
