@@ -71,6 +71,7 @@ struct SettingsView: View {
                         Text(displayedBackendURL)
                             .font(.caption)
                             .foregroundColor(.secondary)
+                            .environment(\.layoutDirection, .leftToRight)
                     }
 
                     Button(LocalizedStringKey("settings.connection.changeBackend")) {
