@@ -73,7 +73,7 @@ jobs:
 
       - name: Upload xcresult bundle
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: i18n-screenshots-xcresult
           path: build/i18n-screenshots.xcresult
