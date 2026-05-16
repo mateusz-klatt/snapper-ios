@@ -19,6 +19,7 @@ import os
 /// the anchor because the sidecar persists before APNs send.
 struct AlertsView: View {
     @EnvironmentObject var navigationCoordinator: NavigationCoordinator
+    @Environment(AppState.self) private var appState
 
     @State private var alerts: [AlertEventInfo] = []
     @State private var isLoading = false
@@ -28,7 +29,7 @@ struct AlertsView: View {
     private let logger = AppLogger.make(category: "AlertsView")
 
     var body: some View {
-        NavigationView {
+        NavigationStack {
             ScrollViewReader { proxy in
                 Group {
                     if isLoading && alerts.isEmpty {
@@ -52,7 +53,7 @@ struct AlertsView: View {
                     } else {
                         List {
                             ForEach(alerts, id: \.publicId) { alert in
-                                AlertRow(alert: alert)
+                                AlertRow(alert: alert, locale: appState.locale)
                                     .id(alert.publicId)
                                     .contentShape(Rectangle())
                                     .onTapGesture {
@@ -131,7 +132,7 @@ private struct AlertDetailView: View {
     let alert: AlertEventInfo
 
     var body: some View {
-        NavigationView {
+        NavigationStack {
             ScrollView {
                 VStack(alignment: .leading, spacing: 12) {
                     Text(alert.title)
