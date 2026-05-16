@@ -3062,7 +3062,7 @@
         "it": {
           "stringUnit": {
             "state": "translated",
-            "value": "Le nuove allerte appariranno qui quando verranno attivate."
+            "value": "I nuovi avvisi appariranno qui quando verranno attivati."
           }
         },
         "nl": {
@@ -3612,7 +3612,7 @@
         "it": {
           "stringUnit": {
             "state": "translated",
-            "value": "Impossibile caricare le allerte"
+            "value": "Impossibile caricare gli avvisi"
           }
         },
         "nl": {
@@ -3887,7 +3887,7 @@
         "it": {
           "stringUnit": {
             "state": "translated",
-            "value": "Caricamento allerte…"
+            "value": "Caricamento avvisi…"
           }
         },
         "nl": {
@@ -6655,7 +6655,7 @@
         "sv": {
           "stringUnit": {
             "state": "translated",
-            "value": "Tradingplattform"
+            "value": "Handelsplattform"
           }
         },
         "nb": {
@@ -6685,7 +6685,7 @@
         "sk": {
           "stringUnit": {
             "state": "translated",
-            "value": "Tradingová platforma"
+            "value": "Obchodná platforma"
           }
         },
         "hu": {
@@ -24055,7 +24055,7 @@
         "ga": {
           "stringUnit": {
             "state": "translated",
-            "value": "Athrú 24u"
+            "value": "Athrú 24 u."
           }
         }
       }
@@ -48075,7 +48075,7 @@
         "hu": {
           "stringUnit": {
             "state": "translated",
-            "value": "A pozíciók itt jelennek meg, amikor nyitott megbízásai vannak."
+            "value": "A nyitott pozícióid itt jelennek meg."
           }
         },
         "ro": {
@@ -48123,7 +48123,7 @@
         "bs": {
           "stringUnit": {
             "state": "translated",
-            "value": "Pozicije će se pojaviti ovdje kada imate otvorene naloge."
+            "value": "Pozicije će se pojaviti ovdje kad imate otvorene pozicije."
           }
         },
         "sq": {
@@ -48249,7 +48249,7 @@
         "hy": {
           "stringUnit": {
             "state": "translated",
-            "value": "Դիրքերը այստեղ կհայտնվեն, երբ բաց հանձնարարականներ ունենաք։"
+            "value": "Դիրքերը այստեղ կհայտնվեն, երբ բաց դիրքեր ունենաք։"
           }
         },
         "ga": {
@@ -53348,7 +53348,7 @@
         "bs": {
           "stringUnit": {
             "state": "translated",
-            "value": "Email"
+            "value": "E-pošta"
           }
         },
         "sq": {
@@ -55422,61 +55422,61 @@
         "pl": {
           "stringUnit": {
             "state": "translated",
-            "value": "Backend"
+            "value": "Serwer"
           }
         },
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Backend"
+            "value": "Server"
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Backend"
+            "value": "Serveur"
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Backend"
+            "value": "Servidor"
           }
         },
         "it": {
           "stringUnit": {
             "state": "translated",
-            "value": "Backend"
+            "value": "Server"
           }
         },
         "nl": {
           "stringUnit": {
             "state": "translated",
-            "value": "Backend"
+            "value": "Server"
           }
         },
         "pt-BR": {
           "stringUnit": {
             "state": "translated",
-            "value": "Backend"
+            "value": "Servidor"
           }
         },
         "sv": {
           "stringUnit": {
             "state": "translated",
-            "value": "Backend"
+            "value": "Server"
           }
         },
         "nb": {
           "stringUnit": {
             "state": "translated",
-            "value": "Backend"
+            "value": "Server"
           }
         },
         "da": {
           "stringUnit": {
             "state": "translated",
-            "value": "Backend"
+            "value": "Server"
           }
         },
         "fi": {
@@ -55488,43 +55488,43 @@
         "cs": {
           "stringUnit": {
             "state": "translated",
-            "value": "Backend"
+            "value": "Server"
           }
         },
         "sk": {
           "stringUnit": {
             "state": "translated",
-            "value": "Backend"
+            "value": "Server"
           }
         },
         "hu": {
           "stringUnit": {
             "state": "translated",
-            "value": "Backend"
+            "value": "Szerver"
           }
         },
         "ro": {
           "stringUnit": {
             "state": "translated",
-            "value": "Backend"
+            "value": "Server"
           }
         },
         "hr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Backend"
+            "value": "Server"
           }
         },
         "uk": {
           "stringUnit": {
             "state": "translated",
-            "value": "Бекенд"
+            "value": "Сервер"
           }
         },
         "ru": {
           "stringUnit": {
             "state": "translated",
-            "value": "Бэкенд"
+            "value": "Сервер"
           }
         },
         "lt": {
@@ -55542,25 +55542,25 @@
         "sr-Latn": {
           "stringUnit": {
             "state": "translated",
-            "value": "Backend"
+            "value": "Server"
           }
         },
         "bs": {
           "stringUnit": {
             "state": "translated",
-            "value": "Backend"
+            "value": "Server"
           }
         },
         "sq": {
           "stringUnit": {
             "state": "translated",
-            "value": "Backend"
+            "value": "Server"
           }
         },
         "is": {
           "stringUnit": {
             "state": "translated",
-            "value": "Backend"
+            "value": "Þjónn"
           }
         },
         "el": {
@@ -55578,19 +55578,19 @@
         "fil": {
           "stringUnit": {
             "state": "translated",
-            "value": "Backend"
+            "value": "Server"
           }
         },
         "ms": {
           "stringUnit": {
             "state": "translated",
-            "value": "Backend"
+            "value": "Pelayan"
           }
         },
         "id": {
           "stringUnit": {
             "state": "translated",
-            "value": "Backend"
+            "value": "Server"
           }
         },
         "sw": {
@@ -55638,13 +55638,13 @@
         "vi": {
           "stringUnit": {
             "state": "translated",
-            "value": "Backend"
+            "value": "Máy chủ"
           }
         },
         "my": {
           "stringUnit": {
             "state": "translated",
-            "value": "Backend"
+            "value": "ဆာဗာ"
           }
         },
         "hi": {
@@ -55680,7 +55680,7 @@
         "ga": {
           "stringUnit": {
             "state": "translated",
-            "value": "Backend"
+            "value": "Freastalaí"
           }
         }
       }
@@ -64796,7 +64796,7 @@
         "it": {
           "stringUnit": {
             "state": "translated",
-            "value": "Scheda allerte. %@ non lette"
+            "value": "Scheda avvisi. %@ non letti"
           }
         },
         "nl": {
@@ -65621,7 +65621,7 @@
         "it": {
           "stringUnit": {
             "state": "translated",
-            "value": "Allerte"
+            "value": "Avvisi"
           }
         },
         "nl": {
