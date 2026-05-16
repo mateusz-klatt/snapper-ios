@@ -11,3 +11,6 @@ xcuserdata/
 *.cer
 .DS_Store
 .swiftpm/
+
+# Local backend URL for ios/scripts/screenshot-all-locales.sh (live tunnel/staging)
+.local-backend-url
