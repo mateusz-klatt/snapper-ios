@@ -169,7 +169,7 @@
         "fil": {
           "stringUnit": {
             "state": "translated",
-            "value": "I-double-tap upang buksan ang detalye ng alerto"
+            "value": "I-double tap upang buksan ang detalye ng alerto"
           }
         },
         "ms": {
@@ -444,7 +444,7 @@
         "fil": {
           "stringUnit": {
             "state": "translated",
-            "value": "I-dismiss ang alerto"
+            "value": "Alisin ang alerto"
           }
         },
         "ms": {
@@ -719,7 +719,7 @@
         "fil": {
           "stringUnit": {
             "state": "translated",
-            "value": "Error sa system"
+            "value": "Error sa sistema"
           }
         },
         "ms": {
@@ -1060,7 +1060,7 @@
         "my": {
           "stringUnit": {
             "state": "translated",
-            "value": "Margin သတိပေးချက်"
+            "value": "အာမခံငွေ သတိပေးချက်"
           }
         },
         "hi": {
@@ -1269,7 +1269,7 @@
         "fil": {
           "stringUnit": {
             "state": "translated",
-            "value": "Na-fill ang order"
+            "value": "Naisagawa ang order"
           }
         },
         "ms": {
@@ -1544,7 +1544,7 @@
         "fil": {
           "stringUnit": {
             "state": "translated",
-            "value": "Na-reject ang order"
+            "value": "Tinanggihan ang order"
           }
         },
         "ms": {
@@ -1819,7 +1819,7 @@
         "fil": {
           "stringUnit": {
             "state": "translated",
-            "value": "Na-trigger ang stop-loss"
+            "value": "Na-activate ang tigil-pagkalugi"
           }
         },
         "ms": {
@@ -1885,7 +1885,7 @@
         "my": {
           "stringUnit": {
             "state": "translated",
-            "value": "stop-loss လုပ်ဆောင်ပြီး"
+            "value": "အရှုံးရပ်ချက် အသက်ဝင်ပြီး"
           }
         },
         "hi": {
@@ -2644,7 +2644,7 @@
         "fil": {
           "stringUnit": {
             "state": "translated",
-            "value": "Thread"
+            "value": "Talakayan"
           }
         },
         "ms": {
@@ -2710,7 +2710,7 @@
         "my": {
           "stringUnit": {
             "state": "translated",
-            "value": "Thread"
+            "value": "ဆွေးနွေးကြောင်း"
           }
         },
         "hi": {
@@ -2919,7 +2919,7 @@
         "fil": {
           "stringUnit": {
             "state": "translated",
-            "value": "Oras"
+            "value": "Tatak ng oras"
           }
         },
         "ms": {
@@ -2985,7 +2985,7 @@
         "my": {
           "stringUnit": {
             "state": "translated",
-            "value": "Timestamp"
+            "value": "အချိန်မှတ်တံဆိပ်"
           }
         },
         "hi": {
@@ -3194,7 +3194,7 @@
         "fil": {
           "stringUnit": {
             "state": "translated",
-            "value": "Lalabas dito ang mga bagong alerto kapag na-trigger ang mga ito."
+            "value": "Lalabas dito ang mga bagong alerto kapag na-activate ang mga ito."
           }
         },
         "ms": {
@@ -3744,7 +3744,7 @@
         "fil": {
           "stringUnit": {
             "state": "translated",
-            "value": "Hindi ma-load ang mga alerto"
+            "value": "Hindi makuha ang mga alerto"
           }
         },
         "ms": {
@@ -4019,7 +4019,7 @@
         "fil": {
           "stringUnit": {
             "state": "translated",
-            "value": "Naglo-load ng mga alerto…"
+            "value": "Kinukuha ang mga alerto…"
           }
         },
         "ms": {
@@ -5394,7 +5394,7 @@
         "fil": {
           "stringUnit": {
             "state": "translated",
-            "value": "I-dismiss"
+            "value": "Alisin"
           }
         },
         "ms": {
@@ -5669,7 +5669,7 @@
         "fil": {
           "stringUnit": {
             "state": "translated",
-            "value": "Advanced (custom na backend)"
+            "value": "Karagdagang opsyon (sariling server)"
           }
         },
         "ms": {
@@ -5735,7 +5735,7 @@
         "my": {
           "stringUnit": {
             "state": "translated",
-            "value": "အဆင့်မြင့် (custom backend)"
+            "value": "အဆင့်မြင့် (စိတ်ကြိုက် ဆာဗာ)"
           }
         },
         "hi": {
@@ -5944,7 +5944,7 @@
         "fil": {
           "stringUnit": {
             "state": "translated",
-            "value": "Kasalukuyang backend: %@"
+            "value": "Kasalukuyang server: %@"
           }
         },
         "ms": {
@@ -6010,7 +6010,7 @@
         "my": {
           "stringUnit": {
             "state": "translated",
-            "value": "လက်ရှိ backend: %@"
+            "value": "လက်ရှိ ဆာဗာ: %@"
           }
         },
         "hi": {
@@ -6494,7 +6494,7 @@
         "fil": {
           "stringUnit": {
             "state": "translated",
-            "value": "Mag-sign in"
+            "value": "Mag-login"
           }
         },
         "ms": {
@@ -6769,7 +6769,7 @@
         "fil": {
           "stringUnit": {
             "state": "translated",
-            "value": "Platform sa trading"
+            "value": "Plataporma ng pangangalakal"
           }
         },
         "ms": {
@@ -7044,7 +7044,7 @@
         "fil": {
           "stringUnit": {
             "state": "translated",
-            "value": "Username"
+            "value": "Pangalan ng gumagamit"
           }
         },
         "ms": {
@@ -7594,7 +7594,7 @@
         "fil": {
           "stringUnit": {
             "state": "translated",
-            "value": "Maaaring balewalain ito ng mga karaniwang user. Itinatakda ng mga self-hoster ang URL ng sarili nilang Snapper backend."
+            "value": "Maaaring balewalain ito ng mga karaniwang gumagamit. Itinatakda ng mga sariling nagho-host ang URL ng sarili nilang Snapper server."
           }
         },
         "ms": {
@@ -7660,7 +7660,7 @@
         "my": {
           "stringUnit": {
             "state": "translated",
-            "value": "သာမန်အသုံးပြုသူများ ဤအရာကို လျစ်လျူရှုနိုင်သည်။ Self-hosters များသည် ကိုယ်ပိုင် Snapper backend ၏ URL ကို သတ်မှတ်ပါသည်။"
+            "value": "သာမန်အသုံးပြုသူများ ဤအရာကို လျစ်လျူရှုနိုင်သည်။ ကိုယ်တိုင် လက်ခံဆောင်ရွက်သူများသည် ကိုယ်ပိုင် Snapper ဆာဗာ၏ URL ကို သတ်မှတ်ပါသည်။"
           }
         },
         "hi": {
@@ -7869,7 +7869,7 @@
         "fil": {
           "stringUnit": {
             "state": "translated",
-            "value": "Gumamit ng https:// (o http:// para sa localhost sa Debug). Origin lamang — walang path, query, o fragment."
+            "value": "Gumamit ng https:// (o http:// para sa localhost sa Debug). Pinagmulan lang — walang landas, query, o fragment."
           }
         },
         "ms": {
@@ -7935,7 +7935,7 @@
         "my": {
           "stringUnit": {
             "state": "translated",
-            "value": "https:// ကို အသုံးပြုပါ (Debug တွင် localhost အတွက် http://)။ Origin သာ — path, query သို့မဟုတ် fragment မပါရပါ။"
+            "value": "https:// ကို အသုံးပြုပါ (Debug တွင် localhost အတွက် http://)။ မူရင်းလိပ်စာသာ ဖြစ်ရမည်။ လမ်းကြောင်း၊ မေးမြန်းချက် သို့မဟုတ် အပိုင်းအစ မပါရပါ။"
           }
         },
         "hi": {
@@ -8144,7 +8144,7 @@
         "fil": {
           "stringUnit": {
             "state": "translated",
-            "value": "Gumamit ng https://your-backend.example. Origin lang — walang path, query, o fragment. Tinatanggihan ng mga App Store build ang http:// at mga self-signed certificate."
+            "value": "Gumamit ng https://your-backend.example. Pinagmulan lang — walang landas, query, o fragment. Tinatanggihan ng mga bersyon sa App Store ang http:// at mga sertipikong sariling pinirmahan."
           }
         },
         "ms": {
@@ -8210,7 +8210,7 @@
         "my": {
           "stringUnit": {
             "state": "translated",
-            "value": "https://your-backend.example ကို အသုံးပြုပါ။ Origin သာ — path, query သို့မဟုတ် fragment မပါရပါ။ App Store builds များသည် http:// နှင့် self-signed certificates များကို ပယ်ချပါသည်။"
+            "value": "https://your-backend.example ကို အသုံးပြုပါ။ မူရင်းလိပ်စာသာ ဖြစ်ရမည်။ လမ်းကြောင်း၊ မေးမြန်းချက် သို့မဟုတ် အပိုင်းအစ မပါရပါ။ App Store တည်ဆောက်မှုများသည် http:// နှင့် ကိုယ်တိုင်လက်မှတ်ထိုးထားသော အသိအမှတ်ပြုလက်မှတ်များကို ပယ်ချပါသည်။"
           }
         },
         "hi": {
@@ -8694,7 +8694,7 @@
         "fil": {
           "stringUnit": {
             "state": "translated",
-            "value": "I-reset sa default"
+            "value": "Ibalik sa orihinal"
           }
         },
         "ms": {
@@ -9519,7 +9519,7 @@
         "fil": {
           "stringUnit": {
             "state": "translated",
-            "value": "Average na presyo"
+            "value": "Karaniwang presyo"
           }
         },
         "ms": {
@@ -10069,7 +10069,7 @@
         "fil": {
           "stringUnit": {
             "state": "translated",
-            "value": "Hindi ma-load"
+            "value": "Hindi makuha"
           }
         },
         "ms": {
@@ -10619,7 +10619,7 @@
         "fil": {
           "stringUnit": {
             "state": "translated",
-            "value": "Naglo-load…"
+            "value": "Kinukuha…"
           }
         },
         "ms": {
@@ -12885,7 +12885,7 @@
         "my": {
           "stringUnit": {
             "state": "translated",
-            "value": "ရာထူး"
+            "value": "အနေအထား"
           }
         },
         "hi": {
@@ -13369,7 +13369,7 @@
         "fil": {
           "stringUnit": {
             "state": "translated",
-            "value": "Di-wastong sagot mula sa server"
+            "value": "Di-wastong tugon mula sa server"
           }
         },
         "ms": {
@@ -13435,7 +13435,7 @@
         "my": {
           "stringUnit": {
             "state": "translated",
-            "value": "server မှ မမှန်ကန်သော တုံ့ပြန်မှု"
+            "value": "ဆာဗာမှ မမှန်ကန်သော တုံ့ပြန်မှု"
           }
         },
         "hi": {
@@ -14260,7 +14260,7 @@
         "my": {
           "stringUnit": {
             "state": "translated",
-            "value": "Network အမှား: %@"
+            "value": "ကွန်ရက်အမှား: %@"
           }
         },
         "hi": {
@@ -14469,7 +14469,7 @@
         "fil": {
           "stringUnit": {
             "state": "translated",
-            "value": "Nabigong i-serialize ang kahilingan sa pag-login"
+            "value": "Nabigong ihanda ang kahilingan sa pag-login"
           }
         },
         "ms": {
@@ -15294,7 +15294,7 @@
         "fil": {
           "stringUnit": {
             "state": "translated",
-            "value": "I-refresh ang data"
+            "value": "I-refresh ang datos"
           }
         },
         "ms": {
@@ -15569,7 +15569,7 @@
         "fil": {
           "stringUnit": {
             "state": "translated",
-            "value": "Nabigo ang authentication: %@"
+            "value": "Nabigo ang pagpapatunay: %@"
           }
         },
         "ms": {
@@ -15635,7 +15635,7 @@
         "my": {
           "stringUnit": {
             "state": "translated",
-            "value": "Auth မအောင်မြင်ပါ: %@"
+            "value": "အထောက်အထားစိစစ်မှု မအောင်မြင်ပါ: %@"
           }
         },
         "hi": {
@@ -15844,7 +15844,7 @@
         "fil": {
           "stringUnit": {
             "state": "translated",
-            "value": "Nag-a-authenticate…"
+            "value": "Pinapatunayan…"
           }
         },
         "ms": {
@@ -17219,7 +17219,7 @@
         "fil": {
           "stringUnit": {
             "state": "translated",
-            "value": "Equity"
+            "value": "Kapital"
           }
         },
         "ms": {
@@ -17285,7 +17285,7 @@
         "my": {
           "stringUnit": {
             "state": "translated",
-            "value": "Equity"
+            "value": "ပိုင်ဆိုင်မှုတန်ဖိုး"
           }
         },
         "hi": {
@@ -17494,7 +17494,7 @@
         "fil": {
           "stringUnit": {
             "state": "translated",
-            "value": "Nabigong i-load — %@"
+            "value": "Hindi nakuha — %@"
           }
         },
         "ms": {
@@ -18794,7 +18794,7 @@
         "my": {
           "stringUnit": {
             "state": "translated",
-            "value": "Qty: %@ @ %@"
+            "value": "အရေအတွက်: %@ @ %@"
           }
         },
         "hi": {
@@ -19003,7 +19003,7 @@
         "fil": {
           "stringUnit": {
             "state": "translated",
-            "value": "Unrealized P&L"
+            "value": "Hindi pa naisasaakatuparang P&L"
           }
         },
         "ms": {
@@ -19069,7 +19069,7 @@
         "my": {
           "stringUnit": {
             "state": "translated",
-            "value": "Unrealized P&L"
+            "value": "မရောင်းရသေးသော P&L"
           }
         },
         "hi": {
@@ -20169,7 +20169,7 @@
         "my": {
           "stringUnit": {
             "state": "translated",
-            "value": "ဖွင့်ထားသော position များ"
+            "value": "ဖွင့်ထားသော အနေအထားများ"
           }
         },
         "hi": {
@@ -20444,7 +20444,7 @@
         "my": {
           "stringUnit": {
             "state": "translated",
-            "value": "မကြာသေးမီ order များ"
+            "value": "မကြာသေးမီ အော်ဒါများ"
           }
         },
         "hi": {
@@ -20653,7 +20653,7 @@
         "fil": {
           "stringUnit": {
             "state": "translated",
-            "value": "Mga Aktibong Order"
+            "value": "Mga aktibong order"
           }
         },
         "ms": {
@@ -20719,7 +20719,7 @@
         "my": {
           "stringUnit": {
             "state": "translated",
-            "value": "Active Orders"
+            "value": "လုပ်ဆောင်နေသော အော်ဒါများ"
           }
         },
         "hi": {
@@ -20928,7 +20928,7 @@
         "fil": {
           "stringUnit": {
             "state": "translated",
-            "value": "Mga Aktibong Estratehiya"
+            "value": "Mga aktibong estratehiya"
           }
         },
         "ms": {
@@ -20994,7 +20994,7 @@
         "my": {
           "stringUnit": {
             "state": "translated",
-            "value": "Active Strategies"
+            "value": "အသက်ဝင်နေသော မဟာဗျူဟာများ"
           }
         },
         "hi": {
@@ -21203,7 +21203,7 @@
         "fil": {
           "stringUnit": {
             "state": "translated",
-            "value": "Status ng Trader"
+            "value": "Katayuan ng mangangalakal"
           }
         },
         "ms": {
@@ -21269,7 +21269,7 @@
         "my": {
           "stringUnit": {
             "state": "translated",
-            "value": "Trader Status"
+            "value": "ကုန်သွယ်သူ အခြေအနေ"
           }
         },
         "hi": {
@@ -21753,7 +21753,7 @@
         "fil": {
           "stringUnit": {
             "state": "translated",
-            "value": "Mag-swipe upang tuklasin ang mga halaga ng chart"
+            "value": "Mag-swipe upang tuklasin ang mga halaga ng tsart"
           }
         },
         "ms": {
@@ -21819,7 +21819,7 @@
         "my": {
           "stringUnit": {
             "state": "translated",
-            "value": "chart တန်ဖိုးများကြည့်ရန် ပွတ်ဆွဲပါ"
+            "value": "ဇယားတန်ဖိုးများ ကြည့်ရန် ပွတ်ဆွဲပါ"
           }
         },
         "hi": {
@@ -22028,7 +22028,7 @@
         "fil": {
           "stringUnit": {
             "state": "translated",
-            "value": "Candlestick chart, %lld bar, %@ hanggang %@"
+            "value": "Tsart ng kandila, %lld bar, %@ hanggang %@"
           }
         },
         "ms": {
@@ -22094,7 +22094,7 @@
         "my": {
           "stringUnit": {
             "state": "translated",
-            "value": "Candlestick chart, %lld bars, %@ မှ %@ အထိ"
+            "value": "မီးတိုင်ဇယား၊ %lld တိုင်၊ %@ မှ %@ အထိ"
           }
         },
         "hi": {
@@ -22303,7 +22303,7 @@
         "fil": {
           "stringUnit": {
             "state": "translated",
-            "value": "Timeframe: %@"
+            "value": "Yugto ng panahon: %@"
           }
         },
         "ms": {
@@ -22369,7 +22369,7 @@
         "my": {
           "stringUnit": {
             "state": "translated",
-            "value": "Timeframe: %@"
+            "value": "အချိန်ကာလ: %@"
           }
         },
         "hi": {
@@ -22578,7 +22578,7 @@
         "fil": {
           "stringUnit": {
             "state": "translated",
-            "value": "Wala pang candle"
+            "value": "Wala pang kandila"
           }
         },
         "ms": {
@@ -22644,7 +22644,7 @@
         "my": {
           "stringUnit": {
             "state": "translated",
-            "value": "candles မရှိသေးပါ"
+            "value": "မီးတိုင်များ မရှိသေးပါ"
           }
         },
         "hi": {
@@ -22919,7 +22919,7 @@
         "my": {
           "stringUnit": {
             "state": "translated",
-            "value": "instruments ရှာပါ"
+            "value": "ကုန်သွယ်ပစ္စည်းများ ရှာပါ"
           }
         },
         "hi": {
@@ -23194,7 +23194,7 @@
         "my": {
           "stringUnit": {
             "state": "translated",
-            "value": "instrument ရွေးပါ"
+            "value": "ကုန်သွယ်ပစ္စည်း ရွေးပါ"
           }
         },
         "hi": {
@@ -23403,7 +23403,7 @@
         "fil": {
           "stringUnit": {
             "state": "translated",
-            "value": "View only"
+            "value": "Tingnan lang"
           }
         },
         "ms": {
@@ -23678,7 +23678,7 @@
         "fil": {
           "stringUnit": {
             "state": "translated",
-            "value": "Naglo-load ng market data…"
+            "value": "Kinukuha ang datos ng merkado…"
           }
         },
         "ms": {
@@ -23744,7 +23744,7 @@
         "my": {
           "stringUnit": {
             "state": "translated",
-            "value": "market data ဖွင့်နေသည်…"
+            "value": "ဈေးကွက်ဒေတာ ဖွင့်နေသည်…"
           }
         },
         "hi": {
@@ -23953,7 +23953,7 @@
         "fil": {
           "stringUnit": {
             "state": "translated",
-            "value": "24h na pagbabago"
+            "value": "Pagbabago sa 24 oras"
           }
         },
         "ms": {
@@ -24019,7 +24019,7 @@
         "my": {
           "stringUnit": {
             "state": "translated",
-            "value": "24h ပြောင်းလဲမှု"
+            "value": "၂၄ နာရီ ပြောင်းလဲမှု"
           }
         },
         "hi": {
@@ -24228,7 +24228,7 @@
         "fil": {
           "stringUnit": {
             "state": "translated",
-            "value": "Close"
+            "value": "Pagsasara"
           }
         },
         "ms": {
@@ -24503,7 +24503,7 @@
         "fil": {
           "stringUnit": {
             "state": "translated",
-            "value": "High"
+            "value": "Mataas"
           }
         },
         "ms": {
@@ -25053,7 +25053,7 @@
         "fil": {
           "stringUnit": {
             "state": "translated",
-            "value": "Low"
+            "value": "Mababa"
           }
         },
         "ms": {
@@ -25328,7 +25328,7 @@
         "fil": {
           "stringUnit": {
             "state": "translated",
-            "value": "Open"
+            "value": "Pagbubukas"
           }
         },
         "ms": {
@@ -25603,7 +25603,7 @@
         "fil": {
           "stringUnit": {
             "state": "translated",
-            "value": "Volume"
+            "value": "Dami"
           }
         },
         "ms": {
@@ -25669,7 +25669,7 @@
         "my": {
           "stringUnit": {
             "state": "translated",
-            "value": "Volume"
+            "value": "အရောင်းအဝယ်ပမာဏ"
           }
         },
         "hi": {
@@ -25878,7 +25878,7 @@
         "fil": {
           "stringUnit": {
             "state": "translated",
-            "value": "Data ng market"
+            "value": "Datos ng merkado"
           }
         },
         "ms": {
@@ -26494,7 +26494,7 @@
         "my": {
           "stringUnit": {
             "state": "translated",
-            "value": "Live"
+            "value": "တိုက်ရိုက်"
           }
         },
         "hi": {
@@ -26703,7 +26703,7 @@
         "fil": {
           "stringUnit": {
             "state": "translated",
-            "value": "Timeframe"
+            "value": "Yugto ng panahon"
           }
         },
         "ms": {
@@ -26769,7 +26769,7 @@
         "my": {
           "stringUnit": {
             "state": "translated",
-            "value": "Timeframe"
+            "value": "အချိန်ကာလ"
           }
         },
         "hi": {
@@ -26978,7 +26978,7 @@
         "fil": {
           "stringUnit": {
             "state": "translated",
-            "value": "Live na candles · cross-exchange"
+            "value": "Live na mga kandila · sa iba’t ibang palitan"
           }
         },
         "ms": {
@@ -27044,7 +27044,7 @@
         "my": {
           "stringUnit": {
             "state": "translated",
-            "value": "Live candles · cross-exchange"
+            "value": "တိုက်ရိုက် မီးတိုင်များ · ဈေးကွက်များအကြား"
           }
         },
         "hi": {
@@ -27319,7 +27319,7 @@
         "my": {
           "stringUnit": {
             "state": "translated",
-            "value": "Scope: %@"
+            "value": "အကျုံးဝင်မှု: %@"
           }
         },
         "hi": {
@@ -28353,7 +28353,7 @@
         "fil": {
           "stringUnit": {
             "state": "translated",
-            "value": "Ino-override ng hard mute ang tahimik na oras at dini-disable ang lahat ng alerto sa saklaw na ito hanggang sa napiling oras."
+            "value": "Pinangingibabawan ng ganap na pagpatahimik ang tahimik na oras at pinapatay ang bawat alerto sa saklaw na ito hanggang sa napiling oras."
           }
         },
         "ms": {
@@ -28419,7 +28419,7 @@
         "my": {
           "stringUnit": {
             "state": "translated",
-            "value": "Hard mute သည် quiet hours ကို ကျော်လွန်ပြီး ရွေးထားသောအချိန်အထိ ဤ scope အတွင်းရှိ alert အားလုံးကို ပိတ်ထားပါသည်။"
+            "value": "အပြည့်အဝ အသံပိတ်ခြင်းသည် အသံတိတ်ချိန်များကို ကျော်လွန်ပြီး ရွေးထားသောအချိန်အထိ ဤအကျုံးဝင်မှုအတွင်းရှိ အချက်ပေးချက်အားလုံးကို ပိတ်ထားပါသည်။"
           }
         },
         "hi": {
@@ -28628,7 +28628,7 @@
         "fil": {
           "stringUnit": {
             "state": "translated",
-            "value": "Hard mute"
+            "value": "Ganap na patahimikin"
           }
         },
         "ms": {
@@ -28694,7 +28694,7 @@
         "my": {
           "stringUnit": {
             "state": "translated",
-            "value": "Hard mute"
+            "value": "အပြည့်အဝ အသံပိတ်"
           }
         },
         "hi": {
@@ -28903,7 +28903,7 @@
         "fil": {
           "stringUnit": {
             "state": "translated",
-            "value": "Pinakamababang priority"
+            "value": "Pinakamababang priyoridad"
           }
         },
         "ms": {
@@ -28969,7 +28969,7 @@
         "my": {
           "stringUnit": {
             "state": "translated",
-            "value": "အနည်းဆုံး ဦးစားပေးမှု"
+            "value": "အနည်းဆုံး ဦးစားပေးအဆင့်"
           }
         },
         "hi": {
@@ -29453,7 +29453,7 @@
         "fil": {
           "stringUnit": {
             "state": "translated",
-            "value": "30 min"
+            "value": "30 minuto"
           }
         },
         "ms": {
@@ -29728,7 +29728,7 @@
         "fil": {
           "stringUnit": {
             "state": "translated",
-            "value": "5 min"
+            "value": "5 minuto"
           }
         },
         "ms": {
@@ -30003,7 +30003,7 @@
         "fil": {
           "stringUnit": {
             "state": "translated",
-            "value": "Custom…"
+            "value": "Pasadya…"
           }
         },
         "ms": {
@@ -30278,7 +30278,7 @@
         "fil": {
           "stringUnit": {
             "state": "translated",
-            "value": "I-mute hanggang"
+            "value": "Patahimikin hanggang"
           }
         },
         "ms": {
@@ -30344,7 +30344,7 @@
         "my": {
           "stringUnit": {
             "state": "translated",
-            "value": "ဤအချိန်အထိ mute"
+            "value": "ဤအချိန်အထိ အသံပိတ်"
           }
         },
         "hi": {
@@ -30553,7 +30553,7 @@
         "fil": {
           "stringUnit": {
             "state": "translated",
-            "value": "Preference ng device"
+            "value": "Kagustuhan ng aparato"
           }
         },
         "ms": {
@@ -30619,7 +30619,7 @@
         "my": {
           "stringUnit": {
             "state": "translated",
-            "value": "စက်ပစ္စည်း preference"
+            "value": "စက်ပစ္စည်း နှစ်သက်ရာ သတ်မှတ်ချက်"
           }
         },
         "hi": {
@@ -30828,7 +30828,7 @@
         "fil": {
           "stringUnit": {
             "state": "translated",
-            "value": "Operator"
+            "value": "Tagapagpatakbo"
           }
         },
         "ms": {
@@ -30894,7 +30894,7 @@
         "my": {
           "stringUnit": {
             "state": "translated",
-            "value": "Operator"
+            "value": "လုပ်ဆောင်သူ"
           }
         },
         "hi": {
@@ -31103,7 +31103,7 @@
         "fil": {
           "stringUnit": {
             "state": "translated",
-            "value": "Ipagpapaliban ang mga hindi kritikal na alerto sa panahong ito, gamit ang timezone ng device."
+            "value": "Ipagpapaliban ang mga hindi kritikal na alerto sa panahong ito, gamit ang timezone ng aparato."
           }
         },
         "ms": {
@@ -31169,7 +31169,7 @@
         "my": {
           "stringUnit": {
             "state": "translated",
-            "value": "Non-critical alerts များကို ဤအချိန်ကာလအတွင်း device timezone ဖြင့် နောက်ဆိုင်းထားပါသည်။"
+            "value": "အရေးမကြီးသော အချက်ပေးချက်များကို ဤအချိန်ကာလအတွင်း စက်ပစ္စည်း၏ အချိန်ဇုန်ဖြင့် နောက်ဆိုင်းထားပါသည်။"
           }
         },
         "hi": {
@@ -32203,7 +32203,7 @@
         "fil": {
           "stringUnit": {
             "state": "translated",
-            "value": "Buong device"
+            "value": "Buong aparato"
           }
         },
         "ms": {
@@ -32269,7 +32269,7 @@
         "my": {
           "stringUnit": {
             "state": "translated",
-            "value": "စက်ပစ္စည်း global"
+            "value": "စက်ပစ္စည်းတစ်ခုလုံး"
           }
         },
         "hi": {
@@ -32478,7 +32478,7 @@
         "fil": {
           "stringUnit": {
             "state": "translated",
-            "value": "Pinapanatili ng edit mode ang orihinal na saklaw. Bahagi ng identity ng alerto ang napiling operator at wallet at hindi maaaring palitan dito."
+            "value": "Pinapanatili ng paraan ng pag-edit ang orihinal na saklaw. Bahagi ng pagkakakilanlan ng alerto ang napiling tagapagpatakbo at pitaka at hindi maaaring palitan dito."
           }
         },
         "ms": {
@@ -32544,7 +32544,7 @@
         "my": {
           "stringUnit": {
             "state": "translated",
-            "value": "Edit mode သည် မူလ scope ကို ထိန်းသိမ်းထားသည်။ ရွေးထားသော operator နှင့် Wallet သည် alert ၏ identity အစိတ်အပိုင်းဖြစ်ပြီး ဤနေရာတွင် ပြောင်းလဲ၍မရပါ။"
+            "value": "ပြင်ဆင်မှုမုဒ်သည် မူလအကျုံးဝင်မှုကို ထိန်းသိမ်းထားသည်။ ရွေးထားသော လုပ်ဆောင်သူနှင့် ပိုက်ဆံအိတ်သည် အချက်ပေးချက်၏ အမှတ်အသားအစိတ်အပိုင်းဖြစ်သောကြောင့် ဤနေရာတွင် ပြောင်းလဲ၍မရပါ။"
           }
         },
         "hi": {
@@ -32753,7 +32753,7 @@
         "fil": {
           "stringUnit": {
             "state": "translated",
-            "value": "Naglo-load ng mga operator… Kung mananatiling walang laman ang listahan, walang operator membership ang iyong account at saklaw ng device lang ang available."
+            "value": "Kinukuha ang mga tagapagpatakbo… Kung mananatiling walang laman ang listahan, wala kang membership bilang tagapagpatakbo sa account mo at saklaw ng aparato lang ang available."
           }
         },
         "ms": {
@@ -32819,7 +32819,7 @@
         "my": {
           "stringUnit": {
             "state": "translated",
-            "value": "operators များ ဖွင့်နေသည်… စာရင်းကွက်လပ်ဖြစ်နေပါက သင့်အကောင့်တွင် operator memberships မရှိပြီး Device scope သာ ရနိုင်သည်။"
+            "value": "လုပ်ဆောင်သူများ ဖွင့်နေသည်… စာရင်းကွက်လပ်ဖြစ်နေပါက သင့်အကောင့်တွင် လုပ်ဆောင်သူအဖွဲ့ဝင်မှု မရှိပြီး စက်ပစ္စည်းအကျုံးဝင်မှုသာ ရနိုင်သည်။"
           }
         },
         "hi": {
@@ -33028,7 +33028,7 @@
         "fil": {
           "stringUnit": {
             "state": "translated",
-            "value": "Nangangailangan ng napiling operator ang saklaw ng wallet."
+            "value": "Nangangailangan ng napiling tagapagpatakbo ang saklaw ng pitaka."
           }
         },
         "ms": {
@@ -33094,7 +33094,7 @@
         "my": {
           "stringUnit": {
             "state": "translated",
-            "value": "Wallet scope အတွက် operator ရွေးထားရန် လိုအပ်သည်။"
+            "value": "ပိုက်ဆံအိတ်အကျုံးဝင်မှုအတွက် လုပ်ဆောင်သူ ရွေးထားရန် လိုအပ်သည်။"
           }
         },
         "hi": {
@@ -33369,7 +33369,7 @@
         "my": {
           "stringUnit": {
             "state": "translated",
-            "value": "Scope"
+            "value": "အကျုံးဝင်မှု"
           }
         },
         "hi": {
@@ -33578,7 +33578,7 @@
         "fil": {
           "stringUnit": {
             "state": "translated",
-            "value": "Operator"
+            "value": "Tagapagpatakbo"
           }
         },
         "ms": {
@@ -33644,7 +33644,7 @@
         "my": {
           "stringUnit": {
             "state": "translated",
-            "value": "Operator"
+            "value": "လုပ်ဆောင်သူ"
           }
         },
         "hi": {
@@ -33853,7 +33853,7 @@
         "fil": {
           "stringUnit": {
             "state": "translated",
-            "value": "Wallet"
+            "value": "Pitaka"
           }
         },
         "ms": {
@@ -33919,7 +33919,7 @@
         "my": {
           "stringUnit": {
             "state": "translated",
-            "value": "Wallet"
+            "value": "ပိုက်ဆံအိတ်"
           }
         },
         "hi": {
@@ -34128,7 +34128,7 @@
         "fil": {
           "stringUnit": {
             "state": "translated",
-            "value": "Wallet"
+            "value": "Pitaka"
           }
         },
         "ms": {
@@ -34194,7 +34194,7 @@
         "my": {
           "stringUnit": {
             "state": "translated",
-            "value": "Wallet"
+            "value": "ပိုက်ဆံအိတ်"
           }
         },
         "hi": {
@@ -34403,7 +34403,7 @@
         "fil": {
           "stringUnit": {
             "state": "translated",
-            "value": "Pinakamababang priority: %@"
+            "value": "Pinakamababang priyoridad: %@"
           }
         },
         "ms": {
@@ -34469,7 +34469,7 @@
         "my": {
           "stringUnit": {
             "state": "translated",
-            "value": "အနည်းဆုံး ဦးစားပေးမှု: %@"
+            "value": "အနည်းဆုံး ဦးစားပေးအဆင့်: %@"
           }
         },
         "hi": {
@@ -34678,7 +34678,7 @@
         "fil": {
           "stringUnit": {
             "state": "translated",
-            "value": "Magdagdag ng override"
+            "value": "Magdagdag ng tanging tuntunin"
           }
         },
         "ms": {
@@ -34744,7 +34744,7 @@
         "my": {
           "stringUnit": {
             "state": "translated",
-            "value": "override ထည့်ပါ"
+            "value": "ခြွင်းချက်သတ်မှတ်ချက် ထည့်ပါ"
           }
         },
         "hi": {
@@ -35228,7 +35228,7 @@
         "fil": {
           "stringUnit": {
             "state": "translated",
-            "value": "Walang override para sa device na ito."
+            "value": "Walang tanging tuntunin para sa aparatong ito."
           }
         },
         "ms": {
@@ -35294,7 +35294,7 @@
         "my": {
           "stringUnit": {
             "state": "translated",
-            "value": "ဤစက်တွင် စက်အလိုက် override မရှိပါ။"
+            "value": "ဤစက်တွင် စက်အလိုက် ခြွင်းချက်သတ်မှတ်ချက် မရှိပါ။"
           }
         },
         "hi": {
@@ -35503,7 +35503,7 @@
         "fil": {
           "stringUnit": {
             "state": "translated",
-            "value": "Hindi ma-load ang mga preference"
+            "value": "Hindi makuha ang mga kagustuhan"
           }
         },
         "ms": {
@@ -35569,7 +35569,7 @@
         "my": {
           "stringUnit": {
             "state": "translated",
-            "value": "preferences ဖွင့်၍မရပါ"
+            "value": "နှစ်သက်ရာ သတ်မှတ်ချက်များ ဖွင့်၍မရပါ"
           }
         },
         "hi": {
@@ -35778,7 +35778,7 @@
         "fil": {
           "stringUnit": {
             "state": "translated",
-            "value": "Hindi ma-save ang mga preference"
+            "value": "Hindi ma-save ang mga kagustuhan"
           }
         },
         "ms": {
@@ -35844,7 +35844,7 @@
         "my": {
           "stringUnit": {
             "state": "translated",
-            "value": "preferences သိမ်းဆည်း၍မရပါ"
+            "value": "နှစ်သက်ရာ သတ်မှတ်ချက်များ သိမ်းဆည်း၍မရပါ"
           }
         },
         "hi": {
@@ -36053,7 +36053,7 @@
         "fil": {
           "stringUnit": {
             "state": "translated",
-            "value": "Mga preference sa notification"
+            "value": "Mga kagustuhan sa notification"
           }
         },
         "ms": {
@@ -36328,7 +36328,7 @@
         "fil": {
           "stringUnit": {
             "state": "translated",
-            "value": "I-enable ang mga push notification sa Settings → Notifications upang irehistro ang device na ito."
+            "value": "I-enable ang mga push notification sa Mga Setting → Mga Notification upang irehistro ang aparatong ito."
           }
         },
         "ms": {
@@ -36394,7 +36394,7 @@
         "my": {
           "stringUnit": {
             "state": "translated",
-            "value": "ဤစက်ကို မှတ်ပုံတင်ရန် Settings → Notifications တွင် push notifications ကို ဖွင့်ပါ။"
+            "value": "ဤစက်ကို မှတ်ပုံတင်ရန် ဆက်တင်များ → အသိပေးချက်များ တွင် တွန်းပို့ အသိပေးချက်များကို ဖွင့်ပါ။"
           }
         },
         "hi": {
@@ -36603,7 +36603,7 @@
         "fil": {
           "stringUnit": {
             "state": "translated",
-            "value": "Walang nakarehistrong device"
+            "value": "Walang nakarehistrong aparato"
           }
         },
         "ms": {
@@ -37153,7 +37153,7 @@
         "fil": {
           "stringUnit": {
             "state": "translated",
-            "value": "Pinakamababang priority"
+            "value": "Pinakamababang priyoridad"
           }
         },
         "ms": {
@@ -37219,7 +37219,7 @@
         "my": {
           "stringUnit": {
             "state": "translated",
-            "value": "အနည်းဆုံး ဦးစားပေးမှု"
+            "value": "အနည်းဆုံး ဦးစားပေးအဆင့်"
           }
         },
         "hi": {
@@ -37428,7 +37428,7 @@
         "fil": {
           "stringUnit": {
             "state": "translated",
-            "value": "Mga override ng device"
+            "value": "Mga tanging tuntunin ng aparato"
           }
         },
         "ms": {
@@ -37494,7 +37494,7 @@
         "my": {
           "stringUnit": {
             "state": "translated",
-            "value": "စက်ပစ္စည်း overrides"
+            "value": "စက်ပစ္စည်း ခြွင်းချက်သတ်မှတ်ချက်များ"
           }
         },
         "hi": {
@@ -37703,7 +37703,7 @@
         "fil": {
           "stringUnit": {
             "state": "translated",
-            "value": "Mga default ng user"
+            "value": "Mga paunang itinakda ng gumagamit"
           }
         },
         "ms": {
@@ -37769,7 +37769,7 @@
         "my": {
           "stringUnit": {
             "state": "translated",
-            "value": "အသုံးပြုသူ default များ"
+            "value": "အသုံးပြုသူ မူရင်းသတ်မှတ်ချက်များ"
           }
         },
         "hi": {
@@ -37978,7 +37978,7 @@
         "fil": {
           "stringUnit": {
             "state": "translated",
-            "value": "Nalalapat ang mga default kapag walang per-device override na tumutugma sa papasok na alerto."
+            "value": "Nalalapat ang mga paunang itinakda kapag walang tanging tuntunin sa aparato na tumutugma sa papasok na alerto."
           }
         },
         "ms": {
@@ -38044,7 +38044,7 @@
         "my": {
           "stringUnit": {
             "state": "translated",
-            "value": "inbound alert နှင့် ကိုက်ညီသော per-device override မရှိပါက defaults ကို အသုံးပြုပါသည်။"
+            "value": "ဝင်လာသော အချက်ပေးချက်နှင့် ကိုက်ညီသော စက်အလိုက် ခြွင်းချက်သတ်မှတ်ချက် မရှိပါက မူရင်းသတ်မှတ်ချက်များကို အသုံးပြုပါသည်။"
           }
         },
         "hi": {
@@ -38253,7 +38253,7 @@
         "fil": {
           "stringUnit": {
             "state": "translated",
-            "value": "I-unmute"
+            "value": "Alisin ang pagkakapatahimik"
           }
         },
         "ms": {
@@ -38528,7 +38528,7 @@
         "fil": {
           "stringUnit": {
             "state": "translated",
-            "value": "I-double-tap upang tingnan ang mga detalye ng order"
+            "value": "I-double tap upang tingnan ang detalye ng order"
           }
         },
         "ms": {
@@ -38594,7 +38594,7 @@
         "my": {
           "stringUnit": {
             "state": "translated",
-            "value": "order အသေးစိတ်ကြည့်ရန် နှစ်ချက်နှိပ်ပါ"
+            "value": "အော်ဒါအသေးစိတ်ကြည့်ရန် နှစ်ချက်နှိပ်ပါ"
           }
         },
         "hi": {
@@ -38869,7 +38869,7 @@
         "my": {
           "stringUnit": {
             "state": "translated",
-            "value": "order ပယ်ဖျက်ပါ"
+            "value": "အော်ဒါ ပယ်ဖျက်ပါ"
           }
         },
         "hi": {
@@ -39144,7 +39144,7 @@
         "my": {
           "stringUnit": {
             "state": "translated",
-            "value": "order ပယ်ဖျက်ပါ"
+            "value": "အော်ဒါ ပယ်ဖျက်ပါ"
           }
         },
         "hi": {
@@ -39419,7 +39419,7 @@
         "my": {
           "stringUnit": {
             "state": "translated",
-            "value": "order ပယ်ဖျက်မည်လား?"
+            "value": "အော်ဒါ ပယ်ဖျက်မည်လား?"
           }
         },
         "hi": {
@@ -39903,7 +39903,7 @@
         "fil": {
           "stringUnit": {
             "state": "translated",
-            "value": "Na-fill"
+            "value": "Naisagawa"
           }
         },
         "ms": {
@@ -39969,7 +39969,7 @@
         "my": {
           "stringUnit": {
             "state": "translated",
-            "value": "Filled"
+            "value": "ဖြည့်ပြီး"
           }
         },
         "hi": {
@@ -40244,7 +40244,7 @@
         "my": {
           "stringUnit": {
             "state": "translated",
-            "value": "Instrument"
+            "value": "ကုန်သွယ်ပစ္စည်း"
           }
         },
         "hi": {
@@ -41003,7 +41003,7 @@
         "fil": {
           "stringUnit": {
             "state": "translated",
-            "value": "Side"
+            "value": "Panig"
           }
         },
         "ms": {
@@ -41069,7 +41069,7 @@
         "my": {
           "stringUnit": {
             "state": "translated",
-            "value": "Side"
+            "value": "ဘက်"
           }
         },
         "hi": {
@@ -41278,7 +41278,7 @@
         "fil": {
           "stringUnit": {
             "state": "translated",
-            "value": "Status"
+            "value": "Katayuan"
           }
         },
         "ms": {
@@ -41344,7 +41344,7 @@
         "my": {
           "stringUnit": {
             "state": "translated",
-            "value": "Status"
+            "value": "အခြေအနေ"
           }
         },
         "hi": {
@@ -41619,7 +41619,7 @@
         "my": {
           "stringUnit": {
             "state": "translated",
-            "value": "Fee: %@ %@"
+            "value": "အခကြေးငွေ: %@ %@"
           }
         },
         "hi": {
@@ -41828,7 +41828,7 @@
         "fil": {
           "stringUnit": {
             "state": "translated",
-            "value": "Na-fill %@ @ %@"
+            "value": "Naisagawa ang %@ @ %@"
           }
         },
         "ms": {
@@ -41894,7 +41894,7 @@
         "my": {
           "stringUnit": {
             "state": "translated",
-            "value": "Filled %@ @ %@"
+            "value": "%@ ကို %@ တွင် ဖြည့်ပြီး"
           }
         },
         "hi": {
@@ -42444,7 +42444,7 @@
         "my": {
           "stringUnit": {
             "state": "translated",
-            "value": "Order အသစ်"
+            "value": "အော်ဒါအသစ်"
           }
         },
         "hi": {
@@ -42994,7 +42994,7 @@
         "my": {
           "stringUnit": {
             "state": "translated",
-            "value": "Size: %@"
+            "value": "ပမာဏ: %@"
           }
         },
         "hi": {
@@ -43753,7 +43753,7 @@
         "fil": {
           "stringUnit": {
             "state": "translated",
-            "value": "Mga fill"
+            "value": "Mga naisagawa"
           }
         },
         "ms": {
@@ -43819,7 +43819,7 @@
         "my": {
           "stringUnit": {
             "state": "translated",
-            "value": "Fills"
+            "value": "ဖြည့်ပြီးမှုများ"
           }
         },
         "hi": {
@@ -44303,7 +44303,7 @@
         "fil": {
           "stringUnit": {
             "state": "translated",
-            "value": "Segment"
+            "value": "Seksyon"
           }
         },
         "ms": {
@@ -44369,7 +44369,7 @@
         "my": {
           "stringUnit": {
             "state": "translated",
-            "value": "Segment"
+            "value": "အပိုင်း"
           }
         },
         "hi": {
@@ -45194,7 +45194,7 @@
         "my": {
           "stringUnit": {
             "state": "translated",
-            "value": "position actions ဖွင့်ရန် နှစ်ချက်နှိပ်ပါ"
+            "value": "အနေအထား လုပ်ဆောင်ချက်များ ဖွင့်ရန် နှစ်ချက်နှိပ်ပါ"
           }
         },
         "hi": {
@@ -45469,7 +45469,7 @@
         "my": {
           "stringUnit": {
             "state": "translated",
-            "value": "position ပိတ်ပါ"
+            "value": "အနေအထား ပိတ်ပါ"
           }
         },
         "hi": {
@@ -45744,7 +45744,7 @@
         "my": {
           "stringUnit": {
             "state": "translated",
-            "value": "position လျှော့ပါ"
+            "value": "အနေအထား လျှော့ပါ"
           }
         },
         "hi": {
@@ -46294,7 +46294,7 @@
         "my": {
           "stringUnit": {
             "state": "translated",
-            "value": "position ပိတ်ပြီး"
+            "value": "အနေအထား ပိတ်ပြီး"
           }
         },
         "hi": {
@@ -46778,7 +46778,7 @@
         "fil": {
           "stringUnit": {
             "state": "translated",
-            "value": "Entry price"
+            "value": "Presyo ng pagpasok"
           }
         },
         "ms": {
@@ -46844,7 +46844,7 @@
         "my": {
           "stringUnit": {
             "state": "translated",
-            "value": "Entry price"
+            "value": "ဝင်ဈေး"
           }
         },
         "hi": {
@@ -47119,7 +47119,7 @@
         "my": {
           "stringUnit": {
             "state": "translated",
-            "value": "Instrument"
+            "value": "ကုန်သွယ်ပစ္စည်း"
           }
         },
         "hi": {
@@ -47328,7 +47328,7 @@
         "fil": {
           "stringUnit": {
             "state": "translated",
-            "value": "Mark price"
+            "value": "Markang presyo"
           }
         },
         "ms": {
@@ -47394,7 +47394,7 @@
         "my": {
           "stringUnit": {
             "state": "translated",
-            "value": "Mark price"
+            "value": "မှတ်သားဈေး"
           }
         },
         "hi": {
@@ -47603,7 +47603,7 @@
         "fil": {
           "stringUnit": {
             "state": "translated",
-            "value": "Unrealized P&L"
+            "value": "Hindi pa naisasaakatuparang P&L"
           }
         },
         "ms": {
@@ -47669,7 +47669,7 @@
         "my": {
           "stringUnit": {
             "state": "translated",
-            "value": "Unrealized PnL"
+            "value": "မရောင်းရသေးသော PnL"
           }
         },
         "hi": {
@@ -47944,7 +47944,7 @@
         "my": {
           "stringUnit": {
             "state": "translated",
-            "value": "Size"
+            "value": "ပမာဏ"
           }
         },
         "hi": {
@@ -48219,7 +48219,7 @@
         "my": {
           "stringUnit": {
             "state": "translated",
-            "value": "ဖွင့်ထားသော ရာထူးများ ရှိသည့်အခါ ဤနေရာတွင် ပေါ်လာမည်။"
+            "value": "သင့်ဖွင့်ထားသော အနေအထားများ ဤနေရာတွင် ပေါ်လာမည်။"
           }
         },
         "hi": {
@@ -48494,7 +48494,7 @@
         "my": {
           "stringUnit": {
             "state": "translated",
-            "value": "open positions မရှိ"
+            "value": "ဖွင့်ထားသော အနေအထား မရှိ"
           }
         },
         "hi": {
@@ -48703,7 +48703,7 @@
         "fil": {
           "stringUnit": {
             "state": "translated",
-            "value": "Hindi ma-load ang mga posisyon"
+            "value": "Hindi makuha ang mga posisyon"
           }
         },
         "ms": {
@@ -48769,7 +48769,7 @@
         "my": {
           "stringUnit": {
             "state": "translated",
-            "value": "positions ဖွင့်၍မရပါ"
+            "value": "အနေအထားများ ဖွင့်၍မရပါ"
           }
         },
         "hi": {
@@ -48978,7 +48978,7 @@
         "fil": {
           "stringUnit": {
             "state": "translated",
-            "value": "Naglo-load ng mga posisyon…"
+            "value": "Kinukuha ang mga posisyon…"
           }
         },
         "ms": {
@@ -49044,7 +49044,7 @@
         "my": {
           "stringUnit": {
             "state": "translated",
-            "value": "positions ဖွင့်နေသည်…"
+            "value": "အနေအထားများ ဖွင့်နေသည်…"
           }
         },
         "hi": {
@@ -49319,7 +49319,7 @@
         "my": {
           "stringUnit": {
             "state": "translated",
-            "value": "Positions"
+            "value": "အနေအထားများ"
           }
         },
         "hi": {
@@ -50353,7 +50353,7 @@
         "fil": {
           "stringUnit": {
             "state": "translated",
-            "value": "Sinasara ng 100% ang posisyon. Nagsusumite ito ng reduce-only market order sa kabilang side."
+            "value": "Isinasara ng 100% ang posisyon. Nagsusumite ito ng order sa merkado na pangbawas lang sa kabilang panig."
           }
         },
         "ms": {
@@ -50419,7 +50419,7 @@
         "my": {
           "stringUnit": {
             "state": "translated",
-            "value": "100% သည် position ကို ပိတ်ပါမည်။ ဆန့်ကျင်ဘက် side အပေါ် reduce-only market order တင်သွင်းပါသည်။"
+            "value": "100% သည် အနေအထားကို ပိတ်ပါမည်။ ဆန့်ကျင်ဘက်ဘက်အပေါ် လျှော့ချရန်သာ ဈေးကွက်အော်ဒါ တင်သွင်းပါသည်။"
           }
         },
         "hi": {
@@ -50694,7 +50694,7 @@
         "my": {
           "stringUnit": {
             "state": "translated",
-            "value": "လျှော့မည့် Size"
+            "value": "လျှော့မည့် ပမာဏ"
           }
         },
         "hi": {
@@ -50969,7 +50969,7 @@
         "my": {
           "stringUnit": {
             "state": "translated",
-            "value": "position လျှော့ပါ"
+            "value": "အနေအထား လျှော့ပါ"
           }
         },
         "hi": {
@@ -51519,7 +51519,7 @@
         "my": {
           "stringUnit": {
             "state": "translated",
-            "value": "Position action"
+            "value": "အနေအထား လုပ်ဆောင်ချက်"
           }
         },
         "hi": {
@@ -52003,7 +52003,7 @@
         "fil": {
           "stringUnit": {
             "state": "translated",
-            "value": "Avg %@"
+            "value": "Karaniwan %@"
           }
         },
         "ms": {
@@ -52069,7 +52069,7 @@
         "my": {
           "stringUnit": {
             "state": "translated",
-            "value": "Avg %@"
+            "value": "ပျမ်းမျှ %@"
           }
         },
         "hi": {
@@ -52278,7 +52278,7 @@
         "fil": {
           "stringUnit": {
             "state": "translated",
-            "value": "I-double-tap upang mag-sign out at bumalik sa pag-login"
+            "value": "I-double tap upang mag-logout at bumalik sa login"
           }
         },
         "ms": {
@@ -52344,7 +52344,7 @@
         "my": {
           "stringUnit": {
             "state": "translated",
-            "value": "Sign out ပြုလုပ်ပြီး login သို့ ပြန်သွားရန် နှစ်ချက်နှိပ်ပါ"
+            "value": "ထွက်ပြီး ဝင်ရောက်မှုမျက်နှာပြင်သို့ ပြန်သွားရန် နှစ်ချက်နှိပ်ပါ"
           }
         },
         "hi": {
@@ -52828,7 +52828,7 @@
         "fil": {
           "stringUnit": {
             "state": "translated",
-            "value": "Mag-log out"
+            "value": "Mag-logout"
           }
         },
         "ms": {
@@ -52894,7 +52894,7 @@
         "my": {
           "stringUnit": {
             "state": "translated",
-            "value": "Log out"
+            "value": "ထွက်ပါ"
           }
         },
         "hi": {
@@ -53444,7 +53444,7 @@
         "my": {
           "stringUnit": {
             "state": "translated",
-            "value": "Email"
+            "value": "အီးမေးလ်"
           }
         },
         "hi": {
@@ -53719,7 +53719,7 @@
         "my": {
           "stringUnit": {
             "state": "translated",
-            "value": "Role: %@"
+            "value": "တာဝန်: %@"
           }
         },
         "hi": {
@@ -53928,7 +53928,7 @@
         "fil": {
           "stringUnit": {
             "state": "translated",
-            "value": "Naka-sign in bilang %@"
+            "value": "Naka-login bilang %@"
           }
         },
         "ms": {
@@ -53994,7 +53994,7 @@
         "my": {
           "stringUnit": {
             "state": "translated",
-            "value": "%@ အဖြစ် sign in လုပ်ထားသည်"
+            "value": "%@ အဖြစ် ဝင်ရောက်ထားသည်"
           }
         },
         "hi": {
@@ -54203,7 +54203,7 @@
         "fil": {
           "stringUnit": {
             "state": "translated",
-            "value": "Username"
+            "value": "Pangalan ng gumagamit"
           }
         },
         "ms": {
@@ -54544,7 +54544,7 @@
         "my": {
           "stringUnit": {
             "state": "translated",
-            "value": "Build"
+            "value": "တည်ဆောက်မှု"
           }
         },
         "hi": {
@@ -54753,7 +54753,7 @@
         "fil": {
           "stringUnit": {
             "state": "translated",
-            "value": "Mga open-source license"
+            "value": "Mga lisensiya ng bukas na source"
           }
         },
         "ms": {
@@ -54819,7 +54819,7 @@
         "my": {
           "stringUnit": {
             "state": "translated",
-            "value": "Open-source licenses"
+            "value": "ပွင့်လင်းရင်းမြစ် လိုင်စင်များ"
           }
         },
         "hi": {
@@ -55094,7 +55094,7 @@
         "my": {
           "stringUnit": {
             "state": "translated",
-            "value": "Source code"
+            "value": "ရင်းမြစ်ကုဒ်"
           }
         },
         "hi": {
@@ -55369,7 +55369,7 @@
         "my": {
           "stringUnit": {
             "state": "translated",
-            "value": "Version"
+            "value": "ဗားရှင်း"
           }
         },
         "hi": {
@@ -55853,7 +55853,7 @@
         "fil": {
           "stringUnit": {
             "state": "translated",
-            "value": "Palitan ang backend"
+            "value": "Palitan ang server"
           }
         },
         "ms": {
@@ -55919,7 +55919,7 @@
         "my": {
           "stringUnit": {
             "state": "translated",
-            "value": "backend ပြောင်းပါ"
+            "value": "ဆာဗာ ပြောင်းပါ"
           }
         },
         "hi": {
@@ -56128,7 +56128,7 @@
         "fil": {
           "stringUnit": {
             "state": "translated",
-            "value": "Kapag pinalitan ang backend, masa-sign out ka at mali-clear ang lokal na state ng app. Kakailanganin mong mag-sign in muli sa bagong URL."
+            "value": "Kapag pinalitan ang server, mala-logout ka at lilinisin ang lokal na estado ng app. Kakailanganin mong mag-login muli sa bagong URL."
           }
         },
         "ms": {
@@ -56194,7 +56194,7 @@
         "my": {
           "stringUnit": {
             "state": "translated",
-            "value": "backend ပြောင်းပါက သင့်ကို sign out လုပ်ပြီး local app state ကို ရှင်းလင်းပါမည်။ URL အသစ်တွင် ပြန်လည် sign in လုပ်ရန် လိုအပ်ပါမည်။"
+            "value": "ဆာဗာ ပြောင်းပါက သင့်ကို ထွက်စေပြီး စက်တွင်း အက်ပ်အခြေအနေကို ရှင်းလင်းပါမည်။ URL အသစ်တွင် ပြန်လည် ဝင်ရောက်ရန် လိုအပ်ပါမည်။"
           }
         },
         "hi": {
@@ -56403,7 +56403,7 @@
         "fil": {
           "stringUnit": {
             "state": "translated",
-            "value": "Palitan ang backend"
+            "value": "Palitan ang server"
           }
         },
         "ms": {
@@ -56469,7 +56469,7 @@
         "my": {
           "stringUnit": {
             "state": "translated",
-            "value": "backend ပြောင်းပါ"
+            "value": "ဆာဗာ ပြောင်းပါ"
           }
         },
         "hi": {
@@ -56678,7 +56678,7 @@
         "fil": {
           "stringUnit": {
             "state": "translated",
-            "value": "Palitan ang backend?"
+            "value": "Palitan ang server?"
           }
         },
         "ms": {
@@ -56744,7 +56744,7 @@
         "my": {
           "stringUnit": {
             "state": "translated",
-            "value": "backend ပြောင်းမည်လား?"
+            "value": "ဆာဗာ ပြောင်းမည်လား?"
           }
         },
         "hi": {
@@ -56953,7 +56953,7 @@
         "fil": {
           "stringUnit": {
             "state": "translated",
-            "value": "Custom backend URL"
+            "value": "URL ng sariling server"
           }
         },
         "ms": {
@@ -57019,7 +57019,7 @@
         "my": {
           "stringUnit": {
             "state": "translated",
-            "value": "Custom backend URL"
+            "value": "စိတ်ကြိုက် ဆာဗာ URL"
           }
         },
         "hi": {
@@ -57228,7 +57228,7 @@
         "fil": {
           "stringUnit": {
             "state": "translated",
-            "value": "Status"
+            "value": "Katayuan"
           }
         },
         "ms": {
@@ -57294,7 +57294,7 @@
         "my": {
           "stringUnit": {
             "state": "translated",
-            "value": "Status"
+            "value": "အခြေအနေ"
           }
         },
         "hi": {
@@ -57503,7 +57503,7 @@
         "fil": {
           "stringUnit": {
             "state": "translated",
-            "value": "Mag-log out"
+            "value": "Mag-logout"
           }
         },
         "ms": {
@@ -57569,7 +57569,7 @@
         "my": {
           "stringUnit": {
             "state": "translated",
-            "value": "Log out"
+            "value": "ထွက်ပါ"
           }
         },
         "hi": {
@@ -57778,7 +57778,7 @@
         "fil": {
           "stringUnit": {
             "state": "translated",
-            "value": "Sigurado ka bang gusto mong mag-sign out?"
+            "value": "Sigurado ka bang gusto mong mag-logout?"
           }
         },
         "ms": {
@@ -57844,7 +57844,7 @@
         "my": {
           "stringUnit": {
             "state": "translated",
-            "value": "logout လုပ်ရန် သေချာပါသလား?"
+            "value": "ထွက်ရန် သေချာပါသလား?"
           }
         },
         "hi": {
@@ -58053,7 +58053,7 @@
         "fil": {
           "stringUnit": {
             "state": "translated",
-            "value": "Mag-sign out?"
+            "value": "Mag-logout?"
           }
         },
         "ms": {
@@ -58328,7 +58328,7 @@
         "fil": {
           "stringUnit": {
             "state": "translated",
-            "value": "Device"
+            "value": "Aparato"
           }
         },
         "ms": {
@@ -58603,7 +58603,7 @@
         "fil": {
           "stringUnit": {
             "state": "translated",
-            "value": "Mga override ng device"
+            "value": "Mga tanging tuntunin ng aparato"
           }
         },
         "ms": {
@@ -58669,7 +58669,7 @@
         "my": {
           "stringUnit": {
             "state": "translated",
-            "value": "စက်ပစ္စည်း overrides"
+            "value": "စက်ပစ္စည်း ခြွင်းချက်သတ်မှတ်ချက်များ"
           }
         },
         "hi": {
@@ -58944,7 +58944,7 @@
         "my": {
           "stringUnit": {
             "state": "translated",
-            "value": "Push notifications ဖွင့်ပါ"
+            "value": "တွန်းပို့ အသိပေးချက်များ ဖွင့်ပါ"
           }
         },
         "hi": {
@@ -59153,7 +59153,7 @@
         "fil": {
           "stringUnit": {
             "state": "translated",
-            "value": "Pamahalaan ang mga preference"
+            "value": "Pamahalaan ang mga kagustuhan"
           }
         },
         "ms": {
@@ -59219,7 +59219,7 @@
         "my": {
           "stringUnit": {
             "state": "translated",
-            "value": "preferences စီမံပါ"
+            "value": "နှစ်သက်ရာ သတ်မှတ်ချက်များ စီမံပါ"
           }
         },
         "hi": {
@@ -59703,7 +59703,7 @@
         "fil": {
           "stringUnit": {
             "state": "translated",
-            "value": "Buksan ang Settings"
+            "value": "Buksan ang Mga Setting"
           }
         },
         "ms": {
@@ -59769,7 +59769,7 @@
         "my": {
           "stringUnit": {
             "state": "translated",
-            "value": "Settings ဖွင့်ပါ"
+            "value": "ဆက်တင်များ ဖွင့်ပါ"
           }
         },
         "hi": {
@@ -62519,7 +62519,7 @@
         "my": {
           "stringUnit": {
             "state": "translated",
-            "value": "Push notifications"
+            "value": "တွန်းပို့ အသိပေးချက်များ"
           }
         },
         "hi": {
@@ -64994,7 +64994,7 @@
         "my": {
           "stringUnit": {
             "state": "translated",
-            "value": "အချက်ပေးချက်များ tab။ %@ မဖတ်ရသေး"
+            "value": "အချက်ပေးချက်များ တက်ဘ်။ မဖတ်ရသေး: %@"
           }
         },
         "hi": {
@@ -65203,7 +65203,7 @@
         "fil": {
           "stringUnit": {
             "state": "translated",
-            "value": "Home tab"
+            "value": "Tab na pangunahin"
           }
         },
         "ms": {
@@ -65269,7 +65269,7 @@
         "my": {
           "stringUnit": {
             "state": "translated",
-            "value": "Home tab"
+            "value": "ပင်မ တက်ဘ်"
           }
         },
         "hi": {
@@ -65544,7 +65544,7 @@
         "my": {
           "stringUnit": {
             "state": "translated",
-            "value": "Positions tab။ %@ open"
+            "value": "အနေအထားများ တက်ဘ်။ ဖွင့်ထားသည်: %@"
           }
         },
         "hi": {
@@ -66028,7 +66028,7 @@
         "fil": {
           "stringUnit": {
             "state": "translated",
-            "value": "Home"
+            "value": "Pangunahin"
           }
         },
         "ms": {
@@ -66644,7 +66644,7 @@
         "my": {
           "stringUnit": {
             "state": "translated",
-            "value": "ရာထူးများ"
+            "value": "အနေအထားများ"
           }
         },
         "hi": {
@@ -67128,7 +67128,7 @@
         "fil": {
           "stringUnit": {
             "state": "translated",
-            "value": "I-attach ang bracket"
+            "value": "Magdagdag ng proteksiyong order"
           }
         },
         "ms": {
@@ -67194,7 +67194,7 @@
         "my": {
           "stringUnit": {
             "state": "translated",
-            "value": "bracket တွဲပါ"
+            "value": "ကာကွယ်အတွဲ တွဲပါ"
           }
         },
         "hi": {
@@ -67403,7 +67403,7 @@
         "fil": {
           "stringUnit": {
             "state": "translated",
-            "value": "Mag-attach ng SL / TP"
+            "value": "Magdagdag ng tigil-pagkalugi / kuha-tubo"
           }
         },
         "ms": {
@@ -67469,7 +67469,7 @@
         "my": {
           "stringUnit": {
             "state": "translated",
-            "value": "SL / TP တွဲပါ"
+            "value": "အရှုံးရပ် / အမြတ်ယူ တွဲပါ"
           }
         },
         "hi": {
@@ -67953,7 +67953,7 @@
         "fil": {
           "stringUnit": {
             "state": "translated",
-            "value": "Naka-attach na ang bracket"
+            "value": "May nakadagdag nang proteksiyong order"
           }
         },
         "ms": {
@@ -68019,7 +68019,7 @@
         "my": {
           "stringUnit": {
             "state": "translated",
-            "value": "bracket တွဲထားပြီး"
+            "value": "ကာကွယ်အတွဲ တွဲထားပြီး"
           }
         },
         "hi": {
@@ -68228,7 +68228,7 @@
         "fil": {
           "stringUnit": {
             "state": "translated",
-            "value": "Di-wastong presyo ng stop-loss"
+            "value": "Di-wastong presyo ng tigil-pagkalugi"
           }
         },
         "ms": {
@@ -68294,7 +68294,7 @@
         "my": {
           "stringUnit": {
             "state": "translated",
-            "value": "မမှန်ကန်သော stop-loss ဈေးနှုန်း"
+            "value": "မမှန်ကန်သော အရှုံးရပ်ဈေး"
           }
         },
         "hi": {
@@ -68503,7 +68503,7 @@
         "fil": {
           "stringUnit": {
             "state": "translated",
-            "value": "Di-wastong presyo ng take-profit"
+            "value": "Di-wastong presyo ng kuha-tubo"
           }
         },
         "ms": {
@@ -68569,7 +68569,7 @@
         "my": {
           "stringUnit": {
             "state": "translated",
-            "value": "မမှန်ကန်သော take-profit ဈေးနှုန်း"
+            "value": "မမှန်ကန်သော အမြတ်ယူဈေး"
           }
         },
         "hi": {
@@ -68778,7 +68778,7 @@
         "fil": {
           "stringUnit": {
             "state": "translated",
-            "value": "Kinakailangan ang hindi bababa sa isa sa stop loss / take profit. Magti-trigger ang backend ng mga reduce-only protective order kapag lumampas ang presyo sa alinmang level."
+            "value": "Kinakailangan ang hindi bababa sa isa sa tigil-pagkalugi / kuha-tubo. Mag-a-activate ang server ng mga proteksiyong order na pangbawas lang kapag lumampas ang presyo sa alinmang antas."
           }
         },
         "ms": {
@@ -68844,7 +68844,7 @@
         "my": {
           "stringUnit": {
             "state": "translated",
-            "value": "stop-loss / take-profit အနည်းဆုံး တစ်ခု လိုအပ်သည်။ ဈေးနှုန်းသည် အဆင့်တစ်ခုခုကို ဖြတ်သွားသောအခါ Backend သည် reduce-only protective orders များကို fire လုပ်ပါသည်။"
+            "value": "အရှုံးရပ် / အမြတ်ယူ ထဲမှ အနည်းဆုံး တစ်ခု လိုအပ်သည်။ ဈေးနှုန်းသည် အဆင့်တစ်ခုခုကို ဖြတ်သွားသောအခါ ဆာဗာသည် လျှော့ချရန်သာ ကာကွယ်ရေးအော်ဒါများကို အသက်ဝင်စေပါသည်။"
           }
         },
         "hi": {
@@ -69053,7 +69053,7 @@
         "fil": {
           "stringUnit": {
             "state": "translated",
-            "value": "Bracket"
+            "value": "Proteksiyong order"
           }
         },
         "ms": {
@@ -69119,7 +69119,7 @@
         "my": {
           "stringUnit": {
             "state": "translated",
-            "value": "Bracket"
+            "value": "ကာကွယ်အတွဲ"
           }
         },
         "hi": {
@@ -69328,7 +69328,7 @@
         "fil": {
           "stringUnit": {
             "state": "translated",
-            "value": "Stop loss"
+            "value": "Tigil-pagkalugi"
           }
         },
         "ms": {
@@ -69394,7 +69394,7 @@
         "my": {
           "stringUnit": {
             "state": "translated",
-            "value": "stop-loss"
+            "value": "အရှုံးရပ်"
           }
         },
         "hi": {
@@ -69603,7 +69603,7 @@
         "fil": {
           "stringUnit": {
             "state": "translated",
-            "value": "Presyo ng stop"
+            "value": "Presyo ng tigil"
           }
         },
         "ms": {
@@ -69669,7 +69669,7 @@
         "my": {
           "stringUnit": {
             "state": "translated",
-            "value": "Stop price"
+            "value": "ရပ်ဈေး"
           }
         },
         "hi": {
@@ -69878,7 +69878,7 @@
         "fil": {
           "stringUnit": {
             "state": "translated",
-            "value": "Mag-attach"
+            "value": "Idagdag"
           }
         },
         "ms": {
@@ -70153,7 +70153,7 @@
         "fil": {
           "stringUnit": {
             "state": "translated",
-            "value": "Take profit"
+            "value": "Kuha-tubo"
           }
         },
         "ms": {
@@ -70219,7 +70219,7 @@
         "my": {
           "stringUnit": {
             "state": "translated",
-            "value": "take-profit"
+            "value": "အမြတ်ယူ"
           }
         },
         "hi": {
@@ -70494,7 +70494,7 @@
         "my": {
           "stringUnit": {
             "state": "translated",
-            "value": "Target price"
+            "value": "ပစ်မှတ်ဈေး"
           }
         },
         "hi": {
@@ -70703,7 +70703,7 @@
         "fil": {
           "stringUnit": {
             "state": "translated",
-            "value": "Mag-attach ng bracket"
+            "value": "Magdagdag ng proteksiyong order"
           }
         },
         "ms": {
@@ -70769,7 +70769,7 @@
         "my": {
           "stringUnit": {
             "state": "translated",
-            "value": "bracket တွဲပါ"
+            "value": "ကာကွယ်အတွဲ တွဲပါ"
           }
         },
         "hi": {
@@ -70978,7 +70978,7 @@
         "fil": {
           "stringUnit": {
             "state": "translated",
-            "value": "Side: %@"
+            "value": "Panig: %@"
           }
         },
         "ms": {
@@ -71044,7 +71044,7 @@
         "my": {
           "stringUnit": {
             "state": "translated",
-            "value": "Side: %@"
+            "value": "ဘက်: %@"
           }
         },
         "hi": {
@@ -71319,7 +71319,7 @@
         "my": {
           "stringUnit": {
             "state": "translated",
-            "value": "order တင်သွင်းပါ"
+            "value": "အော်ဒါ တင်သွင်းပါ"
           }
         },
         "hi": {
@@ -72353,7 +72353,7 @@
         "fil": {
           "stringUnit": {
             "state": "translated",
-            "value": "Exchange"
+            "value": "Palitan"
           }
         },
         "ms": {
@@ -72419,7 +72419,7 @@
         "my": {
           "stringUnit": {
             "state": "translated",
-            "value": "Exchange"
+            "value": "လဲလှယ်ဈေးကွက်"
           }
         },
         "hi": {
@@ -72694,7 +72694,7 @@
         "my": {
           "stringUnit": {
             "state": "translated",
-            "value": "Instrument"
+            "value": "ကုန်သွယ်ပစ္စည်း"
           }
         },
         "hi": {
@@ -72969,7 +72969,7 @@
         "my": {
           "stringUnit": {
             "state": "translated",
-            "value": "Leverage"
+            "value": "အချိုးမြှင့်ငွေချေးမှု"
           }
         },
         "hi": {
@@ -73244,7 +73244,7 @@
         "my": {
           "stringUnit": {
             "state": "translated",
-            "value": "Order"
+            "value": "အော်ဒါ"
           }
         },
         "hi": {
@@ -73519,7 +73519,7 @@
         "my": {
           "stringUnit": {
             "state": "translated",
-            "value": "Type"
+            "value": "အမျိုးအစား"
           }
         },
         "hi": {
@@ -74278,7 +74278,7 @@
         "fil": {
           "stringUnit": {
             "state": "translated",
-            "value": "Reduce-only"
+            "value": "Pangbawas lang"
           }
         },
         "ms": {
@@ -74344,7 +74344,7 @@
         "my": {
           "stringUnit": {
             "state": "translated",
-            "value": "Reduce only"
+            "value": "လျှော့ချရန်သာ"
           }
         },
         "hi": {
@@ -74553,7 +74553,7 @@
         "fil": {
           "stringUnit": {
             "state": "translated",
-            "value": "Risk"
+            "value": "Panganib"
           }
         },
         "ms": {
@@ -74619,7 +74619,7 @@
         "my": {
           "stringUnit": {
             "state": "translated",
-            "value": "Risk"
+            "value": "အန္တရာယ်"
           }
         },
         "hi": {
@@ -74894,7 +74894,7 @@
         "my": {
           "stringUnit": {
             "state": "translated",
-            "value": "instrument ရွေးပါ"
+            "value": "ကုန်သွယ်ပစ္စည်း ရွေးပါ"
           }
         },
         "hi": {
@@ -75103,7 +75103,7 @@
         "fil": {
           "stringUnit": {
             "state": "translated",
-            "value": "Side"
+            "value": "Panig"
           }
         },
         "ms": {
@@ -75169,7 +75169,7 @@
         "my": {
           "stringUnit": {
             "state": "translated",
-            "value": "Side"
+            "value": "ဘက်"
           }
         },
         "hi": {
@@ -75378,7 +75378,7 @@
         "fil": {
           "stringUnit": {
             "state": "translated",
-            "value": "Presyo ng stop"
+            "value": "Presyo ng tigil"
           }
         },
         "ms": {
@@ -75444,7 +75444,7 @@
         "my": {
           "stringUnit": {
             "state": "translated",
-            "value": "Stop price"
+            "value": "ရပ်ဈေး"
           }
         },
         "hi": {
@@ -75994,7 +75994,7 @@
         "my": {
           "stringUnit": {
             "state": "translated",
-            "value": "Order အသစ်"
+            "value": "အော်ဒါအသစ်"
           }
         },
         "hi": {
@@ -76203,7 +76203,7 @@
         "fil": {
           "stringUnit": {
             "state": "translated",
-            "value": "Venue"
+            "value": "Lugar"
           }
         },
         "ms": {
@@ -76269,7 +76269,7 @@
         "my": {
           "stringUnit": {
             "state": "translated",
-            "value": "Venue"
+            "value": "ဈေးကွက်နေရာ"
           }
         },
         "hi": {
@@ -76478,7 +76478,7 @@
         "fil": {
           "stringUnit": {
             "state": "translated",
-            "value": "Na-fill"
+            "value": "Naisagawa"
           }
         },
         "ms": {
@@ -76544,7 +76544,7 @@
         "my": {
           "stringUnit": {
             "state": "translated",
-            "value": "Filled"
+            "value": "ဖြည့်ပြီး"
           }
         },
         "hi": {
@@ -76753,7 +76753,7 @@
         "fil": {
           "stringUnit": {
             "state": "translated",
-            "value": "Bahagyang na-fill"
+            "value": "Bahagyang naisagawa"
           }
         },
         "ms": {
@@ -76819,7 +76819,7 @@
         "my": {
           "stringUnit": {
             "state": "translated",
-            "value": "Partially filled"
+            "value": "တစ်စိတ်တစ်ပိုင်း ဖြည့်ပြီး"
           }
         },
         "hi": {
@@ -77028,7 +77028,7 @@
         "fil": {
           "stringUnit": {
             "state": "translated",
-            "value": "Limit"
+            "value": "Limitasyon"
           }
         },
         "ms": {
@@ -77094,7 +77094,7 @@
         "my": {
           "stringUnit": {
             "state": "translated",
-            "value": "Limit"
+            "value": "ကန့်သတ်"
           }
         },
         "hi": {
@@ -77303,7 +77303,7 @@
         "fil": {
           "stringUnit": {
             "state": "translated",
-            "value": "Market"
+            "value": "Merkado"
           }
         },
         "ms": {
@@ -77369,7 +77369,7 @@
         "my": {
           "stringUnit": {
             "state": "translated",
-            "value": "Market"
+            "value": "ဈေးကွက်"
           }
         },
         "hi": {
@@ -77578,7 +77578,7 @@
         "fil": {
           "stringUnit": {
             "state": "translated",
-            "value": "Stop"
+            "value": "Tigil"
           }
         },
         "ms": {
@@ -77644,7 +77644,7 @@
         "my": {
           "stringUnit": {
             "state": "translated",
-            "value": "Stop"
+            "value": "ရပ်"
           }
         },
         "hi": {
@@ -77853,7 +77853,7 @@
         "fil": {
           "stringUnit": {
             "state": "translated",
-            "value": "Stop limit"
+            "value": "Tigil-limitasyon"
           }
         },
         "ms": {
@@ -77919,7 +77919,7 @@
         "my": {
           "stringUnit": {
             "state": "translated",
-            "value": "Stop limit"
+            "value": "ရပ်ကန့်သတ်"
           }
         },
         "hi": {
@@ -78678,7 +78678,7 @@
         "fil": {
           "stringUnit": {
             "state": "translated",
-            "value": "I-attach ang trailing stop"
+            "value": "Magdagdag ng sumusunod na tigil"
           }
         },
         "ms": {
@@ -78744,7 +78744,7 @@
         "my": {
           "stringUnit": {
             "state": "translated",
-            "value": "trailing stop တွဲပါ"
+            "value": "နောက်လိုက်ရပ် တွဲပါ"
           }
         },
         "hi": {
@@ -78953,7 +78953,7 @@
         "fil": {
           "stringUnit": {
             "state": "translated",
-            "value": "Presyo ng activation"
+            "value": "Presyo ng pag-activate"
           }
         },
         "ms": {
@@ -79019,7 +79019,7 @@
         "my": {
           "stringUnit": {
             "state": "translated",
-            "value": "Activation price"
+            "value": "အသက်ဝင်ဈေး"
           }
         },
         "hi": {
@@ -79228,7 +79228,7 @@
         "fil": {
           "stringUnit": {
             "state": "translated",
-            "value": "Mag-attach ng trailing stop"
+            "value": "Magdagdag ng sumusunod na tigil"
           }
         },
         "ms": {
@@ -79294,7 +79294,7 @@
         "my": {
           "stringUnit": {
             "state": "translated",
-            "value": "trailing stop တွဲပါ"
+            "value": "နောက်လိုက်ရပ် တွဲပါ"
           }
         },
         "hi": {
@@ -79778,7 +79778,7 @@
         "fil": {
           "stringUnit": {
             "state": "translated",
-            "value": "Naka-attach na ang trailing stop"
+            "value": "May nakadagdag nang sumusunod na tigil"
           }
         },
         "ms": {
@@ -79844,7 +79844,7 @@
         "my": {
           "stringUnit": {
             "state": "translated",
-            "value": "trailing stop တွဲထားပြီး"
+            "value": "နောက်လိုက်ရပ် တွဲထားပြီး"
           }
         },
         "hi": {
@@ -80053,7 +80053,7 @@
         "fil": {
           "stringUnit": {
             "state": "translated",
-            "value": "Di-wastong halaga ng trail"
+            "value": "Di-wastong halaga ng pagsunod"
           }
         },
         "ms": {
@@ -80119,7 +80119,7 @@
         "my": {
           "stringUnit": {
             "state": "translated",
-            "value": "မမှန်ကန်သော trail amount"
+            "value": "မမှန်ကန်သော နောက်လိုက်ပမာဏ"
           }
         },
         "hi": {
@@ -80328,7 +80328,7 @@
         "fil": {
           "stringUnit": {
             "state": "translated",
-            "value": "Ang trailing distance ay ang agwat na pinapanatili ng stop habang pabor ang galaw ng presyo. Pinipigilan ng min lock-in (opsyonal) na bumaba ang stop sa ibaba ng profit threshold na iyon kapag naabot na."
+            "value": "Ang distansya ng pagsunod ang agwat na pinananatili ng tigil habang pumapabor ang galaw ng presyo. Pinipigilan ng pinakamababang lock-in (opsyonal) na bumaba ang tigil sa ibaba ng antas ng tubong iyon kapag naabot na."
           }
         },
         "ms": {
@@ -80394,7 +80394,7 @@
         "my": {
           "stringUnit": {
             "state": "translated",
-            "value": "Trailing distance သည် ဈေးနှုန်း ကောင်းမွန်သောဘက်သို့ ရွေ့လျားသည့်အခါ stop က ထိန်းထားသော gap ဖြစ်သည်။ Min lock-in (optional) သည် အဆင့်ရောက်ပြီးနောက် stop ကို ထိုအမြတ် threshold အောက်သို့ မရွေ့အောင် ကာကွယ်သည်။"
+            "value": "နောက်လိုက်အကွာအဝေးသည် ဈေးနှုန်း အကျိုးရှိသည့်ဘက်သို့ ရွေ့လျားသောအခါ ရပ်အဆင့်က ထိန်းထားသော အကွာဖြစ်သည်။ အနည်းဆုံး အမြတ်ပိတ်သိမ်းမှု (မဖြည့်လည်းရ) သည် အဆင့်ရောက်ပြီးနောက် ရပ်အဆင့်ကို ထိုအမြတ်သတ်မှတ်ချက်အောက်သို့ မရွေ့အောင် ကာကွယ်သည်။"
           }
         },
         "hi": {
@@ -80603,7 +80603,7 @@
         "fil": {
           "stringUnit": {
             "state": "translated",
-            "value": "Absolute"
+            "value": "Ganap"
           }
         },
         "ms": {
@@ -80669,7 +80669,7 @@
         "my": {
           "stringUnit": {
             "state": "translated",
-            "value": "Absolute"
+            "value": "ပကတိ"
           }
         },
         "hi": {
@@ -80878,7 +80878,7 @@
         "fil": {
           "stringUnit": {
             "state": "translated",
-            "value": "Mode"
+            "value": "Paraan"
           }
         },
         "ms": {
@@ -80944,7 +80944,7 @@
         "my": {
           "stringUnit": {
             "state": "translated",
-            "value": "Mode"
+            "value": "နည်းလမ်း"
           }
         },
         "hi": {
@@ -81219,7 +81219,7 @@
         "my": {
           "stringUnit": {
             "state": "translated",
-            "value": "Percent"
+            "value": "ရာခိုင်နှုန်း"
           }
         },
         "hi": {
@@ -81428,7 +81428,7 @@
         "fil": {
           "stringUnit": {
             "state": "translated",
-            "value": "Trailing stop"
+            "value": "Sumusunod na tigil"
           }
         },
         "ms": {
@@ -81494,7 +81494,7 @@
         "my": {
           "stringUnit": {
             "state": "translated",
-            "value": "Trailing stop"
+            "value": "နောက်လိုက်ရပ်"
           }
         },
         "hi": {
@@ -81703,7 +81703,7 @@
         "fil": {
           "stringUnit": {
             "state": "translated",
-            "value": "Mag-attach"
+            "value": "Idagdag"
           }
         },
         "ms": {
@@ -81978,7 +81978,7 @@
         "fil": {
           "stringUnit": {
             "state": "translated",
-            "value": "I-attach ang trailing stop"
+            "value": "Magdagdag ng sumusunod na tigil"
           }
         },
         "ms": {
@@ -82044,7 +82044,7 @@
         "my": {
           "stringUnit": {
             "state": "translated",
-            "value": "trailing stop တွဲပါ"
+            "value": "နောက်လိုက်ရပ် တွဲပါ"
           }
         },
         "hi": {
@@ -82253,7 +82253,7 @@
         "fil": {
           "stringUnit": {
             "state": "translated",
-            "value": "Halaga ng trail"
+            "value": "Halaga ng pagsunod"
           }
         },
         "ms": {
@@ -82319,7 +82319,7 @@
         "my": {
           "stringUnit": {
             "state": "translated",
-            "value": "Trail amount"
+            "value": "နောက်လိုက်ပမာဏ"
           }
         },
         "hi": {
@@ -82594,7 +82594,7 @@
         "my": {
           "stringUnit": {
             "state": "translated",
-            "value": "Admin"
+            "value": "စီမံခန့်ခွဲသူ"
           }
         },
         "hi": {
@@ -82803,7 +82803,7 @@
         "fil": {
           "stringUnit": {
             "state": "translated",
-            "value": "AI delegate"
+            "value": "Kinatawan ng AI"
           }
         },
         "ms": {
@@ -82869,7 +82869,7 @@
         "my": {
           "stringUnit": {
             "state": "translated",
-            "value": "AI delegate"
+            "value": "AI ကိုယ်စားလှယ်"
           }
         },
         "hi": {
@@ -83078,7 +83078,7 @@
         "fil": {
           "stringUnit": {
             "state": "translated",
-            "value": "Operator"
+            "value": "Tagapagpatakbo"
           }
         },
         "ms": {
@@ -83144,7 +83144,7 @@
         "my": {
           "stringUnit": {
             "state": "translated",
-            "value": "Operator"
+            "value": "လုပ်ဆောင်သူ"
           }
         },
         "hi": {
@@ -83353,7 +83353,7 @@
         "fil": {
           "stringUnit": {
             "state": "translated",
-            "value": "Viewer"
+            "value": "Tagapanood"
           }
         },
         "ms": {
@@ -83419,7 +83419,7 @@
         "my": {
           "stringUnit": {
             "state": "translated",
-            "value": "Viewer"
+            "value": "ကြည့်ရှုသူ"
           }
         },
         "hi": {
@@ -83628,7 +83628,7 @@
         "fil": {
           "stringUnit": {
             "state": "translated",
-            "value": "Hindi ma-load ang mga wallet"
+            "value": "Hindi makuha ang mga pitaka"
           }
         },
         "ms": {
@@ -83903,7 +83903,7 @@
         "fil": {
           "stringUnit": {
             "state": "translated",
-            "value": "Lahat ng wallet"
+            "value": "Lahat ng pitaka"
           }
         },
         "ms": {
@@ -83969,7 +83969,7 @@
         "my": {
           "stringUnit": {
             "state": "translated",
-            "value": "Wallet အားလုံး"
+            "value": "ပိုက်ဆံအိတ်အားလုံး"
           }
         },
         "hi": {
@@ -84178,7 +84178,7 @@
         "fil": {
           "stringUnit": {
             "state": "translated",
-            "value": "Wallet"
+            "value": "Pitaka"
           }
         },
         "ms": {
@@ -84244,7 +84244,7 @@
         "my": {
           "stringUnit": {
             "state": "translated",
-            "value": "Wallet"
+            "value": "ပိုက်ဆံအိတ်"
           }
         },
         "hi": {
