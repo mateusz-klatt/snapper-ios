@@ -23,10 +23,10 @@ struct AlertRow: View {
         HStack(alignment: .top, spacing: 12) {
             priorityBadge
             VStack(alignment: .leading, spacing: 4) {
-                Text(alert.title)
+                Text(verbatim: displayTitle)
                     .font(.headline)
                     .foregroundStyle(.primary)
-                Text(alert.body)
+                Text(verbatim: displayBody)
                     .font(.subheadline)
                     .foregroundStyle(.secondary)
                     .lineLimit(3)
@@ -46,7 +46,15 @@ struct AlertRow: View {
             }
         }
         .accessibilityElement(children: .combine)
-        .accessibilityLabel("\(alert.title). \(alert.body). \(alert.priority) priority.")
+        .accessibilityLabel("\(displayTitle). \(displayBody). \(alert.priority) priority.")
+    }
+
+    private var displayTitle: String {
+        alert.displayTitle(in: locale.catalogLanguage)
+    }
+
+    private var displayBody: String {
+        alert.displayBody(in: locale.catalogLanguage)
     }
 
     private var priorityBadge: some View {

@@ -61,6 +61,10 @@ final class AlertsViewTests: XCTestCase {
             title: "Title",
             body: "Body text",
             payload: nil,
+            titleLocKey: nil,
+            titleLocArgs: nil,
+            bodyLocKey: nil,
+            bodyLocArgs: nil,
             dedupKey: nil,
             threadKey: nil,
             sourceTopic: nil

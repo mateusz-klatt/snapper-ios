@@ -324,6 +324,10 @@ struct AlertEventInfo: Codable, Sendable {
     let title: String
     let body: String
     let payload: JsonObject?
+    let titleLocKey: String?
+    let titleLocArgs: [String]?
+    let bodyLocKey: String?
+    let bodyLocArgs: [String]?
     let dedupKey: String?
     let threadKey: String?
     let sourceTopic: String?
@@ -344,6 +348,10 @@ struct AlertEventInfo: Codable, Sendable {
         case title
         case body
         case payload
+        case titleLocKey = "title_loc_key"
+        case titleLocArgs = "title_loc_args"
+        case bodyLocKey = "body_loc_key"
+        case bodyLocArgs = "body_loc_args"
         case dedupKey = "dedup_key"
         case threadKey = "thread_key"
         case sourceTopic = "source_topic"

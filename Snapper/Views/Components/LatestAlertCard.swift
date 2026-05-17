@@ -34,11 +34,11 @@ struct LatestAlertCard: View {
                         .font(.caption2)
                         .foregroundStyle(.tertiary)
                 }
-                Text(alert.title)
+                Text(verbatim: alert.displayTitle(in: locale.catalogLanguage))
                     .font(.callout)
                     .fontWeight(.semibold)
                     .lineLimit(1)
-                Text(alert.body)
+                Text(verbatim: alert.displayBody(in: locale.catalogLanguage))
                     .font(.caption)
                     .foregroundStyle(.secondary)
                     .lineLimit(2)
