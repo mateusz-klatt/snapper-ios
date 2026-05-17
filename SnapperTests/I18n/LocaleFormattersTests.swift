@@ -2,9 +2,9 @@ import XCTest
 @testable import Snapper
 
 /// Covers ``LocaleFormatters`` factory methods — verifies that
-/// formatters bound to ``AppLocale.nativeLocale`` honor per-locale
+/// formatters bound to ``AppLocale.westernDigitsLocale`` honor per-locale
 /// CLDR conventions (decimal separator, currency symbol position,
-/// percent spacing).
+/// percent spacing) while pinning numbers to Western digits.
 final class LocaleFormattersTests: XCTestCase {
 
     func testDecimalSeparatorIsDotForEnglishIE() {
@@ -50,13 +50,30 @@ final class LocaleFormattersTests: XCTestCase {
     func testRelativeDateTimeFormatterIsLocaleBound() {
         let formatterIE = LocaleFormatters.relativeDateTime(for: .ie)
         let formatterPL = LocaleFormatters.relativeDateTime(for: .pl)
-        XCTAssertEqual(formatterIE.locale.identifier, "ga-IE")
-        XCTAssertEqual(formatterPL.locale.identifier, "pl-PL")
+        XCTAssertEqual(
+            formatterIE.locale.language.languageCode?.identifier,
+            "ga",
+            "EN/IE formatter language tag must be Irish; got \(formatterIE.locale.identifier)"
+        )
+        XCTAssertEqual(
+            formatterPL.locale.language.languageCode?.identifier,
+            "pl",
+            "PL formatter language tag must be Polish; got \(formatterPL.locale.identifier)"
+        )
+        XCTAssertEqual(
+            formatterIE.locale.numberingSystem.identifier,
+            "latn",
+            "Numbering system must be Latin for Western-digit policy"
+        )
     }
 
     func testCompactDurationFormatterIsLocaleBound() {
         let formatter = LocaleFormatters.compactDuration(for: .pl)
-        XCTAssertEqual(formatter.calendar?.locale?.identifier, "pl-PL")
+        XCTAssertEqual(
+            formatter.calendar?.locale?.language.languageCode?.identifier,
+            "pl",
+            "PL formatter calendar locale must be rooted at Polish; got \(formatter.calendar?.locale?.identifier ?? "nil")"
+        )
     }
 
     /// Phase D ergonomic helper — verifies the wrapper routes

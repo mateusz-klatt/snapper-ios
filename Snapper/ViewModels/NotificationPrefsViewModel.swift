@@ -181,40 +181,65 @@ final class NotificationPrefsViewModel {
 
     static let priorityValues: [String] = ["low", "medium", "high"]
 
-    static func displayName(for alertType: String) -> String {
-        switch alertType {
-        case "order_fill_full": return "Order filled"
-        case "order_rejected": return "Order rejected"
-        case "position_stop_loss_fired": return "Stop-loss fired"
-        case "margin_warning": return "Margin warning"
-        case "critical_system_error": return "System error"
-        default: return alertType
-        }
+    /// Resolve an alert type rawValue ("order_fill_full" etc.) against
+    /// the existing ``alerts.alertType.*`` catalog namespace so the
+    /// label re-localizes when the user switches in-app language.
+    static func displayName(for alertType: String, language: CatalogLanguage = .en) -> String {
+        return LocaleStrings.localizedRawValue(
+            alertType,
+            namespace: "alerts.alertType",
+            in: language
+        )
     }
 
-    static func priorityDisplayName(for priority: String) -> String {
-        return priority.prefix(1).uppercased() + priority.dropFirst()
+    /// Resolve a priority rawValue ("low" / "medium" / "high") against
+    /// the ``notifications.prefs.priority.*`` catalog namespace.
+    static func priorityDisplayName(for priority: String, language: CatalogLanguage = .en) -> String {
+        return LocaleStrings.localizedRawValue(
+            priority,
+            namespace: "notifications.prefs.priority",
+            in: language
+        )
     }
 
-    static func scopeLabel(for pref: DeviceAlertPrefInfo) -> String {
+    static func scopeLabel(for pref: DeviceAlertPrefInfo, language: CatalogLanguage = .en) -> String {
+        let lookupLocale = Locale(identifier: language.rawValue)
         if let walletId = pref.walletPublicId {
-            return "Wallet \(String(walletId.prefix(8)))…"
+            let template = LocaleStrings.localized("notifications.devicePref.scopeLabel.wallet", in: language)
+            return String(format: template, locale: lookupLocale, String(walletId.prefix(8)))
         }
         if let operatorId = pref.operatorPublicId {
-            return "Operator \(String(operatorId.prefix(8)))…"
+            let template = LocaleStrings.localized("notifications.devicePref.scopeLabel.operator", in: language)
+            return String(format: template, locale: lookupLocale, String(operatorId.prefix(8)))
         }
-        return "Device-global"
+        return LocaleStrings.localized("notifications.devicePref.scopeLabel.deviceGlobal", in: language)
     }
 
-    static func summaryLabel(for pref: DeviceAlertPrefInfo) -> String {
+    static func summaryLabel(for pref: DeviceAlertPrefInfo, language: CatalogLanguage = .en) -> String {
+        let lookupLocale = Locale(identifier: language.rawValue)
         var parts: [String] = []
-        parts.append(pref.enabled ? "Enabled" : "Muted")
-        parts.append("min \(pref.minPriority)")
+        parts.append(LocaleStrings.localized(
+            pref.enabled
+                ? "notifications.devicePref.summary.enabled"
+                : "notifications.devicePref.summary.muted",
+            in: language
+        ))
+        let priorityName = priorityDisplayName(for: pref.minPriority, language: language)
+        let minPriorityTemplate = LocaleStrings.localized("notifications.devicePref.summary.minPriority", in: language)
+        parts.append(String(format: minPriorityTemplate, locale: lookupLocale, priorityName))
         if let start = pref.quietHoursStartMin, let end = pref.quietHoursEndMin {
-            parts.append("quiet \(formatMinutes(start))–\(formatMinutes(end))")
+            let quietTemplate = LocaleStrings.localized("notifications.devicePref.summary.quietHours", in: language)
+            parts.append(String(
+                format: quietTemplate,
+                locale: lookupLocale,
+                formatMinutes(start),
+                formatMinutes(end)
+            ))
         }
         if let muteUntil = pref.muteUntil, muteUntil > Date() {
-            parts.append("muted until \(formatRelativeDate(muteUntil))")
+            let relative = formatRelativeDate(muteUntil, language: language)
+            let mutedUntilTemplate = LocaleStrings.localized("notifications.devicePref.summary.mutedUntil", in: language)
+            parts.append(String(format: mutedUntilTemplate, locale: lookupLocale, relative))
         }
         return parts.joined(separator: " · ")
     }
@@ -285,8 +310,13 @@ final class NotificationPrefsViewModel {
         )
     }
 
-    private static func formatRelativeDate(_ date: Date) -> String {
+    /// Relative-time renderer pinned to the requested catalog language so
+    /// PL/JP/AR users see native phrasing ("za 5 min", "5分後", "خلال 5
+    /// دقائق") instead of English ("in 5 min") regardless of the
+    /// device's system locale.
+    static func formatRelativeDate(_ date: Date, language: CatalogLanguage = .en) -> String {
         let formatter = RelativeDateTimeFormatter()
+        formatter.locale = Locale(identifier: language.rawValue)
         formatter.unitsStyle = .short
         return formatter.localizedString(for: date, relativeTo: Date())
     }

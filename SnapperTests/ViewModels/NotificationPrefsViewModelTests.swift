@@ -463,7 +463,8 @@ final class NotificationPrefsViewModelTests: XCTestCase {
         let summary = NotificationPrefsViewModel.summaryLabel(for: pref)
 
         XCTAssertTrue(summary.contains("Muted"))
-        XCTAssertTrue(summary.contains("min high"))
+        XCTAssertTrue(summary.contains("min High"),
+                      "Priority should round-trip through catalog (catalog value is 'High', capitalised); got summary=\(summary)")
         XCTAssertTrue(summary.contains("quiet 01:00–02:05"))
         XCTAssertTrue(summary.contains("muted until"))
     }
@@ -477,6 +478,38 @@ final class NotificationPrefsViewModelTests: XCTestCase {
         let summary = NotificationPrefsViewModel.summaryLabel(for: pref)
 
         XCTAssertFalse(summary.contains("muted until"))
+    }
+
+    /// Catalog round-trip: every leaking helper renders the Polish
+    /// catalog string when given ``language: .pl`` — guards against
+    /// silent regressions where the rawValue fallback path masks a
+    /// missing catalog key.
+    func testSummaryAndScopeAndDisplayLabelsLocalize() {
+        let pref = makeDevicePref(
+            publicId: "p-1",
+            walletPublicId: "01961234567890",
+            enabled: true,
+            minPriority: "medium",
+            quietHoursStartMin: 60,
+            quietHoursEndMin: 125
+        )
+        let plDisplay = NotificationPrefsViewModel.displayName(for: "order_fill_full", language: .pl)
+        XCTAssertNotEqual(plDisplay, "Order filled",
+                          "PL catalog must produce a native value; got \(plDisplay)")
+
+        let plPriority = NotificationPrefsViewModel.priorityDisplayName(for: "medium", language: .pl)
+        XCTAssertNotEqual(plPriority, "Medium",
+                          "PL catalog must produce a native priority label; got \(plPriority)")
+
+        let plScope = NotificationPrefsViewModel.scopeLabel(for: pref, language: .pl)
+        XCTAssertFalse(plScope.hasPrefix("Wallet "),
+                       "PL scopeLabel.wallet must NOT leak the EN 'Wallet' prefix; got \(plScope)")
+
+        let plSummary = NotificationPrefsViewModel.summaryLabel(for: pref, language: .pl)
+        XCTAssertFalse(plSummary.contains("Enabled"),
+                       "PL summary must NOT leak EN 'Enabled'; got \(plSummary)")
+        XCTAssertFalse(plSummary.contains("min Medium"),
+                       "PL summary must use native priority; got \(plSummary)")
     }
 }
 

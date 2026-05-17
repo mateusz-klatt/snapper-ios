@@ -49,14 +49,31 @@ struct CandlestickChartView: View {
     /// trading data uses 24h universally and the locale-default
     /// 12h fallback in en-US / hk / kr truncated the rightmost
     /// tick (` PM` suffix overflows the axis width).
+    ///
+    /// The format style is pinned to ``AppLocale.westernDigitsLocale``
+    /// so the X-axis renders Latin digits in ``ae``/``ir``/``in``
+    /// rather than the locale's native digit set (which would mix
+    /// Eastern-Arabic ``٥:٠٢`` on the axis with Western ``78,041.50``
+    /// on the price tile — see [[westernDigitsLocale]] rationale).
     private var xAxisFormat: Date.FormatStyle {
+        let westernLocale = appState.locale.westernDigitsLocale
         switch timeframe {
         case .oneMinute, .fiveMinutes, .fifteenMinutes, .oneHour:
-            return .dateTime.hour(.twoDigits(amPM: .omitted)).minute(.twoDigits)
+            return .dateTime
+                .hour(.twoDigits(amPM: .omitted))
+                .minute(.twoDigits)
+                .locale(westernLocale)
         case .fourHours:
-            return .dateTime.month(.abbreviated).day().hour(.twoDigits(amPM: .omitted))
+            return .dateTime
+                .month(.abbreviated)
+                .day()
+                .hour(.twoDigits(amPM: .omitted))
+                .locale(westernLocale)
         case .oneDay:
-            return .dateTime.month(.abbreviated).day()
+            return .dateTime
+                .month(.abbreviated)
+                .day()
+                .locale(westernLocale)
         }
     }
 
@@ -70,6 +87,19 @@ struct CandlestickChartView: View {
             locale: appState.locale,
             environmentLayout: layoutDirection
         ) == .leading ? .leading : .trailing
+    }
+
+    /// Number format for the Y-axis price labels — pinned to
+    /// ``AppLocale.westernDigitsLocale`` so the price ticks render
+    /// Latin digits on ``ae``/``ir``/``bd`` instead of the locale's
+    /// native digit set. Without the explicit ``.locale(...)``,
+    /// ``AxisValueLabel()`` picks up the SwiftUI environment locale
+    /// (``AppLocale.nativeLocale`` at the app root) and AE/IR show
+    /// Eastern-Arabic ``٧٨,١٥٨`` while ``LocaleFormatters``-routed
+    /// price tiles render ``78,158`` — the inconsistency the digit
+    /// policy is meant to eliminate.
+    private var yAxisFormat: FloatingPointFormatStyle<Double> {
+        .number.locale(appState.locale.westernDigitsLocale)
     }
 
     /// Compute a tight Y-axis range from the actual candle highs
@@ -129,7 +159,7 @@ struct CandlestickChartView: View {
                 values: .automatic(desiredCount: 5)
             ) { _ in
                 AxisGridLine().foregroundStyle(Color.chartGrid)
-                AxisValueLabel().foregroundStyle(Color.textSecondary)
+                AxisValueLabel(format: yAxisFormat).foregroundStyle(Color.textSecondary)
             }
         }
         .padding(.vertical, 12)

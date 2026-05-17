@@ -114,7 +114,8 @@ final class NotificationPrefsViewTests: XCTestCase {
         )
         let summary = NotificationPrefsViewModel.summaryLabel(for: live)
         XCTAssertTrue(summary.contains("Enabled"))
-        XCTAssertTrue(summary.contains("min high"))
+        XCTAssertTrue(summary.contains("min High"),
+                      "Priority round-trips through catalog (value is 'High'); got summary=\(summary)")
         XCTAssertTrue(summary.contains("quiet 22:00–07:00"))
 
         let muted = makeDevicePref(
