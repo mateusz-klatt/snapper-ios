@@ -87,6 +87,44 @@ enum LocaleStrings {
         return String(format: template, locale: locale, count)
     }
 
+    /// Look up ``key`` and substitute positional ``args`` into its
+    /// placeholders.
+    ///
+    /// Mirrors the backend ``snapper.i18n.catalog.render`` shared by
+    /// the APNs sidecar and REST alert routes — used here for in-app
+    /// re-localization of alert rows when the user changes the locale
+    /// picker without a server round-trip.
+    ///
+    /// **Placeholder handling:** xcstrings templates use printf-style
+    /// specifiers (``%@``, ``%lld``). The wire shape uses ``[String]``
+    /// for ``loc_args`` regardless of which specifier the template
+    /// declares (the only ``%lld`` slot in the alert catalog is a
+    /// single-digit consecutive-warning threshold). To avoid passing
+    /// a ``String`` to a ``%lld`` slot (would format the pointer
+    /// address rather than a number), we normalize ``%lld``/``%d``
+    /// to ``%@`` before formatting. For the current threshold values
+    /// this is visually identical to the locale-aware integer render.
+    ///
+    /// **Catalog miss:** returns the ``key`` itself when neither the
+    /// requested language nor EN has the key — callers compare to
+    /// the key to detect this and fall back to ``alert.title`` /
+    /// ``alert.body`` (the EN strings the server resolved).
+    static func render(
+        _ key: String,
+        in language: CatalogLanguage,
+        args: [String]
+    ) -> String {
+        let template = localized(key, in: language)
+        if template == key { return key }
+        if args.isEmpty { return template }
+        let normalized = template
+            .replacingOccurrences(of: "%lld", with: "%@")
+            .replacingOccurrences(of: "%d", with: "%@")
+        let locale = Locale(identifier: language.rawValue)
+        let cvargs: [CVarArg] = args.map { $0 as NSString }
+        return String(format: normalized, locale: locale, arguments: cvargs)
+    }
+
     /// Resolve a ``Bundle`` for ``language`` with the same fallback
     /// chain as ``localized(_:in:)`` — requested language -> EN ->
     /// main bundle. Public-private because ``localizedPlural`` needs to

@@ -80,7 +80,7 @@ struct AlertsView: View {
                 get: { selectedAlert.map { IdentifiedAlert(alert: $0) } },
                 set: { selectedAlert = $0?.alert }
             )) { wrapper in
-                AlertDetailView(alert: wrapper.alert)
+                AlertDetailView(alert: wrapper.alert, locale: appState.locale)
             }
         }
     }
@@ -130,14 +130,21 @@ private struct IdentifiedAlert: Identifiable {
 
 private struct AlertDetailView: View {
     let alert: AlertEventInfo
+    /// The user-selected app locale (drives in-app re-localization of
+    /// ``title``/``body`` via ``AlertEventInfo.displayTitle(in:)``).
+    /// Defaults to ``.us`` so previews and any legacy caller that
+    /// still constructs ``AlertDetailView`` without a locale render
+    /// English instead of crashing — the same convention used by
+    /// ``AlertRow`` and ``LatestAlertCard``.
+    var locale: AppLocale = .us
 
     var body: some View {
         NavigationStack {
             ScrollView {
                 VStack(alignment: .leading, spacing: 12) {
-                    Text(alert.title)
+                    Text(verbatim: alert.displayTitle(in: locale.catalogLanguage))
                         .font(.title2.bold())
-                    Text(alert.body)
+                    Text(verbatim: alert.displayBody(in: locale.catalogLanguage))
                         .font(.body)
                     Divider()
                     LabeledContent("Type", value: alert.alertType)
