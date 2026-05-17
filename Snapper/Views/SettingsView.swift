@@ -316,15 +316,25 @@ struct SettingsView: View {
         return LocaleStrings.localized(key, in: appState.locale.catalogLanguage)
     }
 
+    /// Status indicator + label rendered via SwiftUI ``Label`` so the
+    /// icon flips with ``\.layoutDirection`` instead of always sitting
+    /// on the visual-left edge. Under RTL (``ae``/``il``/``ir``) the
+    /// plain ``HStack { Circle; Text }`` shape kept the dot on the
+    /// pixel-left of the value, which means in reading order the dot
+    /// came AFTER the value — opposite of the icon-precedes-value
+    /// convention used by iOS native Settings / Wi-Fi / Bloomberg /
+    /// Bybit in their RTL renderings. ``Label`` swaps icon and title
+    /// positions automatically based on layoutDirection.
     private var connectionStatusView: some View {
-        HStack(spacing: 6) {
+        Label {
+            Text(connectionText)
+                .font(.caption)
+        } icon: {
             Circle()
                 .fill(connectionColor)
                 .frame(width: 8, height: 8)
-
-            Text(connectionText)
-                .font(.caption)
         }
+        .labelStyle(.titleAndIcon)
     }
 
     private var connectionColor: Color {
