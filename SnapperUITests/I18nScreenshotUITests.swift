@@ -134,9 +134,9 @@ final class I18nScreenshotUITests: XCTestCase {
     func testCaptureRetryFailures() throws {
         try skipUnlessBackendConfigured()
         let retries: [LocaleSpec] = [
-            .init(code: "th", appleLanguageTag: "th-TH"),
+            .init(code: "ae", appleLanguageTag: "ar-AE"),
+            .init(code: "il", appleLanguageTag: "he-IL"),
             .init(code: "ir", appleLanguageTag: "fa-IR"),
-            .init(code: "am", appleLanguageTag: "hy-AM"),
         ]
         for spec in retries {
             captureLocale(spec)
