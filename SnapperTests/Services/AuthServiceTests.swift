@@ -169,7 +169,8 @@ final class AuthServiceTests: XCTestCase {
             createdAt: Date(timeIntervalSince1970: 0),
             operatorPublicIds: nil,
             primaryOperatorPublicId: nil,
-            activeWalletPublicId: nil
+            activeWalletPublicId: nil,
+            defaultLanguage: nil
         )
     }
 
