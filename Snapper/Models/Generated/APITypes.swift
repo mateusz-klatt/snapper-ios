@@ -4515,6 +4515,7 @@ struct UserProfile: Codable, Sendable {
     let operatorPublicIds: [String]?
     let primaryOperatorPublicId: String?
     let activeWalletPublicId: String?
+    let defaultLanguage: String?
 
     enum CodingKeys: String, CodingKey {
         case type
@@ -4531,6 +4532,7 @@ struct UserProfile: Codable, Sendable {
         case operatorPublicIds = "operator_public_ids"
         case primaryOperatorPublicId = "primary_operator_public_id"
         case activeWalletPublicId = "active_wallet_public_id"
+        case defaultLanguage = "default_language"
     }
 }
 
@@ -4941,6 +4943,34 @@ struct RefreshTokenPayload: Codable, Sendable {
     enum CodingKeys: String, CodingKey {
         case activeWalletPublicId = "active_wallet_public_id"
         case clearActiveWallet = "clear_active_wallet"
+    }
+}
+
+struct UpdateAuthMeRequest: Codable, Sendable {
+    let type: String?
+    let sequenceId: Int
+    let publicId: String
+    let timestamp: Date
+    let sessionId: String
+    let topic: String?
+    let payload: UpdateAuthMeBody
+
+    enum CodingKeys: String, CodingKey {
+        case type
+        case sequenceId = "sequence_id"
+        case publicId = "public_id"
+        case timestamp
+        case sessionId = "session_id"
+        case topic
+        case payload
+    }
+}
+
+struct UpdateAuthMeBody: Codable, Sendable {
+    let defaultLanguage: String?
+
+    enum CodingKeys: String, CodingKey {
+        case defaultLanguage = "default_language"
     }
 }
 
