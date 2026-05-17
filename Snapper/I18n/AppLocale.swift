@@ -70,4 +70,29 @@ enum AppLocale: String, CaseIterable, Codable, Sendable, Hashable, Identifiable 
     /// need a strong reference should keep ``intlLocaleIdentifier``
     /// instead.
     var nativeLocale: Locale { Locale(identifier: intlLocaleIdentifier) }
+
+    /// Foundation ``Locale`` that pins numeric formatting to Western
+    /// (Latin) digits while preserving the locale's grammar, decimal
+    /// separator, grouping, and date/time text. Used by the trading
+    /// surfaces (price tiles, chart axes, percent values, durations)
+    /// so ``ae``/``ir`` show ``78,041.50`` instead of mixed Eastern-
+    /// Arabic ``٥:٠٢`` on the chart vs Western ``78,041.50`` on the
+    /// tile. The ``.latn`` numbering system override is a no-op
+    /// for locales that already default to Latin digits.
+    ///
+    /// Built via ``Locale.Components`` rather than a string-spliced
+    /// BCP-47 identifier — Foundation in iOS 26 rejects
+    /// ``"ga-IE-u-nu-latn"`` from ``NumberFormatter`` (returns ``nil``
+    /// from ``string(from:)``), but the structured-components API
+    /// produces a Locale that all the formatters accept.
+    ///
+    /// Confined to numeric and date-component output via
+    /// ``LocaleFormatters``; the SwiftUI environment ``\.locale``
+    /// keeps ``nativeLocale`` so ``Text(LocalizedStringKey)``
+    /// translation lookup is unaffected.
+    var westernDigitsLocale: Locale {
+        var components = Locale.Components(identifier: intlLocaleIdentifier)
+        components.numberingSystem = Locale.NumberingSystem("latn")
+        return Locale(components: components)
+    }
 }

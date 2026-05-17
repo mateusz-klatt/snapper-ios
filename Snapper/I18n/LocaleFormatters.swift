@@ -2,9 +2,12 @@ import Foundation
 
 /// Per-locale number / date / currency / percent formatter factory.
 ///
-/// Reads ``AppLocale.nativeLocale`` (BCP-47 ``<lang>-<COUNTRY>`` form
-/// via ``CountryMappings.intlLocaleIdentifier``) to bind each formatter
-/// to the user's selected catalog language. New formatters are cheap to
+/// Reads ``AppLocale.westernDigitsLocale`` (BCP-47 ``<lang>-<COUNTRY>-u-nu-latn``
+/// form layered on top of ``CountryMappings.intlLocaleIdentifier``) so
+/// the trading surfaces render Western digits for every supported locale
+/// (otherwise ``ae`` mixes Eastern-Arabic ``٥:٠٢`` on the chart with
+/// Western ``78,041.50`` on the price tile — Bloomberg / Bybit / Binance
+/// resolve this by going Latin everywhere). New formatters are cheap to
 /// create; callers should not cache instances across locale changes
 /// (each ``setLocale`` invalidates the prior formatter so a fresh
 /// factory call picks up the new locale).
@@ -15,7 +18,7 @@ enum LocaleFormatters {
     /// and grouping (non-breaking space for PL, comma for EN).
     static func decimal(for locale: AppLocale, fractionDigits: Int) -> NumberFormatter {
         let formatter = NumberFormatter()
-        formatter.locale = locale.nativeLocale
+        formatter.locale = locale.westernDigitsLocale
         formatter.numberStyle = .decimal
         formatter.minimumFractionDigits = fractionDigits
         formatter.maximumFractionDigits = fractionDigits
@@ -26,7 +29,7 @@ enum LocaleFormatters {
     /// symbol placement follows the locale (suffix in PL, prefix in EN).
     static func currency(for locale: AppLocale, code: String, fractionDigits: Int) -> NumberFormatter {
         let formatter = NumberFormatter()
-        formatter.locale = locale.nativeLocale
+        formatter.locale = locale.westernDigitsLocale
         formatter.numberStyle = .currency
         formatter.currencyCode = code
         formatter.minimumFractionDigits = fractionDigits
@@ -39,7 +42,7 @@ enum LocaleFormatters {
     /// spacing per CLDR rules.
     static func percent(for locale: AppLocale, fractionDigits: Int) -> NumberFormatter {
         let formatter = NumberFormatter()
-        formatter.locale = locale.nativeLocale
+        formatter.locale = locale.westernDigitsLocale
         formatter.numberStyle = .percent
         formatter.minimumFractionDigits = fractionDigits
         formatter.maximumFractionDigits = fractionDigits
@@ -49,7 +52,7 @@ enum LocaleFormatters {
     /// Relative-date formatter ("5 minutes ago" / "5 minut temu").
     static func relativeDateTime(for locale: AppLocale) -> RelativeDateTimeFormatter {
         let formatter = RelativeDateTimeFormatter()
-        formatter.locale = locale.nativeLocale
+        formatter.locale = locale.westernDigitsLocale
         formatter.unitsStyle = .full
         return formatter
     }
@@ -58,7 +61,7 @@ enum LocaleFormatters {
     static func compactDuration(for locale: AppLocale) -> DateComponentsFormatter {
         let formatter = DateComponentsFormatter()
         formatter.calendar = Calendar(identifier: .iso8601)
-        formatter.calendar?.locale = locale.nativeLocale
+        formatter.calendar?.locale = locale.westernDigitsLocale
         formatter.unitsStyle = .abbreviated
         formatter.allowedUnits = [.minute, .second]
         return formatter

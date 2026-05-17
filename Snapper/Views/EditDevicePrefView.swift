@@ -129,7 +129,10 @@ struct EditDevicePrefView: View {
                 Section(LocalizedStringKey("notifications.devicePref.alertType.label")) {
                     if isAlertTypeLocked {
                         HStack {
-                            Text(NotificationPrefsViewModel.displayName(for: alertType))
+                            Text(verbatim: NotificationPrefsViewModel.displayName(
+                                for: alertType,
+                                language: appState.locale.catalogLanguage
+                            ))
                             Spacer()
                             Text(LocalizedStringKey("notifications.devicePref.alertType.lockedBadge"))
                                 .font(.caption)
@@ -138,7 +141,10 @@ struct EditDevicePrefView: View {
                     } else {
                         Picker(LocalizedStringKey("notifications.devicePref.alertType.label"), selection: $alertType) {
                             ForEach(NotificationPrefsViewModel.alertTypes, id: \.self) { type in
-                                Text(NotificationPrefsViewModel.displayName(for: type)).tag(type)
+                                Text(verbatim: NotificationPrefsViewModel.displayName(
+                                    for: type,
+                                    language: appState.locale.catalogLanguage
+                                )).tag(type)
                             }
                         }
                     }
@@ -202,7 +208,10 @@ struct EditDevicePrefView: View {
                     Toggle(LocalizedStringKey("notifications.prefs.row.enabled"), isOn: $enabled)
                     Picker(LocalizedStringKey("notifications.devicePref.minPriority.label"), selection: $minPriority) {
                         ForEach(NotificationPrefsViewModel.priorityValues, id: \.self) { priority in
-                            Text(NotificationPrefsViewModel.priorityDisplayName(for: priority))
+                            Text(verbatim: NotificationPrefsViewModel.priorityDisplayName(
+                                for: priority,
+                                language: appState.locale.catalogLanguage
+                            ))
                                 .tag(priority)
                         }
                     }

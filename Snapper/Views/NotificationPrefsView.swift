@@ -124,6 +124,7 @@ private struct AlertDefaultRow: View {
     let isInflight: Bool
     let onChange: (Bool, String) async -> Bool
 
+    @Environment(AppState.self) private var appState
     @State private var enabled: Bool
     @State private var minPriority: String
     /// Synchronous re-entry guard (preserved from pre-MVVM body).
@@ -146,7 +147,10 @@ private struct AlertDefaultRow: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
             HStack {
-                Text(NotificationPrefsViewModel.displayName(for: alertType))
+                Text(verbatim: NotificationPrefsViewModel.displayName(
+                    for: alertType,
+                    language: appState.locale.catalogLanguage
+                ))
                     .font(.body)
                 Spacer()
                 if isInflight || localInflight {
@@ -170,7 +174,10 @@ private struct AlertDefaultRow: View {
                 }
             Picker(LocalizedStringKey("notifications.prefs.row.minPriority"), selection: $minPriority) {
                 ForEach(NotificationPrefsViewModel.priorityValues, id: \.self) { priority in
-                    Text(NotificationPrefsViewModel.priorityDisplayName(for: priority)).tag(priority)
+                    Text(verbatim: NotificationPrefsViewModel.priorityDisplayName(
+                        for: priority,
+                        language: appState.locale.catalogLanguage
+                    )).tag(priority)
                 }
             }
             .pickerStyle(.segmented)
@@ -202,14 +209,17 @@ private struct AlertDefaultRow: View {
 private struct DevicePrefRow: View {
     let pref: DeviceAlertPrefInfo
 
+    @Environment(AppState.self) private var appState
+
     var body: some View {
+        let language = appState.locale.catalogLanguage
         VStack(alignment: .leading, spacing: 4) {
-            Text(NotificationPrefsViewModel.displayName(for: pref.alertType))
+            Text(verbatim: NotificationPrefsViewModel.displayName(for: pref.alertType, language: language))
                 .font(.body)
-            Text(NotificationPrefsViewModel.scopeLabel(for: pref))
+            Text(verbatim: NotificationPrefsViewModel.scopeLabel(for: pref, language: language))
                 .font(.caption)
                 .foregroundStyle(.secondary)
-            Text(NotificationPrefsViewModel.summaryLabel(for: pref))
+            Text(verbatim: NotificationPrefsViewModel.summaryLabel(for: pref, language: language))
                 .font(.caption2)
                 .foregroundStyle(.tertiary)
         }

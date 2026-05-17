@@ -49,14 +49,31 @@ struct CandlestickChartView: View {
     /// trading data uses 24h universally and the locale-default
     /// 12h fallback in en-US / hk / kr truncated the rightmost
     /// tick (` PM` suffix overflows the axis width).
+    ///
+    /// The format style is pinned to ``AppLocale.westernDigitsLocale``
+    /// so the X-axis renders Latin digits in ``ae``/``ir``/``in``
+    /// rather than the locale's native digit set (which would mix
+    /// Eastern-Arabic ``٥:٠٢`` on the axis with Western ``78,041.50``
+    /// on the price tile — see [[westernDigitsLocale]] rationale).
     private var xAxisFormat: Date.FormatStyle {
+        let westernLocale = appState.locale.westernDigitsLocale
         switch timeframe {
         case .oneMinute, .fiveMinutes, .fifteenMinutes, .oneHour:
-            return .dateTime.hour(.twoDigits(amPM: .omitted)).minute(.twoDigits)
+            return .dateTime
+                .hour(.twoDigits(amPM: .omitted))
+                .minute(.twoDigits)
+                .locale(westernLocale)
         case .fourHours:
-            return .dateTime.month(.abbreviated).day().hour(.twoDigits(amPM: .omitted))
+            return .dateTime
+                .month(.abbreviated)
+                .day()
+                .hour(.twoDigits(amPM: .omitted))
+                .locale(westernLocale)
         case .oneDay:
-            return .dateTime.month(.abbreviated).day()
+            return .dateTime
+                .month(.abbreviated)
+                .day()
+                .locale(westernLocale)
         }
     }
 
