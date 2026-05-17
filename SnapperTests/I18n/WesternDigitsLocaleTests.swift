@@ -105,4 +105,27 @@ final class WesternDigitsLocaleTests: XCTestCase {
         XCTAssertEqual(irLocale.language.languageCode?.identifier, "fa",
                        "ir westernDigitsLocale must preserve Persian language tag")
     }
+
+    /// Mirrors the Y-axis label path in ``CandlestickChartView`` —
+    /// ``FloatingPointFormatStyle.number.locale(...)`` must accept the
+    /// custom-numberingSystem ``Locale`` and produce Latin digits.
+    /// Catches Foundation regressions where the structured-component
+    /// Locale fails to flow through a ``FormatStyle`` chain.
+    func testWesternDigitsLocaleRoutesThroughFloatingPointFormatStyle() {
+        let style = FloatingPointFormatStyle<Double>.number.locale(AppLocale.ae.westernDigitsLocale)
+        let rendered = (78158.6).formatted(style)
+        for character in rendered {
+            for scalar in character.unicodeScalars {
+                if scalar.properties.numericType != nil {
+                    XCTAssertLessThanOrEqual(
+                        scalar.value,
+                        UInt32(0x39),
+                        "FloatingPointFormatStyle with ae westernDigitsLocale must emit Western digits; got scalar \(scalar.value) in \(rendered)"
+                    )
+                }
+            }
+        }
+        XCTAssertTrue(rendered.contains("78"),
+                      "FloatingPointFormatStyle must surface Latin-digit 78xxx; got \(rendered)")
+    }
 }

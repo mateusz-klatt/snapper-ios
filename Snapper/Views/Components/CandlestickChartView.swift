@@ -89,6 +89,19 @@ struct CandlestickChartView: View {
         ) == .leading ? .leading : .trailing
     }
 
+    /// Number format for the Y-axis price labels — pinned to
+    /// ``AppLocale.westernDigitsLocale`` so the price ticks render
+    /// Latin digits on ``ae``/``ir``/``bd`` instead of the locale's
+    /// native digit set. Without the explicit ``.locale(...)``,
+    /// ``AxisValueLabel()`` picks up the SwiftUI environment locale
+    /// (``AppLocale.nativeLocale`` at the app root) and AE/IR show
+    /// Eastern-Arabic ``٧٨,١٥٨`` while ``LocaleFormatters``-routed
+    /// price tiles render ``78,158`` — the inconsistency the digit
+    /// policy is meant to eliminate.
+    private var yAxisFormat: FloatingPointFormatStyle<Double> {
+        .number.locale(appState.locale.westernDigitsLocale)
+    }
+
     /// Compute a tight Y-axis range from the actual candle highs
     /// and lows, padded by 1.5% on each side so the body+wick of
     /// extreme candles sit comfortably inside the chart frame.
@@ -146,7 +159,7 @@ struct CandlestickChartView: View {
                 values: .automatic(desiredCount: 5)
             ) { _ in
                 AxisGridLine().foregroundStyle(Color.chartGrid)
-                AxisValueLabel().foregroundStyle(Color.textSecondary)
+                AxisValueLabel(format: yAxisFormat).foregroundStyle(Color.textSecondary)
             }
         }
         .padding(.vertical, 12)
