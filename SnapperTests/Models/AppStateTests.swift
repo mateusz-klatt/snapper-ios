@@ -38,4 +38,35 @@ final class AppStateTests: XCTestCase {
         state.selectedWalletPublicId = nil
         XCTAssertNil(defaults.string(forKey: Self.walletKey))
     }
+
+    func testFinancialColorPreferenceDefaultsToAuto() {
+        let defaults = makeIsolatedDefaults()
+        let state = AppState(userDefaults: defaults)
+        XCTAssertEqual(state.financialColorPreference, .auto)
+    }
+
+    func testFinancialColorPreferencePersistsAcrossInstances() {
+        let defaults = makeIsolatedDefaults()
+        let writer = AppState(userDefaults: defaults)
+        writer.financialColorPreference = .risingRed
+        let reader = AppState(userDefaults: defaults)
+        XCTAssertEqual(reader.financialColorPreference, .risingRed)
+    }
+
+    func testFinancialColorPreferenceFallsBackToAutoForUnknownRawValue() {
+        let defaults = makeIsolatedDefaults()
+        defaults.set("not-a-real-value", forKey: financialColorPreferenceStorageKey)
+        let state = AppState(userDefaults: defaults)
+        XCTAssertEqual(state.financialColorPreference, .auto)
+    }
+
+    func testFinancialColorPreferenceWritesRawValueToUserDefaults() {
+        let defaults = makeIsolatedDefaults()
+        let state = AppState(userDefaults: defaults)
+        state.financialColorPreference = .risingGreen
+        XCTAssertEqual(
+            defaults.string(forKey: financialColorPreferenceStorageKey),
+            "rising-green"
+        )
+    }
 }
