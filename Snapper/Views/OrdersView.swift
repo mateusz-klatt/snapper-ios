@@ -292,7 +292,7 @@ private struct ExecutionRow: View {
                 Spacer()
                 Text(execution.side)
                     .font(.caption)
-                    .foregroundColor(execution.side == "buy" ? .profitGreen : .lossRed)
+                    .foregroundColor(execution.side == "buy" ? Color.financialRising(for: appState) : Color.financialFalling(for: appState))
             }
             HStack {
                 Text(String(
