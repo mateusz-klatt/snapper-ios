@@ -120,13 +120,15 @@ struct CandlestickChartView: View {
 
     @ViewBuilder
     private var chart: some View {
+        let risingColor = Color.financialRising(for: appState)
+        let fallingColor = Color.financialFalling(for: appState)
         Chart(candles) { candle in
             let openD = (candle.open as NSDecimalNumber).doubleValue
             let highD = (candle.high as NSDecimalNumber).doubleValue
             let lowD = (candle.low as NSDecimalNumber).doubleValue
             let closeD = (candle.close as NSDecimalNumber).doubleValue
             let isUp = closeD >= openD
-            let bodyColor: Color = isUp ? .brandGreen : .brandRed
+            let bodyColor: Color = isUp ? risingColor : fallingColor
 
             RuleMark(
                 x: .value("Time", candle.openAt),

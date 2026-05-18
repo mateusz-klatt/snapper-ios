@@ -329,7 +329,7 @@ struct HomeView: View {
                     VStack(alignment: .trailing, spacing: 4) {
                         Text(position.unrealizedPnl.formattedCurrency(in: appState.locale, code: "USD", fractionDigits: 2))
                             .font(.subheadline)
-                            .foregroundColor(position.unrealizedPnl >= 0 ? .profitGreen : .lossRed)
+                            .foregroundColor(position.unrealizedPnl >= 0 ? Color.financialRising(for: appState) : Color.financialFalling(for: appState))
 
                         Text(LocalizedStringKey("home.position.unrealizedPnl"))
                             .font(.caption2)

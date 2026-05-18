@@ -315,7 +315,7 @@ struct PositionCard: View {
             VStack(alignment: .trailing, spacing: 4) {
                 Text(position.unrealizedPnl.formattedCurrency(in: appState.locale, code: "USD", fractionDigits: 2))
                     .font(.body.monospaced())
-                    .foregroundStyle(position.unrealizedPnl >= 0 ? Color.profitGreen : Color.lossRed)
+                    .foregroundStyle(position.unrealizedPnl >= 0 ? Color.financialRising(for: appState) : Color.financialFalling(for: appState))
                 Text(String(
                     format: LocaleStrings.localized("positions.row.avgPrice", in: appState.locale.catalogLanguage),
                     position.averagePrice.formattedDecimal(in: appState.locale, fractionDigits: 4)
@@ -338,8 +338,8 @@ struct PositionCard: View {
     }
 
     private var directionColor: Color {
-        if position.quantity > 0 { return .profitGreen }
-        if position.quantity < 0 { return .lossRed }
+        if position.quantity > 0 { return Color.financialRising(for: appState) }
+        if position.quantity < 0 { return Color.financialFalling(for: appState) }
         return .secondary
     }
 }

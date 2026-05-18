@@ -22,6 +22,7 @@ final class AppState {
 
     private static let walletKey = "selected_wallet_public_id"
     private static let localeKey = "snapper-locale"
+    private static let financialColorPreferenceKey = financialColorPreferenceStorageKey
     private let userDefaults: UserDefaults
     private let preferredLanguagesProvider: () -> [String]
 
@@ -57,6 +58,25 @@ final class AppState {
         }
     }
 
+    /// Per-user financial-direction color convention preference.
+    ///
+    /// Defaults to ``.auto`` (locale-derived) on first run. The
+    /// resolver in [[FinancialColorPreference.swift]] maps the
+    /// stored preference + the current ``locale`` to a concrete
+    /// ``EffectiveFinancialColorConvention``; mutating either field
+    /// triggers SwiftUI re-render of every view that uses the
+    /// ``Color.financialRising(for:)`` / ``financialFalling(for:)``
+    /// helpers.
+    ///
+    /// Persisted under the same UserDefaults key the web localStorage
+    /// uses (cross-platform parity — see Phase E precedent for
+    /// `snapper-financial-color-preference`).
+    var financialColorPreference: FinancialColorPreference {
+        didSet {
+            userDefaults.set(financialColorPreference.rawValue, forKey: Self.financialColorPreferenceKey)
+        }
+    }
+
     /// Initialize app state. ``preferredLanguagesProvider`` is
     /// injected (rather than reading ``Locale.preferredLanguages``
     /// directly) so XCTest can pass deterministic literal arrays
@@ -74,5 +94,11 @@ final class AppState {
             preferredLanguages: preferredLanguagesProvider(),
             localeKey: Self.localeKey
         )
+        if let raw = userDefaults.string(forKey: Self.financialColorPreferenceKey),
+           let parsed = FinancialColorPreference(rawValue: raw) {
+            self.financialColorPreference = parsed
+        } else {
+            self.financialColorPreference = .auto
+        }
     }
 }

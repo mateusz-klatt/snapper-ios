@@ -69,16 +69,20 @@ struct MarketMetricGrid: View {
 }
 
 /// Reusable KPI tile. The optional ``delta`` controls the value's
-/// color tint (BrandGreen positive, BrandRed negative, neutral
-/// when ``nil``).
+/// color tint via ``Color.financialRising(for:)`` /
+/// ``Color.financialFalling(for:)`` so the 24h %Δ value flips
+/// red/green under East-Asian convention (cn/hk/jp/kr or explicit
+/// rising-red setting). Neutral when ``nil``.
 struct MarketMetricCard: View {
     let label: String
     let value: String
     let delta: Decimal?
 
+    @Environment(AppState.self) private var appState
+
     private var valueColor: Color {
         guard let delta else { return .textPrimary }
-        return delta >= 0 ? .brandGreen : .brandRed
+        return delta >= 0 ? .financialRising(for: appState) : .financialFalling(for: appState)
     }
 
     var body: some View {

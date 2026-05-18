@@ -29,6 +29,48 @@ struct SettingsView: View {
                     Text(LocalizedStringKey("settings.section.language"))
                 }
 
+                Section {
+                    @Bindable var bindableAppState = appState
+                    Picker(
+                        LocalizedStringKey("settings.financialColor.title"),
+                        selection: $bindableAppState.financialColorPreference
+                    ) {
+                        Text(LocalizedStringKey("settings.financialColor.auto"))
+                            .tag(FinancialColorPreference.auto)
+                        Text(LocalizedStringKey("settings.financialColor.risingGreen"))
+                            .tag(FinancialColorPreference.risingGreen)
+                        Text(LocalizedStringKey("settings.financialColor.risingRed"))
+                            .tag(FinancialColorPreference.risingRed)
+                    }
+                    .pickerStyle(.inline)
+                    if appState.financialColorPreference == .auto {
+                        let effective = resolveFinancialColorConvention(
+                            preference: appState.financialColorPreference,
+                            locale: appState.locale
+                        )
+                        let conventionLabelKey =
+                            effective == .risingRed
+                            ? "settings.financialColor.subtitleRisingRed"
+                            : "settings.financialColor.subtitleRisingGreen"
+                        Text(
+                            String(
+                                format: LocaleStrings.localized(
+                                    "settings.financialColor.subtitleAutoCurrent",
+                                    in: appState.locale.catalogLanguage
+                                ),
+                                LocaleStrings.localized(
+                                    conventionLabelKey,
+                                    in: appState.locale.catalogLanguage
+                                )
+                            )
+                        )
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                    }
+                } header: {
+                    Text(LocalizedStringKey("settings.section.financialColor"))
+                }
+
                 Section(LocalizedStringKey("settings.section.account")) {
                     if let user = authService.currentUser {
                         HStack {
