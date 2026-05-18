@@ -3485,6 +3485,7 @@ struct RelatedInstrumentsUnderlying: Codable, Sendable {
     let name: String
     let assetClass: String
     let sector: String?
+    let description: String?
 
     enum CodingKeys: String, CodingKey {
         case publicId = "public_id"
@@ -3492,6 +3493,7 @@ struct RelatedInstrumentsUnderlying: Codable, Sendable {
         case name
         case assetClass = "asset_class"
         case sector
+        case description
     }
 }
 
@@ -4352,6 +4354,7 @@ struct UnderlyingAssetData: Codable, Sendable {
     let name: String
     let assetClass: String
     let sector: String?
+    let description: String?
     let instrumentCount: Int
 
     enum CodingKeys: String, CodingKey {
@@ -4365,6 +4368,7 @@ struct UnderlyingAssetData: Codable, Sendable {
         case name
         case assetClass = "asset_class"
         case sector
+        case description
         case instrumentCount = "instrument_count"
     }
 }
