@@ -30,10 +30,9 @@ struct SettingsView: View {
                 }
 
                 Section {
-                    @Bindable var bindableAppState = appState
                     Picker(
                         LocalizedStringKey("settings.financialColor.title"),
-                        selection: $bindableAppState.financialColorPreference
+                        selection: financialColorPreferenceSelection
                     ) {
                         Text(LocalizedStringKey("settings.financialColor.auto"))
                             .tag(FinancialColorPreference.auto)
@@ -218,6 +217,13 @@ struct SettingsView: View {
         .sheet(isPresented: $showingBackendEditor) {
             backendEditorSheet
         }
+    }
+
+    private var financialColorPreferenceSelection: Binding<FinancialColorPreference> {
+        Binding(
+            get: { appState.financialColorPreference },
+            set: { appState.financialColorPreference = $0 }
+        )
     }
 
     @ViewBuilder
