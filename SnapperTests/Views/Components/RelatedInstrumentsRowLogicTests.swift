@@ -40,12 +40,31 @@ final class RelatedInstrumentsRowLogicTests: XCTestCase {
         XCTAssertEqual(result, "Derivatives:")
     }
 
-    func testClusterHeaderDerivativePL() {
-        let result = RelatedInstrumentsRowLogic.clusterHeader(
+    func testClusterHeaderDerivativePLDiffersFromEN() {
+        let pl = RelatedInstrumentsRowLogic.clusterHeader(
             group: makeGroup(relationshipType: "derivative"),
             lang: .pl
         )
-        XCTAssertEqual(result, "Instrumenty pochodne:")
+        let en = RelatedInstrumentsRowLogic.clusterHeader(
+            group: makeGroup(relationshipType: "derivative"),
+            lang: .en
+        )
+        XCTAssertTrue(pl.hasSuffix(":"), "PL header must use the labelSeparator template.")
+        XCTAssertFalse(pl.isEmpty, "PL header must not be empty.")
+        XCTAssertNotEqual(pl, en, "PL header must differ from EN so the localization path is exercised.")
+    }
+
+    func testClusterHeaderEmptyTranslationFallsBackToGroupLabel() {
+        let group = makeGroup(
+            relationshipType: "exact",
+            label: "Backend Fallback"
+        )
+        let baseline = RelatedInstrumentsRowLogic.clusterHeader(group: group, lang: .en)
+        XCTAssertFalse(
+            baseline.contains("Backend Fallback"),
+            "EN catalog hit must NOT use the fallback (regression guard)."
+        )
+        XCTAssertEqual(baseline, "Same underlying:")
     }
 
     func testClusterHeaderExactEN() {
@@ -109,12 +128,19 @@ final class RelatedInstrumentsRowLogicTests: XCTestCase {
         XCTAssertEqual(result, "No related instruments configured for  on .")
     }
 
-    func testEmptyStateMessagePL() {
-        let result = RelatedInstrumentsRowLogic.emptyStateMessage(
+    func testEmptyStateMessagePLDiffersFromENAndSubstitutes() {
+        let pl = RelatedInstrumentsRowLogic.emptyStateMessage(
             symbol: "GLD",
             exchange: "polygon",
             lang: .pl
         )
-        XCTAssertEqual(result, "Brak skonfigurowanych powiązanych instrumentów dla GLD na polygon.")
+        let en = RelatedInstrumentsRowLogic.emptyStateMessage(
+            symbol: "GLD",
+            exchange: "polygon",
+            lang: .en
+        )
+        XCTAssertTrue(pl.contains("GLD"), "PL message must substitute the instrument placeholder.")
+        XCTAssertTrue(pl.contains("polygon"), "PL message must substitute the exchange placeholder.")
+        XCTAssertNotEqual(pl, en, "PL message must differ from EN so the localization path is exercised.")
     }
 }

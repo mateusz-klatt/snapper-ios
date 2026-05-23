@@ -27,7 +27,16 @@ enum RelatedInstrumentsRowLogic {
     ) -> String {
         let typeKey = "market.related.relationshipType.\(group.relationshipType)"
         let resolvedType = LocaleStrings.localized(typeKey, in: lang)
-        let typeLabel = resolvedType == typeKey ? group.label : resolvedType
+        /// A catalog miss returns the key verbatim; a degenerate
+        /// empty translation returns ``""``. Both fall through to
+        /// the backend-provided ``group.label`` so the header is
+        /// never blank or just a separator character.
+        let typeLabel: String
+        if resolvedType == typeKey || resolvedType.isEmpty {
+            typeLabel = group.label
+        } else {
+            typeLabel = resolvedType
+        }
         let template = LocaleStrings.localized("market.related.labelSeparator", in: lang)
         if template == "market.related.labelSeparator" {
             return "\(typeLabel):"
@@ -77,25 +86,44 @@ enum RelatedInstrumentsRowLogic {
 /// Horizontal row of grouped derivative / proxy / same-underlying
 /// chips that lets the user cross-navigate to a related market via a
 /// single tap. Mirrors the web frontend's ``RelatedInstrumentsRow``.
+///
+/// State semantics:
+/// - ``relatedResponse == nil`` — payload not yet loaded (initial /
+///   loading / fetch-failed / pre-selection). Row renders nothing
+///   so the surface stays out of the way and the empty-state copy
+///   does NOT flash through during normal transitions.
+/// - ``relatedResponse != nil`` and ``groups.isEmpty`` — backend
+///   confirmed no related instruments for the current selection.
+///   Row renders the empty-state message.
+/// - ``relatedResponse != nil`` and ``groups`` populated — row
+///   renders the horizontal chip clusters.
 struct RelatedInstrumentsRowView: View {
-    let groups: [RelatedInstrumentsGroup]
+    let relatedResponse: RelatedInstrumentsResponse?
     let selectedExchange: String?
     let selectedSymbol: String?
     let language: CatalogLanguage
     let onSelect: (_ exchange: String, _ nativeSymbol: String) -> Void
 
     var body: some View {
-        if groups.isEmpty {
-            empty
+        if let payload = relatedResponse?.payload {
+            if payload.groups.isEmpty {
+                if let symbol = selectedSymbol, let exchange = selectedExchange {
+                    emptyState(symbol: symbol, exchange: exchange)
+                } else {
+                    EmptyView()
+                }
+            } else {
+                populated(payload.groups)
+            }
         } else {
-            populated
+            EmptyView()
         }
     }
 
-    private var populated: some View {
+    private func populated(_ groups: [RelatedInstrumentsGroup]) -> some View {
         ScrollView(.horizontal, showsIndicators: false) {
             HStack(alignment: .top, spacing: 16) {
-                ForEach(groups, id: \.relationshipType) { group in
+                ForEach(Array(groups.enumerated()), id: \.offset) { _, group in
                     cluster(group)
                 }
             }
@@ -154,10 +182,10 @@ struct RelatedInstrumentsRowView: View {
         .disabled(isSelected)
     }
 
-    private var empty: some View {
+    private func emptyState(symbol: String, exchange: String) -> some View {
         let message = RelatedInstrumentsRowLogic.emptyStateMessage(
-            symbol: selectedSymbol,
-            exchange: selectedExchange,
+            symbol: symbol,
+            exchange: exchange,
             lang: language
         )
         return Text(verbatim: message)

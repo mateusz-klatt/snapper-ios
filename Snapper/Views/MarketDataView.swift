@@ -48,7 +48,7 @@ struct MarketDataView: View {
                 )
 
                 RelatedInstrumentsRowView(
-                    groups: vm.relatedResponse?.payload.groups ?? [],
+                    relatedResponse: vm.relatedResponse,
                     selectedExchange: vm.selectedExchange,
                     selectedSymbol: vm.selectedInstrument?.symbol,
                     language: appState.locale.catalogLanguage,

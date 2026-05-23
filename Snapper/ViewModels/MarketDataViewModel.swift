@@ -93,6 +93,15 @@ final class MarketDataViewModel {
     /// resolve after the pl refetch and overwrite the banner with
     /// the older language.
     @ObservationIgnored private var pendingRelatedRefetchTask: Task<Void, Never>?
+    /// Monotonic counter incremented at the start of each
+    /// ``selectMarket(exchange:symbol:)`` invocation. The probe-then-
+    /// commit flow for cross-exchange navigation suspends on
+    /// ``fetchInstruments`` before mutating state, so two quick chip
+    /// taps can race: the older fetch may resolve last and commit
+    /// the wrong venue. Each invocation captures the generation at
+    /// entry and verifies it still matches before each state
+    /// mutation; stale invocations bail out without touching the VM.
+    @ObservationIgnored private var marketSelectionGeneration: Int = 0
     @ObservationIgnored private let api: APIClientProtocol
     @ObservationIgnored private weak var webSocketManager: WebSocketManager?
     @ObservationIgnored private let logger = AppLogger.make(category: "MarketDataViewModel")
@@ -285,18 +294,22 @@ final class MarketDataViewModel {
     /// previous selection is preserved in both same-exchange and
     /// cross-exchange miss paths.
     func selectMarket(exchange: String, symbol: String) async {
+        marketSelectionGeneration &+= 1
+        let generation = marketSelectionGeneration
         if exchange != selectedExchange {
             let candidates: [InstrumentDetailData]
             do {
                 let fetched = try await api.fetchInstruments(exchange: exchange)
                 candidates = fetched.filter { $0.canMarketData }
             } catch {
+                guard generation == marketSelectionGeneration else { return }
                 marketSelectionError = .instrumentNotFound(exchange: exchange, symbol: symbol)
                 logger.warning(
                     "selectMarket: destination catalog fetch failed — exchange=\(exchange, privacy: .public) symbol=\(symbol, privacy: .public) error=\(String(describing: error), privacy: .public)"
                 )
                 return
             }
+            guard generation == marketSelectionGeneration else { return }
             guard let target = candidates.first(where: { $0.symbol == symbol }) else {
                 marketSelectionError = .instrumentNotFound(exchange: exchange, symbol: symbol)
                 logger.warning(
@@ -317,6 +330,7 @@ final class MarketDataViewModel {
             )
             return
         }
+        guard generation == marketSelectionGeneration else { return }
         marketSelectionError = nil
         await selectInstrument(target)
     }
