@@ -18,9 +18,10 @@ enum RelatedInstrumentsRowLogic {
     ///    before the iOS catalog catches up).
     /// 2. Wrap the resolved label in the
     ///    ``market.related.labelSeparator`` template
-    ///    (``"%1$@:"`` in EN). Without this wrap, the labelSeparator
-    ///    catalog key sits unused — Copilot v4 flagged that in
-    ///    plan review.
+    ///    (``"%1$@:"`` in EN). The wrap exists so the separator
+    ///    glyph itself (``":"`` in EN, possibly ``"："`` in
+    ///    fullwidth-CJK locales) is owned by the catalog rather
+    ///    than hard-coded in source.
     static func clusterHeader(
         group: RelatedInstrumentsGroup,
         lang: CatalogLanguage
@@ -62,23 +63,23 @@ enum RelatedInstrumentsRowLogic {
     /// Empty-state message shown when the backend returns no related
     /// instruments for the current selection. Substitutes the current
     /// symbol + exchange via the catalog template
-    /// ``market.related.empty``. ``nil`` inputs fall through as the
-    /// empty string — the template has to tolerate that gracefully
-    /// (it does in EN/PL/the audited locales).
+    /// ``market.related.empty``. The view guards against a nil
+    /// selection before calling this helper, so both inputs are
+    /// non-optional here.
     static func emptyStateMessage(
-        symbol: String?,
-        exchange: String?,
+        symbol: String,
+        exchange: String,
         lang: CatalogLanguage
     ) -> String {
         let template = LocaleStrings.localized("market.related.empty", in: lang)
         if template == "market.related.empty" {
-            return "No related instruments configured for \(symbol ?? "") on \(exchange ?? "")."
+            return "No related instruments configured for \(symbol) on \(exchange)."
         }
         return String(
             format: template,
             locale: Locale(identifier: lang.rawValue),
-            symbol ?? "",
-            exchange ?? ""
+            symbol,
+            exchange
         )
     }
 }

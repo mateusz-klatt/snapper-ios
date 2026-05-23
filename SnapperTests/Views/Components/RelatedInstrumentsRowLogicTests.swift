@@ -54,7 +54,7 @@ final class RelatedInstrumentsRowLogicTests: XCTestCase {
         XCTAssertNotEqual(pl, en, "PL header must differ from EN so the localization path is exercised.")
     }
 
-    func testClusterHeaderEmptyTranslationFallsBackToGroupLabel() {
+    func testClusterHeaderENCatalogHitDoesNotUseGroupLabelFallback() {
         let group = makeGroup(
             relationshipType: "exact",
             label: "Backend Fallback"
@@ -117,15 +117,6 @@ final class RelatedInstrumentsRowLogicTests: XCTestCase {
             lang: .en
         )
         XCTAssertEqual(result, "No related instruments configured for GLD on polygon.")
-    }
-
-    func testEmptyStateMessageHandlesNilSelection() {
-        let result = RelatedInstrumentsRowLogic.emptyStateMessage(
-            symbol: nil,
-            exchange: nil,
-            lang: .en
-        )
-        XCTAssertEqual(result, "No related instruments configured for  on .")
     }
 
     func testEmptyStateMessagePLDiffersFromENAndSubstitutes() {
