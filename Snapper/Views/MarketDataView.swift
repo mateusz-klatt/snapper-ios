@@ -57,13 +57,28 @@ struct MarketDataView: View {
                     }
                 )
 
+                PairStatsRowView(
+                    chips: vm.filteredPairChips,
+                    language: appState.locale.catalogLanguage,
+                    onSelect: { exchange, symbol in
+                        Task { await vm.selectMarket(exchange: exchange, symbol: symbol) }
+                    }
+                )
+
                 MarketMetricGrid(metrics: vm.metrics)
 
-                CandlestickChartView(candles: vm.candles, timeframe: vm.selectedTimeframe)
-                    .frame(height: 280)
-                    .padding(.horizontal, 4)
-                    .background(Color.bgSurface)
-                    .clipShape(RoundedRectangle(cornerRadius: 12))
+                VStack(alignment: .leading, spacing: 0) {
+                    CacheWarmingBannerView(
+                        cacheState: vm.cacheState,
+                        expected: MarketCacheTarget.expectedSampleCount,
+                        language: appState.locale.catalogLanguage
+                    )
+                    CandlestickChartView(candles: vm.candles, timeframe: vm.selectedTimeframe)
+                        .frame(height: 280)
+                        .padding(.horizontal, 4)
+                }
+                .background(Color.bgSurface)
+                .clipShape(RoundedRectangle(cornerRadius: 12))
 
                 MarketStatusRow(
                     isDelayed: vm.metrics.isDelayed,

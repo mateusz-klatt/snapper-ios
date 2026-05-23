@@ -10,10 +10,36 @@ final class MarketDataViewModelTests: XCTestCase {
     override func setUp() {
         super.setUp()
         mockAPI = MockAPIClient()
+        /// Default empty cached-candles response — the metrics fetch
+        /// migrated from ``fetchCandles`` to ``fetchCachedCandles``,
+        /// so every test that exercises ``selectInstrument`` (which
+        /// triggers ``fetchChartAndMetrics``) needs this handler
+        /// stubbed. Tests that care about specific cache state
+        /// override per-test.
+        mockAPI.fetchCachedCandlesHandler = { _, _, _, _ in
+            return Self.makeEmptyCachedCandlesResponse()
+        }
         webSocketManager = WebSocketManager(
             authService: FakeAuthService(nextToken: "test-token"),
             taskFactory: FakeWebSocketTaskFactory(task: FakeWebSocketTask()),
             sleeper: FakeSleeper()
+        )
+    }
+
+    nonisolated private static func makeEmptyCachedCandlesResponse() -> CachedCandlesResponse {
+        return CachedCandlesResponse(
+            type: "cached_candles_response",
+            sequenceId: 1,
+            publicId: "cached-empty",
+            timestamp: Date(timeIntervalSince1970: 1_700_000_000),
+            sessionId: "session-test",
+            topic: nil,
+            payload: CachedCandlesPayload(
+                candles: [],
+                sampleCount: 0,
+                isWarm: true,
+                source: "cache"
+            )
         )
     }
 
@@ -366,6 +392,34 @@ final class MarketDataViewModelTests: XCTestCase {
         XCTAssertEqual(
             viewModel.marketSelectionError,
             .instrumentNotFound(exchange: "polygon", symbol: "NOTREAL")
+        )
+    }
+
+    func testMetricsCacheFailureDoesNotBlankChart() async {
+        let gld = makeInstrument(symbol: "GLD", exchange: "polygon")
+        mockAPI.fetchExchangesHandler = { ["polygon"] }
+        mockAPI.fetchInstrumentsHandler = { _ in [gld] }
+        mockAPI.fetchCandlesHandler = { _, _, _, _, _ in [] }
+        mockAPI.fetchCachedCandlesHandler = { _, _, _, _ in
+            throw APIError.serverError("metrics cache temporarily unavailable")
+        }
+        mockAPI.fetchRelatedInstrumentsHandler = { exchange, symbol in
+            return Self.makeRelatedResponse(exchange: exchange, symbol: symbol)
+        }
+        let viewModel = makeViewModel()
+        await viewModel.loadExchanges()
+        await viewModel.selectInstrument(gld)
+        XCTAssertTrue(
+            viewModel.isReady,
+            "Chart must surface even when the metrics cache endpoint is unavailable."
+        )
+        XCTAssertNil(
+            viewModel.loadError,
+            "Metrics cache failure is best-effort and must not poison loadError."
+        )
+        XCTAssertNil(
+            viewModel.cacheState,
+            "Cache state stays nil when the metrics cache fetch fails; banner stays hidden."
         )
     }
 

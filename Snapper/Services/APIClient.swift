@@ -347,6 +347,47 @@ final class APIClient: Sendable, APIClientProtocol {
         return envelope.payload
     }
 
+    /// Fetch the cached-candles envelope for a given venue/symbol/
+    /// timeframe via ``GET /api/candles/cache``. Returns the same
+    /// OHLCV shape as ``fetchCandles`` but the envelope also carries
+    /// cache-warming metadata (``sample_count`` / ``is_warm`` /
+    /// ``source``) the metrics surfaces use to render a warming
+    /// banner. Mirrors the web ``getCachedCandles`` client + backend
+    /// route contract; the ``timeframe`` rawValue (``"1m"`` /
+    /// ``"1h"`` / …) flows through verbatim as the query parameter.
+    func fetchCachedCandles(
+        exchange: String,
+        symbol: String,
+        timeframe: MarketTimeframe,
+        limit: Int
+    ) async throws -> CachedCandlesResponse {
+        let items = [
+            QueryParameter(name: "instrument", value: symbol),
+            QueryParameter(name: "exchange", value: exchange),
+            QueryParameter(name: "timeframe", value: timeframe.rawValue),
+            QueryParameter(name: "limit", value: String(limit)),
+        ]
+        let path = "/candles/cache\(Self.querySuffix(items))"
+        return try await request(endpoint: path)
+    }
+
+    /// Fetch the configured-pair cointegration stats list via
+    /// ``GET /api/market/cache/stats/configured``. Used by the pair
+    /// stats row to render cointegration chips for every pair the
+    /// operator has configured.
+    func fetchAllConfiguredPairStats() async throws -> ListedCachedStatsResponse {
+        return try await request(endpoint: "/market/cache/stats/configured")
+    }
+
+    /// Fetch the cache-warming health snapshot via
+    /// ``GET /api/market/cache/health``. Not consumed by the
+    /// initial Phase 3 UI surface but added so the
+    /// ``APIClientProtocol`` mirrors every backend cache endpoint
+    /// for future operator-facing health dashboards.
+    func fetchCacheHealth() async throws -> CacheHealthResponse {
+        return try await request(endpoint: "/market/cache/health")
+    }
+
     /// Fetch the related-instruments catalog for a given venue-scoped
     /// ticker via ``GET /api/instruments/{exchange}/{native_symbol}/related``.
     ///

@@ -77,6 +77,15 @@ final class MockAPIClient: APIClientProtocol, @unchecked Sendable {
         var updateDefaultLanguage: @Sendable (String) async throws -> Void = { _ in
             throw APIError.invalidResponse
         }
+        var fetchCachedCandles: @Sendable (String, String, MarketTimeframe, Int) async throws -> CachedCandlesResponse = { _, _, _, _ in
+            throw APIError.invalidResponse
+        }
+        var fetchAllConfiguredPairStats: @Sendable () async throws -> ListedCachedStatsResponse = {
+            throw APIError.invalidResponse
+        }
+        var fetchCacheHealth: @Sendable () async throws -> CacheHealthResponse = {
+            throw APIError.invalidResponse
+        }
         var fetchCandles: @Sendable (String, String, MarketTimeframe, Int, Date?) async throws -> [MarketCandle] = { _, _, _, _, _ in
             throw APIError.invalidResponse
         }
@@ -182,6 +191,18 @@ final class MockAPIClient: APIClientProtocol, @unchecked Sendable {
         get { read(\.updateDefaultLanguage) }
         set { write(\.updateDefaultLanguage, newValue) }
     }
+    var fetchCachedCandlesHandler: @Sendable (String, String, MarketTimeframe, Int) async throws -> CachedCandlesResponse {
+        get { read(\.fetchCachedCandles) }
+        set { write(\.fetchCachedCandles, newValue) }
+    }
+    var fetchAllConfiguredPairStatsHandler: @Sendable () async throws -> ListedCachedStatsResponse {
+        get { read(\.fetchAllConfiguredPairStats) }
+        set { write(\.fetchAllConfiguredPairStats, newValue) }
+    }
+    var fetchCacheHealthHandler: @Sendable () async throws -> CacheHealthResponse {
+        get { read(\.fetchCacheHealth) }
+        set { write(\.fetchCacheHealth, newValue) }
+    }
     var fetchCandlesHandler: @Sendable (String, String, MarketTimeframe, Int, Date?) async throws -> [MarketCandle] {
         get { read(\.fetchCandles) }
         set { write(\.fetchCandles, newValue) }
@@ -282,6 +303,23 @@ final class MockAPIClient: APIClientProtocol, @unchecked Sendable {
 
     func updateDefaultLanguage(_ language: String) async throws {
         try await updateDefaultLanguageHandler(language)
+    }
+
+    func fetchCachedCandles(
+        exchange: String,
+        symbol: String,
+        timeframe: MarketTimeframe,
+        limit: Int
+    ) async throws -> CachedCandlesResponse {
+        return try await fetchCachedCandlesHandler(exchange, symbol, timeframe, limit)
+    }
+
+    func fetchAllConfiguredPairStats() async throws -> ListedCachedStatsResponse {
+        return try await fetchAllConfiguredPairStatsHandler()
+    }
+
+    func fetchCacheHealth() async throws -> CacheHealthResponse {
+        return try await fetchCacheHealthHandler()
     }
 
     func fetchCandles(

@@ -393,5 +393,12 @@ enum ExpectedKeys {
         "market.related.relationshipType.exact",
         "market.related.relationshipType.derivative",
         "market.related.relationshipType.proxy",
+        "market.pairStats.label",
+        "market.pairStats.metric",
+        "market.pairStats.chipAriaLabel",
+        "market.cacheBanner.message",
+        "market.cacheBanner.sources.cache",
+        "market.cacheBanner.sources.derived",
+        "market.cacheBanner.sources.db",
         ]
 }

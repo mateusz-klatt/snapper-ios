@@ -57,6 +57,9 @@ final class APIClientSurfaceTests: XCTestCase {
         _ = try await apiClient.updateAlertDefault(command: Self.alertDefaultCommand())
         _ = try await apiClient.fetchRelatedInstruments(exchange: "polygon", symbol: "GLD")
         try await apiClient.updateDefaultLanguage("pl")
+        _ = try await apiClient.fetchCachedCandles(exchange: "polygon", symbol: "GLD", timeframe: .oneMinute, limit: 100)
+        _ = try await apiClient.fetchAllConfiguredPairStats()
+        _ = try await apiClient.fetchCacheHealth()
 
         let snapshots = requests.snapshots
         XCTAssertEqual(snapshots.map(\.method), [
@@ -64,7 +67,8 @@ final class APIClientSurfaceTests: XCTestCase {
             "POST", "POST", "POST", "POST",
             "GET", "GET", "GET", "POST", "GET", "GET",
             "GET", "GET", "PATCH", "GET", "PATCH",
-            "GET", "POST"
+            "GET", "POST",
+            "GET", "GET", "GET"
         ])
         XCTAssertEqual(snapshots.map(\.path), [
             "/api/orders",
@@ -89,8 +93,22 @@ final class APIClientSurfaceTests: XCTestCase {
             "/api/alert_defaults",
             "/api/alert_defaults",
             "/api/instruments/polygon/GLD/related",
-            "/api/auth/me/update"
+            "/api/auth/me/update",
+            "/api/candles/cache",
+            "/api/market/cache/stats/configured",
+            "/api/market/cache/health"
         ])
+        let cachedCandlesQuery = try XCTUnwrap(snapshots[23].query)
+        let cachedCandlesItems = URLComponents(string: "/?\(cachedCandlesQuery)")?.queryItems ?? []
+        XCTAssertEqual(
+            Set(cachedCandlesItems),
+            Set([
+                URLQueryItem(name: "instrument", value: "GLD"),
+                URLQueryItem(name: "exchange", value: "polygon"),
+                URLQueryItem(name: "timeframe", value: "1m"),
+                URLQueryItem(name: "limit", value: "100"),
+            ])
+        )
         XCTAssertNil(snapshots[14].query)
         XCTAssertEqual(snapshots[15].query, "limit=25&before=opaque%2B%2Fcursor")
 
@@ -231,7 +249,40 @@ final class APIClientSurfaceTests: XCTestCase {
         if method == "POST", path == "/api/auth/me/update" {
             return envelope(payload: userProfilePayload())
         }
+        if method == "GET", path == "/api/candles/cache" {
+            return envelope(payload: cachedCandlesPayload())
+        }
+        if method == "GET", path == "/api/market/cache/stats/configured" {
+            return envelope(payload: listedCachedStatsPayload())
+        }
+        if method == "GET", path == "/api/market/cache/health" {
+            return envelope(payload: cacheHealthPayload())
+        }
         return envelope(payload: executionPlanPayload())
+    }
+
+    private static func cachedCandlesPayload() -> [String: Any] {
+        return [
+            "candles": [],
+            "sample_count": 0,
+            "is_warm": true,
+            "source": "cache"
+        ]
+    }
+
+    private static func listedCachedStatsPayload() -> [String: Any] {
+        return [
+            "pairs": [],
+            "count": 0
+        ]
+    }
+
+    private static func cacheHealthPayload() -> [String: Any] {
+        return [
+            "instruments_cached": 0,
+            "pairs_cached": 0,
+            "persist_universe_size": 0
+        ]
     }
 
     private static func percentEncodedPath(for request: URLRequest) -> String {

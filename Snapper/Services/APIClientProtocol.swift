@@ -36,6 +36,14 @@ protocol APIClientProtocol: Sendable {
     func fetchExchanges() async throws -> [String]
     func fetchRelatedInstruments(exchange: String, symbol: String) async throws -> RelatedInstrumentsResponse
     func updateDefaultLanguage(_ language: String) async throws
+    func fetchCachedCandles(
+        exchange: String,
+        symbol: String,
+        timeframe: MarketTimeframe,
+        limit: Int
+    ) async throws -> CachedCandlesResponse
+    func fetchAllConfiguredPairStats() async throws -> ListedCachedStatsResponse
+    func fetchCacheHealth() async throws -> CacheHealthResponse
     func fetchCandles(
         exchange: String,
         instrument: String,
