@@ -17,7 +17,7 @@ enum BannerAssetClass: String {
 /// All view-rendering decisions that depend on data shape (asset-class
 /// normalization, sector slug, chip label fallback chain, description
 /// vs fallback template) live here so the SwiftUI body can stay thin
-/// and excluded from coverage. See ``ios/docs/architecture-mvvm.md``
+/// and excluded from coverage. See ``docs/architecture-mvvm.md``
 /// for the architecture rule.
 enum InstrumentDescriptionBannerLogic {
 

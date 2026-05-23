@@ -57,7 +57,7 @@ final class APIClientSurfaceTests: XCTestCase {
         _ = try await apiClient.updateAlertDefault(command: Self.alertDefaultCommand())
         _ = try await apiClient.fetchRelatedInstruments(exchange: "polygon", symbol: "GLD")
         try await apiClient.updateDefaultLanguage("pl")
-        _ = try await apiClient.fetchCachedCandles(exchange: "polygon", symbol: "GLD", timeframe: "1m", limit: 100)
+        _ = try await apiClient.fetchCachedCandles(exchange: "polygon", symbol: "GLD", timeframe: .oneMinute, limit: 100)
         _ = try await apiClient.fetchAllConfiguredPairStats()
         _ = try await apiClient.fetchCacheHealth()
 

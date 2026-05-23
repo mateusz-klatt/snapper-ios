@@ -427,7 +427,7 @@ final class MarketDataViewModel {
             async let metricsCachedTask = api.fetchCachedCandles(
                 exchange: exchange,
                 symbol: instrument.symbol,
-                timeframe: MarketTimeframe.oneHour.rawValue,
+                timeframe: .oneHour,
                 limit: 25
             )
             isLoadingRelated = true

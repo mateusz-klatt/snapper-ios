@@ -77,7 +77,7 @@ final class MockAPIClient: APIClientProtocol, @unchecked Sendable {
         var updateDefaultLanguage: @Sendable (String) async throws -> Void = { _ in
             throw APIError.invalidResponse
         }
-        var fetchCachedCandles: @Sendable (String, String, String, Int) async throws -> CachedCandlesResponse = { _, _, _, _ in
+        var fetchCachedCandles: @Sendable (String, String, MarketTimeframe, Int) async throws -> CachedCandlesResponse = { _, _, _, _ in
             throw APIError.invalidResponse
         }
         var fetchAllConfiguredPairStats: @Sendable () async throws -> ListedCachedStatsResponse = {
@@ -191,7 +191,7 @@ final class MockAPIClient: APIClientProtocol, @unchecked Sendable {
         get { read(\.updateDefaultLanguage) }
         set { write(\.updateDefaultLanguage, newValue) }
     }
-    var fetchCachedCandlesHandler: @Sendable (String, String, String, Int) async throws -> CachedCandlesResponse {
+    var fetchCachedCandlesHandler: @Sendable (String, String, MarketTimeframe, Int) async throws -> CachedCandlesResponse {
         get { read(\.fetchCachedCandles) }
         set { write(\.fetchCachedCandles, newValue) }
     }
@@ -308,7 +308,7 @@ final class MockAPIClient: APIClientProtocol, @unchecked Sendable {
     func fetchCachedCandles(
         exchange: String,
         symbol: String,
-        timeframe: String,
+        timeframe: MarketTimeframe,
         limit: Int
     ) async throws -> CachedCandlesResponse {
         return try await fetchCachedCandlesHandler(exchange, symbol, timeframe, limit)

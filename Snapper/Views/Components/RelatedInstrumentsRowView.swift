@@ -4,7 +4,7 @@ import SwiftUI
 ///
 /// Cluster header composition + chip-suffix formatting + empty-state
 /// rendering all live here so the SwiftUI body stays thin and excluded
-/// from coverage. See ``ios/docs/architecture-mvvm.md`` for the
+/// from coverage. See ``docs/architecture-mvvm.md`` for the
 /// architecture rule.
 enum RelatedInstrumentsRowLogic {
 

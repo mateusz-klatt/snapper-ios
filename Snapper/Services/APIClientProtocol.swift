@@ -39,7 +39,7 @@ protocol APIClientProtocol: Sendable {
     func fetchCachedCandles(
         exchange: String,
         symbol: String,
-        timeframe: String,
+        timeframe: MarketTimeframe,
         limit: Int
     ) async throws -> CachedCandlesResponse
     func fetchAllConfiguredPairStats() async throws -> ListedCachedStatsResponse

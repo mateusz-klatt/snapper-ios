@@ -352,19 +352,19 @@ final class APIClient: Sendable, APIClientProtocol {
     /// OHLCV shape as ``fetchCandles`` but the envelope also carries
     /// cache-warming metadata (``sample_count`` / ``is_warm`` /
     /// ``source``) the metrics surfaces use to render a warming
-    /// banner. Caller passes ``timeframe`` as the raw rawValue
-    /// string (e.g. ``"1m"``) to mirror the web ``getCachedCandles``
-    /// client + backend route contract.
+    /// banner. Mirrors the web ``getCachedCandles`` client + backend
+    /// route contract; the ``timeframe`` rawValue (``"1m"`` /
+    /// ``"1h"`` / …) flows through verbatim as the query parameter.
     func fetchCachedCandles(
         exchange: String,
         symbol: String,
-        timeframe: String,
+        timeframe: MarketTimeframe,
         limit: Int
     ) async throws -> CachedCandlesResponse {
         let items = [
             QueryParameter(name: "instrument", value: symbol),
             QueryParameter(name: "exchange", value: exchange),
-            QueryParameter(name: "timeframe", value: timeframe),
+            QueryParameter(name: "timeframe", value: timeframe.rawValue),
             QueryParameter(name: "limit", value: String(limit)),
         ]
         let path = "/candles/cache\(Self.querySuffix(items))"
