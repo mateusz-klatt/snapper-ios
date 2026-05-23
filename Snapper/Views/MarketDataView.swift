@@ -9,6 +9,7 @@ import SwiftUI
 /// ``Permission.READ_MARKET_DATA`` since the entry already gates.
 struct MarketDataView: View {
     @EnvironmentObject var webSocketManager: WebSocketManager
+    @Environment(AppState.self) private var appState
     @State private var vm: MarketDataViewModel?
 
     var body: some View {
@@ -39,6 +40,12 @@ struct MarketDataView: View {
         ScrollView {
             VStack(alignment: .leading, spacing: 16) {
                 MarketSelectorBar(vm: vm)
+
+                InstrumentDescriptionBannerView(
+                    underlying: vm.relatedResponse?.payload.underlying,
+                    isLoading: vm.isLoadingRelated,
+                    language: appState.locale.catalogLanguage
+                )
 
                 MarketMetricGrid(metrics: vm.metrics)
 

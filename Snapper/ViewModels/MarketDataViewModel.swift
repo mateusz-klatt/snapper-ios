@@ -3,6 +3,14 @@ import Foundation
 import Observation
 import os
 
+/// Failure surface for ``MarketDataViewModel.selectMarket(exchange:symbol:)``
+/// — the cross-exchange navigation entry point used by the related-
+/// instruments row. Distinct from ``APIError`` because the failure is
+/// data-shape ("instrument not in catalog"), not network/HTTP.
+enum MarketSelectionError: Equatable {
+    case instrumentNotFound(exchange: String, symbol: String)
+}
+
 /// ViewModel for ``MarketDataView`` — owns exchange/instrument/
 /// timeframe selection, the candle snapshot, WS-driven live
 /// merges, and the 24h metric set.
@@ -44,6 +52,25 @@ final class MarketDataViewModel {
     var loadError: APIError?
     var showInstrumentPicker: Bool = false
 
+    /// Related-instruments envelope (underlying + sector + grouped
+    /// derivatives) returned by ``GET /api/instruments/.../related``.
+    /// Populated alongside the chart/metrics fetch in
+    /// ``fetchChartAndMetrics`` and refreshed when the user changes
+    /// locale (so the description repaints in the new language).
+    /// ``nil`` until the first fetch resolves.
+    var relatedResponse: RelatedInstrumentsResponse?
+
+    /// Mirrors ``isLoading`` for the related-instruments fetch so the
+    /// banner can show a skeleton independently of the chart fetch.
+    var isLoadingRelated: Bool = false
+
+    /// Surfaces failures from ``selectMarket(exchange:symbol:)`` —
+    /// specifically the "instrument not in catalog" case the related-
+    /// instruments row can hit when the user taps a derivative chip
+    /// whose target instrument no longer exists on the destination
+    /// venue. Cleared on the next successful navigation.
+    var marketSelectionError: MarketSelectionError?
+
     @ObservationIgnored private var selectionGeneration: Int = 0
     @ObservationIgnored private var pendingCandles: [MarketCandle] = []
     @ObservationIgnored private var lastEmittedAt: Date = .distantPast
@@ -59,6 +86,13 @@ final class MarketDataViewModel {
     /// frame (which would violate the leading-edge throttle bound
     /// AND leak completed-Task storage into ``observationTasks``).
     @ObservationIgnored private var pendingFlushTask: Task<Void, Never>?
+    /// Single-flight handle for the locale-persist refetch task.
+    /// Each `.appStateLocaleDidPersist` notification cancels any
+    /// in-flight refetch and starts a new one — without this, a
+    /// rapid locale flip (en → pl → de) could let the en refetch
+    /// resolve after the pl refetch and overwrite the banner with
+    /// the older language.
+    @ObservationIgnored private var pendingRelatedRefetchTask: Task<Void, Never>?
     @ObservationIgnored private let api: APIClientProtocol
     @ObservationIgnored private weak var webSocketManager: WebSocketManager?
     @ObservationIgnored private let logger = AppLogger.make(category: "MarketDataViewModel")
@@ -76,6 +110,7 @@ final class MarketDataViewModel {
     func start() async {
         startObservingFrames()
         startObservingConnectionState()
+        startObservingLocalePersistNotification()
         await loadExchanges()
         await applyDevAutoSelectIfRequested()
     }
@@ -111,6 +146,8 @@ final class MarketDataViewModel {
         observationTasks.removeAll()
         pendingFlushTask?.cancel()
         pendingFlushTask = nil
+        pendingRelatedRefetchTask?.cancel()
+        pendingRelatedRefetchTask = nil
         unsubscribeCurrentSelection()
     }
 
@@ -137,25 +174,57 @@ final class MarketDataViewModel {
     }
 
     func selectExchange(_ exchange: String) async {
+        resetSelectionStateForExchangeChange(to: exchange)
+        await loadInstruments(for: exchange, autoPickDefault: true)
+    }
+
+    /// Reset per-instrument state for a venue change.
+    ///
+    /// Mutates: ``selectedExchange``, ``selectedInstrument``,
+    /// ``instruments`` (cleared so the picker does not briefly list
+    /// the previous venue's catalog while the new one loads),
+    /// ``candles`` / ``pendingCandles``, ``metrics``,
+    /// ``relatedResponse`` (so the previous market's banner does not
+    /// flash through while the new fetch is in flight), ``isReady``,
+    /// ``loadError``, ``showInstrumentPicker`` (closed so a stale
+    /// sheet cannot survive the transition). Bumps
+    /// ``selectionGeneration`` so any in-flight fetches drop their
+    /// results when they resolve.
+    private func resetSelectionStateForExchangeChange(to exchange: String) {
         unsubscribeCurrentSelection()
         selectedExchange = exchange
         selectedInstrument = nil
+        instruments = []
         candles.removeAll()
         pendingCandles.removeAll()
         metrics = .empty
+        relatedResponse = nil
         isReady = false
         loadError = nil
+        showInstrumentPicker = false
         selectionGeneration &+= 1
-        await loadInstruments(for: exchange)
     }
 
-    private func loadInstruments(for exchange: String) async {
+    /// Load the instrument catalog for a venue.
+    ///
+    /// ``autoPickDefault`` controls whether the post-fetch hook
+    /// auto-selects a default instrument (BTC-USD / BTC-USD-PERP /
+    /// first capable). Targeted navigation via ``selectMarket`` sets
+    /// this to ``false`` so the catalog is loaded but the visible
+    /// selection is not committed until the caller resolves and
+    /// selects the requested symbol — without that hook, a tap on a
+    /// cross-exchange chip would auto-pick the destination venue's
+    /// default instrument first (visible flash + wasted chart fetch)
+    /// before re-selecting the actual target.
+    private func loadInstruments(for exchange: String, autoPickDefault: Bool) async {
         let generation = selectionGeneration
         do {
             let fetched = try await api.fetchInstruments(exchange: exchange)
             guard generation == selectionGeneration else { return }
             instruments = fetched.filter { $0.canMarketData }
-            await autoPickDefaultInstrumentIfNeeded()
+            if autoPickDefault {
+                await autoPickDefaultInstrumentIfNeeded()
+            }
         } catch let error as APIError {
             guard generation == selectionGeneration else { return }
             loadError = error
@@ -189,12 +258,67 @@ final class MarketDataViewModel {
         candles.removeAll()
         pendingCandles.removeAll()
         metrics = .empty
+        /// Clear the previous market's banner data before the new
+        /// fetch starts so the chip/ticker/name/description does not
+        /// flash through during navigation. The skeleton path picks
+        /// up while ``isLoadingRelated`` is true.
+        relatedResponse = nil
         isReady = false
         loadError = nil
         showInstrumentPicker = false
         selectionGeneration &+= 1
         subscribeCurrentSelection()
         await fetchChartAndMetrics()
+    }
+
+    /// Cross-exchange navigation entry point used by the related-
+    /// instruments row. For a cross-exchange tap, probes the
+    /// destination catalog BEFORE mutating any visible state so a
+    /// miss does not visibly wipe the user's current selection (the
+    /// user only sees the venue switch when the target is confirmed
+    /// to exist there). Auto-pick is intentionally skipped on the
+    /// commit path so the venue change does not briefly fetch chart/
+    /// metrics/related for the destination venue's default
+    /// instrument (e.g. BTC-USD on kraken) before re-selecting the
+    /// actual target. Falls through with
+    /// ``marketSelectionError = .instrumentNotFound`` on miss; the
+    /// previous selection is preserved in both same-exchange and
+    /// cross-exchange miss paths.
+    func selectMarket(exchange: String, symbol: String) async {
+        if exchange != selectedExchange {
+            let candidates: [InstrumentDetailData]
+            do {
+                let fetched = try await api.fetchInstruments(exchange: exchange)
+                candidates = fetched.filter { $0.canMarketData }
+            } catch {
+                marketSelectionError = .instrumentNotFound(exchange: exchange, symbol: symbol)
+                logger.warning(
+                    "selectMarket: destination catalog fetch failed — exchange=\(exchange, privacy: .public) symbol=\(symbol, privacy: .public) error=\(String(describing: error), privacy: .public)"
+                )
+                return
+            }
+            guard let target = candidates.first(where: { $0.symbol == symbol }) else {
+                marketSelectionError = .instrumentNotFound(exchange: exchange, symbol: symbol)
+                logger.warning(
+                    "selectMarket: instrument not found in destination catalog — exchange=\(exchange, privacy: .public) symbol=\(symbol, privacy: .public)"
+                )
+                return
+            }
+            resetSelectionStateForExchangeChange(to: exchange)
+            instruments = candidates
+            marketSelectionError = nil
+            await selectInstrument(target)
+            return
+        }
+        guard let target = instruments.first(where: { $0.symbol == symbol }) else {
+            marketSelectionError = .instrumentNotFound(exchange: exchange, symbol: symbol)
+            logger.warning(
+                "selectMarket: instrument not found in catalog — exchange=\(exchange, privacy: .public) symbol=\(symbol, privacy: .public)"
+            )
+            return
+        }
+        marketSelectionError = nil
+        await selectInstrument(target)
     }
 
     func selectTimeframe(_ timeframe: MarketTimeframe) async {
@@ -226,7 +350,10 @@ final class MarketDataViewModel {
             /// guard a fast selection switch could leave the screen
             /// stuck in a `ProgressView` when the older fetch
             /// resolves after the newer one.
-            if generation == selectionGeneration { isLoading = false }
+            if generation == selectionGeneration {
+                isLoading = false
+                isLoadingRelated = false
+            }
         }
         do {
             async let chartCandlesTask = api.fetchCandles(
@@ -243,6 +370,11 @@ final class MarketDataViewModel {
                 limit: 25,
                 asOf: nil
             )
+            isLoadingRelated = true
+            async let relatedTask = api.fetchRelatedInstruments(
+                exchange: exchange,
+                symbol: instrument.symbol
+            )
             let chartCandles = try await chartCandlesTask
             let metricsCandles = try await metricsCandlesTask
             guard generation == selectionGeneration else { return }
@@ -252,6 +384,23 @@ final class MarketDataViewModel {
                 lastTick: lastTickForCurrentSelection()
             )
             isReady = true
+            /// Related-instruments fetch failure is non-fatal: the chart
+            /// + metrics surfaces stay live; only the banner skeleton
+            /// holds. Log loudly so an oncall reading the device log
+            /// can correlate "no description visible" reports.
+            do {
+                let related = try await relatedTask
+                guard generation == selectionGeneration else { return }
+                relatedResponse = related
+            } catch {
+                guard generation == selectionGeneration else { return }
+                /// Drop any stale (previous-market) response on failure
+                /// so the banner reverts to skeleton/empty rather than
+                /// keeping the prior chip/ticker/description visible
+                /// indefinitely.
+                relatedResponse = nil
+                logger.warning("fetchRelatedInstruments failed: \(String(describing: error), privacy: .public)")
+            }
         } catch let error as APIError {
             guard generation == selectionGeneration else { return }
             loadError = error
@@ -389,6 +538,69 @@ final class MarketDataViewModel {
                 }
             }
         })
+    }
+
+    /// Subscribe to ``Notification.Name.appStateLocaleDidPersist`` —
+    /// posted by ``AppState.syncLocaleToBackend`` after the backend
+    /// accepts a new ``default_language``. On receipt, re-fetch the
+    /// related-instruments envelope for the current selection so the
+    /// banner description repaints in the new language without
+    /// requiring the user to re-navigate.
+    ///
+    /// Subscription is filtered to ``object: nil`` so any ``AppState``
+    /// instance can fire the refresh (matters for previews/tests that
+    /// construct their own ``AppState``). The observer task is
+    /// cancelled in ``stop()``.
+    ///
+    /// Latest-wins via ``pendingRelatedRefetchTask``: each notification
+    /// cancels any in-flight refetch before scheduling its own. Without
+    /// this, a rapid locale flip can race so the older request resolves
+    /// after the newer one and repaints the banner with the stale
+    /// language.
+    private func startObservingLocalePersistNotification() {
+        observationTasks.append(Task { @MainActor [weak self] in
+            let stream = NotificationCenter.default.notifications(
+                named: .appStateLocaleDidPersist
+            )
+            for await _ in stream {
+                guard let self else { return }
+                self.pendingRelatedRefetchTask?.cancel()
+                self.pendingRelatedRefetchTask = Task { @MainActor [weak self] in
+                    await self?.refetchRelatedForCurrentSelection()
+                }
+            }
+        })
+    }
+
+    /// Re-fetch the related-instruments envelope for whatever is
+    /// currently selected. No-op when no selection is set. Uses the
+    /// same generation-token discipline as
+    /// ``fetchChartAndMetrics`` so a stale fetch that lands after a
+    /// new selection is silently discarded.
+    private func refetchRelatedForCurrentSelection() async {
+        guard let exchange = selectedExchange,
+              let instrument = selectedInstrument else { return }
+        let generation = selectionGeneration
+        isLoadingRelated = true
+        defer {
+            if generation == selectionGeneration {
+                isLoadingRelated = false
+            }
+        }
+        do {
+            let response = try await api.fetchRelatedInstruments(
+                exchange: exchange,
+                symbol: instrument.symbol
+            )
+            guard generation == selectionGeneration else { return }
+            if Task.isCancelled { return }
+            relatedResponse = response
+        } catch {
+            guard generation == selectionGeneration else { return }
+            if Task.isCancelled { return }
+            relatedResponse = nil
+            logger.warning("refetchRelatedForCurrentSelection failed: \(String(describing: error), privacy: .public)")
+        }
     }
 
     private func handleIncomingCandle(_ frame: CandleData) {

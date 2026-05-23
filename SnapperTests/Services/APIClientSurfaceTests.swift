@@ -55,13 +55,16 @@ final class APIClientSurfaceTests: XCTestCase {
         _ = try await apiClient.updateDevicePref(devicePublicId: "device/1", command: Self.devicePrefCommand())
         _ = try await apiClient.fetchAlertDefaults()
         _ = try await apiClient.updateAlertDefault(command: Self.alertDefaultCommand())
+        _ = try await apiClient.fetchRelatedInstruments(exchange: "polygon", symbol: "GLD")
+        try await apiClient.updateDefaultLanguage("pl")
 
         let snapshots = requests.snapshots
         XCTAssertEqual(snapshots.map(\.method), [
             "GET", "GET", "GET", "GET", "GET", "GET",
             "POST", "POST", "POST", "POST",
             "GET", "GET", "GET", "POST", "GET", "GET",
-            "GET", "GET", "PATCH", "GET", "PATCH"
+            "GET", "GET", "PATCH", "GET", "PATCH",
+            "GET", "POST"
         ])
         XCTAssertEqual(snapshots.map(\.path), [
             "/api/orders",
@@ -84,7 +87,9 @@ final class APIClientSurfaceTests: XCTestCase {
             "/api/devices/device%2F1/prefs",
             "/api/devices/device%2F1/prefs",
             "/api/alert_defaults",
-            "/api/alert_defaults"
+            "/api/alert_defaults",
+            "/api/instruments/polygon/GLD/related",
+            "/api/auth/me/update"
         ])
         XCTAssertNil(snapshots[14].query)
         XCTAssertEqual(snapshots[15].query, "limit=25&before=opaque%2B%2Fcursor")
@@ -103,6 +108,13 @@ final class APIClientSurfaceTests: XCTestCase {
         let prefPayload = try XCTUnwrap(prefBody["payload"] as? [String: Any])
         XCTAssertEqual(prefPayload["alert_type"] as? String, "order_fill_full")
         XCTAssertEqual(prefPayload["mute_until"] as? String, "1970-01-01T00:00:00Z")
+
+        let langBody = try XCTUnwrap(snapshots[22].jsonBody)
+        XCTAssertEqual(langBody["type"] as? String, "update_auth_me_request")
+        XCTAssertNotNil(langBody["public_id"] as? String)
+        XCTAssertNotNil(langBody["session_id"] as? String)
+        let langPayload = try XCTUnwrap(langBody["payload"] as? [String: Any])
+        XCTAssertEqual(langPayload["default_language"] as? String, "pl")
     }
 
     func testServerErrorDetailAndPlainStatusErrors() async throws {
@@ -212,6 +224,12 @@ final class APIClientSurfaceTests: XCTestCase {
         }
         if method == "PATCH", path == "/api/alert_defaults" {
             return envelope(payload: alertDefaultPayload())
+        }
+        if method == "GET", path == "/api/instruments/polygon/GLD/related" {
+            return relatedInstrumentsEnvelope()
+        }
+        if method == "POST", path == "/api/auth/me/update" {
+            return envelope(payload: userProfilePayload())
         }
         return envelope(payload: executionPlanPayload())
     }
@@ -349,6 +367,44 @@ final class APIClientSurfaceTests: XCTestCase {
             "alert_type": "order_fill_full",
             "enabled": true,
             "min_priority": "medium"
+        ]
+    }
+
+    private static func userProfilePayload() -> [String: Any] {
+        return [
+            "sequence_id": 1,
+            "public_id": "user-1",
+            "timestamp": "2026-01-01T00:00:00Z",
+            "session_id": "session-1",
+            "username": "viewer",
+            "role": "viewer",
+            "is_active": true,
+            "created_at": "2026-01-01T00:00:00Z",
+            "default_language": "pl"
+        ]
+    }
+
+    private static func relatedInstrumentsEnvelope() -> [String: Any] {
+        return [
+            "sequence_id": 1,
+            "public_id": "related-1",
+            "timestamp": "2026-01-01T00:00:00Z",
+            "session_id": "session-1",
+            "payload": [
+                "selected": [
+                    "exchange": "polygon",
+                    "native_symbol": "GLD"
+                ],
+                "underlying": [
+                    "public_id": "underlying-1",
+                    "ticker": "GLD",
+                    "name": "SPDR Gold Trust",
+                    "asset_class": "commodity",
+                    "sector": "Precious Metals",
+                    "description": "Test description."
+                ],
+                "groups": []
+            ]
         ]
     }
 
