@@ -387,5 +387,11 @@ enum ExpectedKeys {
         "market.sector.us-large-cap",
         "market.sector.us-small-cap",
         "market.sector.us-tech",
+        "market.related.labelSeparator",
+        "market.related.exchangeSeparator",
+        "market.related.empty",
+        "market.related.relationshipType.exact",
+        "market.related.relationshipType.derivative",
+        "market.related.relationshipType.proxy",
         ]
 }

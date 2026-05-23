@@ -47,6 +47,16 @@ struct MarketDataView: View {
                     language: appState.locale.catalogLanguage
                 )
 
+                RelatedInstrumentsRowView(
+                    relatedResponse: vm.relatedResponse,
+                    selectedExchange: vm.selectedExchange,
+                    selectedSymbol: vm.selectedInstrument?.symbol,
+                    language: appState.locale.catalogLanguage,
+                    onSelect: { exchange, nativeSymbol in
+                        Task { await vm.selectMarket(exchange: exchange, symbol: nativeSymbol) }
+                    }
+                )
+
                 MarketMetricGrid(metrics: vm.metrics)
 
                 CandlestickChartView(candles: vm.candles, timeframe: vm.selectedTimeframe)
