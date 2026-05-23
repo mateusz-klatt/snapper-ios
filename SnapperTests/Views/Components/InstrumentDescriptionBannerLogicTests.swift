@@ -4,17 +4,11 @@ import XCTest
 @MainActor
 final class InstrumentDescriptionBannerLogicTests: XCTestCase {
 
-    override func setUp() {
-        super.setUp()
-        /// Pin to US locale so the catalog-resolution helpers fall
-        /// through deterministically. ``AppState.shared`` resolves
-        /// ``locale`` from system preferred languages on first launch,
-        /// which can land on ``.ie`` (catalog language ``.ga``) on a
-        /// freshly-booted simulator — that catalog has no entries and
-        /// would cause every ``LocaleStrings.localized`` lookup to
-        /// miss in a way that masks the test intent.
-        AppState.shared.locale = .us
-    }
+    /// The logic helpers all take an explicit ``CatalogLanguage`` so
+    /// these tests do not depend on ``AppState.shared.locale`` —
+    /// mutating the shared instance would also schedule a backend
+    /// locale-sync task and make the suite order-dependent. Each
+    /// test passes its own ``lang:`` argument to the helper.
 
     private func makeUnderlying(
         name: String = "SPDR Gold Trust",
@@ -69,19 +63,6 @@ final class InstrumentDescriptionBannerLogicTests: XCTestCase {
             InstrumentDescriptionBannerLogic.slugifySector("us-tech"),
             "us-tech"
         )
-    }
-
-    /// Until the ``market.sector.*`` catalog entries land (next step
-    /// adds the port script + xcstrings regeneration), the
-    /// localized-sector lookup misses and the helper falls through
-    /// to step 2 (raw sector string). Asserts the step-2 path.
-    func testChipLabelFallsBackToRawSectorWhenCatalogMisses() {
-        let label = InstrumentDescriptionBannerLogic.chipLabel(
-            sector: "Precious Metals",
-            assetClass: .commodity,
-            lang: .en
-        )
-        XCTAssertEqual(label, "Precious Metals")
     }
 
     func testChipLabelUnknownSectorReturnsRawString() {

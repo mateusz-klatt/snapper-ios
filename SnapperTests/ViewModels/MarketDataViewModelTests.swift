@@ -369,6 +369,40 @@ final class MarketDataViewModelTests: XCTestCase {
         )
     }
 
+    func testSelectMarketCrossExchangeMissPreservesPriorSelection() async {
+        let btc = makeInstrument(symbol: "BTC-USD", exchange: "kraken")
+        let gld = makeInstrument(symbol: "GLD", exchange: "polygon")
+        mockAPI.fetchExchangesHandler = { ["kraken", "polygon"] }
+        mockAPI.fetchInstrumentsHandler = { exchange in
+            return exchange == "kraken" ? [btc] : [gld]
+        }
+        mockAPI.fetchCandlesHandler = { _, _, _, _, _ in [] }
+        mockAPI.fetchRelatedInstrumentsHandler = { exchange, symbol in
+            return Self.makeRelatedResponse(exchange: exchange, symbol: symbol)
+        }
+        let viewModel = makeViewModel()
+        await viewModel.loadExchanges()
+        XCTAssertEqual(viewModel.selectedExchange, "kraken")
+        XCTAssertEqual(viewModel.selectedInstrument?.symbol, "BTC-USD")
+
+        await viewModel.selectMarket(exchange: "polygon", symbol: "NOTREAL")
+
+        XCTAssertEqual(
+            viewModel.marketSelectionError,
+            .instrumentNotFound(exchange: "polygon", symbol: "NOTREAL")
+        )
+        XCTAssertEqual(
+            viewModel.selectedExchange,
+            "kraken",
+            "Cross-exchange miss must NOT commit the venue switch."
+        )
+        XCTAssertEqual(
+            viewModel.selectedInstrument?.symbol,
+            "BTC-USD",
+            "Cross-exchange miss must preserve the prior instrument."
+        )
+    }
+
     func testSelectMarketRecoveryClearsError() async {
         let gld = makeInstrument(symbol: "GLD", exchange: "polygon")
         mockAPI.fetchExchangesHandler = { ["polygon"] }

@@ -181,21 +181,27 @@ final class MarketDataViewModel {
     /// Reset per-instrument state for a venue change.
     ///
     /// Mutates: ``selectedExchange``, ``selectedInstrument``,
+    /// ``instruments`` (cleared so the picker does not briefly list
+    /// the previous venue's catalog while the new one loads),
     /// ``candles`` / ``pendingCandles``, ``metrics``,
     /// ``relatedResponse`` (so the previous market's banner does not
     /// flash through while the new fetch is in flight), ``isReady``,
-    /// ``loadError``. Bumps ``selectionGeneration`` so any in-flight
-    /// fetches drop their results when they resolve.
+    /// ``loadError``, ``showInstrumentPicker`` (closed so a stale
+    /// sheet cannot survive the transition). Bumps
+    /// ``selectionGeneration`` so any in-flight fetches drop their
+    /// results when they resolve.
     private func resetSelectionStateForExchangeChange(to exchange: String) {
         unsubscribeCurrentSelection()
         selectedExchange = exchange
         selectedInstrument = nil
+        instruments = []
         candles.removeAll()
         pendingCandles.removeAll()
         metrics = .empty
         relatedResponse = nil
         isReady = false
         loadError = nil
+        showInstrumentPicker = false
         selectionGeneration &+= 1
     }
 
@@ -266,22 +272,43 @@ final class MarketDataViewModel {
     }
 
     /// Cross-exchange navigation entry point used by the related-
-    /// instruments row. If ``exchange`` differs from the current
-    /// selection, refreshes the destination catalog WITHOUT triggering
-    /// the default-instrument auto-pick — auto-picking would fetch
-    /// chart/metrics/related for the venue's default instrument
-    /// (e.g. BTC-USD on kraken) and flash that on screen before the
-    /// caller's actual target is selected. Once the catalog is loaded,
-    /// the helper resolves the requested symbol in ``instruments`` and
-    /// commits the selection. Falls through with
-    /// ``marketSelectionError = .instrumentNotFound`` when the target
-    /// symbol is not in the destination catalog; in that case the
-    /// previous selection (if any) is preserved so the user can
-    /// recover by tapping a different chip.
+    /// instruments row. For a cross-exchange tap, probes the
+    /// destination catalog BEFORE mutating any visible state so a
+    /// miss does not visibly wipe the user's current selection (the
+    /// user only sees the venue switch when the target is confirmed
+    /// to exist there). Auto-pick is intentionally skipped on the
+    /// commit path so the venue change does not briefly fetch chart/
+    /// metrics/related for the destination venue's default
+    /// instrument (e.g. BTC-USD on kraken) before re-selecting the
+    /// actual target. Falls through with
+    /// ``marketSelectionError = .instrumentNotFound`` on miss; the
+    /// previous selection is preserved in both same-exchange and
+    /// cross-exchange miss paths.
     func selectMarket(exchange: String, symbol: String) async {
         if exchange != selectedExchange {
+            let candidates: [InstrumentDetailData]
+            do {
+                let fetched = try await api.fetchInstruments(exchange: exchange)
+                candidates = fetched.filter { $0.canMarketData }
+            } catch {
+                marketSelectionError = .instrumentNotFound(exchange: exchange, symbol: symbol)
+                logger.warning(
+                    "selectMarket: destination catalog fetch failed — exchange=\(exchange, privacy: .public) symbol=\(symbol, privacy: .public) error=\(String(describing: error), privacy: .public)"
+                )
+                return
+            }
+            guard let target = candidates.first(where: { $0.symbol == symbol }) else {
+                marketSelectionError = .instrumentNotFound(exchange: exchange, symbol: symbol)
+                logger.warning(
+                    "selectMarket: instrument not found in destination catalog — exchange=\(exchange, privacy: .public) symbol=\(symbol, privacy: .public)"
+                )
+                return
+            }
             resetSelectionStateForExchangeChange(to: exchange)
-            await loadInstruments(for: exchange, autoPickDefault: false)
+            instruments = candidates
+            marketSelectionError = nil
+            await selectInstrument(target)
+            return
         }
         guard let target = instruments.first(where: { $0.symbol == symbol }) else {
             marketSelectionError = .instrumentNotFound(exchange: exchange, symbol: symbol)
