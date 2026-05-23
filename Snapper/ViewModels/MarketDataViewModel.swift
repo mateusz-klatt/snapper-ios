@@ -71,6 +71,23 @@ final class MarketDataViewModel {
     /// venue. Cleared on the next successful navigation.
     var marketSelectionError: MarketSelectionError?
 
+    /// Cache-warming snapshot reflecting the METRICS cache endpoint
+    /// (``GET /api/candles/cache?timeframe=1h&limit=25``) — the
+    /// surface the 24h metric grid above the chart consumes. NOT
+    /// the chart-candles cache state; the chart still calls
+    /// ``GET /api/candles`` directly. The banner therefore tells
+    /// the operator "the data infrastructure is still building the
+    /// metrics dataset"; it does not represent the chart's data
+    /// freshness. Placed inside the chart container per the web
+    /// reference layout where the same visual hierarchy holds.
+    var cacheState: CacheStateSnapshot?
+
+    /// Configured-pair cointegration stats fetched once per session
+    /// from ``GET /api/market/cache/stats/configured``. The
+    /// ``PairStatsRowView`` filters this to the chips relevant to
+    /// the current selection via ``filteredPairChips``.
+    var pairStats: ListedCachedStatsResponse?
+
     @ObservationIgnored private var selectionGeneration: Int = 0
     @ObservationIgnored private var pendingCandles: [MarketCandle] = []
     @ObservationIgnored private var lastEmittedAt: Date = .distantPast
@@ -121,7 +138,33 @@ final class MarketDataViewModel {
         startObservingConnectionState()
         startObservingLocalePersistNotification()
         await loadExchanges()
+        await loadConfiguredPairStats()
         await applyDevAutoSelectIfRequested()
+    }
+
+    /// Fetch the configured-pair cointegration stats list ONCE per
+    /// session and cache in ``pairStats``. Failures log + leave the
+    /// row hidden — non-fatal because the rest of the screen does
+    /// not depend on it.
+    private func loadConfiguredPairStats() async {
+        do {
+            pairStats = try await api.fetchAllConfiguredPairStats()
+        } catch {
+            logger.warning("fetchAllConfiguredPairStats failed: \(String(describing: error), privacy: .public)")
+        }
+    }
+
+    /// View-model shape for one pair-stats chip the row renders.
+    /// Computed lazily from ``pairStats`` + the current selection.
+    var filteredPairChips: [PairStatsChipModel] {
+        guard let pairs = pairStats?.payload.pairs,
+              let exchange = selectedExchange,
+              let symbol = selectedInstrument?.symbol
+        else {
+            return []
+        }
+        let selfKey = "\(exchange):\(symbol)"
+        return PairStatsRowLogic.buildChips(pairs: pairs, selfKey: selfKey)
     }
 
     /// DEBUG-only auto-selection hook. When the simulator is
@@ -208,6 +251,7 @@ final class MarketDataViewModel {
         pendingCandles.removeAll()
         metrics = .empty
         relatedResponse = nil
+        cacheState = nil
         isReady = false
         loadError = nil
         showInstrumentPicker = false
@@ -267,11 +311,13 @@ final class MarketDataViewModel {
         candles.removeAll()
         pendingCandles.removeAll()
         metrics = .empty
-        /// Clear the previous market's banner data before the new
-        /// fetch starts so the chip/ticker/name/description does not
-        /// flash through during navigation. The skeleton path picks
-        /// up while ``isLoadingRelated`` is true.
+        /// Clear the previous market's banner data + cache state
+        /// before the new fetch starts so the chip/ticker/name/
+        /// description + warming banner do not flash through during
+        /// navigation. The skeleton path picks up while
+        /// ``isLoadingRelated`` is true.
         relatedResponse = nil
+        cacheState = nil
         isReady = false
         loadError = nil
         showInstrumentPicker = false
@@ -344,6 +390,7 @@ final class MarketDataViewModel {
         selectedTimeframe = timeframe
         candles.removeAll()
         pendingCandles.removeAll()
+        cacheState = nil
         isReady = false
         loadError = nil
         selectionGeneration &+= 1
@@ -377,12 +424,11 @@ final class MarketDataViewModel {
                 limit: 100,
                 asOf: nil
             )
-            async let metricsCandlesTask = api.fetchCandles(
+            async let metricsCachedTask = api.fetchCachedCandles(
                 exchange: exchange,
-                instrument: instrument.symbol,
-                timeframe: .oneHour,
-                limit: 25,
-                asOf: nil
+                symbol: instrument.symbol,
+                timeframe: MarketTimeframe.oneHour.rawValue,
+                limit: 25
             )
             isLoadingRelated = true
             async let relatedTask = api.fetchRelatedInstruments(
@@ -390,14 +436,33 @@ final class MarketDataViewModel {
                 symbol: instrument.symbol
             )
             let chartCandles = try await chartCandlesTask
-            let metricsCandles = try await metricsCandlesTask
             guard generation == selectionGeneration else { return }
             mergeBufferIntoSnapshot(snapshot: chartCandles)
-            metrics = computeMetrics(
-                from: metricsCandles,
-                lastTick: lastTickForCurrentSelection()
-            )
             isReady = true
+            /// Metrics-candles + cache-state come from a separate
+            /// cached-endpoint. Failure is non-fatal: the chart
+            /// surface above already populated, so an outage on the
+            /// metrics/cache service must NOT blank the screen.
+            /// Swallow the error after logging; the metric grid
+            /// falls back to its ``.empty`` initial state and the
+            /// warming banner stays hidden (``cacheState == nil``).
+            do {
+                let metricsCachedEnvelope = try await metricsCachedTask
+                guard generation == selectionGeneration else { return }
+                let metricsCandles = metricsCachedEnvelope.payload.candles.compactMap { $0.toMarketCandle() }
+                metrics = computeMetrics(
+                    from: metricsCandles,
+                    lastTick: lastTickForCurrentSelection()
+                )
+                cacheState = CacheStateSnapshot(
+                    isWarm: metricsCachedEnvelope.payload.isWarm,
+                    sampleCount: metricsCachedEnvelope.payload.sampleCount,
+                    source: metricsCachedEnvelope.payload.source
+                )
+            } catch {
+                guard generation == selectionGeneration else { return }
+                logger.warning("fetchCachedCandles (metrics) failed: \(String(describing: error), privacy: .public)")
+            }
             /// Related-instruments fetch failure is non-fatal: the chart
             /// + metrics surfaces stay live; only the banner skeleton
             /// holds. Log loudly so an oncall reading the device log
