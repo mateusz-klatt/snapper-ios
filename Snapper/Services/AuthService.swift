@@ -29,12 +29,26 @@ class AuthService: ObservableObject {
     /// refresh itself returns 401.
     private var refreshTask: Task<String?, Never>?
 
+    private let appStateProvider: @Sendable @MainActor () -> AppState
+
+    /// Initialize the auth service.
+    ///
+    /// ``appStateProvider`` is a lazy closure rather than a stored
+    /// ``AppState`` value to avoid a static-init cycle: ``AppState.shared``
+    /// captures a closure pointing at ``APIClient.shared`` (which in
+    /// turn holds ``AuthService.shared``). Resolving any singleton's
+    /// dependency eagerly during another singleton's init would
+    /// re-enter the chain. The closure captures the symbol but does
+    /// not evaluate it until ``login()`` calls it after both
+    /// singletons are fully initialized.
     init(
         session: URLSession = .shared,
-        apiBaseURLProvider: @MainActor @escaping () -> String = { AppConfig.apiBaseURL }
+        apiBaseURLProvider: @MainActor @escaping () -> String = { AppConfig.apiBaseURL },
+        appStateProvider: @escaping @Sendable @MainActor () -> AppState = { AppState.shared }
     ) {
         self.session = session
         self.apiBaseURLProvider = apiBaseURLProvider
+        self.appStateProvider = appStateProvider
     }
 
     private convenience init() {
@@ -82,6 +96,30 @@ class AuthService: ObservableObject {
                 let loginResponse = try decoder.decode(LoginResponse.self, from: data)
                 currentUser = loginResponse.payload.user
                 self.error = nil
+                /// Persist the locale BEFORE flipping ``isAuthenticated``.
+                /// Flipping the @Published bool triggers the root view's
+                /// post-login navigation synchronously on the next
+                /// SwiftUI runloop tick; any ``await`` placed AFTER the
+                /// flip would return into a world where MarketDataView
+                /// has already mounted and started its first description
+                /// fetch against a stale backend ``default_language``.
+                /// Sequencing the persist first guarantees first-fetch
+                /// correctness without a refetch round-trip.
+                await appStateProvider().syncLocaleToBackend(skipAuthCheck: true, authService: self)
+                /// Defend against a server that 401s the immediate
+                /// ``/auth/me/update`` call placed inside this login
+                /// flow. ``APIClient.request`` calls ``authService.logout()``
+                /// on terminal 401s, which clears ``currentUser`` and
+                /// invalidates the cookies. ``syncLocaleToBackend``
+                /// swallows the throw so without this guard ``login()``
+                /// would proceed to set ``isAuthenticated = true`` with
+                /// ``currentUser == nil`` against an already-invalidated
+                /// session, dropping the user into a half-logged-in
+                /// state the UI cannot recover from.
+                guard currentUser != nil else {
+                    self.error = .invalidResponse
+                    return
+                }
                 isAuthenticated = true
                 await DeviceRegistrationService.shared().onLogin()
             } else {

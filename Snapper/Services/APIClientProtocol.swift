@@ -34,6 +34,8 @@ protocol APIClientProtocol: Sendable {
 
     func fetchInstruments(exchange: String) async throws -> [InstrumentDetailData]
     func fetchExchanges() async throws -> [String]
+    func fetchRelatedInstruments(exchange: String, symbol: String) async throws -> RelatedInstrumentsResponse
+    func updateDefaultLanguage(_ language: String) async throws
     func fetchCandles(
         exchange: String,
         instrument: String,

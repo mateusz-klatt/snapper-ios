@@ -71,6 +71,12 @@ final class MockAPIClient: APIClientProtocol, @unchecked Sendable {
         var fetchExchanges: @Sendable () async throws -> [String] = {
             throw APIError.invalidResponse
         }
+        var fetchRelatedInstruments: @Sendable (String, String) async throws -> RelatedInstrumentsResponse = { _, _ in
+            throw APIError.invalidResponse
+        }
+        var updateDefaultLanguage: @Sendable (String) async throws -> Void = { _ in
+            throw APIError.invalidResponse
+        }
         var fetchCandles: @Sendable (String, String, MarketTimeframe, Int, Date?) async throws -> [MarketCandle] = { _, _, _, _, _ in
             throw APIError.invalidResponse
         }
@@ -168,6 +174,14 @@ final class MockAPIClient: APIClientProtocol, @unchecked Sendable {
         get { read(\.fetchExchanges) }
         set { write(\.fetchExchanges, newValue) }
     }
+    var fetchRelatedInstrumentsHandler: @Sendable (String, String) async throws -> RelatedInstrumentsResponse {
+        get { read(\.fetchRelatedInstruments) }
+        set { write(\.fetchRelatedInstruments, newValue) }
+    }
+    var updateDefaultLanguageHandler: @Sendable (String) async throws -> Void {
+        get { read(\.updateDefaultLanguage) }
+        set { write(\.updateDefaultLanguage, newValue) }
+    }
     var fetchCandlesHandler: @Sendable (String, String, MarketTimeframe, Int, Date?) async throws -> [MarketCandle] {
         get { read(\.fetchCandles) }
         set { write(\.fetchCandles, newValue) }
@@ -260,6 +274,14 @@ final class MockAPIClient: APIClientProtocol, @unchecked Sendable {
 
     func fetchExchanges() async throws -> [String] {
         return try await fetchExchangesHandler()
+    }
+
+    func fetchRelatedInstruments(exchange: String, symbol: String) async throws -> RelatedInstrumentsResponse {
+        return try await fetchRelatedInstrumentsHandler(exchange, symbol)
+    }
+
+    func updateDefaultLanguage(_ language: String) async throws {
+        try await updateDefaultLanguageHandler(language)
     }
 
     func fetchCandles(

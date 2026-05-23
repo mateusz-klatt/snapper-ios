@@ -6,6 +6,8 @@ final class LoginViewModelTests: XCTestCase {
 
     var mockAuthService: AuthService!
     var mockSession: URLSession!
+    var injectedAppState: AppState!
+    var loginLocaleMock: MockAPIClient!
 
     override func setUp() {
         super.setUp()
@@ -14,12 +16,26 @@ final class LoginViewModelTests: XCTestCase {
         configuration.protocolClasses = [MockURLProtocol.self]
         mockSession = URLSession(configuration: configuration)
 
-        mockAuthService = AuthService(session: mockSession)
+        loginLocaleMock = MockAPIClient()
+        loginLocaleMock.updateDefaultLanguageHandler = { _ in }
+        let mock = loginLocaleMock!
+        injectedAppState = AppState(
+            userDefaults: UserDefaults(suiteName: "test.LoginViewModelTests.\(UUID().uuidString)")!,
+            preferredLanguagesProvider: { ["en"] },
+            apiClientProvider: { mock }
+        )
+        let state = injectedAppState!
+        mockAuthService = AuthService(
+            session: mockSession,
+            appStateProvider: { state }
+        )
     }
 
     override func tearDown() {
         mockAuthService = nil
         mockSession = nil
+        injectedAppState = nil
+        loginLocaleMock = nil
         MockURLProtocol.requestHandler = nil
         super.tearDown()
     }

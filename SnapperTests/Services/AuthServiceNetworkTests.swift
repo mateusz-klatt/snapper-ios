@@ -6,6 +6,8 @@ final class AuthServiceNetworkTests: XCTestCase {
 
     var authService: AuthService!
     var mockSession: URLSession!
+    var injectedAppState: AppState!
+    var loginLocaleMock: MockAPIClient!
 
     override func setUp() {
         super.setUp()
@@ -14,12 +16,26 @@ final class AuthServiceNetworkTests: XCTestCase {
         configuration.protocolClasses = [MockURLProtocol.self]
         mockSession = URLSession(configuration: configuration)
 
-        authService = AuthService(session: mockSession)
+        loginLocaleMock = MockAPIClient()
+        loginLocaleMock.updateDefaultLanguageHandler = { _ in }
+        let mock = loginLocaleMock!
+        injectedAppState = AppState(
+            userDefaults: UserDefaults(suiteName: "test.AuthServiceNetworkTests.\(UUID().uuidString)")!,
+            preferredLanguagesProvider: { ["en"] },
+            apiClientProvider: { mock }
+        )
+        let state = injectedAppState!
+        authService = AuthService(
+            session: mockSession,
+            appStateProvider: { state }
+        )
     }
 
     override func tearDown() {
         authService = nil
         mockSession = nil
+        injectedAppState = nil
+        loginLocaleMock = nil
         MockURLProtocol.requestHandler = nil
         super.tearDown()
     }
@@ -71,6 +87,118 @@ final class AuthServiceNetworkTests: XCTestCase {
             XCTAssertNil(authService.error)
             XCTAssertEqual(authService.currentUser?.username, "testuser")
         }
+    }
+
+    /// Login MUST persist the locale BEFORE flipping
+    /// ``isAuthenticated`` so the first post-login fetch sees the
+    /// backend-resolved description in the user's catalog language.
+    /// Captures ``isAuthenticated`` inside the mock's
+    /// ``updateDefaultLanguage`` handler and asserts it is still
+    /// false at that moment.
+    func testLoginPersistsLocaleBeforeAuthFlip() async throws {
+        let flipObserved = AuthFlipObserver()
+        let authRef = authService!
+        loginLocaleMock.updateDefaultLanguageHandler = { _ in
+            let snapshot = await MainActor.run { authRef.isAuthenticated }
+            flipObserved.record(authFlipAtLocalePersist: snapshot)
+        }
+
+        MockURLProtocol.requestHandler = { request in
+            let response = HTTPURLResponse(
+                url: request.url!,
+                statusCode: 200,
+                httpVersion: nil,
+                headerFields: [AppConfig.HTTPHeader.contentType: AppConfig.ContentType.json]
+            )!
+            let json: [String: Any] = [
+                "sequence_id": 1,
+                "public_id": "01961234-5678-7000-8000-000000000500",
+                "timestamp": "2025-01-01T00:00:00Z",
+                "session_id": "session-1",
+                "payload": [
+                    "sequence_id": 1,
+                    "public_id": "01961234-5678-7000-8000-000000000501",
+                    "timestamp": "2025-01-01T00:00:00Z",
+                    "session_id": "session-1",
+                    "message": "Login successful",
+                    "expires_in": 900,
+                    "user": [
+                        "sequence_id": 1,
+                        "public_id": "01961234-5678-7000-8000-000000000502",
+                        "timestamp": "2025-01-01T00:00:00Z",
+                        "session_id": "session-1",
+                        "username": "testuser",
+                        "email": "test@example.com",
+                        "role": "viewer",
+                        "is_active": true,
+                        "created_at": "2025-01-01T00:00:00Z"
+                    ]
+                ]
+            ]
+            let data = try JSONSerialization.data(withJSONObject: json)
+            return (response, data)
+        }
+
+        await authService.login(username: "testuser", password: "testpass")
+
+        XCTAssertEqual(flipObserved.snapshot, false, "isAuthenticated must still be false when locale-persist runs.")
+        XCTAssertTrue(authService.isAuthenticated, "Login must complete with isAuthenticated true.")
+    }
+
+    /// If the post-login locale-persist call invalidates the session
+    /// (e.g. the helper triggers ``authService.logout()`` via the
+    /// 401 retry path), ``login()`` MUST bail out instead of
+    /// flipping ``isAuthenticated`` against a now-invalidated session.
+    func testLoginBailsOutWhenLocaleSyncInvalidatesSession() async throws {
+        let authRef = authService!
+        loginLocaleMock.updateDefaultLanguageHandler = { _ in
+            await MainActor.run {
+                authRef.currentUser = nil
+                authRef.isAuthenticated = false
+            }
+            throw APIError.httpError(401)
+        }
+
+        MockURLProtocol.requestHandler = { request in
+            let response = HTTPURLResponse(
+                url: request.url!,
+                statusCode: 200,
+                httpVersion: nil,
+                headerFields: [AppConfig.HTTPHeader.contentType: AppConfig.ContentType.json]
+            )!
+            let json: [String: Any] = [
+                "sequence_id": 1,
+                "public_id": "01961234-5678-7000-8000-000000000510",
+                "timestamp": "2025-01-01T00:00:00Z",
+                "session_id": "session-2",
+                "payload": [
+                    "sequence_id": 1,
+                    "public_id": "01961234-5678-7000-8000-000000000511",
+                    "timestamp": "2025-01-01T00:00:00Z",
+                    "session_id": "session-2",
+                    "message": "Login successful",
+                    "expires_in": 900,
+                    "user": [
+                        "sequence_id": 1,
+                        "public_id": "01961234-5678-7000-8000-000000000512",
+                        "timestamp": "2025-01-01T00:00:00Z",
+                        "session_id": "session-2",
+                        "username": "testuser",
+                        "email": "test@example.com",
+                        "role": "viewer",
+                        "is_active": true,
+                        "created_at": "2025-01-01T00:00:00Z"
+                    ]
+                ]
+            ]
+            let data = try JSONSerialization.data(withJSONObject: json)
+            return (response, data)
+        }
+
+        await authService.login(username: "testuser", password: "testpass")
+
+        XCTAssertFalse(authService.isAuthenticated, "Login must NOT flip isAuthenticated when locale sync invalidated the session.")
+        XCTAssertEqual(authService.error, .invalidResponse, "Login surfaces .invalidResponse so the UI can prompt re-auth.")
     }
 
     func testLoginInvalidCredentials() async throws {
@@ -559,5 +687,20 @@ private final class HandlerCallCounter: @unchecked Sendable {
 
     var value: Int {
         lock.withLock { count }
+    }
+}
+
+/// Captures the value of ``AuthService.isAuthenticated`` observed
+/// at the moment the locale-persist mock fires. Used to assert
+/// that login persists the locale BEFORE flipping the auth state
+/// — see ``testLoginPersistsLocaleBeforeAuthFlip``.
+private final class AuthFlipObserver: @unchecked Sendable {
+    private let lock = NSLock()
+    private var storage: Bool?
+    func record(authFlipAtLocalePersist value: Bool) {
+        lock.withLock { storage = value }
+    }
+    var snapshot: Bool? {
+        lock.withLock { storage }
     }
 }

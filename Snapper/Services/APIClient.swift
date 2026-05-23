@@ -347,6 +347,61 @@ final class APIClient: Sendable, APIClientProtocol {
         return envelope.payload
     }
 
+    /// Fetch the related-instruments catalog for a given venue-scoped
+    /// ticker via ``GET /api/instruments/{exchange}/{native_symbol}/related``.
+    ///
+    /// The response carries the resolved underlying (name, sector,
+    /// asset class, per-locale description) plus grouped derivative
+    /// and proxy instruments. The backend resolves the description
+    /// from ``User.default_language`` set via
+    /// ``updateDefaultLanguage(_:)``.
+    func fetchRelatedInstruments(
+        exchange: String,
+        symbol: String
+    ) async throws -> RelatedInstrumentsResponse {
+        return try await request(
+            endpoint: "/instruments/\(Self.encodePathSegment(exchange))/\(Self.encodePathSegment(symbol))/related"
+        )
+    }
+
+    /// Persist the caller's preferred catalog language to
+    /// ``User.default_language`` via ``POST /api/auth/me/update``.
+    ///
+    /// Flows through ``request(...)`` so the helper's
+    /// ``attachCSRFHeader(to:method:)`` runs and the 401-refresh
+    /// retry path remains in effect. ``request(...)`` is preferred
+    /// over the bespoke ``URLSession.dataTask`` path used by
+    /// ``AuthService.login/refresh/logout`` (those routes are
+    /// server-side CSRF-exempt; ``/auth/me/update`` is guarded by
+    /// ``validate_csrf_token``).
+    ///
+    /// ``language`` is the catalog-language code (``"en"``,
+    /// ``"pl"``, …) — callers source it from
+    /// ``AppLocale.catalogLanguage.rawValue``.
+    ///
+    /// The backend returns the updated ``UserResponse``; this call
+    /// discards it because ``AppState`` is the source of truth for
+    /// the locale on the client.
+    func updateDefaultLanguage(_ language: String) async throws {
+        let provenance = await MainActor.run {
+            EnvelopeMinter.shared.next(.control)
+        }
+        let envelope = UpdateAuthMeRequest(
+            type: "update_auth_me_request",
+            sequenceId: provenance.sequenceId,
+            publicId: provenance.publicId,
+            timestamp: provenance.timestamp,
+            sessionId: provenance.sessionId,
+            topic: nil,
+            payload: UpdateAuthMeBody(defaultLanguage: language)
+        )
+        let _: UserResponse = try await request(
+            endpoint: "/auth/me/update",
+            method: "POST",
+            body: envelope
+        )
+    }
+
     /// Fetch historical candle data via ``GET /api/candles``.
     ///
     /// Routes through ``requestWithFractionalSecondsDates`` rather

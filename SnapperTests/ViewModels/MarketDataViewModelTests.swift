@@ -251,4 +251,184 @@ final class MarketDataViewModelTests: XCTestCase {
         XCTAssertTrue(viewModel.instruments.isEmpty)
         XCTAssertNil(viewModel.selectedInstrument)
     }
+
+    nonisolated private static func makeRelatedResponse(
+        exchange: String,
+        symbol: String,
+        description: String = "Test description."
+    ) -> RelatedInstrumentsResponse {
+        return RelatedInstrumentsResponse(
+            type: "related_instruments_response",
+            sequenceId: 1,
+            publicId: "related-\(symbol)",
+            timestamp: Date(timeIntervalSince1970: 1_700_000_000),
+            sessionId: "session-test",
+            topic: nil,
+            payload: RelatedInstrumentsPayloadData(
+                selected: RelatedInstrumentsSelected(
+                    exchange: exchange,
+                    nativeSymbol: symbol
+                ),
+                underlying: RelatedInstrumentsUnderlying(
+                    publicId: "underlying-\(symbol)",
+                    ticker: symbol,
+                    name: "\(symbol) Test Name",
+                    assetClass: "commodity",
+                    sector: "Precious Metals",
+                    description: description
+                ),
+                groups: []
+            )
+        )
+    }
+
+    func testSelectInstrumentPopulatesRelatedResponse() async {
+        let gld = makeInstrument(symbol: "GLD", exchange: "polygon")
+        mockAPI.fetchExchangesHandler = { ["polygon"] }
+        mockAPI.fetchInstrumentsHandler = { _ in [gld] }
+        mockAPI.fetchCandlesHandler = { _, _, _, _, _ in [] }
+        mockAPI.fetchRelatedInstrumentsHandler = { exchange, symbol in
+            return Self.makeRelatedResponse(exchange: exchange, symbol: symbol)
+        }
+        let viewModel = makeViewModel()
+        await viewModel.loadExchanges()
+        await viewModel.selectInstrument(gld)
+        XCTAssertEqual(viewModel.relatedResponse?.payload.selected.nativeSymbol, "GLD")
+        XCTAssertEqual(viewModel.relatedResponse?.payload.underlying?.description, "Test description.")
+        XCTAssertFalse(viewModel.isLoadingRelated)
+    }
+
+    func testSelectInstrumentDoesNotFailOnRelatedFetchError() async {
+        let gld = makeInstrument(symbol: "GLD", exchange: "polygon")
+        mockAPI.fetchExchangesHandler = { ["polygon"] }
+        mockAPI.fetchInstrumentsHandler = { _ in [gld] }
+        mockAPI.fetchCandlesHandler = { _, _, _, _, _ in [] }
+        mockAPI.fetchRelatedInstrumentsHandler = { _, _ in
+            throw APIError.serverError("temporary outage")
+        }
+        let viewModel = makeViewModel()
+        await viewModel.loadExchanges()
+        await viewModel.selectInstrument(gld)
+        XCTAssertNil(viewModel.relatedResponse, "Related fetch failure must leave relatedResponse nil, not crash the selection.")
+        XCTAssertTrue(viewModel.isReady, "Chart + metrics must still surface even when related fetch fails.")
+        XCTAssertNil(viewModel.loadError, "Related fetch failure is non-fatal and must not poison loadError.")
+        XCTAssertFalse(viewModel.isLoadingRelated)
+    }
+
+    func testSelectMarketSameExchangeLoadsInstrument() async {
+        let gld = makeInstrument(symbol: "GLD", exchange: "polygon")
+        let slv = makeInstrument(symbol: "SLV", exchange: "polygon")
+        mockAPI.fetchExchangesHandler = { ["polygon"] }
+        mockAPI.fetchInstrumentsHandler = { _ in [gld, slv] }
+        mockAPI.fetchCandlesHandler = { _, _, _, _, _ in [] }
+        mockAPI.fetchRelatedInstrumentsHandler = { exchange, symbol in
+            return Self.makeRelatedResponse(exchange: exchange, symbol: symbol)
+        }
+        let viewModel = makeViewModel()
+        await viewModel.loadExchanges()
+        await viewModel.selectInstrument(gld)
+        await viewModel.selectMarket(exchange: "polygon", symbol: "SLV")
+        XCTAssertEqual(viewModel.selectedInstrument?.symbol, "SLV")
+        XCTAssertNil(viewModel.marketSelectionError)
+    }
+
+    func testSelectMarketCrossExchangeSwitchesExchangeFirst() async {
+        let btc = makeInstrument(symbol: "BTC-USD", exchange: "kraken")
+        let gld = makeInstrument(symbol: "GLD", exchange: "polygon")
+        mockAPI.fetchExchangesHandler = { ["kraken", "polygon"] }
+        mockAPI.fetchInstrumentsHandler = { exchange in
+            return exchange == "kraken" ? [btc] : [gld]
+        }
+        mockAPI.fetchCandlesHandler = { _, _, _, _, _ in [] }
+        mockAPI.fetchRelatedInstrumentsHandler = { exchange, symbol in
+            return Self.makeRelatedResponse(exchange: exchange, symbol: symbol)
+        }
+        let viewModel = makeViewModel()
+        await viewModel.loadExchanges()
+        XCTAssertEqual(viewModel.selectedExchange, "kraken")
+        await viewModel.selectMarket(exchange: "polygon", symbol: "GLD")
+        XCTAssertEqual(viewModel.selectedExchange, "polygon")
+        XCTAssertEqual(viewModel.selectedInstrument?.symbol, "GLD")
+        XCTAssertNil(viewModel.marketSelectionError)
+    }
+
+    func testSelectMarketUnknownSymbolSetsError() async {
+        let gld = makeInstrument(symbol: "GLD", exchange: "polygon")
+        mockAPI.fetchExchangesHandler = { ["polygon"] }
+        mockAPI.fetchInstrumentsHandler = { _ in [gld] }
+        mockAPI.fetchCandlesHandler = { _, _, _, _, _ in [] }
+        mockAPI.fetchRelatedInstrumentsHandler = { exchange, symbol in
+            return Self.makeRelatedResponse(exchange: exchange, symbol: symbol)
+        }
+        let viewModel = makeViewModel()
+        await viewModel.loadExchanges()
+        await viewModel.selectMarket(exchange: "polygon", symbol: "NOTREAL")
+        XCTAssertEqual(
+            viewModel.marketSelectionError,
+            .instrumentNotFound(exchange: "polygon", symbol: "NOTREAL")
+        )
+    }
+
+    func testSelectMarketRecoveryClearsError() async {
+        let gld = makeInstrument(symbol: "GLD", exchange: "polygon")
+        mockAPI.fetchExchangesHandler = { ["polygon"] }
+        mockAPI.fetchInstrumentsHandler = { _ in [gld] }
+        mockAPI.fetchCandlesHandler = { _, _, _, _, _ in [] }
+        mockAPI.fetchRelatedInstrumentsHandler = { exchange, symbol in
+            return Self.makeRelatedResponse(exchange: exchange, symbol: symbol)
+        }
+        let viewModel = makeViewModel()
+        await viewModel.loadExchanges()
+        await viewModel.selectMarket(exchange: "polygon", symbol: "NOTREAL")
+        XCTAssertNotNil(viewModel.marketSelectionError)
+        await viewModel.selectMarket(exchange: "polygon", symbol: "GLD")
+        XCTAssertNil(viewModel.marketSelectionError)
+        XCTAssertEqual(viewModel.selectedInstrument?.symbol, "GLD")
+    }
+
+    func testLocalePersistNotificationRefetchesRelated() async throws {
+        let gld = makeInstrument(symbol: "GLD", exchange: "polygon")
+        mockAPI.fetchExchangesHandler = { ["polygon"] }
+        mockAPI.fetchInstrumentsHandler = { _ in [gld] }
+        mockAPI.fetchCandlesHandler = { _, _, _, _, _ in [] }
+        let fetchCount = RelatedFetchCounter()
+        mockAPI.fetchRelatedInstrumentsHandler = { exchange, symbol in
+            fetchCount.increment()
+            return Self.makeRelatedResponse(
+                exchange: exchange,
+                symbol: symbol,
+                description: "fetched-\(fetchCount.value)"
+            )
+        }
+        let viewModel = makeViewModel()
+        await viewModel.start()
+        let baseline = fetchCount.value
+        XCTAssertGreaterThan(baseline, 0, "Initial start+auto-pick must fetch related at least once.")
+
+        NotificationCenter.default.post(
+            name: .appStateLocaleDidPersist,
+            object: nil,
+            userInfo: ["language": "pl"]
+        )
+
+        let deadline = Date().addingTimeInterval(2.0)
+        while fetchCount.value <= baseline, Date() < deadline {
+            try await Task.sleep(nanoseconds: 25_000_000)
+        }
+
+        XCTAssertGreaterThan(fetchCount.value, baseline, "Locale-persist notification must trigger an additional refetch.")
+        XCTAssertEqual(viewModel.relatedResponse?.payload.underlying?.description, "fetched-\(fetchCount.value)")
+        viewModel.stop()
+    }
+}
+
+private final class RelatedFetchCounter: @unchecked Sendable {
+    private let lock = NSLock()
+    private var count: Int = 0
+    func increment() {
+        lock.withLock { count += 1 }
+    }
+    var value: Int {
+        lock.withLock { count }
+    }
 }
