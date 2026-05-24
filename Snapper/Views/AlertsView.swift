@@ -69,6 +69,24 @@ struct AlertsView: View {
                 .onChange(of: navigationCoordinator.pendingAlertPublicId) { _, newValue in
                     handleDeepLink(alertPublicId: newValue, proxy: proxy)
                 }
+                .task(id: navigationCoordinator.pendingAlertPublicId) {
+                    /// Mirror the ``.onChange`` consumer so an
+                    /// ``pendingAlertPublicId`` that was already
+                    /// set BEFORE this view mounted still triggers
+                    /// the scroll-to-anchor + clear contract.
+                    /// ``.onChange`` fires only on subsequent value
+                    /// changes, never on the initial value, so
+                    /// without this an ``/alerts/<id>`` deep link
+                    /// consumed by ``MainTabView`` at first
+                    /// ``.onAppear`` would leave the anchor
+                    /// un-handled and the pending link un-cleared,
+                    /// which the locale-driven ``MainTabView``
+                    /// remount in PR #97 would then replay.
+                    handleDeepLink(
+                        alertPublicId: navigationCoordinator.pendingAlertPublicId,
+                        proxy: proxy
+                    )
+                }
             }
             .navigationTitle(LocalizedStringKey("alerts.navTitle"))
             .task {

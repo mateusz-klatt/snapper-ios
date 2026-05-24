@@ -138,7 +138,29 @@ struct RootView: View {
     var body: some View {
         Group {
             if authService.isAuthenticated {
+                /// Force re-mount of the authenticated tab tree on
+                /// locale change. ``.environment(\.locale, ...)`` +
+                /// ``\.layoutDirection`` alone are not enough:
+                /// SwiftUI's ``NavigationStack`` caches its layout
+                /// direction internally on first mount, so a switch
+                /// from an RTL locale (``ae`` / ``il`` / ``ir``) to
+                /// an LTR locale leaves the Settings / Alerts /
+                /// Orders / Positions stacks rendering
+                /// right-to-left with the new language's text —
+                /// the visually broken state the user flagged after
+                /// toggling Israel → United States in Settings.
+                ///
+                /// Re-mounting via ``.id(appState.locale)`` discards
+                /// the cached stacks and rebuilds them under the
+                /// freshly-emitted environment values.
+                ///
+                /// Scoped to the authenticated branch (NOT the
+                /// outer ``Group``) so a locale change from
+                /// ``LoginView``'s own ``LocaleSwitcher`` chip does
+                /// not re-mount the login form and discard the
+                /// user's in-progress username/password ``@State``.
                 MainTabView()
+                    .id(appState.locale)
             } else {
                 LoginView()
             }
