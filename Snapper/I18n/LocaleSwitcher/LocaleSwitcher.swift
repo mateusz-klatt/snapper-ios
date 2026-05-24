@@ -39,6 +39,8 @@ struct LocaleSwitcher: View {
                     .font(.title3)
                 Text(verbatim: appState.locale.nativeCountryName)
                     .font(.subheadline)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.7)
                     .foregroundColor(.textPrimary)
                 Image(systemName: "chevron.down")
                     .font(.caption2)
@@ -170,6 +172,7 @@ private struct LocaleCell: View {
                             : Color.clear
                     )
             )
+            .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
         .accessibilityLabel(
