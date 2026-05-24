@@ -27,18 +27,29 @@ final class MarketDataViewModelTests: XCTestCase {
     }
 
     nonisolated private static func makeEmptyCachedCandlesResponse() -> CachedCandlesResponse {
+        return makeCachedCandlesResponse(isWarm: true, sampleCount: 0, source: "cache")
+    }
+
+    /// Parametrised builder for ``CachedCandlesResponse`` so the
+    /// chart-cache vs metrics ownership tests can stub each
+    /// timeframe branch with distinct cache-state metadata.
+    nonisolated private static func makeCachedCandlesResponse(
+        isWarm: Bool,
+        sampleCount: Int,
+        source: String
+    ) -> CachedCandlesResponse {
         return CachedCandlesResponse(
             type: "cached_candles_response",
             sequenceId: 1,
-            publicId: "cached-empty",
+            publicId: "cached-stub",
             timestamp: Date(timeIntervalSince1970: 1_700_000_000),
             sessionId: "session-test",
             topic: nil,
             payload: CachedCandlesPayload(
                 candles: [],
-                sampleCount: 0,
-                isWarm: true,
-                source: "cache"
+                sampleCount: sampleCount,
+                isWarm: isWarm,
+                source: source
             )
         )
     }
@@ -395,7 +406,12 @@ final class MarketDataViewModelTests: XCTestCase {
         )
     }
 
-    func testMetricsCacheFailureDoesNotBlankChart() async {
+    /// Both cache endpoints (chart-cache probe AND metrics probe)
+    /// fail in the same selection cycle. The chart must still
+    /// surface from the smart-route ``fetchCandles`` fetch and
+    /// neither failure may poison ``loadError`` — both are
+    /// best-effort signals.
+    func testCachedEndpointFailureDoesNotBlankChart() async {
         let gld = makeInstrument(symbol: "GLD", exchange: "polygon")
         mockAPI.fetchExchangesHandler = { ["polygon"] }
         mockAPI.fetchInstrumentsHandler = { _ in [gld] }
@@ -420,6 +436,113 @@ final class MarketDataViewModelTests: XCTestCase {
         XCTAssertNil(
             viewModel.cacheState,
             "Cache state stays nil when the metrics cache fetch fails; banner stays hidden."
+        )
+    }
+
+    /// Selected timeframe is .fiveMinutes (chart-cache probe runs
+    /// with timeframe=5m, limit=19). Metrics probe stays at 1h/25
+    /// regardless. ``cacheState`` MUST come from the chart-cache
+    /// probe (5m/limit=19 response, ``is_warm=false``,
+    /// ``sample_count=10``) NOT from the metrics probe (1h/25
+    /// response, ``is_warm=true``, ``sample_count=25``).
+    func testCacheStateOwnedByChartProbeNotMetricsProbe() async {
+        let gld = makeInstrument(symbol: "GLD", exchange: "polygon")
+        mockAPI.fetchExchangesHandler = { ["polygon"] }
+        mockAPI.fetchInstrumentsHandler = { _ in [gld] }
+        mockAPI.fetchCandlesHandler = { _, _, _, _, _ in [] }
+        mockAPI.fetchRelatedInstrumentsHandler = { exchange, symbol in
+            return Self.makeRelatedResponse(exchange: exchange, symbol: symbol)
+        }
+        mockAPI.fetchCachedCandlesHandler = { _, _, tf, _ in
+            if tf == .fiveMinutes {
+                return Self.makeCachedCandlesResponse(isWarm: false, sampleCount: 10, source: "cache")
+            }
+            return Self.makeCachedCandlesResponse(isWarm: true, sampleCount: 25, source: "cache")
+        }
+        let viewModel = makeViewModel()
+        await viewModel.loadExchanges()
+        viewModel.selectedTimeframe = .fiveMinutes
+        await viewModel.selectInstrument(gld)
+        XCTAssertEqual(
+            viewModel.cacheState?.isWarm,
+            false,
+            "cacheState.isWarm must come from the chart-cache probe (.fiveMinutes), not metrics (.oneHour)."
+        )
+        XCTAssertEqual(
+            viewModel.cacheState?.sampleCount,
+            10,
+            "cacheState.sampleCount must come from the chart-cache probe response."
+        )
+    }
+
+    /// Metrics-probe failure must NOT clear ``cacheState`` —
+    /// ownership belongs to the chart-cache probe, so a metrics
+    /// outage is isolated from the warming banner.
+    func testMetricsProbeFailureLeavesCacheStateIntact() async {
+        let gld = makeInstrument(symbol: "GLD", exchange: "polygon")
+        mockAPI.fetchExchangesHandler = { ["polygon"] }
+        mockAPI.fetchInstrumentsHandler = { _ in [gld] }
+        mockAPI.fetchCandlesHandler = { _, _, _, _, _ in [] }
+        mockAPI.fetchRelatedInstrumentsHandler = { exchange, symbol in
+            return Self.makeRelatedResponse(exchange: exchange, symbol: symbol)
+        }
+        mockAPI.fetchCachedCandlesHandler = { _, _, tf, _ in
+            if tf == .oneHour {
+                throw APIError.serverError("metrics endpoint down")
+            }
+            return Self.makeCachedCandlesResponse(isWarm: false, sampleCount: 42, source: "cache")
+        }
+        let viewModel = makeViewModel()
+        await viewModel.loadExchanges()
+        await viewModel.selectInstrument(gld)
+        XCTAssertEqual(
+            viewModel.cacheState?.sampleCount,
+            42,
+            "cacheState must stay populated from the chart-cache probe when metrics fail in isolation."
+        )
+    }
+
+    /// Chart-cache probe failure clears ``cacheState`` (banner
+    /// hides) AND keeps the chart populated (smart-route fetch is
+    /// independent and still succeeds). The smart-route fetch
+    /// returns one synthetic candle so the test can prove the
+    /// chart genuinely surfaced data, not just that ``isReady``
+    /// flipped.
+    func testChartCacheProbeFailureClearsCacheStateAndKeepsChart() async {
+        let gld = makeInstrument(symbol: "GLD", exchange: "polygon")
+        let stubCandle = MarketCandle(
+            openAt: Date(timeIntervalSince1970: 1_700_000_000),
+            open: 100,
+            high: 101,
+            low: 99,
+            close: 100,
+            volume: 10,
+            vwap: nil,
+            trades: nil
+        )
+        mockAPI.fetchExchangesHandler = { ["polygon"] }
+        mockAPI.fetchInstrumentsHandler = { _ in [gld] }
+        mockAPI.fetchCandlesHandler = { _, _, _, _, _ in [stubCandle] }
+        mockAPI.fetchRelatedInstrumentsHandler = { exchange, symbol in
+            return Self.makeRelatedResponse(exchange: exchange, symbol: symbol)
+        }
+        mockAPI.fetchCachedCandlesHandler = { _, _, tf, _ in
+            if tf == .oneMinute {
+                throw APIError.serverError("chart cache probe failed")
+            }
+            return Self.makeCachedCandlesResponse(isWarm: true, sampleCount: 25, source: "cache")
+        }
+        let viewModel = makeViewModel()
+        await viewModel.loadExchanges()
+        await viewModel.selectInstrument(gld)
+        XCTAssertNil(
+            viewModel.cacheState,
+            "Chart-cache probe failure clears cacheState so the banner hides."
+        )
+        XCTAssertEqual(
+            viewModel.candles.count,
+            1,
+            "Chart populated from smart-route /candles fetch — independent of the failed cache probe."
         )
     }
 

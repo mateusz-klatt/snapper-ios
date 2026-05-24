@@ -70,7 +70,7 @@ struct MarketDataView: View {
                 VStack(alignment: .leading, spacing: 0) {
                     CacheWarmingBannerView(
                         cacheState: vm.cacheState,
-                        expected: MarketCacheTarget.expectedSampleCount,
+                        expected: MarketCacheLimits.bannerProbeLimit(for: vm.selectedTimeframe),
                         language: appState.locale.catalogLanguage
                     )
                     CandlestickChartView(candles: vm.candles, timeframe: vm.selectedTimeframe)
