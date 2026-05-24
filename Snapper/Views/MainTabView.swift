@@ -37,6 +37,44 @@ struct MainTabView: View {
     /// the same scene.
     @SceneStorage("snapper.main-tab.selected") private var selectedTab: String = "home"
 
+    /// Tab IDs currently visible given the user's permissions —
+    /// computed from the same gates the ``TabView`` body uses so
+    /// the two cannot drift apart. Order matters: ``"home"`` is
+    /// always the first fallback when an unavailable tab needs
+    /// normalising, and the list happens to be ordered exactly the
+    /// way ``TabView`` lays them out.
+    private var availableTabIDs: [String] {
+        var ids: [String] = []
+        if authService.canAccess("overview") { ids.append("home") }
+        if authService.hasPermission(.readPositions) { ids.append("positions") }
+        if authService.canAccess("orders") { ids.append("orders") }
+        if authService.hasPermission(.readNotifications) { ids.append("alerts") }
+        if authService.canAccess("overview") { ids.append("settings") }
+        return ids
+    }
+
+    /// Snap ``selectedTab`` back to an available tab when the
+    /// stored value points at something the current role cannot
+    /// access. Guards the ``@SceneStorage`` restore path: a
+    /// previous login (different role) may have stored
+    /// ``"alerts"``; logging in again as a role without
+    /// ``readNotifications`` would render an empty
+    /// ``TabView(selection:)`` because the tag is missing.
+    /// Falls back to ``"home"`` when present, otherwise the first
+    /// available tab, otherwise the literal ``"home"`` as a final
+    /// safety net (the TabView render will be empty anyway).
+    private func normalizeSelectedTab() {
+        let ids = availableTabIDs
+        guard !ids.contains(selectedTab) else { return }
+        if ids.contains("home") {
+            selectedTab = "home"
+        } else if let first = ids.first {
+            selectedTab = first
+        } else {
+            selectedTab = "home"
+        }
+    }
+
     var body: some View {
         TabView(selection: $selectedTab) {
             if authService.canAccess("overview") {
@@ -81,6 +119,13 @@ struct MainTabView: View {
             }
         }
         .onAppear {
+            /// Normalise the ``@SceneStorage``-restored selection
+            /// against the current role's permissions BEFORE any
+            /// deep-link consumption — otherwise a stored
+            /// ``"alerts"`` from a previous login as a different
+            /// role could leave the ``TabView`` pointing at a tag
+            /// that the current body conditional does not render.
+            normalizeSelectedTab()
             /// Consume any pending deep-link that landed BEFORE the
             /// tab view existed (e.g. a notification tap while the
             /// user was on the login screen — `pendingDeepLink` is
@@ -94,6 +139,13 @@ struct MainTabView: View {
         .onChange(of: navigationCoordinator.pendingDeepLink) { _, _ in
             consumePendingDeepLink()
         }
+        .onChange(of: authService.currentUser?.role.rawValue) { _, _ in
+            /// Re-normalise on role flip (logout-as-A → login-as-B
+            /// within the same scene) so a tab that the new role
+            /// cannot access is replaced before its body would have
+            /// been rendered.
+            normalizeSelectedTab()
+        }
         /// WS lifecycle is owned by `SnapperApp` (scenePhase + isAuthenticated
         /// observers). Putting connect/disconnect here would kill the
         /// socket whenever a modal sheet covered the tab view.
@@ -105,14 +157,40 @@ struct MainTabView: View {
     /// MainTabView mount) and the `.onChange` runtime-update path
     /// (logged-in tap while MainTabView is already mounted).
     private func consumePendingDeepLink() {
-        if let nextTab = Self.routeDeepLink(
+        guard let nextTab = Self.routeDeepLink(
             path: navigationCoordinator.pendingDeepLink,
             alertsPrefix: AppConfig.Endpoints.alerts,
             ordersPrefix: AppConfig.Endpoints.orders,
             positionsPrefix: AppConfig.Endpoints.positions,
             systemPrefix: AppConfig.Endpoints.system
-        ) {
-            selectedTab = nextTab
+        ) else { return }
+        guard availableTabIDs.contains(nextTab) else {
+            /// Recognized route but the target tab is not visible
+            /// for the current role — clear so the stale link does
+            /// not linger and re-fire on the next ``MainTabView``
+            /// remount (locale flip via ``.id(appState.locale)`` or
+            /// role swap).
+            navigationCoordinator.clearPendingDeepLink()
+            return
+        }
+        selectedTab = nextTab
+        /// Clear the pending deep link for tabs that consume the
+        /// entire path here — without it, a notification tap to
+        /// ``/orders/...`` / ``/positions/...`` / ``/system/...``
+        /// stays in ``NavigationCoordinator.pendingDeepLink``
+        /// indefinitely, and a future ``MainTabView`` re-mount
+        /// (e.g. the ``.id(appState.locale)`` re-mount on a
+        /// locale flip) re-fires ``.onAppear`` which re-consumes
+        /// the stale value and yanks the user back to that tab.
+        ///
+        /// ``alerts`` is only exempted when there's an actual
+        /// ``pendingAlertPublicId`` anchor for ``AlertsView`` to
+        /// consume — a bare ``/alerts`` route is fully consumed
+        /// by selecting the tab and can be cleared here.
+        let alertsHasAnchor = nextTab == "alerts"
+            && navigationCoordinator.pendingAlertPublicId != nil
+        if !alertsHasAnchor {
+            navigationCoordinator.clearPendingDeepLink()
         }
     }
 
