@@ -428,7 +428,7 @@ final class MarketDataViewModel {
                 exchange: exchange,
                 symbol: instrument.symbol,
                 timeframe: .oneHour,
-                limit: 25
+                limit: MarketCacheTarget.expectedSampleCount
             )
             isLoadingRelated = true
             async let relatedTask = api.fetchRelatedInstruments(
