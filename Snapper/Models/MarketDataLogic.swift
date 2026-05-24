@@ -270,17 +270,19 @@ enum CacheWarmingBannerLogic {
     }
 }
 
-/// Cache-warming target sample count for the metrics-grid fetch.
-/// Mirrors the per-fetch ``limit:`` parameter passed to
-/// ``APIClient.fetchCachedCandles(timeframe: .oneHour, limit: 25)``
-/// so the banner's ``"X / Y candles available"`` denominator
-/// matches the actual request — earlier the constant was 100
-/// (mirroring the web frontend's chart fetch), which produced a
-/// misleading ``"23 / 100"`` while the iOS metrics endpoint only
-/// ever asks for 25 hourly candles. The web frontend's 100 is
-/// correct for its own chart-driven query; iOS keeps a separate
-/// metrics path with a smaller hourly window, so the target
-/// follows the iOS fetch.
+/// Single source of truth for the metrics-grid fetch's request
+/// ``limit:`` AND the cache-warming banner's denominator. The two
+/// numbers MUST stay in lockstep — if the fetch asks for 25 and
+/// the banner says "X / 100" the banner is meaningless, and the
+/// reverse drift is just as bad. ``MarketDataViewModel`` reads
+/// this when calling ``fetchCachedCandles`` and
+/// ``MarketDataView`` reads the same value when rendering the
+/// banner, so a future change here propagates to both sites.
+///
+/// Pre-fix the constant was 100 (mirroring the web frontend's
+/// chart-driven query in ``MarketData.tsx``), but the iOS metrics
+/// path runs a separate hourly window with a smaller limit, so
+/// the iOS target follows the iOS fetch rather than the web one.
 enum MarketCacheTarget {
     static let expectedSampleCount: Int = 25
 }
