@@ -60,6 +60,7 @@ struct LocaleSwitcher: View {
                 in: appState.locale.catalogLanguage
             )
         )
+        .accessibilityIdentifier("locale.switcher.trigger")
         .popover(isPresented: $isPresented) {
             LocaleSwitcherPopoverContent(
                 currentLocale: appState.locale,

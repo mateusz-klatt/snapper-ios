@@ -2,12 +2,53 @@ import SwiftUI
 
 @main
 struct SnapperApp: App {
+
+    /// Reset persisted session state when the screenshot harness
+    /// passes ``-snapper.resetSessionState YES`` at launch. Must run
+    /// BEFORE ``@StateObject`` initializers (which would lazy-create
+    /// ``AuthService.shared`` and pick up the persisted cookies),
+    /// so we do it in ``SnapperApp.init()`` rather than the
+    /// ``AppDelegate`` (whose delegate methods can fire AFTER the
+    /// SwiftUI property wrappers under SwiftUI's lifecycle). DEBUG-
+    /// only so production launches cannot be tricked into clearing
+    /// the session.
+    init() {
+        #if DEBUG
+        Self.resetSessionStateIfRequested()
+        #endif
+    }
+
     @UIApplicationDelegateAdaptor(AppDelegate.self) private var appDelegate
     @StateObject private var authService = AuthService.shared
     @StateObject private var webSocketManager = WebSocketManager.shared
     @StateObject private var notificationService = NotificationService.shared
     @StateObject private var navigationCoordinator = NavigationCoordinator.shared
     @Environment(\.scenePhase) private var scenePhase
+
+    /// Inline implementation mirrors the one in ``AppDelegate`` but
+    /// runs at App construction so the SwiftUI property wrappers see
+    /// a clean state. The AppDelegate variant is kept as a defense
+    /// in depth in case the SwiftUI lifecycle changes in a future
+    /// iOS release.
+    #if DEBUG
+    private static func resetSessionStateIfRequested() {
+        let defaults = UserDefaults.standard
+        let requested = defaults.bool(forKey: "snapper.resetSessionState")
+            || defaults.string(forKey: "snapper.resetSessionState") == "YES"
+        guard requested else { return }
+        for cookie in HTTPCookieStorage.shared.cookies ?? [] {
+            HTTPCookieStorage.shared.deleteCookie(cookie)
+        }
+        if let urlSessionCookies = URLSession.shared.configuration.httpCookieStorage?.cookies {
+            for cookie in urlSessionCookies {
+                URLSession.shared.configuration.httpCookieStorage?.deleteCookie(cookie)
+            }
+        }
+        if let bundleId = Bundle.main.bundleIdentifier {
+            defaults.removePersistentDomain(forName: bundleId)
+        }
+    }
+    #endif
 
     var body: some Scene {
         WindowGroup {
