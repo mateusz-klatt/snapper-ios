@@ -143,6 +143,191 @@ final class I18nScreenshotUITests: XCTestCase {
         }
     }
 
+    /// AppStore marketing showcase: one carefully-chosen screen per
+    /// locale that highlights a single i18n capability of the v2
+    /// release. The output PNGs feed the 8 ASC screenshot slots
+    /// (one image per slot, English-locale gallery — Apple shows
+    /// the same gallery across all markets).
+    ///
+    /// Slot mapping:
+    /// 1. Polish login — picker chip showing "🇵🇱 Polska" autonym
+    /// 2. EN with locale popover open — 15×3 grid with every
+    ///    autonym visible (Deutsch / Français / 中国 / الإمارات / ישראל / Éire ...)
+    /// 3. Arabic home — RTL layout + Arabic text + Western digits
+    ///    on the trading surfaces
+    /// 4. Simplified Chinese home — red-rising / green-falling candle
+    ///    convention auto-derived from locale
+    /// 5. French positions — French UI strings
+    /// 6. German orders — German UI strings
+    /// 7. Japanese alerts — Japanese UI strings
+    /// 8. Spanish settings — chip "🇪🇸 España" + financial-color
+    ///    preference picker
+    func testCaptureMarketingShowcase() throws {
+        try skipUnlessBackendConfigured()
+        captureShowcaseLoginWithPicker(
+            spec: .init(code: "pl", appleLanguageTag: "pl-PL"),
+            slot: "01-login-pl"
+        )
+        captureShowcaseLocaleSwitcherPopover(
+            spec: .init(code: "us", appleLanguageTag: "en-US"),
+            slot: "02-locale-switcher-en"
+        )
+        captureShowcasePostLogin(
+            spec: .init(code: "ae", appleLanguageTag: "ar-AE"),
+            slot: "03-home-ar-rtl",
+            tabIndex: nil
+        )
+        captureShowcasePostLogin(
+            spec: .init(code: "cn", appleLanguageTag: "zh-Hans-CN"),
+            slot: "04-home-cn-redrising",
+            tabIndex: nil,
+            forceRisingRed: true
+        )
+        captureShowcasePostLogin(
+            spec: .init(code: "fr", appleLanguageTag: "fr-FR"),
+            slot: "05-positions-fr",
+            tabIndex: 1
+        )
+        captureShowcasePostLogin(
+            spec: .init(code: "de", appleLanguageTag: "de-DE"),
+            slot: "06-orders-de",
+            tabIndex: 2
+        )
+        captureShowcasePostLogin(
+            spec: .init(code: "jp", appleLanguageTag: "ja-JP"),
+            slot: "07-alerts-jp",
+            tabIndex: 3
+        )
+        captureShowcasePostLogin(
+            spec: .init(code: "es", appleLanguageTag: "es-ES"),
+            slot: "08-settings-es",
+            tabIndex: 4
+        )
+    }
+
+    /// Capture the Login screen with the locale picker chip visible.
+    /// Does NOT log in — the goal is to show the chip + autonym
+    /// before the first interaction. Output filename uses ``slot``
+    /// so the gallery can be ordered by ASC slot index without
+    /// renaming.
+    ///
+    /// Passes ``-snapper.resetSessionState YES`` so the DEBUG hook in
+    /// ``AppDelegate.resetSessionStateIfRequested`` clears any
+    /// persisted auth cookies before the SwiftUI root mounts.
+    /// Without this the simulator's prior login session would
+    /// auto-flip ``isAuthenticated = true`` on launch and the
+    /// harness would screenshot ``MainTabView`` instead of
+    /// ``LoginView``.
+    private func captureShowcaseLoginWithPicker(spec: LocaleSpec, slot: String) {
+        XCTContext.runActivity(named: "showcase-\(slot)") { _ in
+            let app = launchApp(spec: spec, resetSession: true)
+            sleep(4)
+            attach(code: spec.code, screen: slot)
+            app.terminate()
+        }
+    }
+
+    /// Capture the Login screen with the locale picker popover open
+    /// so the 15×3 grid of autonyms is visible. Resets the session
+    /// (so the trigger is on the LoginView header), then taps the
+    /// chip via its stable accessibility identifier rather than
+    /// fragile screen coordinates.
+    private func captureShowcaseLocaleSwitcherPopover(spec: LocaleSpec, slot: String) {
+        XCTContext.runActivity(named: "showcase-\(slot)") { _ in
+            let app = launchApp(spec: spec, resetSession: true)
+            sleep(4)
+            let trigger = app.buttons["locale.switcher.trigger"]
+            if trigger.waitForExistence(timeout: 5) {
+                trigger.tap()
+            } else {
+                let chevronCoord = app.coordinate(withNormalizedOffset: CGVector(dx: 0.85, dy: 0.08))
+                chevronCoord.tap()
+            }
+            sleep(2)
+            attach(code: spec.code, screen: slot)
+            app.terminate()
+        }
+    }
+
+    /// Log in and optionally navigate to a specific tab before
+    /// taking the screenshot. ``tabIndex == nil`` keeps the user
+    /// on Home (which auto-pushes the Market Data screen on first
+    /// appear for users with a single configured pair).
+    /// ``forceRisingRed`` explicitly forces the red-rising candle
+    /// convention via launchArg — used for the CN showcase slot so
+    /// the screenshot proves the East-Asian palette regardless of
+    /// any locale-auto-resolver edge case in the harness.
+    private func captureShowcasePostLogin(
+        spec: LocaleSpec,
+        slot: String,
+        tabIndex: Int?,
+        forceRisingRed: Bool = false
+    ) {
+        XCTContext.runActivity(named: "showcase-\(slot)") { _ in
+            let app = launchApp(spec: spec, forceRisingRed: forceRisingRed)
+            guard performLogin(in: app) else {
+                attach(code: spec.code, screen: "\(slot)-login-failed")
+                app.terminate()
+                return
+            }
+            dismissSavePasswordDialog(app: app)
+            sleep(4)
+            if let index = tabIndex {
+                let tabBar = app.tabBars.firstMatch
+                if tabBar.exists, tabBar.buttons.count > index {
+                    tabBar.buttons.element(boundBy: index).tap()
+                } else {
+                    let normalized = CGVector(dx: 0.1 + 0.2 * CGFloat(index), dy: 0.96)
+                    app.coordinate(withNormalizedOffset: normalized).tap()
+                }
+                sleep(3)
+            }
+            attach(code: spec.code, screen: slot)
+            app.terminate()
+        }
+    }
+
+    /// UUID of the paper wallet seeded by
+    /// ``scripts/seed_demo.py`` — pinned so the showcase test
+    /// renders against the wallet that has the demo positions /
+    /// orders / alerts rather than the main wallet which is empty
+    /// by default. Apple reviewer screenshots are taken against
+    /// this wallet via the ``selected_wallet_public_id``
+    /// UserDefault launch override.
+    private static let demoPaperWalletPublicId = "019e5384-75a3-77a0-bd87-7a820e21475c"
+
+    /// Build + launch the app for ``spec`` with the AppLanguages /
+    /// AppleLocale overrides that the screenshot harness relies on.
+    /// Pass ``resetSession: true`` to also wipe HTTP cookies +
+    /// wallet defaults before the SwiftUI root mounts.
+    /// Pass ``forceRisingRed: true`` to seed the
+    /// ``snapper-financial-color-preference`` UserDefault with
+    /// ``rising-red`` so the chart renders the East-Asian palette
+    /// regardless of locale-resolver behavior.
+    private func launchApp(
+        spec: LocaleSpec,
+        resetSession: Bool = false,
+        forceRisingRed: Bool = false
+    ) -> XCUIApplication {
+        let app = XCUIApplication()
+        var args = [
+            "-snapper-locale", spec.code,
+            "-snapper.customBackendURL", backendURL,
+            "-AppleLanguages", "(\(spec.appleLanguageTag))",
+            "-AppleLocale", spec.appleLanguageTag,
+            "-selected_wallet_public_id", Self.demoPaperWalletPublicId,
+        ]
+        if resetSession {
+            args += ["-snapper.resetSessionState", "YES"]
+        }
+        if forceRisingRed {
+            args += ["-snapper-financial-color-preference", "rising-red"]
+        }
+        app.launchArguments = args
+        app.launch()
+        return app
+    }
+
     private func captureLocale(_ spec: LocaleSpec) {
         XCTContext.runActivity(named: "locale-\(spec.code)") { _ in
             let app = XCUIApplication()

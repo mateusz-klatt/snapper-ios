@@ -3,7 +3,7 @@
 # and dump per-country PNGs into the proprietary/screenshots/ios/ tree.
 #
 # Usage:
-#   ios/scripts/screenshot-all-locales.sh [smoke|all|retry]
+#   ios/scripts/screenshot-all-locales.sh [smoke|all|retry|showcase]
 #
 # Backend URL discovery (in order):
 #   1. SNAPPER_UITEST_BACKEND_URL env var
@@ -20,10 +20,11 @@ XCRESULT="$ROOT/build/screenshots.xcresult"
 
 MODE="${1:-all}"
 case "$MODE" in
-  smoke) METHOD="testCaptureSmoke" ;;
-  retry) METHOD="testCaptureRetryFailures" ;;
-  all)   METHOD="testCaptureAllLocales" ;;
-  *) echo "usage: $0 [smoke|all|retry]" >&2 ; exit 2 ;;
+  smoke)    METHOD="testCaptureSmoke" ;;
+  retry)    METHOD="testCaptureRetryFailures" ;;
+  all)      METHOD="testCaptureAllLocales" ;;
+  showcase) METHOD="testCaptureMarketingShowcase" ;;
+  *) echo "usage: $0 [smoke|all|retry|showcase]" >&2 ; exit 2 ;;
 esac
 
 URL="${SNAPPER_UITEST_BACKEND_URL:-}"
@@ -88,6 +89,15 @@ if sentinel not in text:
     raise SystemExit(f"sentinel not found in {path}")
 open(path, 'w').write(text.replace(sentinel, url))
 PY
+
+if [ "$MODE" = "showcase" ]; then
+  echo "==> Uninstalling Snapper from booted simulator (showcase needs clean state)"
+  DEVICE_UDID=$(xcrun simctl list devices "iPhone 17 Pro" | grep -E "iOS 26.2|(26.2)" -A1 | grep "iPhone 17 Pro (" | grep -v Max | grep -oE "[A-F0-9]{8}-[A-F0-9]{4}-[A-F0-9]{4}-[A-F0-9]{4}-[A-F0-9]{12}" | head -1)
+  if [ -n "$DEVICE_UDID" ]; then
+    xcrun simctl boot "$DEVICE_UDID" 2>/dev/null || true
+    xcrun simctl uninstall "$DEVICE_UDID" com.example.snapper 2>/dev/null || true
+  fi
+fi
 
 xcodebuild test \
     -scheme Snapper \

@@ -2,12 +2,52 @@ import SwiftUI
 
 @main
 struct SnapperApp: App {
+
+    /// Reset persisted session state when the screenshot harness
+    /// passes ``-snapper.resetSessionState YES`` at launch. Runs in
+    /// the App struct's ``init()`` so the clear lands before
+    /// ``WindowGroup``'s content closure evaluates and triggers the
+    /// first authenticated API call — at that point
+    /// ``URLSession.shared`` would otherwise attach the persisted
+    /// cookies from ``HTTPCookieStorage.shared`` and the test runner
+    /// would see a logged-in screen instead of ``LoginView``. The
+    /// AppDelegate copy of this helper is kept as defense in depth.
+    /// DEBUG-only so production launches cannot be tricked into
+    /// clearing the session by a hostile launch argument.
+    init() {
+        #if DEBUG
+        Self.resetSessionStateIfRequested()
+        #endif
+    }
+
     @UIApplicationDelegateAdaptor(AppDelegate.self) private var appDelegate
     @StateObject private var authService = AuthService.shared
     @StateObject private var webSocketManager = WebSocketManager.shared
     @StateObject private var notificationService = NotificationService.shared
     @StateObject private var navigationCoordinator = NavigationCoordinator.shared
     @Environment(\.scenePhase) private var scenePhase
+
+    /// Inline implementation mirrors the one in ``AppDelegate``.
+    /// Side-effects are explicitly scoped to ``HTTPCookieStorage.shared``
+    /// cookies + ``selected_wallet_public_id`` / ``snapper.devAutoLoginUser``
+    /// / ``snapper.devAutoLoginPass`` UserDefaults keys. The locale
+    /// picker, financial-color preference, and backend URL override
+    /// survive — the harness sets the backend URL via a separate
+    /// ``-snapper.customBackendURL`` launch argument.
+    #if DEBUG
+    private static func resetSessionStateIfRequested() {
+        let defaults = UserDefaults.standard
+        let requested = defaults.bool(forKey: "snapper.resetSessionState")
+            || defaults.string(forKey: "snapper.resetSessionState") == "YES"
+        guard requested else { return }
+        for cookie in HTTPCookieStorage.shared.cookies ?? [] {
+            HTTPCookieStorage.shared.deleteCookie(cookie)
+        }
+        defaults.removeObject(forKey: "selected_wallet_public_id")
+        defaults.removeObject(forKey: "snapper.devAutoLoginUser")
+        defaults.removeObject(forKey: "snapper.devAutoLoginPass")
+    }
+    #endif
 
     var body: some Scene {
         WindowGroup {
