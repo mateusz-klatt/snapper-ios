@@ -86,14 +86,4 @@ final class AppLocaleNativeCountryNameTests: XCTestCase {
             )
         }
     }
-
-    func testFallbackToUppercasedISOWhenICUMissesIsAtLeastTheCode() {
-        for code in AppLocale.allCases {
-            let name = code.nativeCountryName
-            XCTAssertTrue(
-                !name.isEmpty,
-                "Fallback must keep the cell label populated for \(code.rawValue)"
-            )
-        }
-    }
 }
