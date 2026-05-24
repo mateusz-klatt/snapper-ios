@@ -145,5 +145,22 @@ struct RootView: View {
         }
         .environment(\.locale, LocaleEnvironmentResolver.environmentLocale(for: appState.locale))
         .environment(\.layoutDirection, LocaleEnvironmentResolver.layoutDirection(for: appState.locale))
+        /// Force re-mount of the entire view tree on locale change.
+        ///
+        /// ``.environment(\.locale, ...)`` and ``\.layoutDirection``
+        /// alone are not enough: SwiftUI's ``NavigationStack``
+        /// caches its layout direction internally on first mount,
+        /// so a switch from an RTL locale (``ae`` / ``il`` / ``ir``)
+        /// to an LTR locale leaves the Settings / Alerts / Orders /
+        /// Positions stacks rendering right-to-left with the new
+        /// language's text — a visually broken state user-flagged
+        /// after toggling Israel → United States in Settings.
+        ///
+        /// Re-mounting via ``.id(appState.locale)`` discards the
+        /// cached stacks and rebuilds them under the freshly-emitted
+        /// environment values. The cost is a single transient
+        /// re-render per locale change, which is the expected
+        /// behavior for a language flip in any case.
+        .id(appState.locale)
     }
 }

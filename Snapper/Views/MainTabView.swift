@@ -25,7 +25,17 @@ struct MainTabView: View {
     @EnvironmentObject var navigationCoordinator: NavigationCoordinator
     @Environment(AppState.self) private var appState
 
-    @State private var selectedTab: String = "home"
+    /// ``@SceneStorage`` instead of plain ``@State`` so the active
+    /// tab survives the ``RootView`` re-mount that follows a locale
+    /// change. ``RootView`` carries ``.id(appState.locale)`` to
+    /// invalidate cached ``NavigationStack`` layout directions on
+    /// RTL ⇄ LTR flips; without ``@SceneStorage`` that re-mount
+    /// would also discard ``selectedTab`` and bounce the user back
+    /// to the Home tab right after they flipped languages from
+    /// Settings. Scene storage persists the value in the scene's
+    /// state restoration store across view-identity changes within
+    /// the same scene.
+    @SceneStorage("snapper.main-tab.selected") private var selectedTab: String = "home"
 
     var body: some View {
         TabView(selection: $selectedTab) {
