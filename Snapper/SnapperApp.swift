@@ -11,28 +11,19 @@ struct SnapperApp: App {
 
     var body: some Scene {
         WindowGroup {
-            Group {
-                if authService.isAuthenticated {
-                    MainTabView()
-                        .environmentObject(authService)
-                        .environmentObject(webSocketManager)
-                        .environmentObject(notificationService)
-                        .environmentObject(navigationCoordinator)
-                } else {
-                    LoginView()
-                        .environmentObject(authService)
+            RootView()
+                .environmentObject(authService)
+                .environmentObject(webSocketManager)
+                .environmentObject(notificationService)
+                .environmentObject(navigationCoordinator)
+                .environment(AppState.shared)
+                .tint(.brandGreen)
+                .onChange(of: scenePhase) { _, newPhase in
+                    handleScenePhase(newPhase)
                 }
-            }
-            .environment(AppState.shared)
-            .environment(\.locale, LocaleEnvironmentResolver.environmentLocale(for: AppState.shared.locale))
-            .environment(\.layoutDirection, LocaleEnvironmentResolver.layoutDirection(for: AppState.shared.locale))
-            .tint(.brandGreen)
-            .onChange(of: scenePhase) { _, newPhase in
-                handleScenePhase(newPhase)
-            }
-            .onChange(of: authService.isAuthenticated) { _, isAuth in
-                handleAuthChange(isAuth)
-            }
+                .onChange(of: authService.isAuthenticated) { _, isAuth in
+                    handleAuthChange(isAuth)
+                }
         }
     }
 
@@ -79,5 +70,40 @@ struct SnapperApp: App {
         } else {
             webSocketManager.disconnect()
         }
+    }
+}
+
+/// Root view that owns the SwiftUI environment locale + layout-
+/// direction wiring. Pulled out of ``SnapperApp/body`` because
+/// reading ``AppState.shared.locale`` inline inside the
+/// ``WindowGroup`` content closure did not reliably re-evaluate
+/// when ``locale`` mutated: SwiftUI's ``@Observable`` tracking
+/// registers reads from ``View.body``, not from ``App.body``'s
+/// scene closure, so locale-driven environment values were
+/// pinned at app launch. The pin manifested as ``Text(LocalizedStringKey)``
+/// resolving against the launch language regardless of the user's
+/// picker selection, and as ``\.layoutDirection`` staying RTL/LTR
+/// from the initial locale even after switching to a code with
+/// the opposite directionality.
+///
+/// Reading ``appState.locale`` through ``@Environment(AppState.self)``
+/// here puts the read inside a tracked ``View.body``; SwiftUI then
+/// re-evaluates ``RootView/body`` on every locale change and
+/// re-emits the environment modifiers with fresh values, which
+/// propagate to every descendant.
+struct RootView: View {
+    @Environment(AppState.self) private var appState
+    @EnvironmentObject private var authService: AuthService
+
+    var body: some View {
+        Group {
+            if authService.isAuthenticated {
+                MainTabView()
+            } else {
+                LoginView()
+            }
+        }
+        .environment(\.locale, LocaleEnvironmentResolver.environmentLocale(for: appState.locale))
+        .environment(\.layoutDirection, LocaleEnvironmentResolver.layoutDirection(for: appState.locale))
     }
 }

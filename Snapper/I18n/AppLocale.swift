@@ -95,4 +95,24 @@ enum AppLocale: String, CaseIterable, Codable, Sendable, Hashable, Identifiable 
         components.numberingSystem = Locale.NumberingSystem("latn")
         return Locale(components: components)
     }
+
+    /// Country name rendered in the country's own catalog language —
+    /// the autonym (``Polska`` for ``.pl``, ``Deutschland`` for
+    /// ``.de``, ``中国`` for ``.cn``, ``الإمارات`` for ``.ae``,
+    /// ``Éire`` for ``.ie``, ``United States`` for ``.us``). Used by
+    /// the locale-picker grid cells so each row is unambiguously
+    /// identified by both flag and name even when the user does not
+    /// recognize the regional-indicator flag glyph.
+    ///
+    /// Resolved through ``Locale.localizedString(forRegionCode:)`` on
+    /// the country's own ``nativeLocale`` so the rendered string
+    /// follows the country's own writing system regardless of the
+    /// app-level locale. Falls back to the uppercased ISO-3166 code
+    /// when ICU has no entry for the region (should not happen with
+    /// the locked 45-code set on iOS 26.2 but the fallback keeps the
+    /// cell label non-empty if ICU data changes).
+    var nativeCountryName: String {
+        nativeLocale.localizedString(forRegionCode: rawValue.uppercased())
+            ?? rawValue.uppercased()
+    }
 }
