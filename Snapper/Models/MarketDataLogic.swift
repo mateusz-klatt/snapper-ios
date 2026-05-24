@@ -2,8 +2,13 @@ import Foundation
 
 /// View-model snapshot of the cache-warming endpoint payload.
 /// Populated by ``MarketDataViewModel`` from the
-/// ``CachedCandlesPayload`` sibling fields each time the metrics
-/// candles refresh.
+/// ``CachedCandlesPayload`` sibling fields returned by the
+/// chart-cache state probe (the per-selected-timeframe
+/// ``/api/candles/cache`` request that drives the warming
+/// banner). NOT sourced from the metrics-grid hourly probe —
+/// that probe powers the 24h high/low cards and is intentionally
+/// decoupled from this snapshot so cache-state failures and
+/// metrics failures stay isolated.
 ///
 /// Lives under ``Snapper/Models`` (not under ``Views/``) because the
 /// ViewModel exposes ``cacheState: CacheStateSnapshot?`` as part of
@@ -270,19 +275,65 @@ enum CacheWarmingBannerLogic {
     }
 }
 
-/// Single source of truth for the metrics-grid fetch's request
-/// ``limit:`` AND the cache-warming banner's denominator. The two
-/// numbers MUST stay in lockstep — if the fetch asks for 25 and
-/// the banner says "X / 100" the banner is meaningless, and the
-/// reverse drift is just as bad. ``MarketDataViewModel`` reads
-/// this when calling ``fetchCachedCandles`` and
-/// ``MarketDataView`` reads the same value when rendering the
-/// banner, so a future change here propagates to both sites.
+/// Per-task request limits for the two cache endpoints
+/// ``MarketDataViewModel`` consumes, plus the matching banner
+/// denominator. Replaces the prior single-value
+/// ``MarketCacheTarget.expectedSampleCount`` which conflated the
+/// banner probe (drives the warming UI) with the metrics-grid
+/// hourly fetch (drives the 24h high/low/changePct cards) and
+/// produced misleading banner copy when the chart timeframe
+/// differed from the metrics timeframe.
 ///
-/// Pre-fix the constant was 100 (mirroring the web frontend's
-/// chart-driven query in ``MarketData.tsx``), but the iOS metrics
-/// path runs a separate hourly window with a smaller limit, so
-/// the iOS target follows the iOS fetch rather than the web one.
-enum MarketCacheTarget {
-    static let expectedSampleCount: Int = 25
+/// Split semantics:
+/// - ``bannerProbeLimit(for:)``: per-selected-timeframe request
+///   limit for the ``chartCacheStateTask`` that drives
+///   ``cacheState``. Banner reads the SAME value via this helper
+///   so the rendered "X / Y" denominator always matches the
+///   request that produced the X numerator. Values follow the
+///   backend cache's 100-bar 1m deque cap minus worst-case
+///   alignment loss (``bucket-1`` 1m bars at the start), so a
+///   healthy 100-bar 1m cache always reaches the published target
+///   regardless of where the minute boundary falls. For DB-backed
+///   long frames (1h/4h/1d) the value is a stable returned-row
+///   target for the selected DB-backed timeframe (25 rows).
+/// - ``metricsHourlyLimit``: fixed hourly window for the
+///   ``metricsCachedTask`` that powers the 24h metric grid. Kept
+///   separate from the banner probe because the metric cards need
+///   a fixed hourly aggregation regardless of which chart
+///   timeframe the user is viewing.
+enum MarketCacheLimits {
+
+    /// Number of cached bars the chart-cache state probe requests
+    /// for a given selected timeframe. The banner's denominator
+    /// reuses this value via the same helper so the request limit
+    /// and the rendered denominator can never drift apart.
+    ///
+    /// Worst-case derivations from the backend's 100-bar 1m cache
+    /// deque:
+    /// - 1m → 100 (native deque capacity)
+    /// - 5m → 19 (``floor((100 - 4) / 5)`` — even if the first 4
+    ///   1m bars sit on a non-5m boundary you still get 19 full
+    ///   5m bars)
+    /// - 15m → 5 (``floor((100 - 14) / 15)``)
+    /// - 1h / 4h / 1d → 25 (DB-backed; the cache cannot serve
+    ///   long frames so this is the stable returned-row target
+    ///   for the selected DB-backed timeframe rather than a
+    ///   cache-derived count)
+    static func bannerProbeLimit(for tf: MarketTimeframe) -> Int {
+        switch tf {
+        case .oneMinute:      return 100
+        case .fiveMinutes:    return 19
+        case .fifteenMinutes: return 5
+        case .oneHour:        return 25
+        case .fourHours:      return 25
+        case .oneDay:         return 25
+        }
+    }
+
+    /// Fixed 25-bar hourly window for the 24h metrics grid
+    /// (high/low/changePct cards). Decoupled from
+    /// ``bannerProbeLimit(for:)`` because metrics needs a stable
+    /// hourly aggregation regardless of the chart's currently-
+    /// selected timeframe.
+    static let metricsHourlyLimit: Int = 25
 }

@@ -71,15 +71,20 @@ final class MarketDataViewModel {
     /// venue. Cleared on the next successful navigation.
     var marketSelectionError: MarketSelectionError?
 
-    /// Cache-warming snapshot reflecting the METRICS cache endpoint
-    /// (``GET /api/candles/cache?timeframe=1h&limit=25``) — the
-    /// surface the 24h metric grid above the chart consumes. NOT
-    /// the chart-candles cache state; the chart still calls
-    /// ``GET /api/candles`` directly. The banner therefore tells
-    /// the operator "the data infrastructure is still building the
-    /// metrics dataset"; it does not represent the chart's data
-    /// freshness. Placed inside the chart container per the web
-    /// reference layout where the same visual hierarchy holds.
+    /// Cache-warming snapshot reflecting the CHART cache-state
+    /// probe (``GET /api/candles/cache?timeframe=<selectedTimeframe>
+    /// &limit=<bannerProbeLimit>``) — the warming banner rendered
+    /// above the chart reads from this. Uses the SAME timeframe
+    /// the chart is rendering, so the banner reflects the chart's
+    /// actual data freshness; the limit comes from
+    /// ``MarketCacheLimits.bannerProbeLimit(for:)`` so the banner's
+    /// "X / Y" denominator matches the request that produced X.
+    /// Populated by an independent non-fatal probe — failure
+    /// clears this back to ``nil`` (banner hides) while the chart
+    /// itself continues to paint from the smart-route
+    /// ``GET /api/candles`` fetch which has DB fallback. The
+    /// metrics-grid hourly fetch is intentionally NOT the source
+    /// here — it powers the 24h high/low/changePct cards instead.
     var cacheState: CacheStateSnapshot?
 
     /// Configured-pair cointegration stats fetched once per session
@@ -424,11 +429,38 @@ final class MarketDataViewModel {
                 limit: 100,
                 asOf: nil
             )
+            /// Cache-state probe for the BANNER. Asks the cache-only
+            /// endpoint for the same timeframe the chart is rendering
+            /// so the warming banner reflects the chart's actual data
+            /// freshness (not the metrics-grid hourly window). Uses a
+            /// per-timeframe limit from
+            /// ``MarketCacheLimits.bannerProbeLimit(for:)`` so the
+            /// banner's denominator and the request limit are
+            /// guaranteed to match. Non-fatal: failure clears
+            /// ``cacheState`` (banner hides) but the chart still
+            /// paints from ``chartCandlesTask`` which has DB fallback.
+            ///
+            /// Intentionally NOT deduped with ``metricsCachedTask``
+            /// when ``selectedTimeframe == .oneHour`` — the two probes
+            /// serve different purposes (banner state vs metric grid)
+            /// and keeping them separate preserves failure isolation:
+            /// a metrics outage cannot blank the banner and vice
+            /// versa. The duplicate 1h request is documented overhead.
+            async let chartCacheStateTask = api.fetchCachedCandles(
+                exchange: exchange,
+                symbol: instrument.symbol,
+                timeframe: selectedTimeframe,
+                limit: MarketCacheLimits.bannerProbeLimit(for: selectedTimeframe)
+            )
+            /// Hourly metrics-grid fetch (24h high/low/changePct
+            /// cards). Stays at a fixed hourly window regardless of
+            /// the chart's selected timeframe — the metric cards
+            /// always represent a 24h-ish horizon.
             async let metricsCachedTask = api.fetchCachedCandles(
                 exchange: exchange,
                 symbol: instrument.symbol,
                 timeframe: .oneHour,
-                limit: MarketCacheTarget.expectedSampleCount
+                limit: MarketCacheLimits.metricsHourlyLimit
             )
             isLoadingRelated = true
             async let relatedTask = api.fetchRelatedInstruments(
@@ -439,13 +471,29 @@ final class MarketDataViewModel {
             guard generation == selectionGeneration else { return }
             mergeBufferIntoSnapshot(snapshot: chartCandles)
             isReady = true
-            /// Metrics-candles + cache-state come from a separate
-            /// cached-endpoint. Failure is non-fatal: the chart
-            /// surface above already populated, so an outage on the
-            /// metrics/cache service must NOT blank the screen.
-            /// Swallow the error after logging; the metric grid
-            /// falls back to its ``.empty`` initial state and the
-            /// warming banner stays hidden (``cacheState == nil``).
+            /// Banner cache-state — awaited independently from the
+            /// metrics fetch so a slow/failing metrics call cannot
+            /// delay the banner update. Failure clears ``cacheState``
+            /// so the banner hides; the chart above is unaffected.
+            do {
+                let chartCacheEnvelope = try await chartCacheStateTask
+                guard generation == selectionGeneration else { return }
+                cacheState = CacheStateSnapshot(
+                    isWarm: chartCacheEnvelope.payload.isWarm,
+                    sampleCount: chartCacheEnvelope.payload.sampleCount,
+                    source: chartCacheEnvelope.payload.source
+                )
+            } catch {
+                guard generation == selectionGeneration else { return }
+                cacheState = nil
+                logger.warning("chart cache-state probe failed: \(String(describing: error), privacy: .public)")
+            }
+            /// Metrics-candles come from a separate cached-endpoint
+            /// hourly fetch. Failure is non-fatal: the chart surface
+            /// already populated, so an outage on the metrics service
+            /// must NOT blank the screen. Swallow the error after
+            /// logging; the metric grid falls back to its ``.empty``
+            /// initial state.
             do {
                 let metricsCachedEnvelope = try await metricsCachedTask
                 guard generation == selectionGeneration else { return }
@@ -453,11 +501,6 @@ final class MarketDataViewModel {
                 metrics = computeMetrics(
                     from: metricsCandles,
                     lastTick: lastTickForCurrentSelection()
-                )
-                cacheState = CacheStateSnapshot(
-                    isWarm: metricsCachedEnvelope.payload.isWarm,
-                    sampleCount: metricsCachedEnvelope.payload.sampleCount,
-                    source: metricsCachedEnvelope.payload.source
                 )
             } catch {
                 guard generation == selectionGeneration else { return }
