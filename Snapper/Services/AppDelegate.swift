@@ -51,10 +51,17 @@ final class AppDelegate: NSObject, UIApplicationDelegate, @preconcurrency UNUser
     /// ``-snapper.resetSessionState YES`` in ``launchArguments``;
     /// no-op when the argument is missing or set to anything else.
     ///
-    /// Lives in the AppDelegate's launch path so the clear happens
-    /// BEFORE ``AuthService.init`` has a chance to restore the
-    /// session from cookies. Side-effects are scoped to the listed
-    /// auth + wallet + dev-auto-login keys; the locale picker /
+    /// Lives in the AppDelegate's launch path as defense in depth —
+    /// the primary reset happens in ``SnapperApp.init()`` which
+    /// SwiftUI calls before the ``WindowGroup`` content closure
+    /// evaluates and triggers the first authenticated API call.
+    /// ``URLSession.shared`` only attaches persisted cookies on
+    /// outgoing requests, not at ``AuthService`` init time, so as
+    /// long as the reset runs before the first API call the test
+    /// runner sees ``LoginView``. The AppDelegate path is kept
+    /// in case the SwiftUI lifecycle changes in a future iOS
+    /// release. Side-effects are scoped to the listed auth +
+    /// wallet + dev-auto-login keys; the locale picker /
     /// financial-color preference / backend URL override survive
     /// (the harness sets the backend URL via a separate
     /// ``-snapper.customBackendURL`` argument).

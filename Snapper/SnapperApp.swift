@@ -4,14 +4,16 @@ import SwiftUI
 struct SnapperApp: App {
 
     /// Reset persisted session state when the screenshot harness
-    /// passes ``-snapper.resetSessionState YES`` at launch. Must run
-    /// BEFORE ``@StateObject`` initializers (which would lazy-create
-    /// ``AuthService.shared`` and pick up the persisted cookies),
-    /// so we do it in ``SnapperApp.init()`` rather than the
-    /// ``AppDelegate`` (whose delegate methods can fire AFTER the
-    /// SwiftUI property wrappers under SwiftUI's lifecycle). DEBUG-
-    /// only so production launches cannot be tricked into clearing
-    /// the session.
+    /// passes ``-snapper.resetSessionState YES`` at launch. Runs in
+    /// the App struct's ``init()`` so the clear lands before
+    /// ``WindowGroup``'s content closure evaluates and triggers the
+    /// first authenticated API call — at that point
+    /// ``URLSession.shared`` would otherwise attach the persisted
+    /// cookies from ``HTTPCookieStorage.shared`` and the test runner
+    /// would see a logged-in screen instead of ``LoginView``. The
+    /// AppDelegate copy of this helper is kept as defense in depth.
+    /// DEBUG-only so production launches cannot be tricked into
+    /// clearing the session by a hostile launch argument.
     init() {
         #if DEBUG
         Self.resetSessionStateIfRequested()
@@ -25,11 +27,13 @@ struct SnapperApp: App {
     @StateObject private var navigationCoordinator = NavigationCoordinator.shared
     @Environment(\.scenePhase) private var scenePhase
 
-    /// Inline implementation mirrors the one in ``AppDelegate`` but
-    /// runs at App construction so the SwiftUI property wrappers see
-    /// a clean state. The AppDelegate variant is kept as a defense
-    /// in depth in case the SwiftUI lifecycle changes in a future
-    /// iOS release.
+    /// Inline implementation mirrors the one in ``AppDelegate``.
+    /// Side-effects are explicitly scoped to ``HTTPCookieStorage.shared``
+    /// cookies + ``selected_wallet_public_id`` / ``snapper.devAutoLoginUser``
+    /// / ``snapper.devAutoLoginPass`` UserDefaults keys. The locale
+    /// picker, financial-color preference, and backend URL override
+    /// survive — the harness sets the backend URL via a separate
+    /// ``-snapper.customBackendURL`` launch argument.
     #if DEBUG
     private static func resetSessionStateIfRequested() {
         let defaults = UserDefaults.standard
@@ -39,14 +43,9 @@ struct SnapperApp: App {
         for cookie in HTTPCookieStorage.shared.cookies ?? [] {
             HTTPCookieStorage.shared.deleteCookie(cookie)
         }
-        if let urlSessionCookies = URLSession.shared.configuration.httpCookieStorage?.cookies {
-            for cookie in urlSessionCookies {
-                URLSession.shared.configuration.httpCookieStorage?.deleteCookie(cookie)
-            }
-        }
-        if let bundleId = Bundle.main.bundleIdentifier {
-            defaults.removePersistentDomain(forName: bundleId)
-        }
+        defaults.removeObject(forKey: "selected_wallet_public_id")
+        defaults.removeObject(forKey: "snapper.devAutoLoginUser")
+        defaults.removeObject(forKey: "snapper.devAutoLoginPass")
     }
     #endif
 
