@@ -50,6 +50,18 @@ final class NiceAxisTests: XCTestCase {
         XCTAssertEqual((result.lowerBound + result.upperBound) / 2, 76500, accuracy: 0.001)
     }
 
+    func testTickCount_belowTwo_isClampedToTwo() {
+        let resultOne = niceAxis(min: 0, max: 100, tickCount: 1)
+        let resultZero = niceAxis(min: 0, max: 100, tickCount: 0)
+        let resultNegative = niceAxis(min: 0, max: 100, tickCount: -5)
+        let baseline = niceAxis(min: 0, max: 100, tickCount: 2)
+        XCTAssertEqual(resultOne, baseline)
+        XCTAssertEqual(resultZero, baseline)
+        XCTAssertEqual(resultNegative, baseline)
+        XCTAssertFalse(resultOne.step.isNaN)
+        XCTAssertFalse(resultOne.step.isInfinite)
+    }
+
     func testLargeRange_millions_5ticks_stepIsRound() {
         let result = niceAxis(min: 1_234_567, max: 1_345_678, tickCount: 5)
         let allowedSteps: Set<Double> = [10_000, 20_000, 25_000, 50_000]

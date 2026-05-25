@@ -74,6 +74,12 @@ private func niceNumber(_ x: Double, round: Bool) -> Double {
 /// degenerate value lands at the plot's vertical midpoint rather
 /// than against the bottom edge where ``CandlestickGeometry``'s
 /// clip-to-plot pipeline would render it invisible.
+///
+/// ``tickCount`` is clamped to a minimum of 2 — the formula
+/// ``range / (tickCount - 1)`` is undefined for ``tickCount < 2``
+/// (division by zero, then NaN propagation). Callers in this
+/// project pass ``5``; the clamp protects against future misuse
+/// of the helper as a shared library function.
 func niceAxis(min: Double, max: Double, tickCount: Int) -> NiceAxis {
     guard max > min else {
         return NiceAxis(
@@ -82,8 +88,9 @@ func niceAxis(min: Double, max: Double, tickCount: Int) -> NiceAxis {
             step: 1
         )
     }
+    let safeTickCount = Swift.max(tickCount, 2)
     let range = niceNumber(max - min, round: false)
-    let step = niceNumber(range / Double(tickCount - 1), round: true)
+    let step = niceNumber(range / Double(safeTickCount - 1), round: true)
     return NiceAxis(
         lowerBound: floor(min / step) * step,
         upperBound: ceil(max / step) * step,

@@ -175,17 +175,20 @@ struct CandlestickChartView: View {
         let xFormat = xAxisFormat
 
         Canvas { ctx, size in
+            let plotWidth = size.width - Self.yAxisLabelWidth
+            let plotHeight = size.height - Self.xAxisLabelHeight
+            guard plotWidth > 0, plotHeight > 0 else { return }
             let plotRect = CGRect(
                 x: onLeading ? Self.yAxisLabelWidth : 0,
                 y: 0,
-                width: size.width - Self.yAxisLabelWidth,
-                height: size.height - Self.xAxisLabelHeight
+                width: plotWidth,
+                height: plotHeight
             )
             let yAxisRect = CGRect(
                 x: onLeading ? 0 : size.width - Self.yAxisLabelWidth,
                 y: 0,
                 width: Self.yAxisLabelWidth,
-                height: size.height - Self.xAxisLabelHeight
+                height: plotHeight
             )
             let xAxisRect = CGRect(
                 x: 0,
