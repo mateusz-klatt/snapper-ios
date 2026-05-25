@@ -155,7 +155,7 @@ final class NotificationPrefsViewModel {
             )
             loadError = nil
             return true
-        } catch let APIError.httpError(404) {
+        } catch APIError.httpError(404) {
             loadError = nil
             return true
         } catch {

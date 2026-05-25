@@ -63,14 +63,9 @@ struct HomeView: View {
                 await loadData()
                 await loadLatestAlert()
             }
-            .background(
-                NavigationLink(
-                    destination: MarketDataView(),
-                    isActive: $devShouldShowMarket,
-                    label: { EmptyView() }
-                )
-                .opacity(0)
-            )
+            .navigationDestination(isPresented: $devShouldShowMarket) {
+                MarketDataView()
+            }
         }
         .task {
             await loadData()
