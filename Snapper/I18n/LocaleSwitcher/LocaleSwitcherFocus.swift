@@ -34,12 +34,23 @@ enum LocaleSwitcherFocus {
     /// the code at visual row ``r``, column ``c``. The columns are
     /// the original ``row1``/``row2``/``row3`` blocks laid out
     /// top-to-bottom.
-    static let rows: [[AppLocale]] = {
+    static let rows: [[AppLocale]] = makeRows()
+
+    private static func makeRows() -> [[AppLocale]] {
         let columns = [AppLocale.row1, AppLocale.row2, AppLocale.row3]
-        return (0..<rowCount).map { rowIdx in
-            columns.map { col in col[rowIdx] }
+        var transposedRows: [[AppLocale]] = []
+        transposedRows.reserveCapacity(rowCount)
+
+        for rowIdx in 0..<rowCount {
+            var row: [AppLocale] = []
+            row.reserveCapacity(columnCount)
+            for column in columns {
+                row.append(column[rowIdx])
+            }
+            transposedRows.append(row)
         }
-    }()
+        return transposedRows
+    }
 
     /// ``(row, column)`` coordinate of ``code`` within the
     /// transposed grid, or ``nil`` if the code is not present
