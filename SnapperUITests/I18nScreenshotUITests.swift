@@ -205,6 +205,65 @@ final class I18nScreenshotUITests: XCTestCase {
         )
     }
 
+    /// Visual regression test for ``CandlestickChartView`` after
+    /// the v2.0.2 SwiftUI-primitive rewrite. Captures three
+    /// screenshots into xcresult, one per scenario:
+    ///
+    /// - ``locale-us__chart-verify-rising-green.png``:
+    ///   ``locale=us``, no financial-color-preference override.
+    ///   Resolver yields ``.risingGreen`` (Western default).
+    ///   Expected visual: rising candles GREEN, falling RED;
+    ///   Y-axis labels on TRAILING edge.
+    /// - ``locale-cn__chart-verify-rising-red-auto.png``:
+    ///   ``locale=cn``, no financial-color-preference override.
+    ///   Resolver yields ``.risingRed`` for East-Asian locales.
+    ///   Expected visual: rising candles RED, falling GREEN;
+    ///   Y-axis labels on TRAILING edge. **This is the path
+    ///   broken in v2.0.1** — the rewrite must show red-rising
+    ///   here. Critically, no ``forceRisingRed=true`` shortcut
+    ///   is used; the live resolver must produce the result.
+    /// - ``locale-ae__chart-verify-rtl-axis.png``:
+    ///   ``locale=ae``, no financial-color-preference override.
+    ///   Expected visual: Y-axis labels on LEADING edge (RTL).
+    ///   Colors irrelevant for this slot (Western convention
+    ///   like US).
+    ///
+    /// Navigation uses ``-snapper.devStartOnMarket YES`` so the
+    /// DEBUG auto-navigate hook in ``HomeView`` pushes
+    /// ``MarketDataView`` straight after login, bypassing manual
+    /// tab/Home taps.
+    ///
+    /// See plan
+    /// [[plan_2026_05_24_ios_v202_candlestick_primitive_rewrite]]
+    /// §Tests for the acceptance criteria.
+    func testCaptureChartColorVerification() throws {
+        try skipUnlessBackendConfigured()
+        let cases: [(LocaleSpec, String)] = [
+            (.init(code: "us", appleLanguageTag: "en-US"), "chart-verify-rising-green"),
+            (.init(code: "cn", appleLanguageTag: "zh-Hans-CN"), "chart-verify-rising-red-auto"),
+            (.init(code: "ae", appleLanguageTag: "ar-AE"), "chart-verify-rtl-axis"),
+        ]
+        for (spec, slot) in cases {
+            XCTContext.runActivity(named: "\(spec.code)/\(slot)") { _ in
+                let app = launchApp(
+                    spec: spec,
+                    resetSession: true,
+                    forceRisingRed: false,
+                    devStartOnMarket: true
+                )
+                guard performLogin(in: app) else {
+                    attach(code: spec.code, screen: "\(slot)-login-failed")
+                    app.terminate()
+                    return
+                }
+                dismissSavePasswordDialog(app: app)
+                sleep(4)
+                attach(code: spec.code, screen: slot)
+                app.terminate()
+            }
+        }
+    }
+
     /// Capture the Login screen with the locale picker chip visible.
     /// Does NOT log in — the goal is to show the chip + autonym
     /// before the first interaction. Output filename uses ``slot``
@@ -307,7 +366,8 @@ final class I18nScreenshotUITests: XCTestCase {
     private func launchApp(
         spec: LocaleSpec,
         resetSession: Bool = false,
-        forceRisingRed: Bool = false
+        forceRisingRed: Bool = false,
+        devStartOnMarket: Bool = false
     ) -> XCUIApplication {
         let app = XCUIApplication()
         var args = [
@@ -322,6 +382,9 @@ final class I18nScreenshotUITests: XCTestCase {
         }
         if forceRisingRed {
             args += ["-snapper-financial-color-preference", "rising-red"]
+        }
+        if devStartOnMarket {
+            args += ["-snapper.devStartOnMarket", "YES"]
         }
         app.launchArguments = args
         app.launch()

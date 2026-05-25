@@ -3,7 +3,7 @@
 # and dump per-country PNGs into the proprietary/screenshots/ios/ tree.
 #
 # Usage:
-#   ios/scripts/screenshot-all-locales.sh [smoke|all|retry|showcase]
+#   ios/scripts/screenshot-all-locales.sh [smoke|all|retry|showcase|chart-verify]
 #
 # Backend URL discovery (in order):
 #   1. SNAPPER_UITEST_BACKEND_URL env var
@@ -20,11 +20,12 @@ XCRESULT="$ROOT/build/screenshots.xcresult"
 
 MODE="${1:-all}"
 case "$MODE" in
-  smoke)    METHOD="testCaptureSmoke" ;;
-  retry)    METHOD="testCaptureRetryFailures" ;;
-  all)      METHOD="testCaptureAllLocales" ;;
-  showcase) METHOD="testCaptureMarketingShowcase" ;;
-  *) echo "usage: $0 [smoke|all|retry|showcase]" >&2 ; exit 2 ;;
+  smoke)        METHOD="testCaptureSmoke" ;;
+  retry)        METHOD="testCaptureRetryFailures" ;;
+  all)          METHOD="testCaptureAllLocales" ;;
+  showcase)     METHOD="testCaptureMarketingShowcase" ;;
+  chart-verify) METHOD="testCaptureChartColorVerification" ;;
+  *) echo "usage: $0 [smoke|all|retry|showcase|chart-verify]" >&2 ; exit 2 ;;
 esac
 
 URL="${SNAPPER_UITEST_BACKEND_URL:-}"
