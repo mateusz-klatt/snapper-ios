@@ -1,26 +1,59 @@
-import Charts
 import SwiftUI
 
-/// Candlestick chart rendered with Apple's Swift Charts. Wick is
-/// a ``RuleMark(yStart: low, yEnd: high)``; body is a
-/// ``RectangleMark(yStart: min(open, close), yEnd: max(open,
-/// close))``. Body fill: BrandGreen when ``close >= open``,
-/// BrandRed otherwise. Grid color reads the asset-catalog
-/// ``ChartGrid`` token (already defined in the project's
-/// ``Assets.xcassets`` anticipating this work).
+/// Candlestick chart rendered with SwiftUI primitives
+/// (``Canvas`` + ``Path``). Wick is a ``Path`` line stroke from
+/// ``low`` to ``high``; body is a filled rounded ``Path`` from
+/// ``min(open, close)`` to ``max(open, close)``. Body fill is
+/// resolved at the view's body via
+/// ``Color.financialRising(for: appState)`` /
+/// ``Color.financialFalling(for: appState)`` so the rising/falling
+/// convention follows the user's
+/// ``FinancialColorPreference`` and locale.
 ///
-/// Decimal candle values cross the Charts boundary via
+/// We render the axes ourselves rather than using Apple's Swift
+/// Charts (``Chart`` + ``RectangleMark`` + ``RuleMark``) because
+/// iOS 26.2 ships a Charts regression that silently ignores
+/// ``.foregroundStyle()`` for ``.red`` / ``.green`` semantic
+/// colors on those marks, breaking the CN/HK/JP/KR
+/// ``rising-red`` convention. The math is unit-tested in
+/// ``NiceAxisTests`` and ``CandlestickGeometryTests``; the visual
+/// rendering is verified by ``testCaptureChartColorVerification``.
+/// See [[plan_2026_05_24_ios_v202_candlestick_primitive_rewrite]].
+///
+/// Decimal candle values cross the ``Double`` boundary via
 /// ``NSDecimalNumber.doubleValue`` — confined to this view so the
 /// VM-side storage stays precision-clean.
 struct CandlestickChartView: View {
     let candles: [MarketCandle]
     /// Drives the X-axis label format. Hourly / daily candles
-    /// labelled as `HH:mm` collapse to repeated `00:00` rows; the
-    /// switch keeps the axis legible across the supported set.
+    /// labelled as ``HH:mm`` collapse to repeated ``00:00`` rows;
+    /// the switch keeps the axis legible across the supported set.
     var timeframe: MarketTimeframe = .oneHour
 
     @Environment(AppState.self) private var appState
     @Environment(\.layoutDirection) private var layoutDirection
+
+    private static let xAxisLabelHeight: CGFloat = 20
+    private static let yAxisLabelWidth: CGFloat = 56
+    private static let maxBodyWidth: CGFloat = 5
+    private static let minBodyWidth: CGFloat = 1
+    private static let bodySlotFraction: CGFloat = 0.7
+    private static let bodyCornerRadius: CGFloat = 1
+    private static let wickLineWidth: CGFloat = 1.5
+    private static let gridLineWidth: CGFloat = 0.5
+    private static let yAxisTickCount: Int = 5
+    private static let xAxisTickCount: Int = 4
+
+    /// Per-candle body width, computed from the candle slot width
+    /// (``plotWidth / count``). Capped at ``maxBodyWidth`` (5pt)
+    /// for sparse charts and floored at ``minBodyWidth`` (1pt)
+    /// for very dense charts so bodies stay visible without
+    /// overlapping their neighbors.
+    private static func candleBodyWidth(plotWidth: CGFloat, count: Int) -> CGFloat {
+        guard count > 0 else { return maxBodyWidth }
+        let slot = plotWidth / CGFloat(count)
+        return min(max(slot * bodySlotFraction, minBodyWidth), maxBodyWidth)
+    }
 
     var body: some View {
         if candles.isEmpty {
@@ -40,21 +73,16 @@ struct CandlestickChartView: View {
 
     /// Pick a Date.FormatStyle appropriate to the chart's
     /// timeframe so X-axis labels stay legible. Intraday
-    /// timeframes show `HH:mm`; daily candles show `MMM d`
-    /// (e.g. `May 11`) — otherwise multiple daily candles
-    /// all render as `00:00` and the axis becomes useless.
+    /// timeframes show ``HH:mm``; daily candles show ``MMM d``.
     ///
     /// Hour formatting forces 24-hour clock via
     /// ``.twoDigits(amPM: .omitted)`` regardless of locale —
     /// trading data uses 24h universally and the locale-default
-    /// 12h fallback in en-US / hk / kr truncated the rightmost
-    /// tick (` PM` suffix overflows the axis width).
+    /// 12h fallback truncated the rightmost tick.
     ///
     /// The format style is pinned to ``AppLocale.westernDigitsLocale``
     /// so the X-axis renders Latin digits in ``ae``/``ir``/``in``
-    /// rather than the locale's native digit set (which would mix
-    /// Eastern-Arabic ``٥:٠٢`` on the axis with Western ``78,041.50``
-    /// on the price tile — see [[westernDigitsLocale]] rationale).
+    /// rather than the locale's native digit set.
     private var xAxisFormat: Date.FormatStyle {
         let westernLocale = appState.locale.westernDigitsLocale
         switch timeframe {
@@ -77,91 +105,201 @@ struct CandlestickChartView: View {
         }
     }
 
-    /// Position the y-axis on the leading edge under RTL locales /
-    /// environment layout, trailing edge otherwise. Honors both the
-    /// ``AppLocale.isRTL`` set (UAE/IL/IR) and the SwiftUI
-    /// ``\.layoutDirection`` env so RTL accessibility traits and
-    /// preview overrides flip the axis correctly.
-    private var yAxisPosition: AxisMarkPosition {
-        return ChartRTLBehavior.yAxisEdge(
-            locale: appState.locale,
-            environmentLayout: layoutDirection
-        ) == .leading ? .leading : .trailing
-    }
-
     /// Number format for the Y-axis price labels — pinned to
     /// ``AppLocale.westernDigitsLocale`` so the price ticks render
-    /// Latin digits on ``ae``/``ir``/``bd`` instead of the locale's
-    /// native digit set. Without the explicit ``.locale(...)``,
-    /// ``AxisValueLabel()`` picks up the SwiftUI environment locale
-    /// (``AppLocale.nativeLocale`` at the app root) and AE/IR show
-    /// Eastern-Arabic ``٧٨,١٥٨`` while ``LocaleFormatters``-routed
-    /// price tiles render ``78,158`` — the inconsistency the digit
-    /// policy is meant to eliminate.
+    /// Latin digits regardless of the locale's native digit set.
     private var yAxisFormat: FloatingPointFormatStyle<Double> {
         .number.locale(appState.locale.westernDigitsLocale)
     }
 
-    /// Compute a tight Y-axis range from the actual candle highs
-    /// and lows, padded by 1.5% on each side so the body+wick of
-    /// extreme candles sit comfortably inside the chart frame.
-    /// Without this, Swift Charts auto-scales from 0 which makes
-    /// crypto-priced candles compress to a thin band.
-    private var yAxisDomain: ClosedRange<Double> {
+    /// ``true`` when the Y-axis labels should sit on the leading
+    /// edge of the chart frame (RTL locales like ``ae`` / ``il``
+    /// / ``ir``), ``false`` for the trailing edge (Western
+    /// default). Honors both ``AppLocale.isRTL`` and the SwiftUI
+    /// ``\.layoutDirection`` env.
+    private var yAxisOnLeading: Bool {
+        ChartRTLBehavior.yAxisEdge(
+            locale: appState.locale,
+            environmentLayout: layoutDirection
+        ) == .leading
+    }
+
+    /// Y-axis domain computed by the Heckbert nice-number
+    /// algorithm so tick labels land on round prices
+    /// (e.g. ``76510, 76520, …, 76550``) rather than the raw
+    /// data endpoints. Falls back to ``0...1`` when the candle
+    /// set is empty — though the caller short-circuits the
+    /// empty case before reaching here.
+    private var niceDomain: NiceAxis {
         let highs = candles.map { ($0.high as NSDecimalNumber).doubleValue }
         let lows = candles.map { ($0.low as NSDecimalNumber).doubleValue }
-        guard let high = highs.max(), let low = lows.min(), high > low else {
-            return 0 ... 1
+        guard let high = highs.max(), let low = lows.min() else {
+            return NiceAxis(lowerBound: 0, upperBound: 1, step: 1)
         }
-        let span = high - low
-        let pad = max(span * 0.015, 0.0001)
-        return (low - pad) ... (high + pad)
+        return niceAxis(min: low, max: high, tickCount: Self.yAxisTickCount)
+    }
+
+    /// Tick prices for the Y-axis, evaluated at every ``step``
+    /// from ``lowerBound`` to ``upperBound``. Slack of
+    /// ``step * 0.001`` on the upper bound absorbs floating-point
+    /// drift so the top tick reliably appears.
+    private static func yTicks(in domain: NiceAxis) -> [Double] {
+        var ticks: [Double] = []
+        var price = domain.lowerBound
+        while price <= domain.upperBound + domain.step * 0.001 {
+            ticks.append(price)
+            price += domain.step
+        }
+        return ticks
+    }
+
+    /// Indices of the candles that get an X-axis label. When
+    /// fewer than ``xAxisTickCount`` candles exist, every
+    /// candle gets its own label; otherwise four labels are
+    /// distributed evenly at ``0``, ``n/3``, ``2n/3`` and
+    /// ``n - 1``.
+    private static func xTickIndices(candleCount n: Int) -> [Int] {
+        guard n > xAxisTickCount else { return Array(0..<n) }
+        return [0, n / 3, (2 * n) / 3, n - 1]
     }
 
     @ViewBuilder
     private var chart: some View {
         let risingColor = Color.financialRising(for: appState)
         let fallingColor = Color.financialFalling(for: appState)
-        Chart(candles) { candle in
-            let openD = (candle.open as NSDecimalNumber).doubleValue
-            let highD = (candle.high as NSDecimalNumber).doubleValue
-            let lowD = (candle.low as NSDecimalNumber).doubleValue
-            let closeD = (candle.close as NSDecimalNumber).doubleValue
-            let isUp = closeD >= openD
-            let bodyColor: Color = isUp ? risingColor : fallingColor
+        let domain = niceDomain
+        let yTicks = Self.yTicks(in: domain)
+        let xTickIndices = Self.xTickIndices(candleCount: candles.count)
+        let onLeading = yAxisOnLeading
+        let yFormat = yAxisFormat
+        let xFormat = xAxisFormat
 
-            RuleMark(
-                x: .value("Time", candle.openAt),
-                yStart: .value("Low", lowD),
-                yEnd: .value("High", highD)
+        Canvas { ctx, size in
+            let plotWidth = size.width - Self.yAxisLabelWidth
+            let plotHeight = size.height - Self.xAxisLabelHeight
+            guard plotWidth > 0, plotHeight > 0 else { return }
+            let plotRect = CGRect(
+                x: onLeading ? Self.yAxisLabelWidth : 0,
+                y: 0,
+                width: plotWidth,
+                height: plotHeight
             )
-            .foregroundStyle(bodyColor.opacity(0.7))
-            .lineStyle(StrokeStyle(lineWidth: 1.5))
+            let yAxisRect = CGRect(
+                x: onLeading ? 0 : size.width - Self.yAxisLabelWidth,
+                y: 0,
+                width: Self.yAxisLabelWidth,
+                height: plotHeight
+            )
+            let xAxisRect = CGRect(
+                x: 0,
+                y: size.height - Self.xAxisLabelHeight,
+                width: size.width,
+                height: Self.xAxisLabelHeight
+            )
 
-            RectangleMark(
-                x: .value("Time", candle.openAt),
-                yStart: .value("Open or close", min(openD, closeD)),
-                yEnd: .value("Open or close", max(openD, closeD)),
-                width: .fixed(5)
+            let bodyWidth = Self.candleBodyWidth(
+                plotWidth: plotRect.width,
+                count: candles.count
             )
-            .foregroundStyle(bodyColor)
-            .cornerRadius(1)
-        }
-        .chartYScale(domain: yAxisDomain)
-        .chartXAxis {
-            AxisMarks(values: .automatic(desiredCount: 4)) { _ in
-                AxisGridLine().foregroundStyle(Color.chartGrid)
-                AxisValueLabel(format: xAxisFormat, centered: false)
-                    .foregroundStyle(Color.textSecondary)
+
+            var plotCtx = ctx
+            plotCtx.clip(to: Path(plotRect))
+
+            for tickPrice in yTicks {
+                let y = CandlestickGeometry.pixelY(
+                    price: tickPrice,
+                    domain: domain,
+                    plotMinY: plotRect.minY,
+                    plotMaxY: plotRect.maxY
+                )
+                var gridPath = Path()
+                gridPath.move(to: CGPoint(x: plotRect.minX, y: y))
+                gridPath.addLine(to: CGPoint(x: plotRect.maxX, y: y))
+                plotCtx.stroke(
+                    gridPath,
+                    with: .color(Color.chartGrid),
+                    lineWidth: Self.gridLineWidth
+                )
             }
-        }
-        .chartYAxis {
-            AxisMarks(
-                position: yAxisPosition,
-                values: .automatic(desiredCount: 5)
-            ) { _ in
-                AxisGridLine().foregroundStyle(Color.chartGrid)
-                AxisValueLabel(format: yAxisFormat).foregroundStyle(Color.textSecondary)
+
+            for (index, candle) in candles.enumerated() {
+                let open = (candle.open as NSDecimalNumber).doubleValue
+                let close = (candle.close as NSDecimalNumber).doubleValue
+                let high = (candle.high as NSDecimalNumber).doubleValue
+                let low = (candle.low as NSDecimalNumber).doubleValue
+                let isUp = close >= open
+                let bodyColor = isUp ? risingColor : fallingColor
+
+                let (wickTop, wickBottom) = CandlestickGeometry.candleWickEndpoints(
+                    index: index,
+                    count: candles.count,
+                    high: high,
+                    low: low,
+                    domain: domain,
+                    plotRect: plotRect
+                )
+                var wickPath = Path()
+                wickPath.move(to: wickTop)
+                wickPath.addLine(to: wickBottom)
+                plotCtx.stroke(
+                    wickPath,
+                    with: .color(bodyColor.opacity(0.7)),
+                    lineWidth: Self.wickLineWidth
+                )
+
+                let bodyRect = CandlestickGeometry.candleBodyRect(
+                    index: index,
+                    count: candles.count,
+                    open: open,
+                    close: close,
+                    domain: domain,
+                    plotRect: plotRect,
+                    bodyWidth: bodyWidth
+                )
+                let bodyPath = Path(
+                    roundedRect: bodyRect,
+                    cornerRadius: Self.bodyCornerRadius
+                )
+                plotCtx.fill(bodyPath, with: .color(bodyColor))
+            }
+
+            for tickPrice in yTicks {
+                let y = CandlestickGeometry.pixelY(
+                    price: tickPrice,
+                    domain: domain,
+                    plotMinY: plotRect.minY,
+                    plotMaxY: plotRect.maxY
+                )
+                let label = Text(tickPrice.formatted(yFormat))
+                    .font(.caption2)
+                    .foregroundStyle(Color.textSecondary)
+                let labelX = onLeading
+                    ? yAxisRect.maxX - 4
+                    : yAxisRect.minX + 4
+                let anchor: UnitPoint = onLeading ? .trailing : .leading
+                ctx.draw(
+                    label,
+                    at: CGPoint(x: labelX, y: y),
+                    anchor: anchor
+                )
+            }
+
+            for index in xTickIndices where index < candles.count {
+                let centerX = CandlestickGeometry.pixelX(
+                    index: index,
+                    count: candles.count,
+                    plotWidth: plotRect.width,
+                    plotMinX: plotRect.minX
+                )
+                let candle = candles[index]
+                let label = Text(candle.openAt.formatted(xFormat))
+                    .font(.caption2)
+                    .foregroundStyle(Color.textSecondary)
+                ctx.draw(
+                    label,
+                    at: CGPoint(x: centerX, y: xAxisRect.midY),
+                    anchor: .center
+                )
             }
         }
         .padding(.vertical, 12)
