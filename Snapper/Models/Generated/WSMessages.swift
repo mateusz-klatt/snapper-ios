@@ -759,6 +759,8 @@ struct ProcessSummaryItem: Codable, Sendable {
     let role: String
     let lifecycle: String
     let activePublicId: String?
+    let rssBytes: Int?
+    let cpuPercent: Double?
 
     enum CodingKeys: String, CodingKey {
         case name
@@ -767,6 +769,8 @@ struct ProcessSummaryItem: Codable, Sendable {
         case role
         case lifecycle
         case activePublicId = "active_public_id"
+        case rssBytes = "rss_bytes"
+        case cpuPercent = "cpu_percent"
     }
 }
 
