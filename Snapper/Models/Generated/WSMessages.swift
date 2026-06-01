@@ -752,28 +752,6 @@ struct ProcessRunEventData: Codable, Sendable {
     }
 }
 
-struct ProcessSummaryItem: Codable, Sendable {
-    let name: String
-    let running: Bool
-    let enabled: Bool
-    let role: String
-    let lifecycle: String
-    let activePublicId: String?
-    let rssBytes: Int?
-    let cpuPercent: Double?
-
-    enum CodingKeys: String, CodingKey {
-        case name
-        case running
-        case enabled
-        case role
-        case lifecycle
-        case activePublicId = "active_public_id"
-        case rssBytes = "rss_bytes"
-        case cpuPercent = "cpu_percent"
-    }
-}
-
 struct ProcessSummaryEventData: Codable, Sendable {
     let type: String
     let sequenceId: Int
@@ -781,6 +759,7 @@ struct ProcessSummaryEventData: Codable, Sendable {
     let timestamp: Date
     let sessionId: String
     let topic: String?
+    let coordinator: String?
     let processes: [ProcessSummaryItem]
     let snapshotAt: Date
 
@@ -791,6 +770,7 @@ struct ProcessSummaryEventData: Codable, Sendable {
         case timestamp
         case sessionId = "session_id"
         case topic
+        case coordinator
         case processes
         case snapshotAt = "snapshot_at"
     }

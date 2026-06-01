@@ -3266,10 +3266,12 @@ struct ProcessSummaryData: Codable, Sendable {
     let timestamp: Date
     let sessionId: String
     let topic: String?
+    let coordinator: String?
     let feeds: ProcessCategoryCount
     let strategies: ProcessCategoryCount
     let executors: ProcessCategoryCount
     let brokers: ProcessCategoryCount
+    let processes: [ProcessSummaryItem]?
 
     enum CodingKeys: String, CodingKey {
         case type
@@ -3278,10 +3280,34 @@ struct ProcessSummaryData: Codable, Sendable {
         case timestamp
         case sessionId = "session_id"
         case topic
+        case coordinator
         case feeds
         case strategies
         case executors
         case brokers
+        case processes
+    }
+}
+
+struct ProcessSummaryItem: Codable, Sendable {
+    let name: String
+    let running: Bool
+    let enabled: Bool
+    let role: String
+    let lifecycle: String
+    let activePublicId: String?
+    let rssBytes: Int?
+    let cpuPercent: Double?
+
+    enum CodingKeys: String, CodingKey {
+        case name
+        case running
+        case enabled
+        case role
+        case lifecycle
+        case activePublicId = "active_public_id"
+        case rssBytes = "rss_bytes"
+        case cpuPercent = "cpu_percent"
     }
 }
 
