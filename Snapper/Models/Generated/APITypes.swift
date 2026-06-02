@@ -952,6 +952,28 @@ struct BacktestSignalListResponse: Codable, Sendable {
     }
 }
 
+struct BacktestStrategyClassListResponse: Codable, Sendable {
+    let type: String?
+    let sequenceId: Int
+    let publicId: String
+    let timestamp: Date
+    let sessionId: String
+    let topic: String?
+    let payload: [String]
+    let count: Int
+
+    enum CodingKeys: String, CodingKey {
+        case type
+        case sequenceId = "sequence_id"
+        case publicId = "public_id"
+        case timestamp
+        case sessionId = "session_id"
+        case topic
+        case payload
+        case count
+    }
+}
+
 struct BacktestTradeData: Codable, Sendable {
     let type: String?
     let sequenceId: Int
