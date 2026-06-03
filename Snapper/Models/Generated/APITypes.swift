@@ -4016,6 +4016,7 @@ struct StrategyProcess: Codable, Sendable {
     let running: Bool
     let enabled: Bool
     let mode: String
+    let strategyClass: String?
 
     enum CodingKeys: String, CodingKey {
         case type
@@ -4028,6 +4029,7 @@ struct StrategyProcess: Codable, Sendable {
         case running
         case enabled
         case mode
+        case strategyClass = "strategy_class"
     }
 }
 
