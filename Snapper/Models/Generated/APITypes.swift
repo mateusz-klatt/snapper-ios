@@ -1252,6 +1252,8 @@ struct ConfiguredProcess: Codable, Sendable {
     let kind: String
     let walletPublicId: String?
     let parentTemplate: String?
+    let coordinator: String?
+    let managedRemotely: Bool?
 
     enum CodingKeys: String, CodingKey {
         case type
@@ -1277,6 +1279,8 @@ struct ConfiguredProcess: Codable, Sendable {
         case kind
         case walletPublicId = "wallet_public_id"
         case parentTemplate = "parent_template"
+        case coordinator
+        case managedRemotely = "managed_remotely"
     }
 }
 
