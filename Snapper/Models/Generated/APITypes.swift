@@ -2376,6 +2376,34 @@ struct InstrumentDetailListResponse: Codable, Sendable {
     }
 }
 
+struct InstrumentFeedHealthRowSchema: Codable, Sendable {
+    let coordinator: String
+    let exchange: String
+    let channel: String
+    let symbol: String
+    let status: String
+    let requestedAt: Date
+    let confirmedAt: Date?
+    let lastSeenDataAt: Date?
+    let lastError: String?
+    let retryCount: Int
+    let snapshotAt: Date
+
+    enum CodingKeys: String, CodingKey {
+        case coordinator
+        case exchange
+        case channel
+        case symbol
+        case status
+        case requestedAt = "requested_at"
+        case confirmedAt = "confirmed_at"
+        case lastSeenDataAt = "last_seen_data_at"
+        case lastError = "last_error"
+        case retryCount = "retry_count"
+        case snapshotAt = "snapshot_at"
+    }
+}
+
 struct InstrumentListResponse: Codable, Sendable {
     let type: String?
     let sequenceId: Int
@@ -2474,6 +2502,88 @@ struct LoginResponse: Codable, Sendable {
     let sessionId: String
     let topic: String?
     let payload: LoginData
+
+    enum CodingKeys: String, CodingKey {
+        case type
+        case sequenceId = "sequence_id"
+        case publicId = "public_id"
+        case timestamp
+        case sessionId = "session_id"
+        case topic
+        case payload
+    }
+}
+
+struct MarketDataCoverageExchange: Codable, Sendable {
+    let exchange: String
+    let instruments: Int
+    let freshTicks: Int
+    let freshCandles: Int
+    let gatedOff: Int
+    let dark: Int
+
+    enum CodingKeys: String, CodingKey {
+        case exchange
+        case instruments
+        case freshTicks = "fresh_ticks"
+        case freshCandles = "fresh_candles"
+        case gatedOff = "gated_off"
+        case dark
+    }
+}
+
+struct MarketDataCoveragePayload: Codable, Sendable {
+    let exchanges: [MarketDataCoverageExchange]
+    let tickWindowSeconds: Int
+    let candleWindowSeconds: Int
+
+    enum CodingKeys: String, CodingKey {
+        case exchanges
+        case tickWindowSeconds = "tick_window_seconds"
+        case candleWindowSeconds = "candle_window_seconds"
+    }
+}
+
+struct MarketDataCoverageResponse: Codable, Sendable {
+    let type: String?
+    let sequenceId: Int
+    let publicId: String
+    let timestamp: Date
+    let sessionId: String
+    let topic: String?
+    let payload: MarketDataCoveragePayload
+
+    enum CodingKeys: String, CodingKey {
+        case type
+        case sequenceId = "sequence_id"
+        case publicId = "public_id"
+        case timestamp
+        case sessionId = "session_id"
+        case topic
+        case payload
+    }
+}
+
+struct MarketFeedHealthPayload: Codable, Sendable {
+    let rows: [InstrumentFeedHealthRowSchema]
+    let exchange: String?
+    let freshWithinSeconds: Int?
+
+    enum CodingKeys: String, CodingKey {
+        case rows
+        case exchange
+        case freshWithinSeconds = "fresh_within_seconds"
+    }
+}
+
+struct MarketFeedHealthResponse: Codable, Sendable {
+    let type: String?
+    let sequenceId: Int
+    let publicId: String
+    let timestamp: Date
+    let sessionId: String
+    let topic: String?
+    let payload: MarketFeedHealthPayload
 
     enum CodingKeys: String, CodingKey {
         case type
