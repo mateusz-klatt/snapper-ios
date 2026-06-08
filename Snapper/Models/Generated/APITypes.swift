@@ -7509,6 +7509,7 @@ struct SignalData: Codable, Sendable {
     let pairedGroupSize: Int?
     let pairedGroupIndex: Int?
     let pairedGroupPolicy: String?
+    let pairedGroupKey: String?
 
     init(
         type: String? = nil,
@@ -7533,7 +7534,8 @@ struct SignalData: Codable, Sendable {
         pairedGroupId: String? = nil,
         pairedGroupSize: Int? = nil,
         pairedGroupIndex: Int? = nil,
-        pairedGroupPolicy: String? = nil
+        pairedGroupPolicy: String? = nil,
+        pairedGroupKey: String? = nil
     ) {
         self.type = type
         self.sequenceId = sequenceId
@@ -7558,6 +7560,7 @@ struct SignalData: Codable, Sendable {
         self.pairedGroupSize = pairedGroupSize
         self.pairedGroupIndex = pairedGroupIndex
         self.pairedGroupPolicy = pairedGroupPolicy
+        self.pairedGroupKey = pairedGroupKey
     }
 
     enum CodingKeys: String, CodingKey {
@@ -7584,6 +7587,7 @@ struct SignalData: Codable, Sendable {
         case pairedGroupSize = "paired_group_size"
         case pairedGroupIndex = "paired_group_index"
         case pairedGroupPolicy = "paired_group_policy"
+        case pairedGroupKey = "paired_group_key"
     }
 }
 
