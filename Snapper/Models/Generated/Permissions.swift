@@ -27,13 +27,14 @@ enum Permission: String, CaseIterable, Codable, Sendable {
     case manageBacktests = "manage:backtests"
     case readNotifications = "read:notifications"
     case manageNotificationDevices = "manage:notification_devices"
+    case managePairedExecution = "manage:paired_execution"
 }
 
 let rolePermissions: [UserRole: [Permission]] = [
     .aiDelegate: [.cancelOrders, .createOrders, .managePositions, .readBacktests, .readMarketData, .readOrders, .readPositions, .readSignals, .readStrategies, .readSystemStatus],
     .viewer: [.manageNotificationDevices, .readBacktests, .readMarketData, .readNotifications, .readOrders, .readPositions, .readStrategies, .readSystemStatus],
-    .operatorRole: [.cancelOrders, .createOrders, .manageBacktests, .manageNotificationDevices, .managePositions, .manageProcesses, .readBacktests, .readMarketData, .readNotifications, .readOrders, .readPositions, .readSignals, .readStrategies, .readSystemStatus, .startStrategies, .stopStrategies],
-    .admin: [.cancelOrders, .configureStrategies, .configureSystem, .createOrders, .impersonateOperator, .manageBacktests, .manageNotificationDevices, .managePositions, .manageProcesses, .manageScopeGrants, .manageUsers, .manageWalletCredentials, .readBacktests, .readMarketData, .readNotifications, .readOrders, .readPositions, .readSignals, .readStrategies, .readSystemStatus, .readWalletCredentials, .startStrategies, .stopStrategies],
+    .operatorRole: [.cancelOrders, .createOrders, .manageBacktests, .manageNotificationDevices, .managePairedExecution, .managePositions, .manageProcesses, .readBacktests, .readMarketData, .readNotifications, .readOrders, .readPositions, .readSignals, .readStrategies, .readSystemStatus, .startStrategies, .stopStrategies],
+    .admin: [.cancelOrders, .configureStrategies, .configureSystem, .createOrders, .impersonateOperator, .manageBacktests, .manageNotificationDevices, .managePairedExecution, .managePositions, .manageProcesses, .manageScopeGrants, .manageUsers, .manageWalletCredentials, .readBacktests, .readMarketData, .readNotifications, .readOrders, .readPositions, .readSignals, .readStrategies, .readSystemStatus, .readWalletCredentials, .startStrategies, .stopStrategies],
 ]
 
 let resourceAccess: [String: [UserRole]] = [

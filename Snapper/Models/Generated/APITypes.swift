@@ -5434,6 +5434,338 @@ struct OrphanSweepResultData: Codable, Sendable {
     }
 }
 
+struct PairedExecutionIncident: Codable, Sendable {
+    let type: String?
+    let sequenceId: Int
+    let publicId: String
+    let timestamp: Date
+    let sessionId: String
+    let topic: String?
+    let walletPublicId: String
+    let strategyId: String
+    let groupKey: String
+    let halt: PairedHaltInfo?
+    let haltMissing: Bool
+    let groups: [PairedGroupIncident]
+
+    init(
+        type: String? = nil,
+        sequenceId: Int,
+        publicId: String,
+        timestamp: Date,
+        sessionId: String,
+        topic: String? = nil,
+        walletPublicId: String,
+        strategyId: String,
+        groupKey: String,
+        halt: PairedHaltInfo?,
+        haltMissing: Bool,
+        groups: [PairedGroupIncident]
+    ) {
+        self.type = type
+        self.sequenceId = sequenceId
+        self.publicId = publicId
+        self.timestamp = timestamp
+        self.sessionId = sessionId
+        self.topic = topic
+        self.walletPublicId = walletPublicId
+        self.strategyId = strategyId
+        self.groupKey = groupKey
+        self.halt = halt
+        self.haltMissing = haltMissing
+        self.groups = groups
+    }
+
+    enum CodingKeys: String, CodingKey {
+        case type
+        case sequenceId = "sequence_id"
+        case publicId = "public_id"
+        case timestamp
+        case sessionId = "session_id"
+        case topic
+        case walletPublicId = "wallet_public_id"
+        case strategyId = "strategy_id"
+        case groupKey = "group_key"
+        case halt
+        case haltMissing = "halt_missing"
+        case groups
+    }
+}
+
+struct PairedExecutionIncidentListResponse: Codable, Sendable {
+    let type: String?
+    let sequenceId: Int
+    let publicId: String
+    let timestamp: Date
+    let sessionId: String
+    let topic: String?
+    let payload: [PairedExecutionIncident]
+    let count: Int
+
+    init(
+        type: String? = nil,
+        sequenceId: Int,
+        publicId: String,
+        timestamp: Date,
+        sessionId: String,
+        topic: String? = nil,
+        payload: [PairedExecutionIncident],
+        count: Int
+    ) {
+        self.type = type
+        self.sequenceId = sequenceId
+        self.publicId = publicId
+        self.timestamp = timestamp
+        self.sessionId = sessionId
+        self.topic = topic
+        self.payload = payload
+        self.count = count
+    }
+
+    enum CodingKeys: String, CodingKey {
+        case type
+        case sequenceId = "sequence_id"
+        case publicId = "public_id"
+        case timestamp
+        case sessionId = "session_id"
+        case topic
+        case payload
+        case count
+    }
+}
+
+struct PairedGroupIncident: Codable, Sendable {
+    let type: String?
+    let sequenceId: Int
+    let publicId: String
+    let timestamp: Date
+    let sessionId: String
+    let topic: String?
+    let groupPublicId: String
+    let status: String
+    let policy: String
+    let failureReason: String?
+    let haltedAt: Date?
+    let createdAt: Date
+    let legs: [PairedLegExposure]
+
+    init(
+        type: String? = nil,
+        sequenceId: Int,
+        publicId: String,
+        timestamp: Date,
+        sessionId: String,
+        topic: String? = nil,
+        groupPublicId: String,
+        status: String,
+        policy: String,
+        failureReason: String?,
+        haltedAt: Date?,
+        createdAt: Date,
+        legs: [PairedLegExposure]
+    ) {
+        self.type = type
+        self.sequenceId = sequenceId
+        self.publicId = publicId
+        self.timestamp = timestamp
+        self.sessionId = sessionId
+        self.topic = topic
+        self.groupPublicId = groupPublicId
+        self.status = status
+        self.policy = policy
+        self.failureReason = failureReason
+        self.haltedAt = haltedAt
+        self.createdAt = createdAt
+        self.legs = legs
+    }
+
+    enum CodingKeys: String, CodingKey {
+        case type
+        case sequenceId = "sequence_id"
+        case publicId = "public_id"
+        case timestamp
+        case sessionId = "session_id"
+        case topic
+        case groupPublicId = "group_public_id"
+        case status
+        case policy
+        case failureReason = "failure_reason"
+        case haltedAt = "halted_at"
+        case createdAt = "created_at"
+        case legs
+    }
+}
+
+struct PairedGroupTerminalizeResponse: Codable, Sendable {
+    let type: String?
+    let sequenceId: Int
+    let publicId: String
+    let timestamp: Date
+    let sessionId: String
+    let topic: String?
+    let payload: PairedGroupIncident
+
+    init(
+        type: String? = nil,
+        sequenceId: Int,
+        publicId: String,
+        timestamp: Date,
+        sessionId: String,
+        topic: String? = nil,
+        payload: PairedGroupIncident
+    ) {
+        self.type = type
+        self.sequenceId = sequenceId
+        self.publicId = publicId
+        self.timestamp = timestamp
+        self.sessionId = sessionId
+        self.topic = topic
+        self.payload = payload
+    }
+
+    enum CodingKeys: String, CodingKey {
+        case type
+        case sequenceId = "sequence_id"
+        case publicId = "public_id"
+        case timestamp
+        case sessionId = "session_id"
+        case topic
+        case payload
+    }
+}
+
+struct PairedHaltInfo: Codable, Sendable {
+    let type: String?
+    let sequenceId: Int
+    let publicId: String
+    let timestamp: Date
+    let sessionId: String
+    let topic: String?
+    let haltPublicId: String
+    let reason: String
+    let groupPublicId: String
+    let createdAt: Date
+
+    init(
+        type: String? = nil,
+        sequenceId: Int,
+        publicId: String,
+        timestamp: Date,
+        sessionId: String,
+        topic: String? = nil,
+        haltPublicId: String,
+        reason: String,
+        groupPublicId: String,
+        createdAt: Date
+    ) {
+        self.type = type
+        self.sequenceId = sequenceId
+        self.publicId = publicId
+        self.timestamp = timestamp
+        self.sessionId = sessionId
+        self.topic = topic
+        self.haltPublicId = haltPublicId
+        self.reason = reason
+        self.groupPublicId = groupPublicId
+        self.createdAt = createdAt
+    }
+
+    enum CodingKeys: String, CodingKey {
+        case type
+        case sequenceId = "sequence_id"
+        case publicId = "public_id"
+        case timestamp
+        case sessionId = "session_id"
+        case topic
+        case haltPublicId = "halt_public_id"
+        case reason
+        case groupPublicId = "group_public_id"
+        case createdAt = "created_at"
+    }
+}
+
+struct PairedLegExposure: Codable, Sendable {
+    let type: String?
+    let sequenceId: Int
+    let publicId: String
+    let timestamp: Date
+    let sessionId: String
+    let topic: String?
+    let legPublicId: String
+    let legIndex: Int
+    let exchange: String
+    let instrument: String
+    let mode: String
+    let shardKey: String
+    let side: String
+    let status: String
+    let filledSignedQty: Double
+    let compensatedSignedQty: Double
+    let openQty: Double
+    let compensationSeq: Int
+
+    init(
+        type: String? = nil,
+        sequenceId: Int,
+        publicId: String,
+        timestamp: Date,
+        sessionId: String,
+        topic: String? = nil,
+        legPublicId: String,
+        legIndex: Int,
+        exchange: String,
+        instrument: String,
+        mode: String,
+        shardKey: String,
+        side: String,
+        status: String,
+        filledSignedQty: Double,
+        compensatedSignedQty: Double,
+        openQty: Double,
+        compensationSeq: Int
+    ) {
+        self.type = type
+        self.sequenceId = sequenceId
+        self.publicId = publicId
+        self.timestamp = timestamp
+        self.sessionId = sessionId
+        self.topic = topic
+        self.legPublicId = legPublicId
+        self.legIndex = legIndex
+        self.exchange = exchange
+        self.instrument = instrument
+        self.mode = mode
+        self.shardKey = shardKey
+        self.side = side
+        self.status = status
+        self.filledSignedQty = filledSignedQty
+        self.compensatedSignedQty = compensatedSignedQty
+        self.openQty = openQty
+        self.compensationSeq = compensationSeq
+    }
+
+    enum CodingKeys: String, CodingKey {
+        case type
+        case sequenceId = "sequence_id"
+        case publicId = "public_id"
+        case timestamp
+        case sessionId = "session_id"
+        case topic
+        case legPublicId = "leg_public_id"
+        case legIndex = "leg_index"
+        case exchange
+        case instrument
+        case mode
+        case shardKey = "shard_key"
+        case side
+        case status
+        case filledSignedQty = "filled_signed_qty"
+        case compensatedSignedQty = "compensated_signed_qty"
+        case openQty = "open_qty"
+        case compensationSeq = "compensation_seq"
+    }
+}
+
 struct PendingReviewListResponse: Codable, Sendable {
     let items: [PendingReviewSummaryItem]
     let count: Int
