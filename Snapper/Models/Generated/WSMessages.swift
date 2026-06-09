@@ -71,6 +71,7 @@ enum OrderEventDataEvent: String, Codable, Sendable {
     case cancelled
     case expired
     case replaced
+    case unknown
 }
 
 enum OrderReplaceDataExchange: String, Codable, Sendable {
