@@ -20,10 +20,9 @@ import XCTest
 /// - placeholder schemas match across plural categories,
 /// - Polish characters are stored as literal UTF-8.
 ///
-/// The bidirectional ``ExpectedKeys.values ⊆ catalog`` assertion
-/// activates at end of Phase H rollout via
-/// ``Snapper/I18n/PhaseHRolloutStatus.isComplete``. During rollout the
-/// v1-locked subset still gets the strict treatment.
+/// The bidirectional ``ExpectedKeys.values ⊆ catalog`` assertion is
+/// controlled by ``Snapper/I18n/PhaseHRolloutStatus.isComplete``. The
+/// v1-locked subset always gets strict treatment.
 final class CatalogParityTests: XCTestCase {
 
     private static let expectedKeys: Set<String> = ExpectedKeys.values
@@ -327,7 +326,7 @@ final class CatalogParityTests: XCTestCase {
 
     func testEveryExpectedKeyAppearsInCatalog() throws {
         guard PhaseHRolloutStatus.isComplete else {
-            throw XCTSkip("Phase H rollout in progress — bidirectional parity activates when PhaseHRolloutStatus.isComplete flips to true at end of Phase J")
+            throw XCTSkip("Bidirectional catalog parity is disabled by PhaseHRolloutStatus — ExpectedKeys.values must match Localizable.xcstrings when enabled")
         }
         let catalog = try loadCatalog()
         let catalogKeys = Set(catalog.strings.keys)
