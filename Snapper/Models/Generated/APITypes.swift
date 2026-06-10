@@ -261,6 +261,7 @@ enum RegisterDeviceBodyPreviewsMode: String, Codable, Sendable {
 enum DeviceAlertPrefBodyAlertType: String, Codable, Sendable {
     case orderFillFull = "order_fill_full"
     case orderRejected = "order_rejected"
+    case orderUnknown = "order_unknown"
     case positionStopLossFired = "position_stop_loss_fired"
     case marginWarning = "margin_warning"
     case criticalSystemError = "critical_system_error"
