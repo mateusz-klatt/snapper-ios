@@ -4,7 +4,7 @@ Native iOS client for the [Snapper](https://github.com/mateusz-klatt/snapper) tr
 
 ## Status
 
-- **v0.1.x** — Slice 1: order entry, cancel, brackets, trailing stops, alerts, push notifications, wallet picker. See [`CHANGELOG.md`](CHANGELOG.md) for the per-release breakdown.
+- Current source: order entry, cancel, brackets, trailing stops, alerts, push notifications, wallet picker, live WebSocket order/heartbeat updates, market-data charts, runtime backend URL override, and 45-country localization. See [`CHANGELOG.md`](CHANGELOG.md) for the per-release breakdown.
 - Public source mirror; the maintainer owns the App Store / TestFlight pipeline. Forks build for the simulator out of the box.
 
 ## Screenshots
@@ -25,7 +25,7 @@ Captured on iPhone 17 Pro Max (iOS 26.2) signed in as a viewer-role account agai
 
 ![Notification preferences — per-alert-type defaults (order filled, order rejected, stop-loss fired, margin warning, system error) with priority floor and enable toggle; device overrides layered on top](docs/screenshots/07-notification-prefs.png)
 
-![Market data — BTC-USD on kraken at 1m timeframe, Swift Charts custom candlesticks (BrandGreen up / BrandRed down), tight Y-axis auto-scale; REST snapshot + WS streaming via the same 200ms leading-edge throttle the frontend uses](docs/screenshots/08-market-data.png)
+![Market data — BTC-USD on kraken at 1m timeframe, custom SwiftUI candlesticks (BrandGreen up / BrandRed down), tight Y-axis auto-scale; REST snapshot + WS streaming via the same 200ms leading-edge throttle the frontend uses](docs/screenshots/08-market-data.png)
 
 ## Requirements
 
@@ -38,7 +38,7 @@ Captured on iPhone 17 Pro Max (iOS 26.2) signed in as a viewer-role account agai
 ```bash
 make setup     # generates Snapper.xcodeproj from project.yml
 make build     # iPhone 17 Pro simulator
-make test      # full XCTest + Swift Testing suites
+make test      # SnapperTests + SnapperUITests scheme test action
 ```
 
 The Makefile uses sensible simulator defaults that match the GitHub Actions `macos-26` runner image. Override at the command line if needed:
@@ -62,9 +62,10 @@ The release build's runtime editor enforces the same rules `BackendURLStore.cano
 ## Architecture
 
 - **Swift 6.0** with strict concurrency. Services use actors (`DeviceRegistrationService`) and `@MainActor` isolation (`AuthService`, `WebSocketManager`); cross-actor protocols are `Sendable`.
-- **MVVM-with-pragmatic-View-fetching**: `LoginViewModel` is the textbook example; data-heavy tabs (`HomeView`, `OrdersView`, `PositionsView`) call `APIClient.shared` directly to keep the view-model layer minimal. v0.2.0 may tighten this.
+- **MVVM where it pays off**: login, orders, positions, market data, notification preferences, wallet picker, and order sheets use `@MainActor @Observable` ViewModels with `APIClientProtocol` injection. `HomeView` and `EditDevicePrefView` still keep thin view-scoped `APIClient.shared` orchestration where the extra VM layer would not buy much.
+- **Localization**: `AppLocale` drives the 45-country picker, SwiftUI locale/layout direction, catalog-language fallback, locale-aware numeric formatting, and the financial color convention. String coverage lives in `Snapper/Resources/Localization/Localizable.xcstrings`; `make check-all` runs both iOS i18n lint gates.
 - **Networking**:
-  - `APIClient` — REST with one-shot 401-refresh-and-replay, generic `Decodable` body.
+  - `APIClient` — REST with one-shot 401-refresh-and-replay, generic `Decodable` body, path/query encoding, and `X-CSRF-Token` attachment for mutating requests when a matching `csrf_token` cookie exists.
   - `WebSocketManager` — capped exponential backoff reconnect (300s ceiling), proactive `ws_token` refresh, terminal `.authFailed` state distinct from transient `.error`.
   - `EnvelopeMinter` — actor-isolated provenance stamper (per-app session id, separate control / telemetry counters, ms-precision ISO-8601). Mirrors the bridge's `integrations/snapper-mcp/src/envelope.ts` so backend gap detection sees a coherent session across iOS-originated commands.
 - **Generated types** under `Snapper/Models/Generated/` are upstream-owned snapshots of the backend's OpenAPI + WebSocket schemas. External contributors cannot regenerate them without backend access — see [`docs/known-limitations.md`](docs/known-limitations.md).

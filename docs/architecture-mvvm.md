@@ -7,9 +7,11 @@ shape.
 
 ## The split
 
-Each release-critical View has a paired `@MainActor @Observable`
+Most release-critical Views have a paired `@MainActor @Observable`
 ViewModel. The View owns layout + transient presentation flags;
-the VM owns load / submit / error / business state.
+the VM owns load / submit / error / business state. Small one-off
+surfaces may still call services directly when there is no reusable
+state or decision logic to extract.
 
 | Concern | Owner | Example |
 |---|---|---|
@@ -60,7 +62,7 @@ final class XxxViewModel {
 |---|---|
 | ViewModel tests | Inject `MockAPIClient` — closure-overridable class conforming to `APIClientProtocol`. Lock-protected handler slots so concurrent VM calls (`async let` fan-out) don't race. Default behavior: throw `APIError.invalidResponse` so unconfigured calls fail loudly. |
 | Service-stack tests (`APIClientNetworkTests` etc.) | Keep `URLProtocol` interception against the concrete `APIClient` to verify JSON encode / decode contract end-to-end. |
-| Auth seam | `AuthRefreshing` protocol (legacy, in `Services/Protocols.swift`); `AuthService` is the production conformer. |
+| Auth seam | `AuthRefreshing` protocol (older seam in `Services/Protocols.swift`); `AuthService` is the production conformer. |
 
 ## Concurrency rules
 
@@ -89,7 +91,7 @@ Hybrid path enacted in v0.3.1:
      chrome (declarative layout); the testable logic lives in
      `Snapper/ViewModels/`. View bodies are unreachable without
      ViewInspector.
-   - `Snapper/SnapperApp.swift` — app-entry / scene-phase wiring
+   - `Snapper/SnapperApp.swift` — app-entry / scene lifecycle wiring
      not unit-testable without a UIApplication harness.
    - `Snapper/Models/Generated/**` — auto-generated structs.
    - `SnapperTests/**` — industry standard (test code does not
@@ -122,8 +124,7 @@ load; chrome is excluded from the denominator.
 - Form validation + body building (`canSubmit`, `buildBody`).
 
 **Skip** when the View is:
-- Pure layout chrome over a parent-injected closure (small sheets
-  like `AttachBracketSheet` / `AttachTrailingStopSheet`).
+- Pure layout chrome over a parent-injected closure.
 - A single-purpose row / card type (`PositionCard`, `OrderRow`).
 - A wrapper around already-VM-owned state.
 
@@ -172,8 +173,8 @@ The editor surface lives in two places:
   `BackendURLEditor` sheet → on Save: sequenced sign-out
   documented in `CHANGELOG.md` v0.4.0 entry. The sequence is
   intentionally simple ("best-effort logout + force relogin")
-  rather than a smooth in-session switch — the smooth switch is
-  deferred to v0.5.0+ pending real-user signal.
+  rather than a smooth in-session switch; that richer flow remains
+  out of current scope pending real-user signal.
 
 Validation rules in `BackendURLStore.canonicalize` are the single
 authority on what is acceptable input; the editor surfaces user-
