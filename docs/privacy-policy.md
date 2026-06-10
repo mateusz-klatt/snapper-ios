@@ -34,12 +34,12 @@ The app processes the following categories of data **on your device** so it can 
 
 - **What:** username, password (during the login form), and the session tokens / cookies (`access_token`, `refresh_token`, `ws_token`, `csrf_token`) returned by your backend.
 - **How stored:** the backend's HTTP session cookies are accepted and replayed by the system `URLSession` (the app uses `URLSession.shared` and lets iOS handle cookie storage). The short-lived WebSocket token is held in memory only — never written to disk by the app. The plaintext password is held in memory inside `LoginViewModel` only for the duration of the login request — `LoginViewModel.login()` overwrites it with an empty string the moment the login call resolves (success or failure), so it does not persist for the rest of the session.
-- **Where it goes:** sent to your backend (the URL you configured) over HTTPS during login and refresh requests. Never sent anywhere else.
+- **Where it goes:** sent to your backend (the URL you configured) during login and refresh requests. App Store builds require HTTPS; DEBUG builds may use loopback HTTP for local development. Never sent anywhere else.
 
 ### Trade-related data
 
 - **What:** orders, positions, executions, alerts, wallet balances, instrument metadata, AI review payloads. All of this originates from your backend and is rendered locally for display.
-- **How stored:** in-memory only during the app session. Some derived state (selected wallet, time-travel cursor, theme) is persisted to `UserDefaults` so the app can restore it on next launch.
+- **How stored:** in-memory only during the app session. User choices such as selected wallet, app locale, financial-color preference, and custom backend URL are persisted to `UserDefaults` so the app can restore them on next launch.
 - **Where it goes:** never leaves your device except as part of the trading commands you submit back to your own backend.
 
 ### Push notification token (APNs)
@@ -59,7 +59,7 @@ The app processes the following categories of data **on your device** so it can 
 
 ### App preferences
 
-- **What:** UI choices like selected wallet, theme, and time-travel cursor.
+- **What:** UI choices like selected wallet, app locale, financial-color preference, and custom backend URL.
 - **How stored:** Apple `UserDefaults` (declared in `PrivacyInfo.xcprivacy` under `CA92.1`).
 - **Where it goes:** stays on your device.
 

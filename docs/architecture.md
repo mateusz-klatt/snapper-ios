@@ -15,6 +15,7 @@ This document captures the design decisions a reader would otherwise need to rev
 
 - Generic `request<T: Decodable>` core that all endpoint methods delegate to.
 - One-shot 401 handling: on `401`, call `AuthService.fetchFreshWsToken()` to refresh, then replay the original request once. A second 401 forces logout and routes the UI to `LoginView` via `SnapperApp`'s `isAuthenticated` observer.
+- Mutating requests attach `X-CSRF-Token` from the matching `csrf_token` cookie in `HTTPCookieStorage`. Login, refresh, and logout stay server-exempt and do not flow through this client.
 - Path segments interpolated through `encodePathSegment` (percent-encoded with `.urlPathAllowed`); query strings built with `URLComponents` + `URLQueryItem` so opaque server-emitted cursors with reserved characters round-trip correctly.
 - ISO-8601 date encoding/decoding on both sides — backend Pydantic models expect ISO strings, not Unix timestamps.
 
@@ -38,9 +39,7 @@ This document captures the design decisions a reader would otherwise need to rev
 - Session-cookie based (`URLSession.shared` cookie jar). Login `POST /api/auth/login` with `username`/`password`; backend sets `session_id` and `csrf_token` cookies.
 - Refresh: `POST /api/auth/refresh?return_tokens=true` returns a new `ws_token` (used by `WebSocketManager`) plus rotated session cookies.
 - Logout: `POST /api/auth/logout` invalidates the session server-side; client-side state is cleared regardless.
-- `WebSocketManager.wsToken` is a separate token from auth — used only for the WS handshake (`?token=<ws_token>` URL param). It rotates independently of the session cookie.
-
-See [`known-limitations.md`](known-limitations.md) for the CSRF header gap on iOS mutating REST requests (frontend sends `X-CSRF-Token`; iOS does not yet — scheduled for v0.2.0).
+- `WebSocketManager.wsToken` is a separate token from auth — used only in `authenticate` / `reauth` WebSocket frames. It rotates independently of the session cookie.
 
 ## App lifecycle
 
@@ -51,11 +50,21 @@ See [`known-limitations.md`](known-limitations.md) for the CSRF header gap on iO
 ## State management
 
 - `AppState` (`@MainActor` singleton) holds wallet selection + cached operator/wallet catalogues. Persisted to `UserDefaults` so a relaunch lands on the same wallet.
+- `AppState.locale` is the user-selected country code. It persists to `UserDefaults`, drives SwiftUI `\.locale` and `\.layoutDirection` at the app root, and syncs `User.default_language` to the backend after login or a runtime picker change.
+- `FinancialColorPreference` persists the user's market-color convention (`auto`, rising green, rising red). `auto` resolves from the active locale.
 - Trading screens fetch fresh data on appear via `.task(id:)` modifiers keyed on the selected wallet — switching wallets re-runs the fetch automatically.
+
+## Localization
+
+- `AppLocale` is the 45-country picker surface; `CatalogLanguage` is the string-catalog language set. Most country codes map one-to-one to a translated catalog column, while `us` uses English.
+- `CountryMappings` is the source of truth for catalog-language and BCP-47 locale identifiers. Tests keep it aligned with the web mapping.
+- `LocaleStrings` reads `Localizable.xcstrings` directly for runtime-selected languages. `LocaleFormatters` keeps trading numbers in Western digits while preserving regional separators and date grammar.
+- RTL handling is explicit: `ae`, `il`, and `ir` flip SwiftUI layout direction, and chart axis placement goes through `ChartRTLBehavior`.
+- `make check-all` runs both `ios-i18n-check` and `ios-i18n-check-strict` so new view/view-model strings either route through the catalog or appear on an allowlist.
 
 ## Testing strategy
 
-- `XCTest` for the bulk of the suite + `Swift Testing` for newer additions.
+- `XCTest` for the bulk of the unit and UI suite + `Swift Testing` for the smoke target.
 - `MockURLProtocol` hosts simulated REST responses; tests assert on the actual `URLRequest` shape (path, method, headers, body) rather than calling stubs that bypass the network layer.
 - `FakeWebSocketTask` + `FakeWebSocketTaskFactory` stand in for `URLSessionWebSocketTask` so reconnect-race tests are deterministic.
 - `FakeSleeper` (actor) replaces `Task.sleep` in tests that exercise backoff timing — verifies the manager really waits, without waiting in real time.
@@ -64,8 +73,8 @@ See [`known-limitations.md`](known-limitations.md) for the CSRF header gap on iO
 ## Build system
 
 - **XcodeGen** (`project.yml`) is the source of truth. The generated `Snapper.xcodeproj` is `.gitignore`'d — every contributor regenerates it locally, so signing identities and per-developer Xcode settings stay out of the tree.
-- `Makefile` is the public surface (`make build`, `make test`, `make coverage`, `make archive`). CI uses the same Make targets the maintainer uses locally.
-- Zero Swift Package Manager dependencies — everything runs on `Foundation` / `SwiftUI` / `Combine`. Keeps the supply chain trivial to audit.
+- `Makefile` is the public surface (`make build`, `make test`, `make coverage`, `make archive`, `make check-all`). CI uses the build/test/coverage targets; local completion gates use `check-all`, which chains build, test, strict Swift comment scanning, and both i18n scans.
+- Zero Swift Package Manager dependencies — everything runs on Apple SDK frameworks such as `Foundation`, `SwiftUI`, `Combine`, `Observation`, `UIKit`, `UserNotifications`, and `os`. Keeps the supply chain trivial to audit.
 
 ## Release pipeline
 
