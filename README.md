@@ -72,11 +72,12 @@ The release build's runtime editor enforces the same rules `BackendURLStore.cano
 
 ## Continuous integration
 
-GitHub Actions runs on `macos-26`:
+GitHub Actions uses runner-specific workflows:
 
-- `ci.yml` — `make build && make test` on every push to `master` and every PR.
-- `gitleaks.yml` — secret scan on push / PR / weekly cron.
-- `sonarcloud.yml` — coverage scan via Xcode `xccov` → SonarCloud generic XML.
+- `ci.yml` (`macos-26`) — `make build && make test` on every push to `master` and every PR.
+- `sonarcloud.yml` (`macos-26`) — coverage scan via Xcode `xccov` → SonarCloud generic XML.
+- `gitleaks.yml` (`ubuntu-latest`) — secret scan on push / PR / weekly cron.
+- `i18n-screenshots.yml` (`macos-26`, manual dispatch) — opt-in 45-locale UI screenshot sweep that requires a live backend URL input.
 
 ## Signing & release
 

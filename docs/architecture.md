@@ -80,11 +80,12 @@ This document captures the design decisions a reader would otherwise need to rev
 
 Two CI surfaces collaborate, each playing the role it is best suited for:
 
-### GitHub Actions (`macos-26`)
+### GitHub Actions
 
-- `ci.yml` — `make build && make test` on every push to `master` and every PR. Unsigned simulator build; runs in ~5-7 minutes.
-- `gitleaks.yml` — secret scan on push / PR / weekly cron.
-- `sonarcloud.yml` — coverage scan via Xcode `xccov` → SonarCloud generic XML.
+- `ci.yml` (`macos-26`) — `make build && make test` on every push to `master` and every PR. Unsigned simulator build; runs in ~5-7 minutes.
+- `sonarcloud.yml` (`macos-26`) — coverage scan via Xcode `xccov` → SonarCloud generic XML.
+- `gitleaks.yml` (`ubuntu-latest`) — secret scan on push / PR / weekly cron.
+- `i18n-screenshots.yml` (`macos-26`, manual dispatch) — opt-in 45-locale UI screenshot sweep that requires a live backend URL input.
 
 This is the **gate**: nothing reaches `master` without these green.
 
