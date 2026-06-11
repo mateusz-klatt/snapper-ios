@@ -1155,6 +1155,7 @@ struct OrderRequestData: Codable, Sendable {
     let orderType: String
     let quantity: Double
     let price: Double?
+    let stopPrice: Double?
     let clientOrderId: String
     let signaledAt: Date?
     let strategyTag: String?
@@ -1183,6 +1184,7 @@ struct OrderRequestData: Codable, Sendable {
         orderType: String,
         quantity: Double,
         price: Double? = nil,
+        stopPrice: Double? = nil,
         clientOrderId: String,
         signaledAt: Date? = nil,
         strategyTag: String? = nil,
@@ -1210,6 +1212,7 @@ struct OrderRequestData: Codable, Sendable {
         self.orderType = orderType
         self.quantity = quantity
         self.price = price
+        self.stopPrice = stopPrice
         self.clientOrderId = clientOrderId
         self.signaledAt = signaledAt
         self.strategyTag = strategyTag
@@ -1239,6 +1242,7 @@ struct OrderRequestData: Codable, Sendable {
         case orderType = "order_type"
         case quantity
         case price
+        case stopPrice = "stop_price"
         case clientOrderId = "client_order_id"
         case signaledAt = "signaled_at"
         case strategyTag = "strategy_tag"
