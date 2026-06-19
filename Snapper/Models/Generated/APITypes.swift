@@ -1990,6 +1990,7 @@ struct CandleData: Codable, Sendable {
     let volume: Double
     let vwap: Double?
     let trades: Int?
+    let complete: Bool?
 
     init(
         type: String? = nil,
@@ -2008,7 +2009,8 @@ struct CandleData: Codable, Sendable {
         close: Double,
         volume: Double,
         vwap: Double? = nil,
-        trades: Int? = nil
+        trades: Int? = nil,
+        complete: Bool? = nil
     ) {
         self.type = type
         self.sequenceId = sequenceId
@@ -2027,6 +2029,7 @@ struct CandleData: Codable, Sendable {
         self.volume = volume
         self.vwap = vwap
         self.trades = trades
+        self.complete = complete
     }
 
     enum CodingKeys: String, CodingKey {
@@ -2047,6 +2050,7 @@ struct CandleData: Codable, Sendable {
         case volume
         case vwap
         case trades
+        case complete
     }
 }
 
