@@ -3389,6 +3389,7 @@ struct EgressHealthResponse: Codable, Sendable {
 struct EgressRouteStatusSnapshot: Codable, Sendable {
     let id: String
     let kind: String
+    let proxyUrl: String?
     let region: String?
     let exitIp: String?
     let provider: String?
@@ -3400,10 +3401,12 @@ struct EgressRouteStatusSnapshot: Codable, Sendable {
     let inUseCount: Int
     let activeReservations: [EgressActiveReservationSnapshot]?
     let connections: [EgressConnectionSnapshot]?
+    let transfer: EgressTransferSnapshot?
 
     init(
         id: String,
         kind: String,
+        proxyUrl: String? = nil,
         region: String? = nil,
         exitIp: String? = nil,
         provider: String? = nil,
@@ -3414,10 +3417,12 @@ struct EgressRouteStatusSnapshot: Codable, Sendable {
         quarantineSecondsRemaining: Double?,
         inUseCount: Int,
         activeReservations: [EgressActiveReservationSnapshot]? = nil,
-        connections: [EgressConnectionSnapshot]? = nil
+        connections: [EgressConnectionSnapshot]? = nil,
+        transfer: EgressTransferSnapshot? = nil
     ) {
         self.id = id
         self.kind = kind
+        self.proxyUrl = proxyUrl
         self.region = region
         self.exitIp = exitIp
         self.provider = provider
@@ -3429,11 +3434,13 @@ struct EgressRouteStatusSnapshot: Codable, Sendable {
         self.inUseCount = inUseCount
         self.activeReservations = activeReservations
         self.connections = connections
+        self.transfer = transfer
     }
 
     enum CodingKeys: String, CodingKey {
         case id
         case kind
+        case proxyUrl = "proxy_url"
         case region
         case exitIp = "exit_ip"
         case provider
@@ -3445,6 +3452,61 @@ struct EgressRouteStatusSnapshot: Codable, Sendable {
         case inUseCount = "in_use_count"
         case activeReservations = "active_reservations"
         case connections
+        case transfer
+    }
+}
+
+struct EgressTransferSnapshot: Codable, Sendable {
+    let interface: String
+    let socks5ListenPort: Int
+    let rxBytes: Int
+    let txBytes: Int
+    let rxRateBytesPerSecond: Double?
+    let txRateBytesPerSecond: Double?
+    let latestHandshakeAt: Date?
+    let counterReset: Bool
+    let sampledAt: Date
+    let sampleAgeSeconds: Double
+    let stale: Bool
+
+    init(
+        interface: String,
+        socks5ListenPort: Int,
+        rxBytes: Int,
+        txBytes: Int,
+        rxRateBytesPerSecond: Double? = nil,
+        txRateBytesPerSecond: Double? = nil,
+        latestHandshakeAt: Date? = nil,
+        counterReset: Bool,
+        sampledAt: Date,
+        sampleAgeSeconds: Double,
+        stale: Bool
+    ) {
+        self.interface = interface
+        self.socks5ListenPort = socks5ListenPort
+        self.rxBytes = rxBytes
+        self.txBytes = txBytes
+        self.rxRateBytesPerSecond = rxRateBytesPerSecond
+        self.txRateBytesPerSecond = txRateBytesPerSecond
+        self.latestHandshakeAt = latestHandshakeAt
+        self.counterReset = counterReset
+        self.sampledAt = sampledAt
+        self.sampleAgeSeconds = sampleAgeSeconds
+        self.stale = stale
+    }
+
+    enum CodingKeys: String, CodingKey {
+        case interface
+        case socks5ListenPort = "socks5_listen_port"
+        case rxBytes = "rx_bytes"
+        case txBytes = "tx_bytes"
+        case rxRateBytesPerSecond = "rx_rate_bytes_per_second"
+        case txRateBytesPerSecond = "tx_rate_bytes_per_second"
+        case latestHandshakeAt = "latest_handshake_at"
+        case counterReset = "counter_reset"
+        case sampledAt = "sampled_at"
+        case sampleAgeSeconds = "sample_age_seconds"
+        case stale
     }
 }
 

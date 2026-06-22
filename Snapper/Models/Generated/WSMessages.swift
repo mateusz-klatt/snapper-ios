@@ -808,6 +808,90 @@ struct EgressPoolSnapshotEventData: Codable, Sendable {
     }
 }
 
+struct EgressTransferInterfaceSnapshot: Codable, Sendable {
+    let interface: String
+    let socks5ListenPort: Int
+    let rxBytes: Int
+    let txBytes: Int
+    let rxRateBytesPerSecond: Double?
+    let txRateBytesPerSecond: Double?
+    let latestHandshakeAt: Date?
+    let counterReset: Bool
+    let sampledAt: Date
+
+    init(
+        interface: String,
+        socks5ListenPort: Int,
+        rxBytes: Int,
+        txBytes: Int,
+        rxRateBytesPerSecond: Double? = nil,
+        txRateBytesPerSecond: Double? = nil,
+        latestHandshakeAt: Date? = nil,
+        counterReset: Bool,
+        sampledAt: Date
+    ) {
+        self.interface = interface
+        self.socks5ListenPort = socks5ListenPort
+        self.rxBytes = rxBytes
+        self.txBytes = txBytes
+        self.rxRateBytesPerSecond = rxRateBytesPerSecond
+        self.txRateBytesPerSecond = txRateBytesPerSecond
+        self.latestHandshakeAt = latestHandshakeAt
+        self.counterReset = counterReset
+        self.sampledAt = sampledAt
+    }
+
+    enum CodingKeys: String, CodingKey {
+        case interface
+        case socks5ListenPort = "socks5_listen_port"
+        case rxBytes = "rx_bytes"
+        case txBytes = "tx_bytes"
+        case rxRateBytesPerSecond = "rx_rate_bytes_per_second"
+        case txRateBytesPerSecond = "tx_rate_bytes_per_second"
+        case latestHandshakeAt = "latest_handshake_at"
+        case counterReset = "counter_reset"
+        case sampledAt = "sampled_at"
+    }
+}
+
+struct EgressTransferEventData: Codable, Sendable {
+    let type: String
+    let sequenceId: Int
+    let publicId: String
+    let timestamp: Date
+    let sessionId: String
+    let topic: String?
+    let interfaces: [EgressTransferInterfaceSnapshot]?
+
+    init(
+        type: String,
+        sequenceId: Int,
+        publicId: String,
+        timestamp: Date,
+        sessionId: String,
+        topic: String? = nil,
+        interfaces: [EgressTransferInterfaceSnapshot]? = nil
+    ) {
+        self.type = type
+        self.sequenceId = sequenceId
+        self.publicId = publicId
+        self.timestamp = timestamp
+        self.sessionId = sessionId
+        self.topic = topic
+        self.interfaces = interfaces
+    }
+
+    enum CodingKeys: String, CodingKey {
+        case type
+        case sequenceId = "sequence_id"
+        case publicId = "public_id"
+        case timestamp
+        case sessionId = "session_id"
+        case topic
+        case interfaces
+    }
+}
+
 struct ExecutionPlanDecisionEventData: Codable, Sendable {
     let type: String
     let sequenceId: Int
