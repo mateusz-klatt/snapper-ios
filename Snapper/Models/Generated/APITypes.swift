@@ -64,6 +64,26 @@ enum ConfiguredProcessKind: String, Codable, Sendable {
     case instance
 }
 
+enum EgressActiveReservationSnapshotTrafficClass: String, Codable, Sendable {
+    case publicValue = "public"
+    case privateValue = "private"
+}
+
+enum EgressConnectionSnapshotKind: String, Codable, Sendable {
+    case ws
+    case rest
+}
+
+enum EgressConnectionSnapshotTrafficClass: String, Codable, Sendable {
+    case publicValue = "public"
+    case privateValue = "private"
+}
+
+enum EgressRouteStatusSnapshotKind: String, Codable, Sendable {
+    case direct
+    case socks5
+}
+
 enum ExecutionDataExchange: String, Codable, Sendable {
     case paper
     case kraken
@@ -3181,6 +3201,250 @@ struct DeviceAlertPrefResponse: Codable, Sendable {
         case sessionId = "session_id"
         case topic
         case payload
+    }
+}
+
+struct EgressActiveReservationSnapshot: Codable, Sendable {
+    let exchange: String
+    let trafficClass: String
+    let container: String?
+
+    init(
+        exchange: String,
+        trafficClass: String,
+        container: String? = nil
+    ) {
+        self.exchange = exchange
+        self.trafficClass = trafficClass
+        self.container = container
+    }
+
+    enum CodingKeys: String, CodingKey {
+        case exchange
+        case trafficClass = "traffic_class"
+        case container
+    }
+}
+
+struct EgressConnectionSnapshot: Codable, Sendable {
+    let host: String
+    let kind: String
+    let exchange: String
+    let trafficClass: String
+    let container: String?
+    let count: Int
+    let lastSeenAt: Date?
+
+    init(
+        host: String,
+        kind: String,
+        exchange: String,
+        trafficClass: String,
+        container: String? = nil,
+        count: Int,
+        lastSeenAt: Date? = nil
+    ) {
+        self.host = host
+        self.kind = kind
+        self.exchange = exchange
+        self.trafficClass = trafficClass
+        self.container = container
+        self.count = count
+        self.lastSeenAt = lastSeenAt
+    }
+
+    enum CodingKeys: String, CodingKey {
+        case host
+        case kind
+        case exchange
+        case trafficClass = "traffic_class"
+        case container
+        case count
+        case lastSeenAt = "last_seen_at"
+    }
+}
+
+struct EgressContainerSummary: Codable, Sendable {
+    let container: String
+    let lastSeenAgeSeconds: Double
+    let stale: Bool
+    let routeCount: Int
+
+    init(
+        container: String,
+        lastSeenAgeSeconds: Double,
+        stale: Bool,
+        routeCount: Int
+    ) {
+        self.container = container
+        self.lastSeenAgeSeconds = lastSeenAgeSeconds
+        self.stale = stale
+        self.routeCount = routeCount
+    }
+
+    enum CodingKeys: String, CodingKey {
+        case container
+        case lastSeenAgeSeconds = "last_seen_age_seconds"
+        case stale
+        case routeCount = "route_count"
+    }
+}
+
+struct EgressHealthData: Codable, Sendable {
+    let type: String?
+    let sequenceId: Int
+    let publicId: String
+    let timestamp: Date
+    let sessionId: String
+    let topic: String?
+    let enabled: Bool
+    let onAllQuarantined: String?
+    let privateFallbackRouteId: String?
+    let privateOnFallback: Bool?
+    let containers: [EgressContainerSummary]?
+    let routes: [EgressRouteStatusSnapshot]?
+
+    init(
+        type: String? = nil,
+        sequenceId: Int,
+        publicId: String,
+        timestamp: Date,
+        sessionId: String,
+        topic: String? = nil,
+        enabled: Bool,
+        onAllQuarantined: String? = nil,
+        privateFallbackRouteId: String? = nil,
+        privateOnFallback: Bool? = nil,
+        containers: [EgressContainerSummary]? = nil,
+        routes: [EgressRouteStatusSnapshot]? = nil
+    ) {
+        self.type = type
+        self.sequenceId = sequenceId
+        self.publicId = publicId
+        self.timestamp = timestamp
+        self.sessionId = sessionId
+        self.topic = topic
+        self.enabled = enabled
+        self.onAllQuarantined = onAllQuarantined
+        self.privateFallbackRouteId = privateFallbackRouteId
+        self.privateOnFallback = privateOnFallback
+        self.containers = containers
+        self.routes = routes
+    }
+
+    enum CodingKeys: String, CodingKey {
+        case type
+        case sequenceId = "sequence_id"
+        case publicId = "public_id"
+        case timestamp
+        case sessionId = "session_id"
+        case topic
+        case enabled
+        case onAllQuarantined = "on_all_quarantined"
+        case privateFallbackRouteId = "private_fallback_route_id"
+        case privateOnFallback = "private_on_fallback"
+        case containers
+        case routes
+    }
+}
+
+struct EgressHealthResponse: Codable, Sendable {
+    let type: String?
+    let sequenceId: Int
+    let publicId: String
+    let timestamp: Date
+    let sessionId: String
+    let topic: String?
+    let payload: EgressHealthData
+
+    init(
+        type: String? = nil,
+        sequenceId: Int,
+        publicId: String,
+        timestamp: Date,
+        sessionId: String,
+        topic: String? = nil,
+        payload: EgressHealthData
+    ) {
+        self.type = type
+        self.sequenceId = sequenceId
+        self.publicId = publicId
+        self.timestamp = timestamp
+        self.sessionId = sessionId
+        self.topic = topic
+        self.payload = payload
+    }
+
+    enum CodingKeys: String, CodingKey {
+        case type
+        case sequenceId = "sequence_id"
+        case publicId = "public_id"
+        case timestamp
+        case sessionId = "session_id"
+        case topic
+        case payload
+    }
+}
+
+struct EgressRouteStatusSnapshot: Codable, Sendable {
+    let id: String
+    let kind: String
+    let region: String?
+    let exitIp: String?
+    let provider: String?
+    let priority: Int
+    let allowedExchanges: [String]?
+    let enabled: Bool
+    let quarantined: Bool
+    let quarantineSecondsRemaining: Double?
+    let inUseCount: Int
+    let activeReservations: [EgressActiveReservationSnapshot]?
+    let connections: [EgressConnectionSnapshot]?
+
+    init(
+        id: String,
+        kind: String,
+        region: String? = nil,
+        exitIp: String? = nil,
+        provider: String? = nil,
+        priority: Int,
+        allowedExchanges: [String]? = nil,
+        enabled: Bool,
+        quarantined: Bool,
+        quarantineSecondsRemaining: Double?,
+        inUseCount: Int,
+        activeReservations: [EgressActiveReservationSnapshot]? = nil,
+        connections: [EgressConnectionSnapshot]? = nil
+    ) {
+        self.id = id
+        self.kind = kind
+        self.region = region
+        self.exitIp = exitIp
+        self.provider = provider
+        self.priority = priority
+        self.allowedExchanges = allowedExchanges
+        self.enabled = enabled
+        self.quarantined = quarantined
+        self.quarantineSecondsRemaining = quarantineSecondsRemaining
+        self.inUseCount = inUseCount
+        self.activeReservations = activeReservations
+        self.connections = connections
+    }
+
+    enum CodingKeys: String, CodingKey {
+        case id
+        case kind
+        case region
+        case exitIp = "exit_ip"
+        case provider
+        case priority
+        case allowedExchanges = "allowed_exchanges"
+        case enabled
+        case quarantined
+        case quarantineSecondsRemaining = "quarantine_seconds_remaining"
+        case inUseCount = "in_use_count"
+        case activeReservations = "active_reservations"
+        case connections
     }
 }
 

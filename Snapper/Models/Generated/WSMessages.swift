@@ -736,6 +736,78 @@ struct DelegateOfflineData: Codable, Sendable {
     }
 }
 
+struct EgressPoolStatusSnapshot: Codable, Sendable {
+    let enabled: Bool
+    let onAllQuarantined: String?
+    let privateFallbackRouteId: String?
+    let privateOnFallback: Bool?
+    let routes: [EgressRouteStatusSnapshot]?
+
+    init(
+        enabled: Bool,
+        onAllQuarantined: String? = nil,
+        privateFallbackRouteId: String? = nil,
+        privateOnFallback: Bool? = nil,
+        routes: [EgressRouteStatusSnapshot]? = nil
+    ) {
+        self.enabled = enabled
+        self.onAllQuarantined = onAllQuarantined
+        self.privateFallbackRouteId = privateFallbackRouteId
+        self.privateOnFallback = privateOnFallback
+        self.routes = routes
+    }
+
+    enum CodingKeys: String, CodingKey {
+        case enabled
+        case onAllQuarantined = "on_all_quarantined"
+        case privateFallbackRouteId = "private_fallback_route_id"
+        case privateOnFallback = "private_on_fallback"
+        case routes
+    }
+}
+
+struct EgressPoolSnapshotEventData: Codable, Sendable {
+    let type: String
+    let sequenceId: Int
+    let publicId: String
+    let timestamp: Date
+    let sessionId: String
+    let topic: String?
+    let container: String
+    let snapshot: EgressPoolStatusSnapshot
+
+    init(
+        type: String,
+        sequenceId: Int,
+        publicId: String,
+        timestamp: Date,
+        sessionId: String,
+        topic: String? = nil,
+        container: String,
+        snapshot: EgressPoolStatusSnapshot
+    ) {
+        self.type = type
+        self.sequenceId = sequenceId
+        self.publicId = publicId
+        self.timestamp = timestamp
+        self.sessionId = sessionId
+        self.topic = topic
+        self.container = container
+        self.snapshot = snapshot
+    }
+
+    enum CodingKeys: String, CodingKey {
+        case type
+        case sequenceId = "sequence_id"
+        case publicId = "public_id"
+        case timestamp
+        case sessionId = "session_id"
+        case topic
+        case container
+        case snapshot
+    }
+}
+
 struct ExecutionPlanDecisionEventData: Codable, Sendable {
     let type: String
     let sequenceId: Int
