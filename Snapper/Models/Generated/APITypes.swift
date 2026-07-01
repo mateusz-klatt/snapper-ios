@@ -11849,7 +11849,7 @@ struct CreateOrderBody: Codable, Sendable {
     let postOnly: Bool?
     let leverage: Int?
     let reduceOnly: Bool?
-    let walletPublicId: String
+    let walletPublicId: String?
     let operatorPublicId: String?
     let idempotencyKey: String?
     let aiReviewPublicId: String?
@@ -11868,7 +11868,7 @@ struct CreateOrderBody: Codable, Sendable {
         postOnly: Bool? = nil,
         leverage: Int? = nil,
         reduceOnly: Bool? = nil,
-        walletPublicId: String,
+        walletPublicId: String? = nil,
         operatorPublicId: String? = nil,
         idempotencyKey: String? = nil,
         aiReviewPublicId: String? = nil
