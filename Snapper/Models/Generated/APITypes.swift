@@ -64,6 +64,12 @@ enum ConfiguredProcessKind: String, Codable, Sendable {
     case instance
 }
 
+enum DiskMetricsStatus: String, Codable, Sendable {
+    case healthy
+    case warning
+    case error
+}
+
 enum EgressActiveReservationSnapshotTrafficClass: String, Codable, Sendable {
     case publicValue = "public"
     case privateValue = "private"
@@ -3201,6 +3207,48 @@ struct DeviceAlertPrefResponse: Codable, Sendable {
         case sessionId = "session_id"
         case topic
         case payload
+    }
+}
+
+struct DiskMetrics: Codable, Sendable {
+    let mountPath: String
+    let totalBytes: Int?
+    let usedBytes: Int?
+    let freeBytes: Int?
+    let percentUsed: Double?
+    let diskLow: Bool
+    let diskCritical: Bool
+    let status: String
+
+    init(
+        mountPath: String,
+        totalBytes: Int?,
+        usedBytes: Int?,
+        freeBytes: Int?,
+        percentUsed: Double?,
+        diskLow: Bool,
+        diskCritical: Bool,
+        status: String
+    ) {
+        self.mountPath = mountPath
+        self.totalBytes = totalBytes
+        self.usedBytes = usedBytes
+        self.freeBytes = freeBytes
+        self.percentUsed = percentUsed
+        self.diskLow = diskLow
+        self.diskCritical = diskCritical
+        self.status = status
+    }
+
+    enum CodingKeys: String, CodingKey {
+        case mountPath = "mount_path"
+        case totalBytes = "total_bytes"
+        case usedBytes = "used_bytes"
+        case freeBytes = "free_bytes"
+        case percentUsed = "percent_used"
+        case diskLow = "disk_low"
+        case diskCritical = "disk_critical"
+        case status
     }
 }
 
@@ -8503,6 +8551,7 @@ struct SystemMetricsData: Codable, Sendable {
     let limits: LimitsMetrics
     let saturation: SaturationMetrics
     let dbInternal: DbInternalMetrics
+    let disk: DiskMetrics
     let tracemallocActive: Bool
     let cgroupVersion: String?
 
@@ -8522,6 +8571,7 @@ struct SystemMetricsData: Codable, Sendable {
         limits: LimitsMetrics,
         saturation: SaturationMetrics,
         dbInternal: DbInternalMetrics,
+        disk: DiskMetrics,
         tracemallocActive: Bool,
         cgroupVersion: String?
     ) {
@@ -8540,6 +8590,7 @@ struct SystemMetricsData: Codable, Sendable {
         self.limits = limits
         self.saturation = saturation
         self.dbInternal = dbInternal
+        self.disk = disk
         self.tracemallocActive = tracemallocActive
         self.cgroupVersion = cgroupVersion
     }
@@ -8560,6 +8611,7 @@ struct SystemMetricsData: Codable, Sendable {
         case limits
         case saturation
         case dbInternal = "db_internal"
+        case disk
         case tracemallocActive = "tracemalloc_active"
         case cgroupVersion = "cgroup_version"
     }
@@ -8581,6 +8633,7 @@ struct SystemMetricsHistoryItem: Codable, Sendable {
     let limits: LimitsMetrics
     let saturation: SaturationMetrics
     let dbInternal: DbInternalMetrics
+    let disk: DiskMetrics
     let tracemallocActive: Bool
     let cgroupVersion: String?
 
@@ -8600,6 +8653,7 @@ struct SystemMetricsHistoryItem: Codable, Sendable {
         limits: LimitsMetrics,
         saturation: SaturationMetrics,
         dbInternal: DbInternalMetrics,
+        disk: DiskMetrics,
         tracemallocActive: Bool,
         cgroupVersion: String?
     ) {
@@ -8618,6 +8672,7 @@ struct SystemMetricsHistoryItem: Codable, Sendable {
         self.limits = limits
         self.saturation = saturation
         self.dbInternal = dbInternal
+        self.disk = disk
         self.tracemallocActive = tracemallocActive
         self.cgroupVersion = cgroupVersion
     }
@@ -8638,6 +8693,7 @@ struct SystemMetricsHistoryItem: Codable, Sendable {
         case limits
         case saturation
         case dbInternal = "db_internal"
+        case disk
         case tracemallocActive = "tracemalloc_active"
         case cgroupVersion = "cgroup_version"
     }
