@@ -6,6 +6,67 @@ uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+## [2.0.2] — 2026-05-25
+
+CandlestickChartView SwiftUI primitive rewrite for the App Store 2.0.2
+build.
+
+### Fixed
+
+- Replaced the Swift Charts `RectangleMark` / `RuleMark` candle pipeline
+  with SwiftUI `Canvas` + `Path` primitives so color resolution is
+  deterministic for both Western and East-Asian financial color
+  conventions. This fixes the CN / HK / JP / KR red-rising convention
+  that was broken by iOS 26.2 Swift Charts ignoring explicit
+  foreground styles on the previous marks.
+- Verified the same backend BTC-USD candle renders with the expected
+  convention in US and CN locales, and that AE keeps RTL chart axis
+  labels on the leading edge.
+
+### Changed
+
+- Bumped `MARKETING_VERSION` from `2.0.1` to `2.0.2`.
+
+## [2.0.1] — 2026-05-24
+
+App Store release with i18n root-view propagation, the 15x3 picker, and
+market-data banner fixes.
+
+### Fixed
+
+- Propagated locale and layout environment through `RootView` so runtime
+  locale switches update the app root consistently.
+- Updated the language picker to the 15x3 `AppLocale` grid with autonym
+  labels.
+- Fixed the cache-warming banner denominator to match the actual market
+  data fetch.
+- Refactored the market-data banner so it reflects chart-cache state for
+  the selected timeframe.
+
+### Changed
+
+- Bumped `MARKETING_VERSION` from `2.0.0` to `2.0.1`.
+
+## [2.0.0] — 2026-05-23
+
+First App Store 2.x release line.
+
+### Added
+
+- 45-locale native catalog coverage, including Irish, Burmese, and
+  Filipino, plus a native-fluent QA pass across all supported locales.
+- RTL and Hebrew / Arabic bidirectional polish.
+- Financial color convention support, including rising-red behavior for
+  East-Asian market locales.
+- Market Data parity pieces: instrument description banner, related
+  instruments row, pair-stats row, and cache-warming banner.
+- Backend locale persistence through `User.default_language`.
+- XCUITest screenshot harness for all 45 `AppLocale` country codes.
+
+### Changed
+
+- Bumped `MARKETING_VERSION` from `1.0` to `2.0.0`.
+
 ## [0.7.1] — 2026-05-11
 
 Market Data first-render polish — the screen now lands on real data
@@ -836,7 +897,12 @@ v0.2.0 backlog: CSRF header on iOS mutating REST requests,
 public-side type regeneration script, fork-PR Sonar handling, and
 the SwiftUI coverage story.
 
-[Unreleased]: https://github.com/mateusz-klatt/snapper-ios/compare/v0.6.0...HEAD
+[Unreleased]: https://github.com/mateusz-klatt/snapper-ios/compare/v2.0.2-build25...HEAD
+[2.0.2]: https://github.com/mateusz-klatt/snapper-ios/releases/tag/v2.0.2-build25
+[2.0.1]: https://github.com/mateusz-klatt/snapper-ios/releases/tag/v2.0.1
+[2.0.0]: https://github.com/mateusz-klatt/snapper-ios/releases/tag/v2.0.0
+[0.7.1]: https://github.com/mateusz-klatt/snapper-ios/releases/tag/v0.7.1
+[0.7.0]: https://github.com/mateusz-klatt/snapper-ios/releases/tag/v0.7.0
 [0.6.0]: https://github.com/mateusz-klatt/snapper-ios/releases/tag/v0.6.0
 [0.5.0]: https://github.com/mateusz-klatt/snapper-ios/releases/tag/v0.5.0
 [0.4.0]: https://github.com/mateusz-klatt/snapper-ios/releases/tag/v0.4.0

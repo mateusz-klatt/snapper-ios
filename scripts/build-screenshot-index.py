@@ -30,6 +30,12 @@ def flag_for(country: str) -> str:
     return "".join(chr(base + ord(c) - ord("a")) for c in country.lower())
 
 
+def is_country_dir(path: Path) -> bool:
+    """Return True for screenshot directories named by two-letter country code."""
+    name = path.name
+    return path.is_dir() and len(name) == 2 and name.isascii() and name.isalpha()
+
+
 def main() -> int:
     if len(sys.argv) != 2:
         print("usage: build-screenshot-index.py <screenshots-root>", file=sys.stderr)
@@ -40,7 +46,7 @@ def main() -> int:
         print(f"error: directory not found: {root}", file=sys.stderr)
         return 1
 
-    countries = sorted(p.name for p in root.iterdir() if p.is_dir())
+    countries = sorted(p.name for p in root.iterdir() if is_country_dir(p))
     if not countries:
         print(f"warning: no country dirs under {root}", file=sys.stderr)
 
