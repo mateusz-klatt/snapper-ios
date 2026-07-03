@@ -8425,6 +8425,8 @@ struct StrategyProcess: Codable, Sendable {
     let enabled: Bool
     let mode: String
     let strategyClass: String?
+    let coordinator: String?
+    let managedRemotely: Bool?
 
     init(
         type: String? = nil,
@@ -8437,7 +8439,9 @@ struct StrategyProcess: Codable, Sendable {
         running: Bool,
         enabled: Bool,
         mode: String,
-        strategyClass: String? = nil
+        strategyClass: String? = nil,
+        coordinator: String? = nil,
+        managedRemotely: Bool? = nil
     ) {
         self.type = type
         self.sequenceId = sequenceId
@@ -8450,6 +8454,8 @@ struct StrategyProcess: Codable, Sendable {
         self.enabled = enabled
         self.mode = mode
         self.strategyClass = strategyClass
+        self.coordinator = coordinator
+        self.managedRemotely = managedRemotely
     }
 
     enum CodingKeys: String, CodingKey {
@@ -8464,6 +8470,8 @@ struct StrategyProcess: Codable, Sendable {
         case enabled
         case mode
         case strategyClass = "strategy_class"
+        case coordinator
+        case managedRemotely = "managed_remotely"
     }
 }
 
