@@ -149,6 +149,12 @@ enum PositionDataMode: String, Codable, Sendable {
     case paper
 }
 
+enum ProcessDesiredStateDataAction: String, Codable, Sendable {
+    case enable
+    case disable
+    case restart
+}
+
 enum ProcessRunStatus: String, Codable, Sendable {
     case running
     case succeeded
@@ -315,6 +321,12 @@ enum CreateOrderBodyOrderType: String, Codable, Sendable {
     case limit
     case stop
     case stopLimit = "stop_limit"
+}
+
+enum ProcessDesiredStateBodyAction: String, Codable, Sendable {
+    case enable
+    case disable
+    case restart
 }
 
 enum CreateScopeGrantBodyScopeKind: String, Codable, Sendable {
@@ -6547,6 +6559,102 @@ struct ProcessCreatedInfo: Codable, Sendable {
     }
 }
 
+struct ProcessDesiredStateData: Codable, Sendable {
+    let type: String?
+    let sequenceId: Int
+    let publicId: String
+    let timestamp: Date
+    let sessionId: String
+    let topic: String?
+    let status: String?
+    let name: String
+    let action: String
+    let coordinator: String?
+    let managedRemotely: Bool
+    let message: String?
+
+    init(
+        type: String? = nil,
+        sequenceId: Int,
+        publicId: String,
+        timestamp: Date,
+        sessionId: String,
+        topic: String? = nil,
+        status: String? = nil,
+        name: String,
+        action: String,
+        coordinator: String? = nil,
+        managedRemotely: Bool,
+        message: String? = nil
+    ) {
+        self.type = type
+        self.sequenceId = sequenceId
+        self.publicId = publicId
+        self.timestamp = timestamp
+        self.sessionId = sessionId
+        self.topic = topic
+        self.status = status
+        self.name = name
+        self.action = action
+        self.coordinator = coordinator
+        self.managedRemotely = managedRemotely
+        self.message = message
+    }
+
+    enum CodingKeys: String, CodingKey {
+        case type
+        case sequenceId = "sequence_id"
+        case publicId = "public_id"
+        case timestamp
+        case sessionId = "session_id"
+        case topic
+        case status
+        case name
+        case action
+        case coordinator
+        case managedRemotely = "managed_remotely"
+        case message
+    }
+}
+
+struct ProcessDesiredStateResponse: Codable, Sendable {
+    let type: String?
+    let sequenceId: Int
+    let publicId: String
+    let timestamp: Date
+    let sessionId: String
+    let topic: String?
+    let payload: ProcessDesiredStateData
+
+    init(
+        type: String? = nil,
+        sequenceId: Int,
+        publicId: String,
+        timestamp: Date,
+        sessionId: String,
+        topic: String? = nil,
+        payload: ProcessDesiredStateData
+    ) {
+        self.type = type
+        self.sequenceId = sequenceId
+        self.publicId = publicId
+        self.timestamp = timestamp
+        self.sessionId = sessionId
+        self.topic = topic
+        self.payload = payload
+    }
+
+    enum CodingKeys: String, CodingKey {
+        case type
+        case sequenceId = "sequence_id"
+        case publicId = "public_id"
+        case timestamp
+        case sessionId = "session_id"
+        case topic
+        case payload
+    }
+}
+
 struct ProcessMetrics: Codable, Sendable {
     let pid: Int
     let uptimeSeconds: Double
@@ -12080,6 +12188,62 @@ struct ProcessStartBody: Codable, Sendable {
     ) {
         self.mode = mode
         self.parameters = parameters
+    }
+}
+
+struct ProcessDesiredStateRequest: Codable, Sendable {
+    let type: String?
+    let sequenceId: Int
+    let publicId: String
+    let timestamp: Date
+    let sessionId: String
+    let topic: String?
+    let payload: ProcessDesiredStateBody
+
+    init(
+        type: String? = nil,
+        sequenceId: Int,
+        publicId: String,
+        timestamp: Date,
+        sessionId: String,
+        topic: String? = nil,
+        payload: ProcessDesiredStateBody
+    ) {
+        self.type = type
+        self.sequenceId = sequenceId
+        self.publicId = publicId
+        self.timestamp = timestamp
+        self.sessionId = sessionId
+        self.topic = topic
+        self.payload = payload
+    }
+
+    enum CodingKeys: String, CodingKey {
+        case type
+        case sequenceId = "sequence_id"
+        case publicId = "public_id"
+        case timestamp
+        case sessionId = "session_id"
+        case topic
+        case payload
+    }
+}
+
+struct ProcessDesiredStateBody: Codable, Sendable {
+    let action: String
+    let restartNonce: String?
+
+    init(
+        action: String,
+        restartNonce: String? = nil
+    ) {
+        self.action = action
+        self.restartNonce = restartNonce
+    }
+
+    enum CodingKeys: String, CodingKey {
+        case action
+        case restartNonce = "restart_nonce"
     }
 }
 
