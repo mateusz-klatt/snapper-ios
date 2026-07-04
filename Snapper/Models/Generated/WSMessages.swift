@@ -1414,6 +1414,126 @@ struct OrderRequestData: Codable, Sendable {
     }
 }
 
+struct ProcessCommandAckData: Codable, Sendable {
+    let type: String
+    let sequenceId: Int
+    let publicId: String
+    let timestamp: Date
+    let sessionId: String
+    let topic: String?
+    let commandId: String
+    let coordinator: String
+    let processName: String
+    let status: String
+    let detail: String?
+    let signature: String
+
+    init(
+        type: String,
+        sequenceId: Int,
+        publicId: String,
+        timestamp: Date,
+        sessionId: String,
+        topic: String? = nil,
+        commandId: String,
+        coordinator: String,
+        processName: String,
+        status: String,
+        detail: String? = nil,
+        signature: String
+    ) {
+        self.type = type
+        self.sequenceId = sequenceId
+        self.publicId = publicId
+        self.timestamp = timestamp
+        self.sessionId = sessionId
+        self.topic = topic
+        self.commandId = commandId
+        self.coordinator = coordinator
+        self.processName = processName
+        self.status = status
+        self.detail = detail
+        self.signature = signature
+    }
+
+    enum CodingKeys: String, CodingKey {
+        case type
+        case sequenceId = "sequence_id"
+        case publicId = "public_id"
+        case timestamp
+        case sessionId = "session_id"
+        case topic
+        case commandId = "command_id"
+        case coordinator
+        case processName = "process_name"
+        case status
+        case detail
+        case signature
+    }
+}
+
+struct ProcessCommandData: Codable, Sendable {
+    let type: String
+    let sequenceId: Int
+    let publicId: String
+    let timestamp: Date
+    let sessionId: String
+    let topic: String?
+    let commandId: String
+    let coordinator: String
+    let processName: String
+    let action: String
+    let issuedBy: String
+    let issuedAt: Date
+    let signature: String
+
+    init(
+        type: String,
+        sequenceId: Int,
+        publicId: String,
+        timestamp: Date,
+        sessionId: String,
+        topic: String? = nil,
+        commandId: String,
+        coordinator: String,
+        processName: String,
+        action: String,
+        issuedBy: String,
+        issuedAt: Date,
+        signature: String
+    ) {
+        self.type = type
+        self.sequenceId = sequenceId
+        self.publicId = publicId
+        self.timestamp = timestamp
+        self.sessionId = sessionId
+        self.topic = topic
+        self.commandId = commandId
+        self.coordinator = coordinator
+        self.processName = processName
+        self.action = action
+        self.issuedBy = issuedBy
+        self.issuedAt = issuedAt
+        self.signature = signature
+    }
+
+    enum CodingKeys: String, CodingKey {
+        case type
+        case sequenceId = "sequence_id"
+        case publicId = "public_id"
+        case timestamp
+        case sessionId = "session_id"
+        case topic
+        case commandId = "command_id"
+        case coordinator
+        case processName = "process_name"
+        case action
+        case issuedBy = "issued_by"
+        case issuedAt = "issued_at"
+        case signature
+    }
+}
+
 struct ProcessConfiguredEventData: Codable, Sendable {
     let type: String
     let sequenceId: Int
