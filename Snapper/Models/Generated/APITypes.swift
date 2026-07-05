@@ -2159,6 +2159,7 @@ struct ConfiguredProcess: Codable, Sendable {
     let walletPublicId: String?
     let parentTemplate: String?
     let coordinator: String?
+    let coordinatorLabel: String?
     let managedRemotely: Bool?
 
     init(
@@ -2186,6 +2187,7 @@ struct ConfiguredProcess: Codable, Sendable {
         walletPublicId: String? = nil,
         parentTemplate: String? = nil,
         coordinator: String? = nil,
+        coordinatorLabel: String? = nil,
         managedRemotely: Bool? = nil
     ) {
         self.type = type
@@ -2212,6 +2214,7 @@ struct ConfiguredProcess: Codable, Sendable {
         self.walletPublicId = walletPublicId
         self.parentTemplate = parentTemplate
         self.coordinator = coordinator
+        self.coordinatorLabel = coordinatorLabel
         self.managedRemotely = managedRemotely
     }
 
@@ -2240,6 +2243,7 @@ struct ConfiguredProcess: Codable, Sendable {
         case walletPublicId = "wallet_public_id"
         case parentTemplate = "parent_template"
         case coordinator
+        case coordinatorLabel = "coordinator_label"
         case managedRemotely = "managed_remotely"
     }
 }
@@ -7123,6 +7127,7 @@ struct ProcessSummaryData: Codable, Sendable {
     let sessionId: String
     let topic: String?
     let coordinator: String?
+    let coordinatorLabel: String?
     let feeds: ProcessCategoryCount
     let strategies: ProcessCategoryCount
     let executors: ProcessCategoryCount
@@ -7137,6 +7142,7 @@ struct ProcessSummaryData: Codable, Sendable {
         sessionId: String,
         topic: String? = nil,
         coordinator: String? = nil,
+        coordinatorLabel: String? = nil,
         feeds: ProcessCategoryCount,
         strategies: ProcessCategoryCount,
         executors: ProcessCategoryCount,
@@ -7150,6 +7156,7 @@ struct ProcessSummaryData: Codable, Sendable {
         self.sessionId = sessionId
         self.topic = topic
         self.coordinator = coordinator
+        self.coordinatorLabel = coordinatorLabel
         self.feeds = feeds
         self.strategies = strategies
         self.executors = executors
@@ -7165,6 +7172,7 @@ struct ProcessSummaryData: Codable, Sendable {
         case sessionId = "session_id"
         case topic
         case coordinator
+        case coordinatorLabel = "coordinator_label"
         case feeds
         case strategies
         case executors
@@ -8534,6 +8542,7 @@ struct StrategyProcess: Codable, Sendable {
     let mode: String
     let strategyClass: String?
     let coordinator: String?
+    let coordinatorLabel: String?
     let managedRemotely: Bool?
 
     init(
@@ -8549,6 +8558,7 @@ struct StrategyProcess: Codable, Sendable {
         mode: String,
         strategyClass: String? = nil,
         coordinator: String? = nil,
+        coordinatorLabel: String? = nil,
         managedRemotely: Bool? = nil
     ) {
         self.type = type
@@ -8563,6 +8573,7 @@ struct StrategyProcess: Codable, Sendable {
         self.mode = mode
         self.strategyClass = strategyClass
         self.coordinator = coordinator
+        self.coordinatorLabel = coordinatorLabel
         self.managedRemotely = managedRemotely
     }
 
@@ -8579,6 +8590,7 @@ struct StrategyProcess: Codable, Sendable {
         case mode
         case strategyClass = "strategy_class"
         case coordinator
+        case coordinatorLabel = "coordinator_label"
         case managedRemotely = "managed_remotely"
     }
 }

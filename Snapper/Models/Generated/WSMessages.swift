@@ -1642,6 +1642,7 @@ struct ProcessSummaryEventData: Codable, Sendable {
     let sessionId: String
     let topic: String?
     let coordinator: String?
+    let coordinatorLabel: String?
     let processes: [ProcessSummaryItem]
     let snapshotAt: Date
 
@@ -1653,6 +1654,7 @@ struct ProcessSummaryEventData: Codable, Sendable {
         sessionId: String,
         topic: String? = nil,
         coordinator: String? = nil,
+        coordinatorLabel: String? = nil,
         processes: [ProcessSummaryItem],
         snapshotAt: Date
     ) {
@@ -1663,6 +1665,7 @@ struct ProcessSummaryEventData: Codable, Sendable {
         self.sessionId = sessionId
         self.topic = topic
         self.coordinator = coordinator
+        self.coordinatorLabel = coordinatorLabel
         self.processes = processes
         self.snapshotAt = snapshotAt
     }
@@ -1675,6 +1678,7 @@ struct ProcessSummaryEventData: Codable, Sendable {
         case sessionId = "session_id"
         case topic
         case coordinator
+        case coordinatorLabel = "coordinator_label"
         case processes
         case snapshotAt = "snapshot_at"
     }
