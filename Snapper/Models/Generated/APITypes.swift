@@ -7190,6 +7190,7 @@ struct ProcessSummaryItem: Codable, Sendable {
     let activePublicId: String?
     let rssBytes: Int?
     let cpuPercent: Double?
+    let owned: Bool?
 
     init(
         name: String,
@@ -7199,7 +7200,8 @@ struct ProcessSummaryItem: Codable, Sendable {
         lifecycle: String,
         activePublicId: String? = nil,
         rssBytes: Int? = nil,
-        cpuPercent: Double? = nil
+        cpuPercent: Double? = nil,
+        owned: Bool? = nil
     ) {
         self.name = name
         self.running = running
@@ -7209,6 +7211,7 @@ struct ProcessSummaryItem: Codable, Sendable {
         self.activePublicId = activePublicId
         self.rssBytes = rssBytes
         self.cpuPercent = cpuPercent
+        self.owned = owned
     }
 
     enum CodingKeys: String, CodingKey {
@@ -7220,6 +7223,7 @@ struct ProcessSummaryItem: Codable, Sendable {
         case activePublicId = "active_public_id"
         case rssBytes = "rss_bytes"
         case cpuPercent = "cpu_percent"
+        case owned
     }
 }
 
