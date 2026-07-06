@@ -5566,6 +5566,44 @@ struct OperatorListResponse: Codable, Sendable {
     }
 }
 
+struct OperatorResponse: Codable, Sendable {
+    let type: String?
+    let sequenceId: Int
+    let publicId: String
+    let timestamp: Date
+    let sessionId: String
+    let topic: String?
+    let payload: OperatorInfo
+
+    init(
+        type: String? = nil,
+        sequenceId: Int,
+        publicId: String,
+        timestamp: Date,
+        sessionId: String,
+        topic: String? = nil,
+        payload: OperatorInfo
+    ) {
+        self.type = type
+        self.sequenceId = sequenceId
+        self.publicId = publicId
+        self.timestamp = timestamp
+        self.sessionId = sessionId
+        self.topic = topic
+        self.payload = payload
+    }
+
+    enum CodingKeys: String, CodingKey {
+        case type
+        case sequenceId = "sequence_id"
+        case publicId = "public_id"
+        case timestamp
+        case sessionId = "session_id"
+        case topic
+        case payload
+    }
+}
+
 struct OrderData: Codable, Sendable {
     let type: String?
     let sequenceId: Int
@@ -11926,6 +11964,57 @@ struct BracketCancelBody: Codable, Sendable {
         reason: String? = nil
     ) {
         self.reason = reason
+    }
+}
+
+struct CreateOperatorCommand: Codable, Sendable {
+    let type: String?
+    let sequenceId: Int
+    let publicId: String
+    let timestamp: Date
+    let sessionId: String
+    let topic: String?
+    let payload: CreateOperatorBody
+
+    init(
+        type: String? = nil,
+        sequenceId: Int,
+        publicId: String,
+        timestamp: Date,
+        sessionId: String,
+        topic: String? = nil,
+        payload: CreateOperatorBody
+    ) {
+        self.type = type
+        self.sequenceId = sequenceId
+        self.publicId = publicId
+        self.timestamp = timestamp
+        self.sessionId = sessionId
+        self.topic = topic
+        self.payload = payload
+    }
+
+    enum CodingKeys: String, CodingKey {
+        case type
+        case sequenceId = "sequence_id"
+        case publicId = "public_id"
+        case timestamp
+        case sessionId = "session_id"
+        case topic
+        case payload
+    }
+}
+
+struct CreateOperatorBody: Codable, Sendable {
+    let label: String
+    let description: String?
+
+    init(
+        label: String,
+        description: String? = nil
+    ) {
+        self.label = label
+        self.description = description
     }
 }
 
