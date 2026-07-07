@@ -1035,6 +1035,8 @@ struct HeartbeatData: Codable, Sendable {
     let sequence: Int
     let status: String
     let lagMs: Int
+    let marketClosed: Bool?
+    let nextOpen: Date?
     let meta: JsonObject?
 
     init(
@@ -1048,6 +1050,8 @@ struct HeartbeatData: Codable, Sendable {
         sequence: Int,
         status: String,
         lagMs: Int,
+        marketClosed: Bool? = nil,
+        nextOpen: Date? = nil,
         meta: JsonObject? = nil
     ) {
         self.type = type
@@ -1060,6 +1064,8 @@ struct HeartbeatData: Codable, Sendable {
         self.sequence = sequence
         self.status = status
         self.lagMs = lagMs
+        self.marketClosed = marketClosed
+        self.nextOpen = nextOpen
         self.meta = meta
     }
 
@@ -1074,6 +1080,8 @@ struct HeartbeatData: Codable, Sendable {
         case sequence
         case status
         case lagMs = "lag_ms"
+        case marketClosed = "market_closed"
+        case nextOpen = "next_open"
         case meta
     }
 }
