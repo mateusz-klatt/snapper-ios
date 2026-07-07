@@ -6861,6 +6861,8 @@ struct ProcessSchemaData: Codable, Sendable {
     let defaultEnabled: Bool
     let defaultMode: String
     let defaultParameters: JsonObject?
+    let referenceIdentityParams: [String: String]?
+    let seededIdentityParams: [String]?
     let lifecycle: String
 
     init(
@@ -6877,6 +6879,8 @@ struct ProcessSchemaData: Codable, Sendable {
         defaultEnabled: Bool,
         defaultMode: String,
         defaultParameters: JsonObject? = nil,
+        referenceIdentityParams: [String: String]? = nil,
+        seededIdentityParams: [String]? = nil,
         lifecycle: String
     ) {
         self.type = type
@@ -6892,6 +6896,8 @@ struct ProcessSchemaData: Codable, Sendable {
         self.defaultEnabled = defaultEnabled
         self.defaultMode = defaultMode
         self.defaultParameters = defaultParameters
+        self.referenceIdentityParams = referenceIdentityParams
+        self.seededIdentityParams = seededIdentityParams
         self.lifecycle = lifecycle
     }
 
@@ -6909,6 +6915,8 @@ struct ProcessSchemaData: Codable, Sendable {
         case defaultEnabled = "default_enabled"
         case defaultMode = "default_mode"
         case defaultParameters = "default_parameters"
+        case referenceIdentityParams = "reference_identity_params"
+        case seededIdentityParams = "seeded_identity_params"
         case lifecycle
     }
 }
