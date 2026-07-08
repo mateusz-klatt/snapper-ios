@@ -2249,6 +2249,7 @@ struct ConfiguredProcess: Codable, Sendable {
     let kind: String
     let walletPublicId: String?
     let parentTemplate: String?
+    let template: String?
     let coordinator: String?
     let coordinatorLabel: String?
     let managedRemotely: Bool?
@@ -2277,6 +2278,7 @@ struct ConfiguredProcess: Codable, Sendable {
         kind: String,
         walletPublicId: String? = nil,
         parentTemplate: String? = nil,
+        template: String? = nil,
         coordinator: String? = nil,
         coordinatorLabel: String? = nil,
         managedRemotely: Bool? = nil
@@ -2304,6 +2306,7 @@ struct ConfiguredProcess: Codable, Sendable {
         self.kind = kind
         self.walletPublicId = walletPublicId
         self.parentTemplate = parentTemplate
+        self.template = template
         self.coordinator = coordinator
         self.coordinatorLabel = coordinatorLabel
         self.managedRemotely = managedRemotely
@@ -2333,6 +2336,7 @@ struct ConfiguredProcess: Codable, Sendable {
         case kind
         case walletPublicId = "wallet_public_id"
         case parentTemplate = "parent_template"
+        case template
         case coordinator
         case coordinatorLabel = "coordinator_label"
         case managedRemotely = "managed_remotely"
@@ -6596,6 +6600,94 @@ struct ProcessCategoryCount: Codable, Sendable {
     ) {
         self.running = running
         self.total = total
+    }
+}
+
+struct ProcessConfigScopeData: Codable, Sendable {
+    let type: String?
+    let sequenceId: Int
+    let publicId: String
+    let timestamp: Date
+    let sessionId: String
+    let topic: String?
+    let status: String?
+    let name: String
+    let parameters: JsonObject
+    let restartRequired: Bool?
+
+    init(
+        type: String? = nil,
+        sequenceId: Int,
+        publicId: String,
+        timestamp: Date,
+        sessionId: String,
+        topic: String? = nil,
+        status: String? = nil,
+        name: String,
+        parameters: JsonObject,
+        restartRequired: Bool? = nil
+    ) {
+        self.type = type
+        self.sequenceId = sequenceId
+        self.publicId = publicId
+        self.timestamp = timestamp
+        self.sessionId = sessionId
+        self.topic = topic
+        self.status = status
+        self.name = name
+        self.parameters = parameters
+        self.restartRequired = restartRequired
+    }
+
+    enum CodingKeys: String, CodingKey {
+        case type
+        case sequenceId = "sequence_id"
+        case publicId = "public_id"
+        case timestamp
+        case sessionId = "session_id"
+        case topic
+        case status
+        case name
+        case parameters
+        case restartRequired = "restart_required"
+    }
+}
+
+struct ProcessConfigScopeResponse: Codable, Sendable {
+    let type: String?
+    let sequenceId: Int
+    let publicId: String
+    let timestamp: Date
+    let sessionId: String
+    let topic: String?
+    let payload: ProcessConfigScopeData
+
+    init(
+        type: String? = nil,
+        sequenceId: Int,
+        publicId: String,
+        timestamp: Date,
+        sessionId: String,
+        topic: String? = nil,
+        payload: ProcessConfigScopeData
+    ) {
+        self.type = type
+        self.sequenceId = sequenceId
+        self.publicId = publicId
+        self.timestamp = timestamp
+        self.sessionId = sessionId
+        self.topic = topic
+        self.payload = payload
+    }
+
+    enum CodingKeys: String, CodingKey {
+        case type
+        case sequenceId = "sequence_id"
+        case publicId = "public_id"
+        case timestamp
+        case sessionId = "session_id"
+        case topic
+        case payload
     }
 }
 
@@ -12448,6 +12540,66 @@ struct ProcessDesiredStateBody: Codable, Sendable {
     enum CodingKeys: String, CodingKey {
         case action
         case restartNonce = "restart_nonce"
+    }
+}
+
+struct ProcessConfigScopeRequest: Codable, Sendable {
+    let type: String?
+    let sequenceId: Int
+    let publicId: String
+    let timestamp: Date
+    let sessionId: String
+    let topic: String?
+    let payload: ProcessConfigScopeBody
+
+    init(
+        type: String? = nil,
+        sequenceId: Int,
+        publicId: String,
+        timestamp: Date,
+        sessionId: String,
+        topic: String? = nil,
+        payload: ProcessConfigScopeBody
+    ) {
+        self.type = type
+        self.sequenceId = sequenceId
+        self.publicId = publicId
+        self.timestamp = timestamp
+        self.sessionId = sessionId
+        self.topic = topic
+        self.payload = payload
+    }
+
+    enum CodingKeys: String, CodingKey {
+        case type
+        case sequenceId = "sequence_id"
+        case publicId = "public_id"
+        case timestamp
+        case sessionId = "session_id"
+        case topic
+        case payload
+    }
+}
+
+struct ProcessConfigScopeBody: Codable, Sendable {
+    let operatorPublicId: String?
+    let walletPublicId: String?
+    let referenceIdentityParams: [String: String]?
+
+    init(
+        operatorPublicId: String? = nil,
+        walletPublicId: String? = nil,
+        referenceIdentityParams: [String: String]? = nil
+    ) {
+        self.operatorPublicId = operatorPublicId
+        self.walletPublicId = walletPublicId
+        self.referenceIdentityParams = referenceIdentityParams
+    }
+
+    enum CodingKeys: String, CodingKey {
+        case operatorPublicId = "operator_public_id"
+        case walletPublicId = "wallet_public_id"
+        case referenceIdentityParams = "reference_identity_params"
     }
 }
 
