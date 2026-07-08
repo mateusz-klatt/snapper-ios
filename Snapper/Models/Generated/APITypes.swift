@@ -334,6 +334,97 @@ enum CreateScopeGrantBodyScopeKind: String, Codable, Sendable {
     case instrument
 }
 
+struct AdminAiReviewItem: Codable, Sendable {
+    let reviewPublicId: String
+    let strategyPublicId: String
+    let userPublicId: String
+    let operatorPublicId: String
+    let walletPublicId: String
+    let instrumentPublicId: String
+    let selectedDelegatePublicId: String
+    let respondingDelegatePublicId: String?
+    let status: String
+    let decision: String?
+    let rationale: String?
+    let resolutionMode: String?
+    let dispatchVersion: Int
+    let createdAt: Date
+    let resolvedAt: Date?
+    let deadline: Date
+    let signalEnvelope: JsonObject?
+
+    init(
+        reviewPublicId: String,
+        strategyPublicId: String,
+        userPublicId: String,
+        operatorPublicId: String,
+        walletPublicId: String,
+        instrumentPublicId: String,
+        selectedDelegatePublicId: String,
+        respondingDelegatePublicId: String?,
+        status: String,
+        decision: String?,
+        rationale: String?,
+        resolutionMode: String?,
+        dispatchVersion: Int,
+        createdAt: Date,
+        resolvedAt: Date?,
+        deadline: Date,
+        signalEnvelope: JsonObject? = nil
+    ) {
+        self.reviewPublicId = reviewPublicId
+        self.strategyPublicId = strategyPublicId
+        self.userPublicId = userPublicId
+        self.operatorPublicId = operatorPublicId
+        self.walletPublicId = walletPublicId
+        self.instrumentPublicId = instrumentPublicId
+        self.selectedDelegatePublicId = selectedDelegatePublicId
+        self.respondingDelegatePublicId = respondingDelegatePublicId
+        self.status = status
+        self.decision = decision
+        self.rationale = rationale
+        self.resolutionMode = resolutionMode
+        self.dispatchVersion = dispatchVersion
+        self.createdAt = createdAt
+        self.resolvedAt = resolvedAt
+        self.deadline = deadline
+        self.signalEnvelope = signalEnvelope
+    }
+
+    enum CodingKeys: String, CodingKey {
+        case reviewPublicId = "review_public_id"
+        case strategyPublicId = "strategy_public_id"
+        case userPublicId = "user_public_id"
+        case operatorPublicId = "operator_public_id"
+        case walletPublicId = "wallet_public_id"
+        case instrumentPublicId = "instrument_public_id"
+        case selectedDelegatePublicId = "selected_delegate_public_id"
+        case respondingDelegatePublicId = "responding_delegate_public_id"
+        case status
+        case decision
+        case rationale
+        case resolutionMode = "resolution_mode"
+        case dispatchVersion = "dispatch_version"
+        case createdAt = "created_at"
+        case resolvedAt = "resolved_at"
+        case deadline
+        case signalEnvelope = "signal_envelope"
+    }
+}
+
+struct AdminAiReviewListResponse: Codable, Sendable {
+    let items: [AdminAiReviewItem]
+    let count: Int
+
+    init(
+        items: [AdminAiReviewItem],
+        count: Int
+    ) {
+        self.items = items
+        self.count = count
+    }
+}
+
 struct AiReviewDecisionResponse: Codable, Sendable {
     let success: Bool
     let errorCode: String?
