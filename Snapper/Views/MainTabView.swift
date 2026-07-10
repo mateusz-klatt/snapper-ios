@@ -1,6 +1,6 @@
 import SwiftUI
 
-/// 5-tab root: Home, Positions, Orders, Alerts, Settings.
+/// 6-tab root: Home, Positions, Orders, Alerts, Signals, Settings.
 ///
 /// Permission gating per tab:
 /// - Home: ``canAccess("overview")``.
@@ -8,6 +8,12 @@ import SwiftUI
 ///   above ``aiDelegate`` already grants ``readPositions``).
 /// - Orders: ``canAccess("orders")``.
 /// - Alerts: ``readNotifications`` (push gating).
+/// - Signals: ``canAccess("signals")`` — read-only trading-signals feed
+///   (``read:market_data``; every role above is granted it). Inserted
+///   before Settings so Alerts stays a directly-tapped tab: a role with
+///   all six visible tabs lets iOS collapse the last two (Signals,
+///   Settings) into the standard "More" list, leaving the APNs
+///   deep-link target (Alerts) reachable without traversing "More".
 /// - Settings: ``canAccess("overview")`` — every authenticated role
 ///   per the permission catalog (contract that
 ///   any user can self-manage push notifications + device).
@@ -49,6 +55,7 @@ struct MainTabView: View {
         if authService.hasPermission(.readPositions) { ids.append("positions") }
         if authService.canAccess("orders") { ids.append("orders") }
         if authService.hasPermission(.readNotifications) { ids.append("alerts") }
+        if authService.canAccess("signals") { ids.append("signals") }
         if authService.canAccess("overview") { ids.append("settings") }
         return ids
     }
@@ -108,6 +115,14 @@ struct MainTabView: View {
                         Label(LocalizedStringKey("tabs.alerts"), systemImage: "bell.fill")
                     }
                     .tag("alerts")
+            }
+
+            if authService.canAccess("signals") {
+                SignalsView()
+                    .tabItem {
+                        Label(LocalizedStringKey("tabs.signals"), systemImage: "waveform.path.ecg")
+                    }
+                    .tag("signals")
             }
 
             if authService.canAccess("overview") {
