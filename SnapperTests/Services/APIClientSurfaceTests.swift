@@ -60,6 +60,7 @@ final class APIClientSurfaceTests: XCTestCase {
         _ = try await apiClient.fetchCachedCandles(exchange: "polygon", symbol: "GLD", timeframe: .oneMinute, limit: 100)
         _ = try await apiClient.fetchAllConfiguredPairStats()
         _ = try await apiClient.fetchCacheHealth()
+        _ = try await apiClient.fetchBacktests()
 
         let snapshots = requests.snapshots
         XCTAssertEqual(snapshots.map(\.method), [
@@ -68,7 +69,8 @@ final class APIClientSurfaceTests: XCTestCase {
             "GET", "GET", "GET", "POST", "GET", "GET",
             "GET", "GET", "PATCH", "GET", "PATCH",
             "GET", "POST",
-            "GET", "GET", "GET"
+            "GET", "GET", "GET",
+            "GET"
         ])
         XCTAssertEqual(snapshots.map(\.path), [
             "/api/orders",
@@ -96,7 +98,8 @@ final class APIClientSurfaceTests: XCTestCase {
             "/api/auth/me/update",
             "/api/candles/cache",
             "/api/market/cache/stats/configured",
-            "/api/market/cache/health"
+            "/api/market/cache/health",
+            "/api/backtests"
         ])
         let cachedCandlesQuery = try XCTUnwrap(snapshots[23].query)
         let cachedCandlesItems = URLComponents(string: "/?\(cachedCandlesQuery)")?.queryItems ?? []
@@ -201,6 +204,9 @@ final class APIClientSurfaceTests: XCTestCase {
         }
         if method == "GET", path == "/api/signals" {
             return listEnvelope(payload: [])
+        }
+        if method == "GET", path == "/api/backtests" {
+            return listEnvelope(payload: [backtestPayload()])
         }
         if method == "GET", path == "/api/executions" {
             return listEnvelope(payload: [])
@@ -345,6 +351,25 @@ final class APIClientSurfaceTests: XCTestCase {
             "started_at": "2026-01-01T00:00:00Z",
             "command": "snapper",
             "exit_code": 0
+        ]
+    }
+
+    private static func backtestPayload() -> [String: Any] {
+        return [
+            "sequence_id": 1,
+            "public_id": "backtest-1",
+            "timestamp": "2026-01-01T00:00:00Z",
+            "session_id": "session-1",
+            "wallet_public_id": "wallet-1",
+            "strategy_name": "momentum",
+            "instrument_public_id": "instrument-1",
+            "instrument": "BTC-USD",
+            "exchange": "kraken",
+            "timeframe": "1h",
+            "start_date": "2026-01-01T00:00:00Z",
+            "end_date": "2026-02-01T00:00:00Z",
+            "initial_cash": 10000,
+            "status": "completed"
         ]
     }
 

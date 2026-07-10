@@ -26,6 +26,8 @@
 		<string>/positions</string>
 		<key>Signals</key>
 		<string>/signals</string>
+		<key>Backtests</key>
+		<string>/backtests</string>
 		<key>Executions</key>
 		<string>/executions</string>
 		<key>ExecutionPlans</key>

@@ -17,6 +17,7 @@ final class EnvironmentTests: XCTestCase {
             "Orders": "/orders",
             "Positions": "/positions",
             "Signals": "/signals",
+            "Backtests": "/backtests",
             "Executions": "/executions",
             "Status": "/status",
             "Health": "/health",
@@ -75,6 +76,7 @@ final class EnvironmentTests: XCTestCase {
         XCTAssertEqual(AppConfig.Endpoints.orders, "/orders")
         XCTAssertEqual(AppConfig.Endpoints.positions, "/positions")
         XCTAssertEqual(AppConfig.Endpoints.signals, "/signals")
+        XCTAssertEqual(AppConfig.Endpoints.backtests, "/backtests")
         XCTAssertEqual(AppConfig.Endpoints.executions, "/executions")
         XCTAssertEqual(AppConfig.Endpoints.status, "/status")
         XCTAssertEqual(AppConfig.Endpoints.health, "/health")
@@ -103,6 +105,7 @@ final class EnvironmentTests: XCTestCase {
         XCTAssertEqual(parsed.endpoints.orders, "/orders")
         XCTAssertEqual(parsed.endpoints.positions, "/positions")
         XCTAssertEqual(parsed.endpoints.signals, "/signals")
+        XCTAssertEqual(parsed.endpoints.backtests, "/backtests")
         XCTAssertEqual(parsed.endpoints.executions, "/executions")
         XCTAssertEqual(parsed.endpoints.status, "/status")
         XCTAssertEqual(parsed.endpoints.health, "/health")
@@ -229,6 +232,7 @@ final class EnvironmentTests: XCTestCase {
         XCTAssertEqual(empty.endpoints.orders, "")
         XCTAssertEqual(empty.endpoints.positions, "")
         XCTAssertEqual(empty.endpoints.signals, "")
+        XCTAssertEqual(empty.endpoints.backtests, "")
         XCTAssertEqual(empty.endpoints.executions, "")
         XCTAssertEqual(empty.endpoints.status, "")
         XCTAssertEqual(empty.endpoints.health, "")

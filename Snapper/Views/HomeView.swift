@@ -56,6 +56,15 @@ struct HomeView: View {
                         .buttonStyle(.plain)
                     }
 
+                    if authService.canAccess("backtests") {
+                        NavigationLink {
+                            BacktestsView()
+                        } label: {
+                            BacktestsEntryCard()
+                        }
+                        .buttonStyle(.plain)
+                    }
+
                     if !filteredPositions.isEmpty {
                         positionsView
                     }
