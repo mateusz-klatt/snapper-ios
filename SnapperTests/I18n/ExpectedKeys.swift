@@ -474,5 +474,13 @@ enum ExpectedKeys {
         "aiReviews.field.instrument",
         "aiReviews.empty.title",
         "aiReviews.empty.message",
+        "strategies.navTitle",
+        "strategies.entry.subtitle",
+        "strategies.status.running",
+        "strategies.status.stopped",
+        "strategies.field.mode",
+        "strategies.badge.autostart",
+        "strategies.empty.title",
+        "strategies.empty.message",
         ]
 }

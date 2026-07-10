@@ -51,6 +51,9 @@ final class MockAPIClient: APIClientProtocol, @unchecked Sendable {
         var fetchAiReviews: @Sendable () async throws -> [AdminAiReviewItem] = {
             throw APIError.invalidResponse
         }
+        var fetchStrategies: @Sendable () async throws -> [StrategyProcess] = {
+            throw APIError.invalidResponse
+        }
         var fetchExecutions: @Sendable () async throws -> [ExecutionRecord] = {
             throw APIError.invalidResponse
         }
@@ -165,6 +168,10 @@ final class MockAPIClient: APIClientProtocol, @unchecked Sendable {
     var fetchAiReviewsHandler: @Sendable () async throws -> [AdminAiReviewItem] {
         get { read(\.fetchAiReviews) }
         set { write(\.fetchAiReviews, newValue) }
+    }
+    var fetchStrategiesHandler: @Sendable () async throws -> [StrategyProcess] {
+        get { read(\.fetchStrategies) }
+        set { write(\.fetchStrategies, newValue) }
     }
     var fetchExecutionsHandler: @Sendable () async throws -> [ExecutionRecord] {
         get { read(\.fetchExecutions) }
@@ -292,6 +299,10 @@ final class MockAPIClient: APIClientProtocol, @unchecked Sendable {
 
     func fetchAiReviews() async throws -> [AdminAiReviewItem] {
         return try await fetchAiReviewsHandler()
+    }
+
+    func fetchStrategies() async throws -> [StrategyProcess] {
+        return try await fetchStrategiesHandler()
     }
 
     func fetchExecutions() async throws -> [ExecutionRecord] {

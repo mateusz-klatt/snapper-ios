@@ -83,6 +83,15 @@ struct HomeView: View {
                         .buttonStyle(.plain)
                     }
 
+                    if authService.canAccess("strategies") {
+                        NavigationLink {
+                            StrategiesView()
+                        } label: {
+                            StrategiesEntryCard()
+                        }
+                        .buttonStyle(.plain)
+                    }
+
                     if !filteredPositions.isEmpty {
                         positionsView
                     }

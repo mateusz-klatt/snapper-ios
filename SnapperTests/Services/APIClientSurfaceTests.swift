@@ -63,9 +63,11 @@ final class APIClientSurfaceTests: XCTestCase {
         _ = try await apiClient.fetchBacktests()
         _ = try await apiClient.fetchProcessSummary()
         let aiReviews = try await apiClient.fetchAiReviews()
+        let strategies = try await apiClient.fetchStrategies()
 
         XCTAssertEqual(aiReviews.first?.reviewPublicId, "review-1")
         XCTAssertEqual(aiReviews.first?.decision, "approve")
+        XCTAssertEqual(strategies.first?.name, "strategy_macd_btc")
 
         let snapshots = requests.snapshots
         XCTAssertEqual(snapshots.map(\.method), [
@@ -75,7 +77,7 @@ final class APIClientSurfaceTests: XCTestCase {
             "GET", "GET", "PATCH", "GET", "PATCH",
             "GET", "POST",
             "GET", "GET", "GET",
-            "GET", "GET", "GET"
+            "GET", "GET", "GET", "GET"
         ])
         XCTAssertEqual(snapshots.map(\.path), [
             "/api/orders",
@@ -106,7 +108,8 @@ final class APIClientSurfaceTests: XCTestCase {
             "/api/market/cache/health",
             "/api/backtests",
             "/api/processes/summary",
-            "/api/ai-reviews"
+            "/api/ai-reviews",
+            "/api/strategies"
         ])
         let cachedCandlesQuery = try XCTUnwrap(snapshots[23].query)
         let cachedCandlesItems = URLComponents(string: "/?\(cachedCandlesQuery)")?.queryItems ?? []
@@ -220,6 +223,9 @@ final class APIClientSurfaceTests: XCTestCase {
         }
         if method == "GET", path == "/api/ai-reviews" {
             return ["items": [aiReviewPayload()], "count": 1]
+        }
+        if method == "GET", path == "/api/strategies" {
+            return listEnvelope(payload: [strategyProcessPayload()])
         }
         if method == "GET", path == "/api/executions" {
             return listEnvelope(payload: [])
@@ -364,6 +370,19 @@ final class APIClientSurfaceTests: XCTestCase {
             "started_at": "2026-01-01T00:00:00Z",
             "command": "snapper",
             "exit_code": 0
+        ]
+    }
+
+    private static func strategyProcessPayload() -> [String: Any] {
+        return [
+            "sequence_id": 1,
+            "public_id": "strategy-1",
+            "timestamp": "2026-01-01T00:00:00Z",
+            "session_id": "session-1",
+            "name": "strategy_macd_btc",
+            "running": true,
+            "enabled": true,
+            "mode": "paper"
         ]
     }
 

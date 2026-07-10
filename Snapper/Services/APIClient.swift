@@ -242,6 +242,11 @@ final class APIClient: Sendable, APIClientProtocol {
         return envelope.items
     }
 
+    func fetchStrategies() async throws -> [StrategyProcess] {
+        let envelope: StrategyListResponse = try await request(endpoint: AppConfig.Endpoints.strategies)
+        return envelope.payload
+    }
+
     func fetchExecutions() async throws -> [ExecutionRecord] {
         let envelope: ExecutionListResponse = try await request(endpoint: AppConfig.Endpoints.executions)
         return envelope.payload

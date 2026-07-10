@@ -26,6 +26,7 @@ protocol APIClientProtocol: Sendable {
     func fetchBacktests() async throws -> [BacktestRunData]
     func fetchProcessSummary() async throws -> ProcessSummaryData
     func fetchAiReviews() async throws -> [AdminAiReviewItem]
+    func fetchStrategies() async throws -> [StrategyProcess]
     func fetchExecutions() async throws -> [ExecutionRecord]
     func fetchWallets() async throws -> [WalletInfo]
     func fetchOperators() async throws -> [OperatorInfo]
