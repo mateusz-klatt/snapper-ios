@@ -62,6 +62,10 @@ final class APIClientSurfaceTests: XCTestCase {
         _ = try await apiClient.fetchCacheHealth()
         _ = try await apiClient.fetchBacktests()
         _ = try await apiClient.fetchProcessSummary()
+        let aiReviews = try await apiClient.fetchAiReviews()
+
+        XCTAssertEqual(aiReviews.first?.reviewPublicId, "review-1")
+        XCTAssertEqual(aiReviews.first?.decision, "approve")
 
         let snapshots = requests.snapshots
         XCTAssertEqual(snapshots.map(\.method), [
@@ -71,7 +75,7 @@ final class APIClientSurfaceTests: XCTestCase {
             "GET", "GET", "PATCH", "GET", "PATCH",
             "GET", "POST",
             "GET", "GET", "GET",
-            "GET", "GET"
+            "GET", "GET", "GET"
         ])
         XCTAssertEqual(snapshots.map(\.path), [
             "/api/orders",
@@ -101,7 +105,8 @@ final class APIClientSurfaceTests: XCTestCase {
             "/api/market/cache/stats/configured",
             "/api/market/cache/health",
             "/api/backtests",
-            "/api/processes/summary"
+            "/api/processes/summary",
+            "/api/ai-reviews"
         ])
         let cachedCandlesQuery = try XCTUnwrap(snapshots[23].query)
         let cachedCandlesItems = URLComponents(string: "/?\(cachedCandlesQuery)")?.queryItems ?? []
@@ -212,6 +217,9 @@ final class APIClientSurfaceTests: XCTestCase {
         }
         if method == "GET", path == "/api/processes/summary" {
             return envelope(payload: processSummaryPayload())
+        }
+        if method == "GET", path == "/api/ai-reviews" {
+            return ["items": [aiReviewPayload()], "count": 1]
         }
         if method == "GET", path == "/api/executions" {
             return listEnvelope(payload: [])
@@ -356,6 +364,25 @@ final class APIClientSurfaceTests: XCTestCase {
             "started_at": "2026-01-01T00:00:00Z",
             "command": "snapper",
             "exit_code": 0
+        ]
+    }
+
+    private static func aiReviewPayload() -> [String: Any] {
+        return [
+            "review_public_id": "review-1",
+            "strategy_public_id": "strategy-1",
+            "user_public_id": "user-1",
+            "operator_public_id": "operator-1",
+            "wallet_public_id": "wallet-1",
+            "instrument_public_id": "instrument-1",
+            "selected_delegate_public_id": "delegate-1",
+            "status": "resolved_approved",
+            "decision": "approve",
+            "rationale": "momentum confirmed",
+            "dispatch_version": 1,
+            "created_at": "2026-01-01T00:00:00Z",
+            "resolved_at": "2026-01-01T00:30:00Z",
+            "deadline": "2026-01-01T01:00:00Z"
         ]
     }
 

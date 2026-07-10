@@ -464,5 +464,15 @@ enum ExpectedKeys {
         "processes.field.memory",
         "processes.field.cpu",
         "processes.empty.message",
+        "aiReviews.navTitle",
+        "aiReviews.entry.subtitle",
+        "aiReviews.decision.approve",
+        "aiReviews.decision.reject",
+        "aiReviews.decision.pending",
+        "aiReviews.field.rationale",
+        "aiReviews.field.decidedAt",
+        "aiReviews.field.instrument",
+        "aiReviews.empty.title",
+        "aiReviews.empty.message",
         ]
 }

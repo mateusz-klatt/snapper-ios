@@ -30,6 +30,8 @@
 		<string>/backtests</string>
 		<key>ProcessSummary</key>
 		<string>/processes/summary</string>
+		<key>AiReviews</key>
+		<string>/ai-reviews</string>
 		<key>Executions</key>
 		<string>/executions</string>
 		<key>ExecutionPlans</key>

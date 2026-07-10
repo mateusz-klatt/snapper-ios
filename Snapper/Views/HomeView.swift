@@ -74,6 +74,15 @@ struct HomeView: View {
                         .buttonStyle(.plain)
                     }
 
+                    if authService.canAccess("ai-reviews") {
+                        NavigationLink {
+                            AiReviewsView()
+                        } label: {
+                            AiReviewsEntryCard()
+                        }
+                        .buttonStyle(.plain)
+                    }
+
                     if !filteredPositions.isEmpty {
                         positionsView
                     }
