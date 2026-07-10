@@ -237,6 +237,11 @@ final class APIClient: Sendable, APIClientProtocol {
         return envelope.payload
     }
 
+    func fetchAiReviews() async throws -> [AdminAiReviewItem] {
+        let envelope: AdminAiReviewListResponse = try await request(endpoint: AppConfig.Endpoints.aiReviews)
+        return envelope.items
+    }
+
     func fetchExecutions() async throws -> [ExecutionRecord] {
         let envelope: ExecutionListResponse = try await request(endpoint: AppConfig.Endpoints.executions)
         return envelope.payload

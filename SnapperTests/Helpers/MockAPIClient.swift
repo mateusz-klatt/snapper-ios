@@ -48,6 +48,9 @@ final class MockAPIClient: APIClientProtocol, @unchecked Sendable {
         var fetchProcessSummary: @Sendable () async throws -> ProcessSummaryData = {
             throw APIError.invalidResponse
         }
+        var fetchAiReviews: @Sendable () async throws -> [AdminAiReviewItem] = {
+            throw APIError.invalidResponse
+        }
         var fetchExecutions: @Sendable () async throws -> [ExecutionRecord] = {
             throw APIError.invalidResponse
         }
@@ -158,6 +161,10 @@ final class MockAPIClient: APIClientProtocol, @unchecked Sendable {
     var fetchProcessSummaryHandler: @Sendable () async throws -> ProcessSummaryData {
         get { read(\.fetchProcessSummary) }
         set { write(\.fetchProcessSummary, newValue) }
+    }
+    var fetchAiReviewsHandler: @Sendable () async throws -> [AdminAiReviewItem] {
+        get { read(\.fetchAiReviews) }
+        set { write(\.fetchAiReviews, newValue) }
     }
     var fetchExecutionsHandler: @Sendable () async throws -> [ExecutionRecord] {
         get { read(\.fetchExecutions) }
@@ -281,6 +288,10 @@ final class MockAPIClient: APIClientProtocol, @unchecked Sendable {
 
     func fetchProcessSummary() async throws -> ProcessSummaryData {
         return try await fetchProcessSummaryHandler()
+    }
+
+    func fetchAiReviews() async throws -> [AdminAiReviewItem] {
+        return try await fetchAiReviewsHandler()
     }
 
     func fetchExecutions() async throws -> [ExecutionRecord] {
