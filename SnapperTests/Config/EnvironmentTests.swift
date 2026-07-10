@@ -22,6 +22,7 @@ final class EnvironmentTests: XCTestCase {
             "AiReviews": "/ai-reviews",
             "Strategies": "/strategies",
             "Users": "/auth/users",
+            "Delegates": "/ai-delegates",
             "Executions": "/executions",
             "Status": "/status",
             "Health": "/health",
@@ -85,6 +86,7 @@ final class EnvironmentTests: XCTestCase {
         XCTAssertEqual(AppConfig.Endpoints.aiReviews, "/ai-reviews")
         XCTAssertEqual(AppConfig.Endpoints.strategies, "/strategies")
         XCTAssertEqual(AppConfig.Endpoints.users, "/auth/users")
+        XCTAssertEqual(AppConfig.Endpoints.delegates, "/ai-delegates")
         XCTAssertEqual(AppConfig.Endpoints.executions, "/executions")
         XCTAssertEqual(AppConfig.Endpoints.status, "/status")
         XCTAssertEqual(AppConfig.Endpoints.health, "/health")
@@ -118,6 +120,7 @@ final class EnvironmentTests: XCTestCase {
         XCTAssertEqual(parsed.endpoints.aiReviews, "/ai-reviews")
         XCTAssertEqual(parsed.endpoints.strategies, "/strategies")
         XCTAssertEqual(parsed.endpoints.users, "/auth/users")
+        XCTAssertEqual(parsed.endpoints.delegates, "/ai-delegates")
         XCTAssertEqual(parsed.endpoints.executions, "/executions")
         XCTAssertEqual(parsed.endpoints.status, "/status")
         XCTAssertEqual(parsed.endpoints.health, "/health")
@@ -249,6 +252,7 @@ final class EnvironmentTests: XCTestCase {
         XCTAssertEqual(empty.endpoints.aiReviews, "")
         XCTAssertEqual(empty.endpoints.strategies, "")
         XCTAssertEqual(empty.endpoints.users, "")
+        XCTAssertEqual(empty.endpoints.delegates, "")
         XCTAssertEqual(empty.endpoints.executions, "")
         XCTAssertEqual(empty.endpoints.status, "")
         XCTAssertEqual(empty.endpoints.health, "")

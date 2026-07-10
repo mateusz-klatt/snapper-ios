@@ -146,6 +146,24 @@ final class AuthServiceTests: XCTestCase {
         XCTAssertFalse(authService.canAccess("unknown-resource"))
     }
 
+    /// The AI-integration (delegates) surface is operator/admin only —
+    /// guards the generated ``resourceAccess["ai-integration"]`` mapping
+    /// that the Home entry card's ``canAccess("ai-integration")`` gate
+    /// depends on.
+    func testCanAccessAiIntegrationIsOperatorAdminOnly() {
+        authService.currentUser = makeUser(role: .operatorRole)
+        XCTAssertTrue(authService.canAccess("ai-integration"))
+
+        authService.currentUser = makeUser(role: .admin)
+        XCTAssertTrue(authService.canAccess("ai-integration"))
+
+        authService.currentUser = makeUser(role: .viewer)
+        XCTAssertFalse(authService.canAccess("ai-integration"))
+
+        authService.currentUser = makeUser(role: .aiDelegate)
+        XCTAssertFalse(authService.canAccess("ai-integration"))
+    }
+
     func testRoleAndPermissionChecksReturnFalseWithoutUser() {
         authService.currentUser = nil
 

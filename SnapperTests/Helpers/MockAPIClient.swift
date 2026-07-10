@@ -57,6 +57,9 @@ final class MockAPIClient: APIClientProtocol, @unchecked Sendable {
         var fetchUsers: @Sendable () async throws -> [UserProfile] = {
             throw APIError.invalidResponse
         }
+        var fetchDelegates: @Sendable () async throws -> [DelegateRead] = {
+            throw APIError.invalidResponse
+        }
         var fetchExecutions: @Sendable () async throws -> [ExecutionRecord] = {
             throw APIError.invalidResponse
         }
@@ -179,6 +182,10 @@ final class MockAPIClient: APIClientProtocol, @unchecked Sendable {
     var fetchUsersHandler: @Sendable () async throws -> [UserProfile] {
         get { read(\.fetchUsers) }
         set { write(\.fetchUsers, newValue) }
+    }
+    var fetchDelegatesHandler: @Sendable () async throws -> [DelegateRead] {
+        get { read(\.fetchDelegates) }
+        set { write(\.fetchDelegates, newValue) }
     }
     var fetchExecutionsHandler: @Sendable () async throws -> [ExecutionRecord] {
         get { read(\.fetchExecutions) }
@@ -314,6 +321,10 @@ final class MockAPIClient: APIClientProtocol, @unchecked Sendable {
 
     func fetchUsers() async throws -> [UserProfile] {
         return try await fetchUsersHandler()
+    }
+
+    func fetchDelegates() async throws -> [DelegateRead] {
+        return try await fetchDelegatesHandler()
     }
 
     func fetchExecutions() async throws -> [ExecutionRecord] {

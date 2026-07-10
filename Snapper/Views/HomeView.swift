@@ -101,6 +101,15 @@ struct HomeView: View {
                         .buttonStyle(.plain)
                     }
 
+                    if authService.canAccess("ai-integration") {
+                        NavigationLink {
+                            AiIntegrationView()
+                        } label: {
+                            AiIntegrationEntryCard()
+                        }
+                        .buttonStyle(.plain)
+                    }
+
                     if !filteredPositions.isEmpty {
                         positionsView
                     }
