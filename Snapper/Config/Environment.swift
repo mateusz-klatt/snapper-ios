@@ -116,6 +116,9 @@ enum AppConfig {
         static var users: String {
             return configuration.endpoints.users
         }
+        static var delegates: String {
+            return configuration.endpoints.delegates
+        }
 
         static var executions: String {
             return configuration.endpoints.executions
@@ -181,6 +184,7 @@ enum AppConfig {
             let aiReviews: String
             let strategies: String
             let users: String
+            let delegates: String
             let executions: String
             let status: String
             let health: String
@@ -237,6 +241,7 @@ enum AppConfig {
                     aiReviews: endpoints["AiReviews"] as? String ?? "",
                     strategies: endpoints["Strategies"] as? String ?? "",
                     users: endpoints["Users"] as? String ?? "",
+                    delegates: endpoints["Delegates"] as? String ?? "",
                     executions: endpoints["Executions"] as? String ?? "",
                     status: endpoints["Status"] as? String ?? "",
                     health: endpoints["Health"] as? String ?? "",
@@ -280,6 +285,7 @@ enum AppConfig {
                     aiReviews: "",
                     strategies: "",
                     users: "",
+                    delegates: "",
                     executions: "",
                     status: "",
                     health: "",

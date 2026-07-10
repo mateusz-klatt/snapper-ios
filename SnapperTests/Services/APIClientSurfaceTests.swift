@@ -65,11 +65,13 @@ final class APIClientSurfaceTests: XCTestCase {
         let aiReviews = try await apiClient.fetchAiReviews()
         let strategies = try await apiClient.fetchStrategies()
         let users = try await apiClient.fetchUsers()
+        let delegates = try await apiClient.fetchDelegates()
 
         XCTAssertEqual(aiReviews.first?.reviewPublicId, "review-1")
         XCTAssertEqual(aiReviews.first?.decision, "approve")
         XCTAssertEqual(strategies.first?.name, "strategy_macd_btc")
         XCTAssertEqual(users.first?.username, "viewer")
+        XCTAssertEqual(delegates.first?.username, "delegate-mcp")
 
         let snapshots = requests.snapshots
         XCTAssertEqual(snapshots.map(\.method), [
@@ -79,7 +81,7 @@ final class APIClientSurfaceTests: XCTestCase {
             "GET", "GET", "PATCH", "GET", "PATCH",
             "GET", "POST",
             "GET", "GET", "GET",
-            "GET", "GET", "GET", "GET", "GET"
+            "GET", "GET", "GET", "GET", "GET", "GET"
         ])
         XCTAssertEqual(snapshots.map(\.path), [
             "/api/orders",
@@ -112,7 +114,8 @@ final class APIClientSurfaceTests: XCTestCase {
             "/api/processes/summary",
             "/api/ai-reviews",
             "/api/strategies",
-            "/api/auth/users"
+            "/api/auth/users",
+            "/api/ai-delegates"
         ])
         let cachedCandlesQuery = try XCTUnwrap(snapshots[23].query)
         let cachedCandlesItems = URLComponents(string: "/?\(cachedCandlesQuery)")?.queryItems ?? []
@@ -232,6 +235,9 @@ final class APIClientSurfaceTests: XCTestCase {
         }
         if method == "GET", path == "/api/auth/users" {
             return listEnvelope(payload: [userProfilePayload()])
+        }
+        if method == "GET", path == "/api/ai-delegates" {
+            return listEnvelope(payload: [delegatePayload()])
         }
         if method == "GET", path == "/api/executions" {
             return listEnvelope(payload: [])
@@ -524,6 +530,18 @@ final class APIClientSurfaceTests: XCTestCase {
             "alert_type": "order_fill_full",
             "enabled": true,
             "min_priority": "medium"
+        ]
+    }
+
+    private static func delegatePayload() -> [String: Any] {
+        return [
+            "public_id": "delegate-1",
+            "username": "delegate-mcp",
+            "label": "MCP grant",
+            "created_by_user_public_id": "user-1",
+            "created_at": "2026-01-01T00:00:00Z",
+            "is_active": true,
+            "caps": ["max_open_orders": 5, "max_daily_notional_usd": 10000]
         ]
     }
 

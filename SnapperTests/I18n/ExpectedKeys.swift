@@ -489,5 +489,14 @@ enum ExpectedKeys {
         "admin.field.created",
         "admin.empty.title",
         "admin.empty.message",
+        "aiIntegration.navTitle",
+        "aiIntegration.entry.subtitle",
+        "aiIntegration.status.active",
+        "aiIntegration.status.revoked",
+        "aiIntegration.field.maxOpenOrders",
+        "aiIntegration.field.maxDailyUsd",
+        "aiIntegration.caps.default",
+        "aiIntegration.empty.title",
+        "aiIntegration.empty.message",
         ]
 }

@@ -46,6 +46,8 @@
 		<string>/strategies</string>
 		<key>Users</key>
 		<string>/auth/users</string>
+		<key>Delegates</key>
+		<string>/ai-delegates</string>
 		<key>Devices</key>
 		<string>/devices</string>
 		<key>Alerts</key>
