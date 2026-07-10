@@ -354,7 +354,7 @@ final class APIClientSurfaceTests: XCTestCase {
             "public_id": "health-1",
             "timestamp": "2026-01-01T00:00:00Z",
             "session_id": "session-1",
-            "status": "ok",
+            "status": "healthy",
             "version": "1.0",
             "connections": ["active_connections": 1],
             "topics": ["active": 1],

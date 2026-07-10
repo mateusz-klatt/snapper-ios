@@ -47,6 +47,15 @@ struct HomeView: View {
                             .padding()
                     }
 
+                    if authService.canAccess("health") {
+                        NavigationLink {
+                            HealthView()
+                        } label: {
+                            HealthEntryCard()
+                        }
+                        .buttonStyle(.plain)
+                    }
+
                     if !filteredPositions.isEmpty {
                         positionsView
                     }
