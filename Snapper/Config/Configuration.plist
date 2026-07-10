@@ -28,6 +28,8 @@
 		<string>/signals</string>
 		<key>Backtests</key>
 		<string>/backtests</string>
+		<key>ProcessSummary</key>
+		<string>/processes/summary</string>
 		<key>Executions</key>
 		<string>/executions</string>
 		<key>ExecutionPlans</key>

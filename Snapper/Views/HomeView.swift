@@ -65,6 +65,15 @@ struct HomeView: View {
                         .buttonStyle(.plain)
                     }
 
+                    if authService.canAccess("processes") {
+                        NavigationLink {
+                            ProcessesView()
+                        } label: {
+                            ProcessesEntryCard()
+                        }
+                        .buttonStyle(.plain)
+                    }
+
                     if !filteredPositions.isEmpty {
                         positionsView
                     }

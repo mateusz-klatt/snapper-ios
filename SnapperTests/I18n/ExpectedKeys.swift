@@ -453,5 +453,16 @@ enum ExpectedKeys {
         "backtests.field.id",
         "backtests.empty.title",
         "backtests.empty.message",
+        "processes.navTitle",
+        "processes.entry.subtitle",
+        "processes.status.running",
+        "processes.status.stopped",
+        "processes.category.feeds",
+        "processes.category.strategies",
+        "processes.category.executors",
+        "processes.category.brokers",
+        "processes.field.memory",
+        "processes.field.cpu",
+        "processes.empty.message",
         ]
 }

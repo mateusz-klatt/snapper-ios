@@ -61,6 +61,7 @@ final class APIClientSurfaceTests: XCTestCase {
         _ = try await apiClient.fetchAllConfiguredPairStats()
         _ = try await apiClient.fetchCacheHealth()
         _ = try await apiClient.fetchBacktests()
+        _ = try await apiClient.fetchProcessSummary()
 
         let snapshots = requests.snapshots
         XCTAssertEqual(snapshots.map(\.method), [
@@ -70,7 +71,7 @@ final class APIClientSurfaceTests: XCTestCase {
             "GET", "GET", "PATCH", "GET", "PATCH",
             "GET", "POST",
             "GET", "GET", "GET",
-            "GET"
+            "GET", "GET"
         ])
         XCTAssertEqual(snapshots.map(\.path), [
             "/api/orders",
@@ -99,7 +100,8 @@ final class APIClientSurfaceTests: XCTestCase {
             "/api/candles/cache",
             "/api/market/cache/stats/configured",
             "/api/market/cache/health",
-            "/api/backtests"
+            "/api/backtests",
+            "/api/processes/summary"
         ])
         let cachedCandlesQuery = try XCTUnwrap(snapshots[23].query)
         let cachedCandlesItems = URLComponents(string: "/?\(cachedCandlesQuery)")?.queryItems ?? []
@@ -207,6 +209,9 @@ final class APIClientSurfaceTests: XCTestCase {
         }
         if method == "GET", path == "/api/backtests" {
             return listEnvelope(payload: [backtestPayload()])
+        }
+        if method == "GET", path == "/api/processes/summary" {
+            return envelope(payload: processSummaryPayload())
         }
         if method == "GET", path == "/api/executions" {
             return listEnvelope(payload: [])
@@ -351,6 +356,30 @@ final class APIClientSurfaceTests: XCTestCase {
             "started_at": "2026-01-01T00:00:00Z",
             "command": "snapper",
             "exit_code": 0
+        ]
+    }
+
+    private static func processSummaryPayload() -> [String: Any] {
+        return [
+            "sequence_id": 1,
+            "public_id": "psum-1",
+            "timestamp": "2026-01-01T00:00:00Z",
+            "session_id": "session-1",
+            "feeds": ["running": 1, "total": 1],
+            "strategies": ["running": 2, "total": 3],
+            "executors": ["running": 1, "total": 1],
+            "brokers": ["running": 1, "total": 1],
+            "processes": [
+                [
+                    "name": "trader",
+                    "running": true,
+                    "enabled": true,
+                    "role": "core",
+                    "lifecycle": "long_running",
+                    "rss_bytes": 12_345_678,
+                    "cpu_percent": 3.5
+                ]
+            ]
         ]
     }
 
