@@ -101,6 +101,9 @@ enum AppConfig {
         static var signals: String {
             return configuration.endpoints.signals
         }
+        static var backtests: String {
+            return configuration.endpoints.backtests
+        }
 
         static var executions: String {
             return configuration.endpoints.executions
@@ -161,6 +164,7 @@ enum AppConfig {
             let orders: String
             let positions: String
             let signals: String
+            let backtests: String
             let executions: String
             let status: String
             let health: String
@@ -212,6 +216,7 @@ enum AppConfig {
                     orders: endpoints["Orders"] as? String ?? "",
                     positions: endpoints["Positions"] as? String ?? "",
                     signals: endpoints["Signals"] as? String ?? "",
+                    backtests: endpoints["Backtests"] as? String ?? "",
                     executions: endpoints["Executions"] as? String ?? "",
                     status: endpoints["Status"] as? String ?? "",
                     health: endpoints["Health"] as? String ?? "",
@@ -250,6 +255,7 @@ enum AppConfig {
                     orders: "",
                     positions: "",
                     signals: "",
+                    backtests: "",
                     executions: "",
                     status: "",
                     health: "",

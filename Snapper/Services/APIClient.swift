@@ -227,6 +227,11 @@ final class APIClient: Sendable, APIClientProtocol {
         return envelope.payload
     }
 
+    func fetchBacktests() async throws -> [BacktestRunData] {
+        let envelope: BacktestRunListResponse = try await request(endpoint: AppConfig.Endpoints.backtests)
+        return envelope.payload
+    }
+
     func fetchExecutions() async throws -> [ExecutionRecord] {
         let envelope: ExecutionListResponse = try await request(endpoint: AppConfig.Endpoints.executions)
         return envelope.payload
