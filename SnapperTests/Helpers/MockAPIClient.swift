@@ -45,6 +45,9 @@ final class MockAPIClient: APIClientProtocol, @unchecked Sendable {
         var fetchBacktests: @Sendable () async throws -> [BacktestRunData] = {
             throw APIError.invalidResponse
         }
+        var fetchProcessSummary: @Sendable () async throws -> ProcessSummaryData = {
+            throw APIError.invalidResponse
+        }
         var fetchExecutions: @Sendable () async throws -> [ExecutionRecord] = {
             throw APIError.invalidResponse
         }
@@ -151,6 +154,10 @@ final class MockAPIClient: APIClientProtocol, @unchecked Sendable {
     var fetchBacktestsHandler: @Sendable () async throws -> [BacktestRunData] {
         get { read(\.fetchBacktests) }
         set { write(\.fetchBacktests, newValue) }
+    }
+    var fetchProcessSummaryHandler: @Sendable () async throws -> ProcessSummaryData {
+        get { read(\.fetchProcessSummary) }
+        set { write(\.fetchProcessSummary, newValue) }
     }
     var fetchExecutionsHandler: @Sendable () async throws -> [ExecutionRecord] {
         get { read(\.fetchExecutions) }
@@ -270,6 +277,10 @@ final class MockAPIClient: APIClientProtocol, @unchecked Sendable {
 
     func fetchBacktests() async throws -> [BacktestRunData] {
         return try await fetchBacktestsHandler()
+    }
+
+    func fetchProcessSummary() async throws -> ProcessSummaryData {
+        return try await fetchProcessSummaryHandler()
     }
 
     func fetchExecutions() async throws -> [ExecutionRecord] {
