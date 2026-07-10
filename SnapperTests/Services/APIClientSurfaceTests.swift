@@ -64,10 +64,12 @@ final class APIClientSurfaceTests: XCTestCase {
         _ = try await apiClient.fetchProcessSummary()
         let aiReviews = try await apiClient.fetchAiReviews()
         let strategies = try await apiClient.fetchStrategies()
+        let users = try await apiClient.fetchUsers()
 
         XCTAssertEqual(aiReviews.first?.reviewPublicId, "review-1")
         XCTAssertEqual(aiReviews.first?.decision, "approve")
         XCTAssertEqual(strategies.first?.name, "strategy_macd_btc")
+        XCTAssertEqual(users.first?.username, "viewer")
 
         let snapshots = requests.snapshots
         XCTAssertEqual(snapshots.map(\.method), [
@@ -77,7 +79,7 @@ final class APIClientSurfaceTests: XCTestCase {
             "GET", "GET", "PATCH", "GET", "PATCH",
             "GET", "POST",
             "GET", "GET", "GET",
-            "GET", "GET", "GET", "GET"
+            "GET", "GET", "GET", "GET", "GET"
         ])
         XCTAssertEqual(snapshots.map(\.path), [
             "/api/orders",
@@ -109,7 +111,8 @@ final class APIClientSurfaceTests: XCTestCase {
             "/api/backtests",
             "/api/processes/summary",
             "/api/ai-reviews",
-            "/api/strategies"
+            "/api/strategies",
+            "/api/auth/users"
         ])
         let cachedCandlesQuery = try XCTUnwrap(snapshots[23].query)
         let cachedCandlesItems = URLComponents(string: "/?\(cachedCandlesQuery)")?.queryItems ?? []
@@ -226,6 +229,9 @@ final class APIClientSurfaceTests: XCTestCase {
         }
         if method == "GET", path == "/api/strategies" {
             return listEnvelope(payload: [strategyProcessPayload()])
+        }
+        if method == "GET", path == "/api/auth/users" {
+            return listEnvelope(payload: [userProfilePayload()])
         }
         if method == "GET", path == "/api/executions" {
             return listEnvelope(payload: [])

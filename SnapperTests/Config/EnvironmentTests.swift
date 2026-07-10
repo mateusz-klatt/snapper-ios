@@ -21,6 +21,7 @@ final class EnvironmentTests: XCTestCase {
             "ProcessSummary": "/processes/summary",
             "AiReviews": "/ai-reviews",
             "Strategies": "/strategies",
+            "Users": "/auth/users",
             "Executions": "/executions",
             "Status": "/status",
             "Health": "/health",
@@ -83,6 +84,7 @@ final class EnvironmentTests: XCTestCase {
         XCTAssertEqual(AppConfig.Endpoints.processSummary, "/processes/summary")
         XCTAssertEqual(AppConfig.Endpoints.aiReviews, "/ai-reviews")
         XCTAssertEqual(AppConfig.Endpoints.strategies, "/strategies")
+        XCTAssertEqual(AppConfig.Endpoints.users, "/auth/users")
         XCTAssertEqual(AppConfig.Endpoints.executions, "/executions")
         XCTAssertEqual(AppConfig.Endpoints.status, "/status")
         XCTAssertEqual(AppConfig.Endpoints.health, "/health")
@@ -115,6 +117,7 @@ final class EnvironmentTests: XCTestCase {
         XCTAssertEqual(parsed.endpoints.processSummary, "/processes/summary")
         XCTAssertEqual(parsed.endpoints.aiReviews, "/ai-reviews")
         XCTAssertEqual(parsed.endpoints.strategies, "/strategies")
+        XCTAssertEqual(parsed.endpoints.users, "/auth/users")
         XCTAssertEqual(parsed.endpoints.executions, "/executions")
         XCTAssertEqual(parsed.endpoints.status, "/status")
         XCTAssertEqual(parsed.endpoints.health, "/health")
@@ -245,6 +248,7 @@ final class EnvironmentTests: XCTestCase {
         XCTAssertEqual(empty.endpoints.processSummary, "")
         XCTAssertEqual(empty.endpoints.aiReviews, "")
         XCTAssertEqual(empty.endpoints.strategies, "")
+        XCTAssertEqual(empty.endpoints.users, "")
         XCTAssertEqual(empty.endpoints.executions, "")
         XCTAssertEqual(empty.endpoints.status, "")
         XCTAssertEqual(empty.endpoints.health, "")

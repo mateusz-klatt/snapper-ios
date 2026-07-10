@@ -44,6 +44,8 @@
 		<string>/market/data</string>
 		<key>Strategies</key>
 		<string>/strategies</string>
+		<key>Users</key>
+		<string>/auth/users</string>
 		<key>Devices</key>
 		<string>/devices</string>
 		<key>Alerts</key>
