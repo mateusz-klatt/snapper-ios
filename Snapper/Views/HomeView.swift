@@ -92,6 +92,15 @@ struct HomeView: View {
                         .buttonStyle(.plain)
                     }
 
+                    if authService.canAccess("admin") {
+                        NavigationLink {
+                            AdminView()
+                        } label: {
+                            AdminEntryCard()
+                        }
+                        .buttonStyle(.plain)
+                    }
+
                     if !filteredPositions.isEmpty {
                         positionsView
                     }

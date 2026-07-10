@@ -247,6 +247,11 @@ final class APIClient: Sendable, APIClientProtocol {
         return envelope.payload
     }
 
+    func fetchUsers() async throws -> [UserProfile] {
+        let envelope: UserListResponse = try await request(endpoint: AppConfig.Endpoints.users)
+        return envelope.payload
+    }
+
     func fetchExecutions() async throws -> [ExecutionRecord] {
         let envelope: ExecutionListResponse = try await request(endpoint: AppConfig.Endpoints.executions)
         return envelope.payload

@@ -482,5 +482,12 @@ enum ExpectedKeys {
         "strategies.badge.autostart",
         "strategies.empty.title",
         "strategies.empty.message",
+        "admin.navTitle",
+        "admin.entry.subtitle",
+        "admin.status.active",
+        "admin.status.inactive",
+        "admin.field.created",
+        "admin.empty.title",
+        "admin.empty.message",
         ]
 }
