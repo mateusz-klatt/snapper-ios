@@ -110,6 +110,9 @@ enum AppConfig {
         static var aiReviews: String {
             return configuration.endpoints.aiReviews
         }
+        static var strategies: String {
+            return configuration.endpoints.strategies
+        }
 
         static var executions: String {
             return configuration.endpoints.executions
@@ -173,6 +176,7 @@ enum AppConfig {
             let backtests: String
             let processSummary: String
             let aiReviews: String
+            let strategies: String
             let executions: String
             let status: String
             let health: String
@@ -227,6 +231,7 @@ enum AppConfig {
                     backtests: endpoints["Backtests"] as? String ?? "",
                     processSummary: endpoints["ProcessSummary"] as? String ?? "",
                     aiReviews: endpoints["AiReviews"] as? String ?? "",
+                    strategies: endpoints["Strategies"] as? String ?? "",
                     executions: endpoints["Executions"] as? String ?? "",
                     status: endpoints["Status"] as? String ?? "",
                     health: endpoints["Health"] as? String ?? "",
@@ -268,6 +273,7 @@ enum AppConfig {
                     backtests: "",
                     processSummary: "",
                     aiReviews: "",
+                    strategies: "",
                     executions: "",
                     status: "",
                     health: "",
