@@ -22,7 +22,9 @@ final class PositionsViewTests: XCTestCase {
         publicId: String,
         walletPublicId: String?,
         instrumentPublicId: String? = "inst-1",
-        quantity: Double = 1.0
+        quantity: Double = 1.0,
+        positionCyclePublicId: String? = nil,
+        averagePrice: Double? = 50000.0
     ) -> PositionSnapshot {
         return PositionData(
             type: "position",
@@ -36,10 +38,10 @@ final class PositionsViewTests: XCTestCase {
             exchange: "kraken",
             mode: nil,
             quantity: quantity,
-            averagePrice: 50000.0,
+            averagePrice: averagePrice,
             unrealizedPnl: 0.0,
             realizedPnl: 0.0,
-            positionCyclePublicId: nil,
+            positionCyclePublicId: positionCyclePublicId,
             walletPublicId: walletPublicId
         )
     }
@@ -246,6 +248,61 @@ final class PositionsViewTests: XCTestCase {
         XCTAssertFalse(PositionsViewModel.canSubmitReduce(position: emptyWallet))
         XCTAssertFalse(PositionsViewModel.canSubmitReduce(position: missingInstrument))
         XCTAssertFalse(PositionsViewModel.canSubmitReduce(position: emptyInstrument))
+    }
+
+    /// PnL Phase 2: plan attachment requires BOTH an open cycle and a
+    /// truthful entry price — an honest-NULL entry means the backend
+    /// would 422 the plan, so the actions must not be offered.
+    func testCanAttachPlanRequiresCycleAndEntryPrice() {
+        let eligible = makePosition(
+            publicId: "p-attach",
+            walletPublicId: "wallet-a",
+            positionCyclePublicId: "cycle-1"
+        )
+        let noCycle = makePosition(
+            publicId: "p-no-cycle",
+            walletPublicId: "wallet-a"
+        )
+        let noEntry = makePosition(
+            publicId: "p-no-entry",
+            walletPublicId: "wallet-a",
+            positionCyclePublicId: "cycle-1",
+            averagePrice: nil
+        )
+        XCTAssertTrue(PositionsViewModel.canAttachPlan(position: eligible))
+        XCTAssertFalse(PositionsViewModel.canAttachPlan(position: noCycle))
+        XCTAssertFalse(PositionsViewModel.canAttachPlan(position: noEntry))
+    }
+
+    /// PnL Phase 2: a net-zero aggregate of opposing paper strategy
+    /// shards stays ACTIVE on the surface but has nothing to reduce —
+    /// eligibility requires a quantity strictly beyond the TradeService
+    /// zero-snap epsilon, in either direction.
+    func testCanSubmitReduceRequiresNonZeroQuantity() {
+        let flat = makePosition(
+            publicId: "p-flat",
+            walletPublicId: "wallet-a",
+            quantity: 0.0
+        )
+        let epsilon = makePosition(
+            publicId: "p-epsilon",
+            walletPublicId: "wallet-a",
+            quantity: 1e-13
+        )
+        let boundary = makePosition(
+            publicId: "p-boundary",
+            walletPublicId: "wallet-a",
+            quantity: 1e-12
+        )
+        let short = makePosition(
+            publicId: "p-short",
+            walletPublicId: "wallet-a",
+            quantity: -0.5
+        )
+        XCTAssertFalse(PositionsViewModel.canSubmitReduce(position: flat))
+        XCTAssertFalse(PositionsViewModel.canSubmitReduce(position: epsilon))
+        XCTAssertFalse(PositionsViewModel.canSubmitReduce(position: boundary))
+        XCTAssertTrue(PositionsViewModel.canSubmitReduce(position: short))
     }
 
     /// Surface-load-errors branch (PR #2): a refresh failure on top

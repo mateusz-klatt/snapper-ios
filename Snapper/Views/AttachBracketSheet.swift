@@ -41,7 +41,7 @@ struct AttachBracketSheet: View {
                     HStack {
                         Text(LocalizedStringKey("common.averagePrice.label"))
                         Spacer()
-                        Text(position.averagePrice.formattedDecimal(in: appState.locale, fractionDigits: 4))
+                        Text(verbatim: position.averagePrice?.formattedDecimal(in: appState.locale, fractionDigits: 4) ?? "—")
                             .foregroundStyle(.secondary)
                     }
                 }

@@ -6508,9 +6508,12 @@ struct PositionData: Codable, Sendable {
     let exchange: String
     let mode: String?
     let quantity: Double
-    let averagePrice: Double
-    let unrealizedPnl: Double
+    let averagePrice: Double?
+    let unrealizedPnl: Double?
     let realizedPnl: Double
+    let markPrice: Double?
+    let markedAt: Date?
+    let sourceVenueEventId: Int?
     let positionCyclePublicId: String?
     let walletPublicId: String?
 
@@ -6526,9 +6529,12 @@ struct PositionData: Codable, Sendable {
         exchange: String,
         mode: String? = nil,
         quantity: Double,
-        averagePrice: Double,
-        unrealizedPnl: Double,
+        averagePrice: Double? = nil,
+        unrealizedPnl: Double? = nil,
         realizedPnl: Double,
+        markPrice: Double? = nil,
+        markedAt: Date? = nil,
+        sourceVenueEventId: Int? = nil,
         positionCyclePublicId: String? = nil,
         walletPublicId: String? = nil
     ) {
@@ -6546,6 +6552,9 @@ struct PositionData: Codable, Sendable {
         self.averagePrice = averagePrice
         self.unrealizedPnl = unrealizedPnl
         self.realizedPnl = realizedPnl
+        self.markPrice = markPrice
+        self.markedAt = markedAt
+        self.sourceVenueEventId = sourceVenueEventId
         self.positionCyclePublicId = positionCyclePublicId
         self.walletPublicId = walletPublicId
     }
@@ -6565,6 +6574,9 @@ struct PositionData: Codable, Sendable {
         case averagePrice = "average_price"
         case unrealizedPnl = "unrealized_pnl"
         case realizedPnl = "realized_pnl"
+        case markPrice = "mark_price"
+        case markedAt = "marked_at"
+        case sourceVenueEventId = "source_venue_event_id"
         case positionCyclePublicId = "position_cycle_public_id"
         case walletPublicId = "wallet_public_id"
     }

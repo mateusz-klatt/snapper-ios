@@ -208,14 +208,27 @@ final class PositionsViewModel {
         return filteredCount == 0
     }
 
+    /// PnL Phase 2: bracket / trailing-stop attachment needs an open
+    /// cycle AND a truthful entry price — the backend rejects a plan
+    /// whose SL/TP sanity cannot be validated with 422, so the UI must
+    /// not offer the action (an opposing-shard aggregate has an
+    /// honest-NULL entry).
+    static func canAttachPlan(position: PositionSnapshot) -> Bool {
+        position.positionCyclePublicId != nil && position.averagePrice != nil
+    }
+
     /// Reduce / close eligibility: backend rejects `CreateOrderBody`
     /// with empty `instrumentPublicId` or `walletPublicId` so the UI
     /// must hide the trading actions for legacy / system rows that
-    /// arrive without those ids.
+    /// arrive without those ids. PnL Phase 2 additionally requires a
+    /// quantity strictly beyond the TradeService zero-snap epsilon —
+    /// a net-zero aggregate of opposing paper strategy shards stays
+    /// ACTIVE on the surface but has nothing to reduce.
     static func canSubmitReduce(position: PositionSnapshot) -> Bool {
         guard
             let walletId = position.walletPublicId, !walletId.isEmpty,
-            let instrumentId = position.instrumentPublicId, !instrumentId.isEmpty
+            let instrumentId = position.instrumentPublicId, !instrumentId.isEmpty,
+            abs(position.quantity) > 1e-12
         else {
             return false
         }
