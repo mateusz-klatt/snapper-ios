@@ -106,6 +106,11 @@ enum OrderRequestDataOrderType: String, Codable, Sendable {
     case stopLimit = "stop_limit"
 }
 
+enum OrderRequestDataOrigin: String, Codable, Sendable {
+    case live
+    case replay
+}
+
 enum ScopeGrantedDataScopeKind: String, Codable, Sendable {
     case underlying
     case instrument
@@ -129,12 +134,22 @@ enum TickDataExchange: String, Codable, Sendable {
     case polygon
 }
 
+enum TickDataOrigin: String, Codable, Sendable {
+    case live
+    case replay
+}
+
 enum TradeDataExchange: String, Codable, Sendable {
     case kraken
     case krakenFutures = "kraken_futures"
     case krakenEquities = "kraken_equities"
     case walutomat
     case polygon
+}
+
+enum TradeDataOrigin: String, Codable, Sendable {
+    case live
+    case replay
 }
 
 enum WSSubscriptionSuccessResponseAction: String, Codable, Sendable {
@@ -1332,6 +1347,9 @@ struct OrderRequestData: Codable, Sendable {
     let pairedGroupSize: Int?
     let pairedGroupIndex: Int?
     let pairedGroupPolicy: String?
+    let origin: String?
+    let replayWindowStart: Date?
+    let replayWindowEnd: Date?
 
     init(
         type: String,
@@ -1360,7 +1378,10 @@ struct OrderRequestData: Codable, Sendable {
         pairedGroupId: String? = nil,
         pairedGroupSize: Int? = nil,
         pairedGroupIndex: Int? = nil,
-        pairedGroupPolicy: String? = nil
+        pairedGroupPolicy: String? = nil,
+        origin: String? = nil,
+        replayWindowStart: Date? = nil,
+        replayWindowEnd: Date? = nil
     ) {
         self.type = type
         self.sequenceId = sequenceId
@@ -1389,6 +1410,9 @@ struct OrderRequestData: Codable, Sendable {
         self.pairedGroupSize = pairedGroupSize
         self.pairedGroupIndex = pairedGroupIndex
         self.pairedGroupPolicy = pairedGroupPolicy
+        self.origin = origin
+        self.replayWindowStart = replayWindowStart
+        self.replayWindowEnd = replayWindowEnd
     }
 
     enum CodingKeys: String, CodingKey {
@@ -1419,6 +1443,9 @@ struct OrderRequestData: Codable, Sendable {
         case pairedGroupSize = "paired_group_size"
         case pairedGroupIndex = "paired_group_index"
         case pairedGroupPolicy = "paired_group_policy"
+        case origin
+        case replayWindowStart = "replay_window_start"
+        case replayWindowEnd = "replay_window_end"
     }
 }
 
@@ -2127,6 +2154,9 @@ struct TickData: Codable, Sendable {
     let last: Double?
     let isDelayed: Bool?
     let isExtendedHours: Bool?
+    let origin: String?
+    let replayWindowStart: Date?
+    let replayWindowEnd: Date?
 
     init(
         type: String,
@@ -2142,7 +2172,10 @@ struct TickData: Codable, Sendable {
         ask: Double? = nil,
         last: Double? = nil,
         isDelayed: Bool? = nil,
-        isExtendedHours: Bool? = nil
+        isExtendedHours: Bool? = nil,
+        origin: String? = nil,
+        replayWindowStart: Date? = nil,
+        replayWindowEnd: Date? = nil
     ) {
         self.type = type
         self.sequenceId = sequenceId
@@ -2158,6 +2191,9 @@ struct TickData: Codable, Sendable {
         self.last = last
         self.isDelayed = isDelayed
         self.isExtendedHours = isExtendedHours
+        self.origin = origin
+        self.replayWindowStart = replayWindowStart
+        self.replayWindowEnd = replayWindowEnd
     }
 
     enum CodingKeys: String, CodingKey {
@@ -2175,6 +2211,9 @@ struct TickData: Codable, Sendable {
         case last
         case isDelayed = "is_delayed"
         case isExtendedHours = "is_extended_hours"
+        case origin
+        case replayWindowStart = "replay_window_start"
+        case replayWindowEnd = "replay_window_end"
     }
 }
 
@@ -2192,6 +2231,9 @@ struct TradeData: Codable, Sendable {
     let volume: Double
     let side: String?
     let tradeId: String?
+    let origin: String?
+    let replayWindowStart: Date?
+    let replayWindowEnd: Date?
 
     init(
         type: String,
@@ -2206,7 +2248,10 @@ struct TradeData: Codable, Sendable {
         price: Double,
         volume: Double,
         side: String? = nil,
-        tradeId: String? = nil
+        tradeId: String? = nil,
+        origin: String? = nil,
+        replayWindowStart: Date? = nil,
+        replayWindowEnd: Date? = nil
     ) {
         self.type = type
         self.sequenceId = sequenceId
@@ -2221,6 +2266,9 @@ struct TradeData: Codable, Sendable {
         self.volume = volume
         self.side = side
         self.tradeId = tradeId
+        self.origin = origin
+        self.replayWindowStart = replayWindowStart
+        self.replayWindowEnd = replayWindowEnd
     }
 
     enum CodingKeys: String, CodingKey {
@@ -2237,6 +2285,9 @@ struct TradeData: Codable, Sendable {
         case volume
         case side
         case tradeId = "trade_id"
+        case origin
+        case replayWindowStart = "replay_window_start"
+        case replayWindowEnd = "replay_window_end"
     }
 }
 
