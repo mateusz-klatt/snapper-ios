@@ -42,6 +42,11 @@ enum CandleDataExchange: String, Codable, Sendable {
     case polygon
 }
 
+enum CandleDataOrigin: String, Codable, Sendable {
+    case live
+    case replay
+}
+
 enum ConfiguredProcessMode: String, Codable, Sendable {
     case thread
     case process
@@ -214,6 +219,11 @@ enum SignalDataExchange: String, Codable, Sendable {
 enum SignalDataSide: String, Codable, Sendable {
     case buy
     case sell
+}
+
+enum SignalDataOrigin: String, Codable, Sendable {
+    case live
+    case replay
 }
 
 enum SignalDiffEntryLeg: String, Codable, Sendable {
@@ -2120,6 +2130,9 @@ struct CandleData: Codable, Sendable {
     let vwap: Double?
     let trades: Int?
     let complete: Bool?
+    let origin: String?
+    let replayWindowStart: Date?
+    let replayWindowEnd: Date?
 
     init(
         type: String? = nil,
@@ -2139,7 +2152,10 @@ struct CandleData: Codable, Sendable {
         volume: Double,
         vwap: Double? = nil,
         trades: Int? = nil,
-        complete: Bool? = nil
+        complete: Bool? = nil,
+        origin: String? = nil,
+        replayWindowStart: Date? = nil,
+        replayWindowEnd: Date? = nil
     ) {
         self.type = type
         self.sequenceId = sequenceId
@@ -2159,6 +2175,9 @@ struct CandleData: Codable, Sendable {
         self.vwap = vwap
         self.trades = trades
         self.complete = complete
+        self.origin = origin
+        self.replayWindowStart = replayWindowStart
+        self.replayWindowEnd = replayWindowEnd
     }
 
     enum CodingKeys: String, CodingKey {
@@ -2180,6 +2199,9 @@ struct CandleData: Codable, Sendable {
         case vwap
         case trades
         case complete
+        case origin
+        case replayWindowStart = "replay_window_start"
+        case replayWindowEnd = "replay_window_end"
     }
 }
 
@@ -8571,6 +8593,9 @@ struct SignalData: Codable, Sendable {
     let pairedGroupIndex: Int?
     let pairedGroupPolicy: String?
     let pairedGroupKey: String?
+    let origin: String?
+    let replayWindowStart: Date?
+    let replayWindowEnd: Date?
 
     init(
         type: String? = nil,
@@ -8596,7 +8621,10 @@ struct SignalData: Codable, Sendable {
         pairedGroupSize: Int? = nil,
         pairedGroupIndex: Int? = nil,
         pairedGroupPolicy: String? = nil,
-        pairedGroupKey: String? = nil
+        pairedGroupKey: String? = nil,
+        origin: String? = nil,
+        replayWindowStart: Date? = nil,
+        replayWindowEnd: Date? = nil
     ) {
         self.type = type
         self.sequenceId = sequenceId
@@ -8622,6 +8650,9 @@ struct SignalData: Codable, Sendable {
         self.pairedGroupIndex = pairedGroupIndex
         self.pairedGroupPolicy = pairedGroupPolicy
         self.pairedGroupKey = pairedGroupKey
+        self.origin = origin
+        self.replayWindowStart = replayWindowStart
+        self.replayWindowEnd = replayWindowEnd
     }
 
     enum CodingKeys: String, CodingKey {
@@ -8649,6 +8680,9 @@ struct SignalData: Codable, Sendable {
         case pairedGroupIndex = "paired_group_index"
         case pairedGroupPolicy = "paired_group_policy"
         case pairedGroupKey = "paired_group_key"
+        case origin
+        case replayWindowStart = "replay_window_start"
+        case replayWindowEnd = "replay_window_end"
     }
 }
 
