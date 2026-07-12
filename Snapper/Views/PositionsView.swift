@@ -118,7 +118,7 @@ struct PositionsView: View {
                     }
                     .accessibilityLabel(LocalizedStringKey("positions.accessibility.label.reduceButton"))
                 }
-                if position.positionCyclePublicId != nil {
+                if PositionsViewModel.canAttachPlan(position: position) {
                     Button(LocalizedStringKey("trading.bracket.attach")) {
                         bracketModalPosition = IdentifiedPosition(position: position)
                     }
@@ -132,7 +132,7 @@ struct PositionsView: View {
             }
         } message: { position in
             Text(
-                "\(PositionCard.direction(for: position.quantity)) \(position.quantity.formattedDecimal(in: appState.locale, fractionDigits: 4)) @ \(position.averagePrice.formattedDecimal(in: appState.locale, fractionDigits: 4))"
+                "\(PositionCard.direction(for: position.quantity)) \(position.quantity.formattedDecimal(in: appState.locale, fractionDigits: 4)) @ \(position.averagePrice?.formattedDecimal(in: appState.locale, fractionDigits: 4) ?? "—")"
             )
         }
         .alert(
@@ -241,7 +241,7 @@ struct ReducePositionView: View {
                     HStack {
                         Text(LocalizedStringKey("common.averagePrice.label"))
                         Spacer()
-                        Text(position.averagePrice.formattedDecimal(in: appState.locale, fractionDigits: 4))
+                        Text(verbatim: position.averagePrice?.formattedDecimal(in: appState.locale, fractionDigits: 4) ?? "—")
                             .foregroundStyle(.secondary)
                     }
                 }
@@ -313,12 +313,16 @@ struct PositionCard: View {
             }
             Spacer()
             VStack(alignment: .trailing, spacing: 4) {
-                Text(position.unrealizedPnl.formattedCurrency(in: appState.locale, code: "USD", fractionDigits: 2))
+                Text(verbatim: position.unrealizedPnl?.formattedCurrency(in: appState.locale, code: "USD", fractionDigits: 2) ?? "—")
                     .font(.body.monospaced())
-                    .foregroundStyle(position.unrealizedPnl >= 0 ? Color.financialRising(for: appState) : Color.financialFalling(for: appState))
+                    .foregroundStyle(
+                        position.unrealizedPnl.map {
+                            $0 >= 0 ? Color.financialRising(for: appState) : Color.financialFalling(for: appState)
+                        } ?? Color.secondary
+                    )
                 Text(String(
                     format: LocaleStrings.localized("positions.row.avgPrice", in: appState.locale.catalogLanguage),
-                    position.averagePrice.formattedDecimal(in: appState.locale, fractionDigits: 4)
+                    position.averagePrice?.formattedDecimal(in: appState.locale, fractionDigits: 4) ?? "—"
                 ))
                     .font(.caption)
                     .foregroundStyle(.secondary)

@@ -376,7 +376,7 @@ struct HomeView: View {
                         Text(String(
                             format: LocaleStrings.localized("home.position.qtyAtPrice", in: appState.locale.catalogLanguage),
                             position.quantity.formattedDecimal(in: appState.locale, fractionDigits: 4),
-                            position.averagePrice.formattedDecimal(in: appState.locale, fractionDigits: 2)
+                            position.averagePrice?.formattedDecimal(in: appState.locale, fractionDigits: 2) ?? "—"
                         ))
                             .font(.caption)
                             .foregroundColor(.secondary)
@@ -385,9 +385,13 @@ struct HomeView: View {
                     Spacer()
 
                     VStack(alignment: .trailing, spacing: 4) {
-                        Text(position.unrealizedPnl.formattedCurrency(in: appState.locale, code: "USD", fractionDigits: 2))
+                        Text(verbatim: position.unrealizedPnl?.formattedCurrency(in: appState.locale, code: "USD", fractionDigits: 2) ?? "—")
                             .font(.subheadline)
-                            .foregroundColor(position.unrealizedPnl >= 0 ? Color.financialRising(for: appState) : Color.financialFalling(for: appState))
+                            .foregroundColor(
+                                position.unrealizedPnl.map {
+                                    $0 >= 0 ? Color.financialRising(for: appState) : Color.financialFalling(for: appState)
+                                } ?? Color.secondary
+                            )
 
                         Text(LocalizedStringKey("home.position.unrealizedPnl"))
                             .font(.caption2)
