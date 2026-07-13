@@ -12,19 +12,46 @@ final class AccountsViewModel {
     var loadError: APIError?
     private(set) var lastSuccessfulFetch: Date?
 
+    @ObservationIgnored private var pollingTask: Task<Void, Never>?
+
+    /// REST polling interval matching the web account surface.
+    @ObservationIgnored static let livePollingInterval: TimeInterval = 5
+
     private let api: APIClientProtocol
     private let appState: AppState
     private let now: () -> Date
+    private let sleeper: Sleeper
     private let logger = AppLogger.make(category: "AccountsViewModel")
 
     init(
         api: APIClientProtocol = APIClient.shared,
         appState: AppState = .shared,
-        now: @escaping () -> Date = { Date() }
+        now: @escaping () -> Date = { Date() },
+        sleeper: Sleeper = TaskSleeper()
     ) {
         self.api = api
         self.appState = appState
         self.now = now
+        self.sleeper = sleeper
+    }
+
+    /// Start recurring account refreshes, replacing any prior poll.
+    func startPollingLiveUpdates() {
+        stopPollingLiveUpdates()
+        let sleeper = sleeper
+        pollingTask = Task { @MainActor [weak self] in
+            while !Task.isCancelled {
+                try? await sleeper.sleep(seconds: Self.livePollingInterval)
+                guard !Task.isCancelled, let self else { return }
+                await self.load()
+            }
+        }
+    }
+
+    /// Stop recurring account refreshes. Safe to call repeatedly.
+    func stopPollingLiveUpdates() {
+        pollingTask?.cancel()
+        pollingTask = nil
     }
 
     var filteredAccounts: [PortfolioAccountState] {

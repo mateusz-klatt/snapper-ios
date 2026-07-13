@@ -54,6 +54,16 @@ struct AccountsView: View {
                 viewModel = AccountsViewModel(appState: appState)
             }
             await viewModel?.load()
+
+            guard let viewModel else { return }
+            viewModel.startPollingLiveUpdates()
+            await withTaskCancellationHandler {
+                try? await Task.sleep(nanoseconds: .max)
+            } onCancel: {
+                Task { @MainActor in
+                    viewModel.stopPollingLiveUpdates()
+                }
+            }
         }
     }
 

@@ -212,6 +212,37 @@ final class APIClientSurfaceTests: XCTestCase {
         XCTAssertNil(snapshot.query)
     }
 
+    func testFetchAccountsDecodesNonEmptyPayloadAndOptionalObservationClocks() async throws {
+        MockURLProtocol.requestHandler = { _ in
+            return MockURLProtocol.jsonResponse(
+                statusCode: 200,
+                json: Self.listEnvelope(payload: [Self.accountPayload()])
+            )
+        }
+
+        let accounts = try await apiClient.fetchAccounts()
+
+        let account = try XCTUnwrap(accounts.first)
+        XCTAssertEqual(accounts.count, 1)
+        XCTAssertEqual(account.publicId, "account-1")
+        XCTAssertEqual(account.walletPublicId, "wallet-1")
+        XCTAssertEqual(account.balances?.first?.currency, "USD")
+        XCTAssertEqual(account.balances?.first?.total, 1250.5)
+        XCTAssertEqual(account.balances?.first?.free, 1000.25)
+        XCTAssertNil(account.balances?.first?.used)
+        XCTAssertEqual(account.openPositions?.first?.symbol, "BTCUSD")
+        XCTAssertEqual(account.openPositions?.first?.entryPrice, 60000)
+        XCTAssertEqual(account.openPositions?.first?.unrealizedFunding, -1.25)
+        XCTAssertEqual(
+            account.balanceObservedAt,
+            Date(timeIntervalSince1970: 1_767_225_601)
+        )
+        XCTAssertNil(account.positionObservedAt)
+        XCTAssertEqual(account.currentAttemptObservationId, 42)
+        XCTAssertEqual(account.balancePayloadSourceObservationId, 41)
+        XCTAssertNil(account.positionPayloadSourceObservationId)
+    }
+
     private static func responseEnvelope(for request: URLRequest) -> [String: Any] {
         let method = request.httpMethod ?? "GET"
         let path = Self.percentEncodedPath(for: request)
@@ -463,6 +494,48 @@ final class APIClientSurfaceTests: XCTestCase {
             "end_date": "2026-02-01T00:00:00Z",
             "initial_cash": 10000,
             "status": "completed"
+        ]
+    }
+
+    private static func accountPayload() -> [String: Any] {
+        return [
+            "type": "portfolio_account_state",
+            "sequence_id": 7,
+            "public_id": "account-1",
+            "timestamp": "2026-01-01T00:00:02Z",
+            "session_id": "session-1",
+            "wallet_public_id": "wallet-1",
+            "exchange": "kraken",
+            "mode": "live",
+            "sync_status": "observed",
+            "effective_status": "observed",
+            "is_authoritative": true,
+            "balance_status": "observed",
+            "position_status": "observed",
+            "valuation_status": "native_only",
+            "balances": [[
+                "currency": "USD",
+                "total": 1250.5,
+                "free": 1000.25,
+                "used": NSNull(),
+            ]],
+            "open_positions": [[
+                "symbol": "BTCUSD",
+                "side": "long",
+                "size": 0.5,
+                "entry_price": 60000,
+                "mark_price": 61000,
+                "unrealized_pnl": 500,
+                "unrealized_funding": -1.25,
+                "timestamp": "2026-01-01T00:00:01Z",
+            ]],
+            "balance_observed_at": "2026-01-01T00:00:01Z",
+            "position_observed_at": NSNull(),
+            "authoritative_until": "2026-01-01T00:00:17Z",
+            "current_attempt_observation_id": 42,
+            "balance_payload_source_observation_id": 41,
+            "position_payload_source_observation_id": NSNull(),
+            "error": NSNull(),
         ]
     }
 
