@@ -10,6 +10,7 @@ enum Permission: String, CaseIterable, Codable, Sendable {
     case cancelOrders = "cancel:orders"
     case readPositions = "read:positions"
     case managePositions = "manage:positions"
+    case readAccountState = "read:account_state"
     case readStrategies = "read:strategies"
     case readSignals = "read:signals"
     case startStrategies = "start:strategies"
@@ -32,9 +33,9 @@ enum Permission: String, CaseIterable, Codable, Sendable {
 
 let rolePermissions: [UserRole: [Permission]] = [
     .aiDelegate: [.cancelOrders, .createOrders, .managePositions, .readBacktests, .readMarketData, .readOrders, .readPositions, .readSignals, .readStrategies, .readSystemStatus],
-    .viewer: [.manageNotificationDevices, .readBacktests, .readMarketData, .readNotifications, .readOrders, .readPositions, .readStrategies, .readSystemStatus],
-    .operatorRole: [.cancelOrders, .createOrders, .manageBacktests, .manageNotificationDevices, .managePairedExecution, .managePositions, .manageProcesses, .readBacktests, .readMarketData, .readNotifications, .readOrders, .readPositions, .readSignals, .readStrategies, .readSystemStatus, .startStrategies, .stopStrategies],
-    .admin: [.cancelOrders, .configureStrategies, .configureSystem, .createOrders, .impersonateOperator, .manageBacktests, .manageNotificationDevices, .managePairedExecution, .managePositions, .manageProcesses, .manageScopeGrants, .manageUsers, .manageWalletCredentials, .readBacktests, .readMarketData, .readNotifications, .readOrders, .readPositions, .readSignals, .readStrategies, .readSystemStatus, .readWalletCredentials, .startStrategies, .stopStrategies],
+    .viewer: [.manageNotificationDevices, .readAccountState, .readBacktests, .readMarketData, .readNotifications, .readOrders, .readPositions, .readStrategies, .readSystemStatus],
+    .operatorRole: [.cancelOrders, .createOrders, .manageBacktests, .manageNotificationDevices, .managePairedExecution, .managePositions, .manageProcesses, .readAccountState, .readBacktests, .readMarketData, .readNotifications, .readOrders, .readPositions, .readSignals, .readStrategies, .readSystemStatus, .startStrategies, .stopStrategies],
+    .admin: [.cancelOrders, .configureStrategies, .configureSystem, .createOrders, .impersonateOperator, .manageBacktests, .manageNotificationDevices, .managePairedExecution, .managePositions, .manageProcesses, .manageScopeGrants, .manageUsers, .manageWalletCredentials, .readAccountState, .readBacktests, .readMarketData, .readNotifications, .readOrders, .readPositions, .readSignals, .readStrategies, .readSystemStatus, .readWalletCredentials, .startStrategies, .stopStrategies],
 ]
 
 let resourceAccess: [String: [UserRole]] = [
@@ -44,6 +45,7 @@ let resourceAccess: [String: [UserRole]] = [
     "strategies": [.aiDelegate, .viewer, .operatorRole, .admin],
     "orders": [.aiDelegate, .viewer, .operatorRole, .admin],
     "positions": [.aiDelegate, .viewer, .operatorRole, .admin],
+    "accounts": [.viewer, .operatorRole, .admin],
     "signals": [.aiDelegate, .viewer, .operatorRole, .admin],
     "health": [.aiDelegate, .viewer, .operatorRole, .admin],
     "admin": [.admin],
