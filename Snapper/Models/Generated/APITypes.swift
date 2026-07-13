@@ -142,6 +142,18 @@ enum OrderDataOrderType: String, Codable, Sendable {
     case stopLimit = "stop_limit"
 }
 
+enum PortfolioAccountStateExchange: String, Codable, Sendable {
+    case paper
+    case kraken
+    case krakenFutures = "kraken_futures"
+    case walutomat
+}
+
+enum PortfolioAccountStateMode: String, Codable, Sendable {
+    case live
+    case paper
+}
+
 enum PositionDataExchange: String, Codable, Sendable {
     case paper
     case kraken
@@ -342,6 +354,67 @@ enum ProcessDesiredStateBodyAction: String, Codable, Sendable {
 enum CreateScopeGrantBodyScopeKind: String, Codable, Sendable {
     case underlying
     case instrument
+}
+
+struct AccountBalanceEntry: Codable, Sendable {
+    let currency: String
+    let total: Double
+    let free: Double?
+    let used: Double?
+
+    init(
+        currency: String,
+        total: Double,
+        free: Double? = nil,
+        used: Double? = nil
+    ) {
+        self.currency = currency
+        self.total = total
+        self.free = free
+        self.used = used
+    }
+}
+
+struct AccountPositionEntry: Codable, Sendable {
+    let symbol: String
+    let side: String
+    let size: Double
+    let entryPrice: Double
+    let markPrice: Double
+    let unrealizedPnl: Double
+    let unrealizedFunding: Double
+    let timestamp: Date
+
+    init(
+        symbol: String,
+        side: String,
+        size: Double,
+        entryPrice: Double,
+        markPrice: Double,
+        unrealizedPnl: Double,
+        unrealizedFunding: Double,
+        timestamp: Date
+    ) {
+        self.symbol = symbol
+        self.side = side
+        self.size = size
+        self.entryPrice = entryPrice
+        self.markPrice = markPrice
+        self.unrealizedPnl = unrealizedPnl
+        self.unrealizedFunding = unrealizedFunding
+        self.timestamp = timestamp
+    }
+
+    enum CodingKeys: String, CodingKey {
+        case symbol
+        case side
+        case size
+        case entryPrice = "entry_price"
+        case markPrice = "mark_price"
+        case unrealizedPnl = "unrealized_pnl"
+        case unrealizedFunding = "unrealized_funding"
+        case timestamp
+    }
 }
 
 struct AdminAiReviewItem: Codable, Sendable {
@@ -6373,6 +6446,154 @@ struct PendingReviewSummaryItem: Codable, Sendable {
         case fanoutAfter = "fanout_after"
         case instrument
         case signalEnvelope = "signal_envelope"
+    }
+}
+
+struct PortfolioAccountState: Codable, Sendable {
+    let type: String?
+    let sequenceId: Int
+    let publicId: String
+    let timestamp: Date
+    let sessionId: String
+    let topic: String?
+    let walletPublicId: String?
+    let exchange: String
+    let mode: String?
+    let syncStatus: String
+    let effectiveStatus: String
+    let isAuthoritative: Bool
+    let balanceStatus: String
+    let positionStatus: String
+    let valuationStatus: String
+    let balances: [AccountBalanceEntry]?
+    let openPositions: [AccountPositionEntry]?
+    let balanceObservedAt: Date?
+    let positionObservedAt: Date?
+    let authoritativeUntil: Date?
+    let currentAttemptObservationId: Int?
+    let balancePayloadSourceObservationId: Int?
+    let positionPayloadSourceObservationId: Int?
+    let error: String?
+
+    init(
+        type: String? = nil,
+        sequenceId: Int,
+        publicId: String,
+        timestamp: Date,
+        sessionId: String,
+        topic: String? = nil,
+        walletPublicId: String? = nil,
+        exchange: String,
+        mode: String? = nil,
+        syncStatus: String,
+        effectiveStatus: String,
+        isAuthoritative: Bool,
+        balanceStatus: String,
+        positionStatus: String,
+        valuationStatus: String,
+        balances: [AccountBalanceEntry]? = nil,
+        openPositions: [AccountPositionEntry]? = nil,
+        balanceObservedAt: Date? = nil,
+        positionObservedAt: Date? = nil,
+        authoritativeUntil: Date? = nil,
+        currentAttemptObservationId: Int? = nil,
+        balancePayloadSourceObservationId: Int? = nil,
+        positionPayloadSourceObservationId: Int? = nil,
+        error: String? = nil
+    ) {
+        self.type = type
+        self.sequenceId = sequenceId
+        self.publicId = publicId
+        self.timestamp = timestamp
+        self.sessionId = sessionId
+        self.topic = topic
+        self.walletPublicId = walletPublicId
+        self.exchange = exchange
+        self.mode = mode
+        self.syncStatus = syncStatus
+        self.effectiveStatus = effectiveStatus
+        self.isAuthoritative = isAuthoritative
+        self.balanceStatus = balanceStatus
+        self.positionStatus = positionStatus
+        self.valuationStatus = valuationStatus
+        self.balances = balances
+        self.openPositions = openPositions
+        self.balanceObservedAt = balanceObservedAt
+        self.positionObservedAt = positionObservedAt
+        self.authoritativeUntil = authoritativeUntil
+        self.currentAttemptObservationId = currentAttemptObservationId
+        self.balancePayloadSourceObservationId = balancePayloadSourceObservationId
+        self.positionPayloadSourceObservationId = positionPayloadSourceObservationId
+        self.error = error
+    }
+
+    enum CodingKeys: String, CodingKey {
+        case type
+        case sequenceId = "sequence_id"
+        case publicId = "public_id"
+        case timestamp
+        case sessionId = "session_id"
+        case topic
+        case walletPublicId = "wallet_public_id"
+        case exchange
+        case mode
+        case syncStatus = "sync_status"
+        case effectiveStatus = "effective_status"
+        case isAuthoritative = "is_authoritative"
+        case balanceStatus = "balance_status"
+        case positionStatus = "position_status"
+        case valuationStatus = "valuation_status"
+        case balances
+        case openPositions = "open_positions"
+        case balanceObservedAt = "balance_observed_at"
+        case positionObservedAt = "position_observed_at"
+        case authoritativeUntil = "authoritative_until"
+        case currentAttemptObservationId = "current_attempt_observation_id"
+        case balancePayloadSourceObservationId = "balance_payload_source_observation_id"
+        case positionPayloadSourceObservationId = "position_payload_source_observation_id"
+        case error
+    }
+}
+
+struct PortfolioAccountStateListResponse: Codable, Sendable {
+    let type: String?
+    let sequenceId: Int
+    let publicId: String
+    let timestamp: Date
+    let sessionId: String
+    let topic: String?
+    let payload: [PortfolioAccountState]
+    let count: Int
+
+    init(
+        type: String? = nil,
+        sequenceId: Int,
+        publicId: String,
+        timestamp: Date,
+        sessionId: String,
+        topic: String? = nil,
+        payload: [PortfolioAccountState],
+        count: Int
+    ) {
+        self.type = type
+        self.sequenceId = sequenceId
+        self.publicId = publicId
+        self.timestamp = timestamp
+        self.sessionId = sessionId
+        self.topic = topic
+        self.payload = payload
+        self.count = count
+    }
+
+    enum CodingKeys: String, CodingKey {
+        case type
+        case sequenceId = "sequence_id"
+        case publicId = "public_id"
+        case timestamp
+        case sessionId = "session_id"
+        case topic
+        case payload
+        case count
     }
 }
 
