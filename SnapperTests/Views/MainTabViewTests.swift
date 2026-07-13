@@ -12,6 +12,7 @@ final class MainTabViewTests: XCTestCase {
         let alerts = "/alerts"
         let orders = "/orders"
         let positions = "/positions"
+        let accounts = "/portfolio/accounts"
         let system = "/system"
 
         XCTAssertEqual(
@@ -20,6 +21,7 @@ final class MainTabViewTests: XCTestCase {
                 alertsPrefix: alerts,
                 ordersPrefix: orders,
                 positionsPrefix: positions,
+                accountsPrefix: accounts,
                 systemPrefix: system
             ),
             "alerts",
@@ -32,6 +34,7 @@ final class MainTabViewTests: XCTestCase {
                 alertsPrefix: alerts,
                 ordersPrefix: orders,
                 positionsPrefix: positions,
+                accountsPrefix: accounts,
                 systemPrefix: system
             ),
             "orders"
@@ -43,6 +46,7 @@ final class MainTabViewTests: XCTestCase {
                 alertsPrefix: alerts,
                 ordersPrefix: orders,
                 positionsPrefix: positions,
+                accountsPrefix: accounts,
                 systemPrefix: system
             ),
             "positions",
@@ -51,10 +55,23 @@ final class MainTabViewTests: XCTestCase {
 
         XCTAssertEqual(
             MainTabView.routeDeepLink(
+                path: "\(accounts)/wallet-1",
+                alertsPrefix: alerts,
+                ordersPrefix: orders,
+                positionsPrefix: positions,
+                accountsPrefix: accounts,
+                systemPrefix: system
+            ),
+            "accounts"
+        )
+
+        XCTAssertEqual(
+            MainTabView.routeDeepLink(
                 path: "\(system)/health",
                 alertsPrefix: alerts,
                 ordersPrefix: orders,
                 positionsPrefix: positions,
+                accountsPrefix: accounts,
                 systemPrefix: system
             ),
             "home"
@@ -66,6 +83,7 @@ final class MainTabViewTests: XCTestCase {
                 alertsPrefix: alerts,
                 ordersPrefix: orders,
                 positionsPrefix: positions,
+                accountsPrefix: accounts,
                 systemPrefix: system
             ),
             "Empty deep-link must leave the current tab unchanged."
@@ -77,9 +95,29 @@ final class MainTabViewTests: XCTestCase {
                 alertsPrefix: alerts,
                 ordersPrefix: orders,
                 positionsPrefix: positions,
+                accountsPrefix: accounts,
                 systemPrefix: system
             ),
             "Unrecognised paths must leave the current tab unchanged."
         )
+    }
+
+    func testAccountsTabRequiresPermissionAndResourceAccess() {
+        XCTAssertTrue(MainTabView.canShowAccounts(
+            hasReadAccountState: true,
+            canAccessAccountsResource: true
+        ))
+        XCTAssertFalse(MainTabView.canShowAccounts(
+            hasReadAccountState: false,
+            canAccessAccountsResource: true
+        ))
+        XCTAssertFalse(MainTabView.canShowAccounts(
+            hasReadAccountState: true,
+            canAccessAccountsResource: false
+        ))
+        XCTAssertFalse(MainTabView.canShowAccounts(
+            hasReadAccountState: false,
+            canAccessAccountsResource: false
+        ))
     }
 }

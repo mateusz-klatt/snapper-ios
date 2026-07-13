@@ -1,6 +1,6 @@
 import SwiftUI
 
-/// 6-tab root: Home, Positions, Orders, Alerts, Signals, Settings.
+/// Permission-gated root tabs for the operator surfaces.
 ///
 /// Permission gating per tab:
 /// - Home: ``canAccess("overview")``.
@@ -8,12 +8,14 @@ import SwiftUI
 ///   above ``aiDelegate`` already grants ``readPositions``).
 /// - Orders: ``canAccess("orders")``.
 /// - Alerts: ``readNotifications`` (push gating).
+/// - Accounts: ``readAccountState`` and the ``accounts`` resource.
 /// - Signals: ``canAccess("signals")`` — read-only trading-signals feed
 ///   (``read:market_data``; every role above is granted it). Inserted
 ///   before Settings so Alerts stays a directly-tapped tab: a role with
-///   all six visible tabs lets iOS collapse the last two (Signals,
-///   Settings) into the standard "More" list, leaving the APNs
-///   deep-link target (Alerts) reachable without traversing "More".
+///   all seven visible tabs lets iOS collapse the trailing account,
+///   signal, and settings surfaces into the standard "More" list,
+///   leaving the APNs deep-link target (Alerts) reachable without
+///   traversing "More".
 /// - Settings: ``canAccess("overview")`` — every authenticated role
 ///   per the permission catalog (contract that
 ///   any user can self-manage push notifications + device).
@@ -55,6 +57,10 @@ struct MainTabView: View {
         if authService.hasPermission(.readPositions) { ids.append("positions") }
         if authService.canAccess("orders") { ids.append("orders") }
         if authService.hasPermission(.readNotifications) { ids.append("alerts") }
+        if Self.canShowAccounts(
+            hasReadAccountState: authService.hasPermission(.readAccountState),
+            canAccessAccountsResource: authService.canAccess("accounts")
+        ) { ids.append("accounts") }
         if authService.canAccess("signals") { ids.append("signals") }
         if authService.canAccess("overview") { ids.append("settings") }
         return ids
@@ -117,6 +123,17 @@ struct MainTabView: View {
                     .tag("alerts")
             }
 
+            if Self.canShowAccounts(
+                hasReadAccountState: authService.hasPermission(.readAccountState),
+                canAccessAccountsResource: authService.canAccess("accounts")
+            ) {
+                AccountsView()
+                    .tabItem {
+                        Label(LocalizedStringKey("tabs.accounts"), systemImage: "building.columns.fill")
+                    }
+                    .tag("accounts")
+            }
+
             if authService.canAccess("signals") {
                 SignalsView()
                     .tabItem {
@@ -177,6 +194,7 @@ struct MainTabView: View {
             alertsPrefix: AppConfig.Endpoints.alerts,
             ordersPrefix: AppConfig.Endpoints.orders,
             positionsPrefix: AppConfig.Endpoints.positions,
+            accountsPrefix: AppConfig.Endpoints.accounts,
             systemPrefix: AppConfig.Endpoints.system
         ) else { return }
         guard availableTabIDs.contains(nextTab) else {
@@ -215,6 +233,7 @@ struct MainTabView: View {
     /// - ``/orders*`` → ``orders`` (renamed from "trading").
     /// - ``/positions*`` → ``positions`` (now its own tab — previously
     ///   this fell back to Dashboard).
+    /// - ``/portfolio/accounts*`` → ``accounts``.
     /// - ``/system*`` → ``home`` (renamed from "dashboard").
     /// - anything else → ``nil``, leaving the current tab unchanged.
     ///
@@ -226,6 +245,7 @@ struct MainTabView: View {
         alertsPrefix: String,
         ordersPrefix: String,
         positionsPrefix: String,
+        accountsPrefix: String,
         systemPrefix: String
     ) -> String? {
         guard let path else { return nil }
@@ -238,10 +258,20 @@ struct MainTabView: View {
         if path.hasPrefix(positionsPrefix) {
             return "positions"
         }
+        if path.hasPrefix(accountsPrefix) {
+            return "accounts"
+        }
         if path.hasPrefix(systemPrefix) {
             return "home"
         }
         return nil
+    }
+
+    static func canShowAccounts(
+        hasReadAccountState: Bool,
+        canAccessAccountsResource: Bool
+    ) -> Bool {
+        return hasReadAccountState && canAccessAccountsResource
     }
 }
 

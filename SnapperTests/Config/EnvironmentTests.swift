@@ -15,6 +15,7 @@ final class EnvironmentTests: XCTestCase {
             "Refresh": "/refresh",
             "Me": "/me",
             "Orders": "/orders",
+            "Portfolio": "/portfolio",
             "Positions": "/positions",
             "Signals": "/signals",
             "Backtests": "/backtests",
@@ -80,6 +81,7 @@ final class EnvironmentTests: XCTestCase {
         XCTAssertEqual(AppConfig.Endpoints.me, "/auth/me")
         XCTAssertEqual(AppConfig.Endpoints.orders, "/orders")
         XCTAssertEqual(AppConfig.Endpoints.positions, "/positions")
+        XCTAssertEqual(AppConfig.Endpoints.accounts, "/portfolio/accounts")
         XCTAssertEqual(AppConfig.Endpoints.signals, "/signals")
         XCTAssertEqual(AppConfig.Endpoints.backtests, "/backtests")
         XCTAssertEqual(AppConfig.Endpoints.processSummary, "/processes/summary")
@@ -113,6 +115,7 @@ final class EnvironmentTests: XCTestCase {
         XCTAssertEqual(parsed.endpoints.refresh, "/refresh")
         XCTAssertEqual(parsed.endpoints.me, "/me")
         XCTAssertEqual(parsed.endpoints.orders, "/orders")
+        XCTAssertEqual(parsed.endpoints.portfolio, "/portfolio")
         XCTAssertEqual(parsed.endpoints.positions, "/positions")
         XCTAssertEqual(parsed.endpoints.signals, "/signals")
         XCTAssertEqual(parsed.endpoints.backtests, "/backtests")
@@ -150,6 +153,7 @@ final class EnvironmentTests: XCTestCase {
         XCTAssertEqual(parsed.wsPath, "")
         XCTAssertEqual(parsed.endpoints.login, "")
         XCTAssertEqual(parsed.endpoints.orders, "/orders")
+        XCTAssertEqual(parsed.endpoints.portfolio, "")
         XCTAssertEqual(parsed.endpoints.logout, "")
         XCTAssertEqual(parsed.endpoints.trailingStops, "")
     }
@@ -166,6 +170,7 @@ final class EnvironmentTests: XCTestCase {
         XCTAssertEqual(parsed.wsPath, "/stream")
         XCTAssertEqual(parsed.endpoints.login, "")
         XCTAssertEqual(parsed.endpoints.orders, "")
+        XCTAssertEqual(parsed.endpoints.portfolio, "")
         XCTAssertEqual(parsed.endpoints.trailingStops, "")
     }
 

@@ -1,6 +1,545 @@
 {
   "sourceLanguage": "en",
   "strings": {
+    "accounts.balance.currency": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Currency"
+          }
+        }
+      }
+    },
+    "accounts.balance.free": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Free"
+          }
+        }
+      }
+    },
+    "accounts.balance.total": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Total"
+          }
+        }
+      }
+    },
+    "accounts.balance.used": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Used"
+          }
+        }
+      }
+    },
+    "accounts.banner.message": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rows not marked Live show last-known, simulated, or unavailable data — never authoritative live venue balances."
+          }
+        }
+      }
+    },
+    "accounts.banner.title": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Some account data is not live truth"
+          }
+        }
+      }
+    },
+    "accounts.empty.message": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Venue balances and positions appear here once an account has been observed for a connected wallet."
+          }
+        }
+      }
+    },
+    "accounts.empty.title": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No venue accounts"
+          }
+        }
+      }
+    },
+    "accounts.loading": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Loading venue accounts…"
+          }
+        }
+      }
+    },
+    "accounts.meta.authoritativeUntil": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Authoritative until %@"
+          }
+        }
+      }
+    },
+    "accounts.meta.balancesObserved": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Balances observed %@"
+          }
+        }
+      }
+    },
+    "accounts.meta.error": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Error: %@"
+          }
+        }
+      }
+    },
+    "accounts.meta.positionsObserved": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Positions observed %@"
+          }
+        }
+      }
+    },
+    "accounts.mode.live": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Live"
+          }
+        }
+      }
+    },
+    "accounts.mode.paper": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Paper"
+          }
+        }
+      }
+    },
+    "accounts.noValue": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "N/A"
+          }
+        }
+      }
+    },
+    "accounts.page.subtitle": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Exchange cash balances and open positions, labeled by how the venue reported them."
+          }
+        }
+      }
+    },
+    "accounts.page.title": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Venue Accounts"
+          }
+        }
+      }
+    },
+    "accounts.position.entryPrice": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Entry"
+          }
+        }
+      }
+    },
+    "accounts.position.markPrice": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mark"
+          }
+        }
+      }
+    },
+    "accounts.position.side": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Side"
+          }
+        }
+      }
+    },
+    "accounts.position.size": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Size"
+          }
+        }
+      }
+    },
+    "accounts.position.symbol": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Symbol"
+          }
+        }
+      }
+    },
+    "accounts.position.unrealizedFunding": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Funding"
+          }
+        }
+      }
+    },
+    "accounts.position.unrealizedPnl": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Unrealized P&L"
+          }
+        }
+      }
+    },
+    "accounts.section.balances": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Balances"
+          }
+        }
+      }
+    },
+    "accounts.section.positions": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Open positions"
+          }
+        }
+      }
+    },
+    "accounts.sectionEmpty.balances": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No balances reported"
+          }
+        }
+      }
+    },
+    "accounts.sectionEmpty.positions": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No open positions"
+          }
+        }
+      }
+    },
+    "accounts.side.buy": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Buy"
+          }
+        }
+      }
+    },
+    "accounts.side.sell": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sell"
+          }
+        }
+      }
+    },
+    "accounts.status.clockError": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Clock error"
+          }
+        }
+      }
+    },
+    "accounts.status.corrupt": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Unverified"
+          }
+        }
+      }
+    },
+    "accounts.status.notApplicable": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Not applicable"
+          }
+        }
+      }
+    },
+    "accounts.status.observed": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Live"
+          }
+        }
+      }
+    },
+    "accounts.status.simulated": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Simulated"
+          }
+        }
+      }
+    },
+    "accounts.status.stale": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Stale"
+          }
+        }
+      }
+    },
+    "accounts.status.unknown": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Unknown"
+          }
+        }
+      }
+    },
+    "accounts.status.unsupported": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Unavailable"
+          }
+        }
+      }
+    },
+    "accounts.statusTooltip.clockError": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Observation timestamp is inconsistent with the server clock."
+          }
+        }
+      }
+    },
+    "accounts.statusTooltip.corrupt": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The stored snapshot failed validation and cannot be shown as truth."
+          }
+        }
+      }
+    },
+    "accounts.statusTooltip.notApplicable": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "This component does not apply to the venue."
+          }
+        }
+      }
+    },
+    "accounts.statusTooltip.observed": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Live venue truth, observed within the authority window."
+          }
+        }
+      }
+    },
+    "accounts.statusTooltip.simulated": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Paper-trading figures — not real venue balances."
+          }
+        }
+      }
+    },
+    "accounts.statusTooltip.stale": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Last-known snapshot; the authority window elapsed or polling stalled."
+          }
+        }
+      }
+    },
+    "accounts.statusTooltip.unknown": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Status could not be classified; treated as not authoritative."
+          }
+        }
+      }
+    },
+    "accounts.statusTooltip.unsupported": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "This venue does not report account state."
+          }
+        }
+      }
+    },
+    "accounts.unavailable.message": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Venue account state could not be loaded. This is not an empty account — the data is simply unavailable right now."
+          }
+        }
+      }
+    },
+    "accounts.unavailable.title": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Account truth unavailable"
+          }
+        }
+      }
+    },
     "alerts.accessibility.hint.row": {
       "extractionState": "manual",
       "localizations": {
@@ -74106,6 +74645,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "Cluaisín suíomhanna. Oscailte: %@"
+          }
+        }
+      }
+    },
+    "tabs.accounts": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Accounts"
           }
         }
       }

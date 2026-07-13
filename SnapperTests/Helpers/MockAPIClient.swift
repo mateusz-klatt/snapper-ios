@@ -39,6 +39,9 @@ final class MockAPIClient: APIClientProtocol, @unchecked Sendable {
         var fetchPositions: @Sendable () async throws -> [PositionSnapshot] = {
             throw APIError.invalidResponse
         }
+        var fetchAccounts: @Sendable () async throws -> [PortfolioAccountState] = {
+            throw APIError.invalidResponse
+        }
         var fetchSignals: @Sendable () async throws -> [TradingSignal] = {
             throw APIError.invalidResponse
         }
@@ -158,6 +161,10 @@ final class MockAPIClient: APIClientProtocol, @unchecked Sendable {
     var fetchPositionsHandler: @Sendable () async throws -> [PositionSnapshot] {
         get { read(\.fetchPositions) }
         set { write(\.fetchPositions, newValue) }
+    }
+    var fetchAccountsHandler: @Sendable () async throws -> [PortfolioAccountState] {
+        get { read(\.fetchAccounts) }
+        set { write(\.fetchAccounts, newValue) }
     }
     var fetchSignalsHandler: @Sendable () async throws -> [TradingSignal] {
         get { read(\.fetchSignals) }
@@ -297,6 +304,10 @@ final class MockAPIClient: APIClientProtocol, @unchecked Sendable {
 
     func fetchPositions() async throws -> [PositionSnapshot] {
         return try await fetchPositionsHandler()
+    }
+
+    func fetchAccounts() async throws -> [PortfolioAccountState] {
+        return try await fetchAccountsHandler()
     }
 
     func fetchSignals() async throws -> [TradingSignal] {

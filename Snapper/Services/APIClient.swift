@@ -222,6 +222,11 @@ final class APIClient: Sendable, APIClientProtocol {
         return envelope.payload
     }
 
+    func fetchAccounts() async throws -> [PortfolioAccountState] {
+        let envelope: PortfolioAccountStateListResponse = try await request(endpoint: AppConfig.Endpoints.accounts)
+        return envelope.payload
+    }
+
     func fetchSignals() async throws -> [TradingSignal] {
         let envelope: SignalListResponse = try await request(endpoint: AppConfig.Endpoints.signals)
         return envelope.payload

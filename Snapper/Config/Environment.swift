@@ -98,6 +98,10 @@ enum AppConfig {
             return configuration.endpoints.positions
         }
 
+        static var accounts: String {
+            return "\(configuration.endpoints.portfolio)/accounts"
+        }
+
         static var signals: String {
             return configuration.endpoints.signals
         }
@@ -177,6 +181,7 @@ enum AppConfig {
             let refresh: String
             let me: String
             let orders: String
+            let portfolio: String
             let positions: String
             let signals: String
             let backtests: String
@@ -234,6 +239,7 @@ enum AppConfig {
                     refresh: endpoints["Refresh"] as? String ?? "",
                     me: endpoints["Me"] as? String ?? "",
                     orders: endpoints["Orders"] as? String ?? "",
+                    portfolio: endpoints["Portfolio"] as? String ?? "",
                     positions: endpoints["Positions"] as? String ?? "",
                     signals: endpoints["Signals"] as? String ?? "",
                     backtests: endpoints["Backtests"] as? String ?? "",
@@ -278,6 +284,7 @@ enum AppConfig {
                     refresh: "",
                     me: "",
                     orders: "",
+                    portfolio: "",
                     positions: "",
                     signals: "",
                     backtests: "",

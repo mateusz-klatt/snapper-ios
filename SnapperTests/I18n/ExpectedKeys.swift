@@ -11,6 +11,61 @@ import Foundation
 /// ``values`` is the full set including Phase H additions.
 enum ExpectedKeys {
 
+    /// Source-language keys introduced with Venue Accounts. The dedicated
+    /// other-locale pass will remove these from this rollout set as translations land.
+    static let englishOnlyRollout: Set<String> = [
+        "accounts.balance.currency",
+        "accounts.balance.free",
+        "accounts.balance.total",
+        "accounts.balance.used",
+        "accounts.banner.message",
+        "accounts.banner.title",
+        "accounts.empty.message",
+        "accounts.empty.title",
+        "accounts.loading",
+        "accounts.meta.authoritativeUntil",
+        "accounts.meta.balancesObserved",
+        "accounts.meta.error",
+        "accounts.meta.positionsObserved",
+        "accounts.mode.live",
+        "accounts.mode.paper",
+        "accounts.noValue",
+        "accounts.page.subtitle",
+        "accounts.page.title",
+        "accounts.position.entryPrice",
+        "accounts.position.markPrice",
+        "accounts.position.side",
+        "accounts.position.size",
+        "accounts.position.symbol",
+        "accounts.position.unrealizedFunding",
+        "accounts.position.unrealizedPnl",
+        "accounts.section.balances",
+        "accounts.section.positions",
+        "accounts.sectionEmpty.balances",
+        "accounts.sectionEmpty.positions",
+        "accounts.side.buy",
+        "accounts.side.sell",
+        "accounts.status.clockError",
+        "accounts.status.corrupt",
+        "accounts.status.notApplicable",
+        "accounts.status.observed",
+        "accounts.status.simulated",
+        "accounts.status.stale",
+        "accounts.status.unknown",
+        "accounts.status.unsupported",
+        "accounts.statusTooltip.clockError",
+        "accounts.statusTooltip.corrupt",
+        "accounts.statusTooltip.notApplicable",
+        "accounts.statusTooltip.observed",
+        "accounts.statusTooltip.simulated",
+        "accounts.statusTooltip.stale",
+        "accounts.statusTooltip.unknown",
+        "accounts.statusTooltip.unsupported",
+        "accounts.unavailable.message",
+        "accounts.unavailable.title",
+        "tabs.accounts",
+    ]
+
     static let v1Locked: Set<String> = [
         "auth.login.subtitle",
         "auth.login.usernamePlaceholder",
@@ -32,7 +87,7 @@ enum ExpectedKeys {
         "common.localeSwitcher.currentAccessibilityLabel",
     ]
 
-    static let values: Set<String> = [
+    static let values: Set<String> = Set([
         "alerts.accessibility.hint.row",
         "alerts.accessibility.label.dismissButton",
         "alerts.alertType.critical_system_error",
@@ -498,5 +553,5 @@ enum ExpectedKeys {
         "aiIntegration.caps.default",
         "aiIntegration.empty.title",
         "aiIntegration.empty.message",
-        ]
+        ]).union(englishOnlyRollout)
 }

@@ -193,15 +193,24 @@ final class CatalogParityTests: XCTestCase {
         )
     }
 
-    func testEveryKeyHasBothEnAndPlLocalizations() throws {
+    func testCompletedKeysHaveBothEnAndPlLocalizations() throws {
         let catalog = try loadCatalog()
-        for key in catalog.strings.keys {
+        for key in catalog.strings.keys where !ExpectedKeys.englishOnlyRollout.contains(key) {
             guard let entry = catalog.strings[key] else {
                 XCTFail("Missing key: \(key)")
                 continue
             }
             XCTAssertNotNil(entry.localizations["en"], "Missing EN for \(key)")
             XCTAssertNotNil(entry.localizations["pl"], "Missing PL for \(key)")
+        }
+    }
+
+    func testEnglishOnlyRolloutKeysContainOnlyEnglish() throws {
+        let catalog = try loadCatalog()
+        for key in ExpectedKeys.englishOnlyRollout {
+            let entry = try XCTUnwrap(catalog.strings[key], "Missing English-only key: \(key)")
+            XCTAssertEqual(Set(entry.localizations.keys), Set(["en"]))
+            XCTAssertNotNil(entry.localizations["en"])
         }
     }
 
@@ -266,6 +275,7 @@ final class CatalogParityTests: XCTestCase {
         let catalog = try loadCatalog()
         for language in Self.fullyTranslatedLanguages {
             for (key, entry) in catalog.strings {
+                if ExpectedKeys.englishOnlyRollout.contains(key) { continue }
                 XCTAssertNotNil(
                     entry.localizations[language],
                     "Missing \(language) localization for key '\(key)'"
