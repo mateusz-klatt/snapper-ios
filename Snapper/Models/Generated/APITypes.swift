@@ -361,17 +361,40 @@ struct AccountBalanceEntry: Codable, Sendable {
     let total: Double
     let free: Double?
     let used: Double?
+    let totalDecimal: String?
+    let freeDecimal: String?
+    let usedDecimal: String?
+    let numericProvenance: String?
 
     init(
         currency: String,
         total: Double,
         free: Double? = nil,
-        used: Double? = nil
+        used: Double? = nil,
+        totalDecimal: String? = nil,
+        freeDecimal: String? = nil,
+        usedDecimal: String? = nil,
+        numericProvenance: String? = nil
     ) {
         self.currency = currency
         self.total = total
         self.free = free
         self.used = used
+        self.totalDecimal = totalDecimal
+        self.freeDecimal = freeDecimal
+        self.usedDecimal = usedDecimal
+        self.numericProvenance = numericProvenance
+    }
+
+    enum CodingKeys: String, CodingKey {
+        case currency
+        case total
+        case free
+        case used
+        case totalDecimal = "total_decimal"
+        case freeDecimal = "free_decimal"
+        case usedDecimal = "used_decimal"
+        case numericProvenance = "numeric_provenance"
     }
 }
 
