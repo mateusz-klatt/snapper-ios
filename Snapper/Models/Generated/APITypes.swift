@@ -315,6 +315,7 @@ enum UserAlertDefaultBodyAlertType: String, Codable, Sendable {
     case positionStopLossFired = "position_stop_loss_fired"
     case marginWarning = "margin_warning"
     case criticalSystemError = "critical_system_error"
+    case drift
 }
 
 enum UserAlertDefaultBodyMinPriority: String, Codable, Sendable {
@@ -352,6 +353,7 @@ enum DeviceAlertPrefBodyAlertType: String, Codable, Sendable {
     case positionStopLossFired = "position_stop_loss_fired"
     case marginWarning = "margin_warning"
     case criticalSystemError = "critical_system_error"
+    case drift
 }
 
 enum DeviceAlertPrefBodyMinPriority: String, Codable, Sendable {
