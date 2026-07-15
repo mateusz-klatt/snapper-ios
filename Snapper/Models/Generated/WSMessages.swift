@@ -10,6 +10,7 @@ enum AlertEventDataAlertType: String, Codable, Sendable {
     case positionStopLossFired = "position_stop_loss_fired"
     case marginWarning = "margin_warning"
     case criticalSystemError = "critical_system_error"
+    case drift
 }
 
 enum AlertEventDataPriority: String, Codable, Sendable {
@@ -109,6 +110,11 @@ enum OrderRequestDataOrderType: String, Codable, Sendable {
 enum OrderRequestDataOrigin: String, Codable, Sendable {
     case live
     case replay
+}
+
+enum PortfolioDriftEpisodeEventDataLifecycle: String, Codable, Sendable {
+    case opened
+    case resolved
 }
 
 enum ScopeGrantedDataScopeKind: String, Codable, Sendable {
@@ -1446,6 +1452,76 @@ struct OrderRequestData: Codable, Sendable {
         case origin
         case replayWindowStart = "replay_window_start"
         case replayWindowEnd = "replay_window_end"
+    }
+}
+
+struct PortfolioDriftEpisodeEventData: Codable, Sendable {
+    let type: String
+    let sequenceId: Int
+    let publicId: String
+    let timestamp: Date
+    let sessionId: String
+    let topic: String?
+    let walletPublicId: String
+    let exchange: String
+    let mode: String
+    let episodePublicId: String
+    let lifecycle: String
+    let openedAt: Date
+    let closedAt: Date?
+    let mismatchCount: Int
+    let resolutionReason: String?
+
+    init(
+        type: String,
+        sequenceId: Int,
+        publicId: String,
+        timestamp: Date,
+        sessionId: String,
+        topic: String? = nil,
+        walletPublicId: String,
+        exchange: String,
+        mode: String,
+        episodePublicId: String,
+        lifecycle: String,
+        openedAt: Date,
+        closedAt: Date? = nil,
+        mismatchCount: Int,
+        resolutionReason: String? = nil
+    ) {
+        self.type = type
+        self.sequenceId = sequenceId
+        self.publicId = publicId
+        self.timestamp = timestamp
+        self.sessionId = sessionId
+        self.topic = topic
+        self.walletPublicId = walletPublicId
+        self.exchange = exchange
+        self.mode = mode
+        self.episodePublicId = episodePublicId
+        self.lifecycle = lifecycle
+        self.openedAt = openedAt
+        self.closedAt = closedAt
+        self.mismatchCount = mismatchCount
+        self.resolutionReason = resolutionReason
+    }
+
+    enum CodingKeys: String, CodingKey {
+        case type
+        case sequenceId = "sequence_id"
+        case publicId = "public_id"
+        case timestamp
+        case sessionId = "session_id"
+        case topic
+        case walletPublicId = "wallet_public_id"
+        case exchange
+        case mode
+        case episodePublicId = "episode_public_id"
+        case lifecycle
+        case openedAt = "opened_at"
+        case closedAt = "closed_at"
+        case mismatchCount = "mismatch_count"
+        case resolutionReason = "resolution_reason"
     }
 }
 
