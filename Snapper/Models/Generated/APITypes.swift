@@ -3,6 +3,32 @@
 
 import Foundation
 
+enum PortfolioReconciliationEffectiveStatus: String, Codable, Sendable {
+    case matched
+    case mismatched
+    case incomplete
+    case unsupported
+    case error
+    case stale
+    case clockError = "clock_error"
+    case corrupt
+}
+
+enum PortfolioReconciliationEvaluationStatus: String, Codable, Sendable {
+    case matched
+    case mismatched
+    case incomplete
+    case unsupported
+    case error
+}
+
+enum PortfolioReconciliationMethod: String, Codable, Sendable {
+    case futuresPosition = "futures_position"
+    case spotExecutionReplay = "spot_execution_replay"
+    case marginLedgerReplay = "margin_ledger_replay"
+    case unclassified
+}
+
 enum RealPortfolioReconciliationMethod: String, Codable, Sendable {
     case futuresPosition = "futures_position"
     case spotExecutionReplay = "spot_execution_replay"
@@ -20,13 +46,6 @@ enum UserRole: String, Codable, Sendable {
     case viewer
     case operatorRole = "operator"
     case admin
-}
-
-enum PortfolioReconciliationMethod: String, Codable, Sendable {
-    case futuresPosition = "futures_position"
-    case spotExecutionReplay = "spot_execution_replay"
-    case marginLedgerReplay = "margin_ledger_replay"
-    case unclassified
 }
 
 enum AvailableProcessLifecycle: String, Codable, Sendable {
@@ -6598,6 +6617,7 @@ struct PortfolioAccountState: Codable, Sendable {
     let balancePayloadSourceObservationId: Int?
     let positionPayloadSourceObservationId: Int?
     let error: String?
+    let reconciliation: PortfolioReconciliationView
 
     init(
         type: String? = nil,
@@ -6623,7 +6643,8 @@ struct PortfolioAccountState: Codable, Sendable {
         currentAttemptObservationId: Int? = nil,
         balancePayloadSourceObservationId: Int? = nil,
         positionPayloadSourceObservationId: Int? = nil,
-        error: String? = nil
+        error: String? = nil,
+        reconciliation: PortfolioReconciliationView
     ) {
         self.type = type
         self.sequenceId = sequenceId
@@ -6649,6 +6670,7 @@ struct PortfolioAccountState: Codable, Sendable {
         self.balancePayloadSourceObservationId = balancePayloadSourceObservationId
         self.positionPayloadSourceObservationId = positionPayloadSourceObservationId
         self.error = error
+        self.reconciliation = reconciliation
     }
 
     enum CodingKeys: String, CodingKey {
@@ -6676,6 +6698,7 @@ struct PortfolioAccountState: Codable, Sendable {
         case balancePayloadSourceObservationId = "balance_payload_source_observation_id"
         case positionPayloadSourceObservationId = "position_payload_source_observation_id"
         case error
+        case reconciliation
     }
 }
 
@@ -6718,6 +6741,146 @@ struct PortfolioAccountStateListResponse: Codable, Sendable {
         case topic
         case payload
         case count
+    }
+}
+
+struct PortfolioReconciliationDriftEpisode: Codable, Sendable {
+    let publicId: String
+    let status: String
+    let openedAt: Date
+    let triggerObservationId: Int
+    let lastObservationId: Int
+    let detailsSourceObservationId: Int
+    let latestFullMismatchCount: Int
+
+    init(
+        publicId: String,
+        status: String,
+        openedAt: Date,
+        triggerObservationId: Int,
+        lastObservationId: Int,
+        detailsSourceObservationId: Int,
+        latestFullMismatchCount: Int
+    ) {
+        self.publicId = publicId
+        self.status = status
+        self.openedAt = openedAt
+        self.triggerObservationId = triggerObservationId
+        self.lastObservationId = lastObservationId
+        self.detailsSourceObservationId = detailsSourceObservationId
+        self.latestFullMismatchCount = latestFullMismatchCount
+    }
+
+    enum CodingKeys: String, CodingKey {
+        case publicId = "public_id"
+        case status
+        case openedAt = "opened_at"
+        case triggerObservationId = "trigger_observation_id"
+        case lastObservationId = "last_observation_id"
+        case detailsSourceObservationId = "details_source_observation_id"
+        case latestFullMismatchCount = "latest_full_mismatch_count"
+    }
+}
+
+struct PortfolioReconciliationView: Codable, Sendable {
+    let method: PortfolioReconciliationMethod?
+    let evaluationStatus: PortfolioReconciliationEvaluationStatus?
+    let effectiveStatus: PortfolioReconciliationEffectiveStatus
+    let isAuthoritative: Bool
+    let evaluatedAt: Date?
+    let currentObservationId: Int?
+    let lastFullObservationId: Int?
+    let detailSourceObservationId: Int?
+    let lastFullOutcome: String?
+    let consecutiveFullMismatches: Int
+    let anchorPublicId: String?
+    let venueAccountStatePublicId: String?
+    let venueAccountObservationId: Int?
+    let sourceWatermarkKind: String?
+    let sourceWatermark: Int?
+    let expected: JsonObject?
+    let actual: JsonObject?
+    let difference: JsonObject?
+    let tolerance: JsonObject?
+    let reconciledAt: Date?
+    let authoritativeUntil: Date?
+    let error: String?
+    let openDriftEpisode: PortfolioReconciliationDriftEpisode?
+
+    init(
+        method: PortfolioReconciliationMethod?,
+        evaluationStatus: PortfolioReconciliationEvaluationStatus?,
+        effectiveStatus: PortfolioReconciliationEffectiveStatus,
+        isAuthoritative: Bool,
+        evaluatedAt: Date?,
+        currentObservationId: Int?,
+        lastFullObservationId: Int?,
+        detailSourceObservationId: Int?,
+        lastFullOutcome: String?,
+        consecutiveFullMismatches: Int,
+        anchorPublicId: String?,
+        venueAccountStatePublicId: String?,
+        venueAccountObservationId: Int?,
+        sourceWatermarkKind: String?,
+        sourceWatermark: Int?,
+        expected: JsonObject?,
+        actual: JsonObject?,
+        difference: JsonObject?,
+        tolerance: JsonObject?,
+        reconciledAt: Date?,
+        authoritativeUntil: Date?,
+        error: String?,
+        openDriftEpisode: PortfolioReconciliationDriftEpisode?
+    ) {
+        self.method = method
+        self.evaluationStatus = evaluationStatus
+        self.effectiveStatus = effectiveStatus
+        self.isAuthoritative = isAuthoritative
+        self.evaluatedAt = evaluatedAt
+        self.currentObservationId = currentObservationId
+        self.lastFullObservationId = lastFullObservationId
+        self.detailSourceObservationId = detailSourceObservationId
+        self.lastFullOutcome = lastFullOutcome
+        self.consecutiveFullMismatches = consecutiveFullMismatches
+        self.anchorPublicId = anchorPublicId
+        self.venueAccountStatePublicId = venueAccountStatePublicId
+        self.venueAccountObservationId = venueAccountObservationId
+        self.sourceWatermarkKind = sourceWatermarkKind
+        self.sourceWatermark = sourceWatermark
+        self.expected = expected
+        self.actual = actual
+        self.difference = difference
+        self.tolerance = tolerance
+        self.reconciledAt = reconciledAt
+        self.authoritativeUntil = authoritativeUntil
+        self.error = error
+        self.openDriftEpisode = openDriftEpisode
+    }
+
+    enum CodingKeys: String, CodingKey {
+        case method
+        case evaluationStatus = "evaluation_status"
+        case effectiveStatus = "effective_status"
+        case isAuthoritative = "is_authoritative"
+        case evaluatedAt = "evaluated_at"
+        case currentObservationId = "current_observation_id"
+        case lastFullObservationId = "last_full_observation_id"
+        case detailSourceObservationId = "detail_source_observation_id"
+        case lastFullOutcome = "last_full_outcome"
+        case consecutiveFullMismatches = "consecutive_full_mismatches"
+        case anchorPublicId = "anchor_public_id"
+        case venueAccountStatePublicId = "venue_account_state_public_id"
+        case venueAccountObservationId = "venue_account_observation_id"
+        case sourceWatermarkKind = "source_watermark_kind"
+        case sourceWatermark = "source_watermark"
+        case expected
+        case actual
+        case difference
+        case tolerance
+        case reconciledAt = "reconciled_at"
+        case authoritativeUntil = "authoritative_until"
+        case error
+        case openDriftEpisode = "open_drift_episode"
     }
 }
 
