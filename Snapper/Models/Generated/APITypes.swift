@@ -3,6 +3,12 @@
 
 import Foundation
 
+enum RealPortfolioReconciliationMethod: String, Codable, Sendable {
+    case futuresPosition = "futures_position"
+    case spotExecutionReplay = "spot_execution_replay"
+    case marginLedgerReplay = "margin_ledger_replay"
+}
+
 enum RelationshipTypeEnum: String, Codable, Sendable {
     case exact
     case derivative
@@ -14,6 +20,13 @@ enum UserRole: String, Codable, Sendable {
     case viewer
     case operatorRole = "operator"
     case admin
+}
+
+enum PortfolioReconciliationMethod: String, Codable, Sendable {
+    case futuresPosition = "futures_position"
+    case spotExecutionReplay = "spot_execution_replay"
+    case marginLedgerReplay = "margin_ledger_replay"
+    case unclassified
 }
 
 enum AvailableProcessLifecycle: String, Codable, Sendable {
@@ -2880,6 +2893,94 @@ struct CredentialListResponse: Codable, Sendable {
         case topic
         case payload
         case count
+    }
+}
+
+struct CredentialReconciliationMethodInfo: Codable, Sendable {
+    let type: String?
+    let sequenceId: Int
+    let publicId: String
+    let timestamp: Date
+    let sessionId: String
+    let topic: String?
+    let walletPublicId: String
+    let exchange: String
+    let mode: String
+    let method: RealPortfolioReconciliationMethod
+
+    init(
+        type: String? = nil,
+        sequenceId: Int,
+        publicId: String,
+        timestamp: Date,
+        sessionId: String,
+        topic: String? = nil,
+        walletPublicId: String,
+        exchange: String,
+        mode: String,
+        method: RealPortfolioReconciliationMethod
+    ) {
+        self.type = type
+        self.sequenceId = sequenceId
+        self.publicId = publicId
+        self.timestamp = timestamp
+        self.sessionId = sessionId
+        self.topic = topic
+        self.walletPublicId = walletPublicId
+        self.exchange = exchange
+        self.mode = mode
+        self.method = method
+    }
+
+    enum CodingKeys: String, CodingKey {
+        case type
+        case sequenceId = "sequence_id"
+        case publicId = "public_id"
+        case timestamp
+        case sessionId = "session_id"
+        case topic
+        case walletPublicId = "wallet_public_id"
+        case exchange
+        case mode
+        case method
+    }
+}
+
+struct CredentialReconciliationMethodResponse: Codable, Sendable {
+    let type: String?
+    let sequenceId: Int
+    let publicId: String
+    let timestamp: Date
+    let sessionId: String
+    let topic: String?
+    let payload: CredentialReconciliationMethodInfo
+
+    init(
+        type: String? = nil,
+        sequenceId: Int,
+        publicId: String,
+        timestamp: Date,
+        sessionId: String,
+        topic: String? = nil,
+        payload: CredentialReconciliationMethodInfo
+    ) {
+        self.type = type
+        self.sequenceId = sequenceId
+        self.publicId = publicId
+        self.timestamp = timestamp
+        self.sessionId = sessionId
+        self.topic = topic
+        self.payload = payload
+    }
+
+    enum CodingKeys: String, CodingKey {
+        case type
+        case sequenceId = "sequence_id"
+        case publicId = "public_id"
+        case timestamp
+        case sessionId = "session_id"
+        case topic
+        case payload
     }
 }
 
@@ -12057,17 +12158,20 @@ struct CreateCredentialCommand: Codable, Sendable {
 struct CreateCredentialBody: Codable, Sendable {
     let exchange: String
     let credentialType: String
+    let reconciliationMethod: PortfolioReconciliationMethod
     let credentialPayload: [String: String]
     let label: String?
 
     init(
         exchange: String,
         credentialType: String,
+        reconciliationMethod: PortfolioReconciliationMethod,
         credentialPayload: [String: String],
         label: String? = nil
     ) {
         self.exchange = exchange
         self.credentialType = credentialType
+        self.reconciliationMethod = reconciliationMethod
         self.credentialPayload = credentialPayload
         self.label = label
     }
@@ -12075,8 +12179,61 @@ struct CreateCredentialBody: Codable, Sendable {
     enum CodingKeys: String, CodingKey {
         case exchange
         case credentialType = "credential_type"
+        case reconciliationMethod = "reconciliation_method"
         case credentialPayload = "credential_payload"
         case label
+    }
+}
+
+struct SetCredentialReconciliationMethodCommand: Codable, Sendable {
+    let type: String?
+    let sequenceId: Int
+    let publicId: String
+    let timestamp: Date
+    let sessionId: String
+    let topic: String?
+    let payload: SetCredentialReconciliationMethodBody
+
+    init(
+        type: String? = nil,
+        sequenceId: Int,
+        publicId: String,
+        timestamp: Date,
+        sessionId: String,
+        topic: String? = nil,
+        payload: SetCredentialReconciliationMethodBody
+    ) {
+        self.type = type
+        self.sequenceId = sequenceId
+        self.publicId = publicId
+        self.timestamp = timestamp
+        self.sessionId = sessionId
+        self.topic = topic
+        self.payload = payload
+    }
+
+    enum CodingKeys: String, CodingKey {
+        case type
+        case sequenceId = "sequence_id"
+        case publicId = "public_id"
+        case timestamp
+        case sessionId = "session_id"
+        case topic
+        case payload
+    }
+}
+
+struct SetCredentialReconciliationMethodBody: Codable, Sendable {
+    let reconciliationMethod: RealPortfolioReconciliationMethod
+
+    init(
+        reconciliationMethod: RealPortfolioReconciliationMethod
+    ) {
+        self.reconciliationMethod = reconciliationMethod
+    }
+
+    enum CodingKeys: String, CodingKey {
+        case reconciliationMethod = "reconciliation_method"
     }
 }
 
