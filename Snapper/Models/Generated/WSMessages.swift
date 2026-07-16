@@ -3,6 +3,23 @@
 
 import Foundation
 
+enum AccountStateChangedEventDataExchange: String, Codable, Sendable {
+    case paper
+    case kraken
+    case krakenFutures = "kraken_futures"
+    case walutomat
+}
+
+enum AccountStateChangedEventDataMode: String, Codable, Sendable {
+    case live
+    case paper
+}
+
+enum AccountStateChangedEventDataKind: String, Codable, Sendable {
+    case snapshot
+    case reconciliation
+}
+
 enum AlertEventDataAlertType: String, Codable, Sendable {
     case orderFillFull = "order_fill_full"
     case orderRejected = "order_rejected"
@@ -202,6 +219,56 @@ struct WsMessageBase: Codable, Sendable {
         case timestamp
         case sessionId = "session_id"
         case topic
+    }
+}
+
+struct AccountStateChangedEventData: Codable, Sendable {
+    let type: String
+    let sequenceId: Int
+    let publicId: String
+    let timestamp: Date
+    let sessionId: String
+    let topic: String?
+    let walletPublicId: String
+    let exchange: String
+    let mode: String
+    let kind: String
+
+    init(
+        type: String,
+        sequenceId: Int,
+        publicId: String,
+        timestamp: Date,
+        sessionId: String,
+        topic: String? = nil,
+        walletPublicId: String,
+        exchange: String,
+        mode: String,
+        kind: String
+    ) {
+        self.type = type
+        self.sequenceId = sequenceId
+        self.publicId = publicId
+        self.timestamp = timestamp
+        self.sessionId = sessionId
+        self.topic = topic
+        self.walletPublicId = walletPublicId
+        self.exchange = exchange
+        self.mode = mode
+        self.kind = kind
+    }
+
+    enum CodingKeys: String, CodingKey {
+        case type
+        case sequenceId = "sequence_id"
+        case publicId = "public_id"
+        case timestamp
+        case sessionId = "session_id"
+        case topic
+        case walletPublicId = "wallet_public_id"
+        case exchange
+        case mode
+        case kind
     }
 }
 
