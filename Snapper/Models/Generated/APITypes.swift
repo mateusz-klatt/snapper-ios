@@ -66,6 +66,34 @@ enum UserRole: String, Codable, Sendable {
     case admin
 }
 
+enum Permission: String, Codable, Sendable {
+    case read:marketData = "read:market_data"
+    case read:orders
+    case create:orders
+    case cancel:orders
+    case read:positions
+    case manage:positions
+    case read:accountState = "read:account_state"
+    case read:strategies
+    case read:signals
+    case start:strategies
+    case stop:strategies
+    case configure:strategies
+    case read:systemStatus = "read:system_status"
+    case manage:processes
+    case configure:system
+    case manage:users
+    case read:walletCredentials = "read:wallet_credentials"
+    case manage:walletCredentials = "manage:wallet_credentials"
+    case manage:scopeGrants = "manage:scope_grants"
+    case impersonate:operator
+    case read:backtests
+    case manage:backtests
+    case read:notifications
+    case manage:notificationDevices = "manage:notification_devices"
+    case manage:pairedExecution = "manage:paired_execution"
+}
+
 enum AvailableProcessLifecycle: String, Codable, Sendable {
     case longRunning = "long_running"
     case oneShot = "one_shot"
@@ -590,6 +618,530 @@ struct AdminAiReviewListResponse: Codable, Sendable {
     ) {
         self.items = items
         self.count = count
+    }
+}
+
+struct AiReviewAftermathExecution: Codable, Sendable {
+    let publicId: String
+    let timestamp: Date
+    let sessionId: String
+    let sequenceId: Int
+    let tradeId: String?
+    let execId: String?
+    let orderPublicId: String
+    let instrumentPublicId: String
+    let exchangeOrderId: String?
+    let clientOrderId: String?
+    let instrument: String
+    let exchange: String
+    let mode: String
+    let scopeSequence: Int
+    let side: String
+    let size: Double
+    let price: Double
+    let fee: Double
+    let feeAsset: String
+    let status: String
+    let executedAt: Date
+    let walletPublicId: String?
+    let operatorPublicId: String?
+    let liquidityRole: String
+    let priceDecimal: String?
+    let sizeDecimal: String?
+    let feeDecimal: String?
+    let counterAmountDecimal: String?
+    let numericProvenance: String?
+
+    init(
+        publicId: String,
+        timestamp: Date,
+        sessionId: String,
+        sequenceId: Int,
+        tradeId: String?,
+        execId: String?,
+        orderPublicId: String,
+        instrumentPublicId: String,
+        exchangeOrderId: String?,
+        clientOrderId: String?,
+        instrument: String,
+        exchange: String,
+        mode: String,
+        scopeSequence: Int,
+        side: String,
+        size: Double,
+        price: Double,
+        fee: Double,
+        feeAsset: String,
+        status: String,
+        executedAt: Date,
+        walletPublicId: String?,
+        operatorPublicId: String?,
+        liquidityRole: String,
+        priceDecimal: String?,
+        sizeDecimal: String?,
+        feeDecimal: String?,
+        counterAmountDecimal: String?,
+        numericProvenance: String?
+    ) {
+        self.publicId = publicId
+        self.timestamp = timestamp
+        self.sessionId = sessionId
+        self.sequenceId = sequenceId
+        self.tradeId = tradeId
+        self.execId = execId
+        self.orderPublicId = orderPublicId
+        self.instrumentPublicId = instrumentPublicId
+        self.exchangeOrderId = exchangeOrderId
+        self.clientOrderId = clientOrderId
+        self.instrument = instrument
+        self.exchange = exchange
+        self.mode = mode
+        self.scopeSequence = scopeSequence
+        self.side = side
+        self.size = size
+        self.price = price
+        self.fee = fee
+        self.feeAsset = feeAsset
+        self.status = status
+        self.executedAt = executedAt
+        self.walletPublicId = walletPublicId
+        self.operatorPublicId = operatorPublicId
+        self.liquidityRole = liquidityRole
+        self.priceDecimal = priceDecimal
+        self.sizeDecimal = sizeDecimal
+        self.feeDecimal = feeDecimal
+        self.counterAmountDecimal = counterAmountDecimal
+        self.numericProvenance = numericProvenance
+    }
+
+    enum CodingKeys: String, CodingKey {
+        case publicId = "public_id"
+        case timestamp
+        case sessionId = "session_id"
+        case sequenceId = "sequence_id"
+        case tradeId = "trade_id"
+        case execId = "exec_id"
+        case orderPublicId = "order_public_id"
+        case instrumentPublicId = "instrument_public_id"
+        case exchangeOrderId = "exchange_order_id"
+        case clientOrderId = "client_order_id"
+        case instrument
+        case exchange
+        case mode
+        case scopeSequence = "scope_sequence"
+        case side
+        case size
+        case price
+        case fee
+        case feeAsset = "fee_asset"
+        case status
+        case executedAt = "executed_at"
+        case walletPublicId = "wallet_public_id"
+        case operatorPublicId = "operator_public_id"
+        case liquidityRole = "liquidity_role"
+        case priceDecimal = "price_decimal"
+        case sizeDecimal = "size_decimal"
+        case feeDecimal = "fee_decimal"
+        case counterAmountDecimal = "counter_amount_decimal"
+        case numericProvenance = "numeric_provenance"
+    }
+}
+
+struct AiReviewAftermathOrder: Codable, Sendable {
+    let publicId: String
+    let timestamp: Date
+    let sessionId: String
+    let sequenceId: Int
+    let instrument: String
+    let exchange: String
+    let mode: String
+    let clientOrderId: String
+    let exchangeOrderId: String?
+    let createdAt: Date
+    let updatedAt: Date?
+    let side: String
+    let orderType: String
+    let price: Double?
+    let size: Double
+    let filledSize: Double
+    let averagePrice: Double?
+    let status: String
+    let timeInForce: String?
+    let error: String?
+    let leverage: Int?
+    let reduceOnly: Bool
+    let walletPublicId: String?
+    let operatorPublicId: String?
+    let planPublicId: String?
+
+    init(
+        publicId: String,
+        timestamp: Date,
+        sessionId: String,
+        sequenceId: Int,
+        instrument: String,
+        exchange: String,
+        mode: String,
+        clientOrderId: String,
+        exchangeOrderId: String?,
+        createdAt: Date,
+        updatedAt: Date?,
+        side: String,
+        orderType: String,
+        price: Double?,
+        size: Double,
+        filledSize: Double,
+        averagePrice: Double?,
+        status: String,
+        timeInForce: String?,
+        error: String?,
+        leverage: Int?,
+        reduceOnly: Bool,
+        walletPublicId: String?,
+        operatorPublicId: String?,
+        planPublicId: String?
+    ) {
+        self.publicId = publicId
+        self.timestamp = timestamp
+        self.sessionId = sessionId
+        self.sequenceId = sequenceId
+        self.instrument = instrument
+        self.exchange = exchange
+        self.mode = mode
+        self.clientOrderId = clientOrderId
+        self.exchangeOrderId = exchangeOrderId
+        self.createdAt = createdAt
+        self.updatedAt = updatedAt
+        self.side = side
+        self.orderType = orderType
+        self.price = price
+        self.size = size
+        self.filledSize = filledSize
+        self.averagePrice = averagePrice
+        self.status = status
+        self.timeInForce = timeInForce
+        self.error = error
+        self.leverage = leverage
+        self.reduceOnly = reduceOnly
+        self.walletPublicId = walletPublicId
+        self.operatorPublicId = operatorPublicId
+        self.planPublicId = planPublicId
+    }
+
+    enum CodingKeys: String, CodingKey {
+        case publicId = "public_id"
+        case timestamp
+        case sessionId = "session_id"
+        case sequenceId = "sequence_id"
+        case instrument
+        case exchange
+        case mode
+        case clientOrderId = "client_order_id"
+        case exchangeOrderId = "exchange_order_id"
+        case createdAt = "created_at"
+        case updatedAt = "updated_at"
+        case side
+        case orderType = "order_type"
+        case price
+        case size
+        case filledSize = "filled_size"
+        case averagePrice = "average_price"
+        case status
+        case timeInForce = "time_in_force"
+        case error
+        case leverage
+        case reduceOnly = "reduce_only"
+        case walletPublicId = "wallet_public_id"
+        case operatorPublicId = "operator_public_id"
+        case planPublicId = "plan_public_id"
+    }
+}
+
+struct AiReviewAftermathPosition: Codable, Sendable {
+    let publicId: String
+    let timestamp: Date
+    let sessionId: String
+    let sequenceId: Int
+    let instrument: String
+    let instrumentPublicId: String
+    let exchange: String
+    let mode: String
+    let quantity: Double
+    let averagePrice: Double?
+    let unrealizedPnl: Double?
+    let realizedPnl: Double?
+    let markPrice: Double?
+    let markedAt: Date?
+    let sourceVenueEventId: Int?
+    let positionCyclePublicId: String?
+    let walletPublicId: String
+
+    init(
+        publicId: String,
+        timestamp: Date,
+        sessionId: String,
+        sequenceId: Int,
+        instrument: String,
+        instrumentPublicId: String,
+        exchange: String,
+        mode: String,
+        quantity: Double,
+        averagePrice: Double?,
+        unrealizedPnl: Double?,
+        realizedPnl: Double?,
+        markPrice: Double?,
+        markedAt: Date?,
+        sourceVenueEventId: Int?,
+        positionCyclePublicId: String?,
+        walletPublicId: String
+    ) {
+        self.publicId = publicId
+        self.timestamp = timestamp
+        self.sessionId = sessionId
+        self.sequenceId = sequenceId
+        self.instrument = instrument
+        self.instrumentPublicId = instrumentPublicId
+        self.exchange = exchange
+        self.mode = mode
+        self.quantity = quantity
+        self.averagePrice = averagePrice
+        self.unrealizedPnl = unrealizedPnl
+        self.realizedPnl = realizedPnl
+        self.markPrice = markPrice
+        self.markedAt = markedAt
+        self.sourceVenueEventId = sourceVenueEventId
+        self.positionCyclePublicId = positionCyclePublicId
+        self.walletPublicId = walletPublicId
+    }
+
+    enum CodingKeys: String, CodingKey {
+        case publicId = "public_id"
+        case timestamp
+        case sessionId = "session_id"
+        case sequenceId = "sequence_id"
+        case instrument
+        case instrumentPublicId = "instrument_public_id"
+        case exchange
+        case mode
+        case quantity
+        case averagePrice = "average_price"
+        case unrealizedPnl = "unrealized_pnl"
+        case realizedPnl = "realized_pnl"
+        case markPrice = "mark_price"
+        case markedAt = "marked_at"
+        case sourceVenueEventId = "source_venue_event_id"
+        case positionCyclePublicId = "position_cycle_public_id"
+        case walletPublicId = "wallet_public_id"
+    }
+}
+
+struct AiReviewAftermathPositionCycleTransition: Codable, Sendable {
+    let cyclePublicId: String
+    let transition: String
+    let occurredAt: Date
+    let instrumentPublicId: String
+    let exchange: String
+    let mode: String
+    let shardKey: String
+    let walletPublicId: String
+    let operatorPublicId: String?
+    let direction: String
+    let maxQty: Double
+    let statusAtAsOf: String
+    let openingCommandPublicId: String?
+    let closingCommandPublicId: String?
+
+    init(
+        cyclePublicId: String,
+        transition: String,
+        occurredAt: Date,
+        instrumentPublicId: String,
+        exchange: String,
+        mode: String,
+        shardKey: String,
+        walletPublicId: String,
+        operatorPublicId: String?,
+        direction: String,
+        maxQty: Double,
+        statusAtAsOf: String,
+        openingCommandPublicId: String?,
+        closingCommandPublicId: String?
+    ) {
+        self.cyclePublicId = cyclePublicId
+        self.transition = transition
+        self.occurredAt = occurredAt
+        self.instrumentPublicId = instrumentPublicId
+        self.exchange = exchange
+        self.mode = mode
+        self.shardKey = shardKey
+        self.walletPublicId = walletPublicId
+        self.operatorPublicId = operatorPublicId
+        self.direction = direction
+        self.maxQty = maxQty
+        self.statusAtAsOf = statusAtAsOf
+        self.openingCommandPublicId = openingCommandPublicId
+        self.closingCommandPublicId = closingCommandPublicId
+    }
+
+    enum CodingKeys: String, CodingKey {
+        case cyclePublicId = "cycle_public_id"
+        case transition
+        case occurredAt = "occurred_at"
+        case instrumentPublicId = "instrument_public_id"
+        case exchange
+        case mode
+        case shardKey = "shard_key"
+        case walletPublicId = "wallet_public_id"
+        case operatorPublicId = "operator_public_id"
+        case direction
+        case maxQty = "max_qty"
+        case statusAtAsOf = "status_at_as_of"
+        case openingCommandPublicId = "opening_command_public_id"
+        case closingCommandPublicId = "closing_command_public_id"
+    }
+}
+
+struct AiReviewAftermathResponse: Codable, Sendable {
+    let review: AiReviewAftermathReview
+    let windowStartedAt: Date
+    let asOf: Date
+    let orders: [AiReviewAftermathOrder]
+    let executions: [AiReviewAftermathExecution]
+    let positionCycleTransitions: [AiReviewAftermathPositionCycleTransition]
+    let currentPositions: [AiReviewAftermathPosition]
+
+    init(
+        review: AiReviewAftermathReview,
+        windowStartedAt: Date,
+        asOf: Date,
+        orders: [AiReviewAftermathOrder],
+        executions: [AiReviewAftermathExecution],
+        positionCycleTransitions: [AiReviewAftermathPositionCycleTransition],
+        currentPositions: [AiReviewAftermathPosition]
+    ) {
+        self.review = review
+        self.windowStartedAt = windowStartedAt
+        self.asOf = asOf
+        self.orders = orders
+        self.executions = executions
+        self.positionCycleTransitions = positionCycleTransitions
+        self.currentPositions = currentPositions
+    }
+
+    enum CodingKeys: String, CodingKey {
+        case review
+        case windowStartedAt = "window_started_at"
+        case asOf = "as_of"
+        case orders
+        case executions
+        case positionCycleTransitions = "position_cycle_transitions"
+        case currentPositions = "current_positions"
+    }
+}
+
+struct AiReviewAftermathReview: Codable, Sendable {
+    let publicId: String
+    let sessionId: String
+    let sequenceId: Int
+    let userPublicId: String
+    let operatorPublicId: String
+    let walletPublicId: String
+    let instrumentPublicId: String
+    let strategyPublicId: String
+    let selectedDelegatePublicId: String
+    let respondingDelegatePublicId: String?
+    let resolutionMode: String?
+    let status: String
+    let signalEnvelope: JsonObject
+    let signalSnapshotHash: String
+    let instrumentMetadata: JsonObject
+    let deadline: Date
+    let fanoutAfter: Date
+    let decision: String?
+    let rationale: String?
+    let dispatchVersion: Int
+    let counterDecrementedAt: Date?
+    let createdAt: Date
+    let updatedAt: Date
+    let resolvedAt: Date?
+
+    init(
+        publicId: String,
+        sessionId: String,
+        sequenceId: Int,
+        userPublicId: String,
+        operatorPublicId: String,
+        walletPublicId: String,
+        instrumentPublicId: String,
+        strategyPublicId: String,
+        selectedDelegatePublicId: String,
+        respondingDelegatePublicId: String?,
+        resolutionMode: String?,
+        status: String,
+        signalEnvelope: JsonObject,
+        signalSnapshotHash: String,
+        instrumentMetadata: JsonObject,
+        deadline: Date,
+        fanoutAfter: Date,
+        decision: String?,
+        rationale: String?,
+        dispatchVersion: Int,
+        counterDecrementedAt: Date?,
+        createdAt: Date,
+        updatedAt: Date,
+        resolvedAt: Date?
+    ) {
+        self.publicId = publicId
+        self.sessionId = sessionId
+        self.sequenceId = sequenceId
+        self.userPublicId = userPublicId
+        self.operatorPublicId = operatorPublicId
+        self.walletPublicId = walletPublicId
+        self.instrumentPublicId = instrumentPublicId
+        self.strategyPublicId = strategyPublicId
+        self.selectedDelegatePublicId = selectedDelegatePublicId
+        self.respondingDelegatePublicId = respondingDelegatePublicId
+        self.resolutionMode = resolutionMode
+        self.status = status
+        self.signalEnvelope = signalEnvelope
+        self.signalSnapshotHash = signalSnapshotHash
+        self.instrumentMetadata = instrumentMetadata
+        self.deadline = deadline
+        self.fanoutAfter = fanoutAfter
+        self.decision = decision
+        self.rationale = rationale
+        self.dispatchVersion = dispatchVersion
+        self.counterDecrementedAt = counterDecrementedAt
+        self.createdAt = createdAt
+        self.updatedAt = updatedAt
+        self.resolvedAt = resolvedAt
+    }
+
+    enum CodingKeys: String, CodingKey {
+        case publicId = "public_id"
+        case sessionId = "session_id"
+        case sequenceId = "sequence_id"
+        case userPublicId = "user_public_id"
+        case operatorPublicId = "operator_public_id"
+        case walletPublicId = "wallet_public_id"
+        case instrumentPublicId = "instrument_public_id"
+        case strategyPublicId = "strategy_public_id"
+        case selectedDelegatePublicId = "selected_delegate_public_id"
+        case respondingDelegatePublicId = "responding_delegate_public_id"
+        case resolutionMode = "resolution_mode"
+        case status
+        case signalEnvelope = "signal_envelope"
+        case signalSnapshotHash = "signal_snapshot_hash"
+        case instrumentMetadata = "instrument_metadata"
+        case deadline
+        case fanoutAfter = "fanout_after"
+        case decision
+        case rationale
+        case dispatchVersion = "dispatch_version"
+        case counterDecrementedAt = "counter_decremented_at"
+        case createdAt = "created_at"
+        case updatedAt = "updated_at"
+        case resolvedAt = "resolved_at"
     }
 }
 
@@ -6756,6 +7308,36 @@ struct PnlFillMarkerData: Codable, Sendable {
     }
 }
 
+struct PnlFxRateSourceData: Codable, Sendable {
+    let sourceCurrency: String
+    let valuationCurrency: String
+    let baseCurrency: String
+    let quoteCurrency: String
+    let exchange: String
+
+    init(
+        sourceCurrency: String,
+        valuationCurrency: String,
+        baseCurrency: String,
+        quoteCurrency: String,
+        exchange: String
+    ) {
+        self.sourceCurrency = sourceCurrency
+        self.valuationCurrency = valuationCurrency
+        self.baseCurrency = baseCurrency
+        self.quoteCurrency = quoteCurrency
+        self.exchange = exchange
+    }
+
+    enum CodingKeys: String, CodingKey {
+        case sourceCurrency = "source_currency"
+        case valuationCurrency = "valuation_currency"
+        case baseCurrency = "base_currency"
+        case quoteCurrency = "quote_currency"
+        case exchange
+    }
+}
+
 struct PnlInstrumentContributionData: Codable, Sendable {
     let instrumentPublicId: String
     let realizedPnl: Double?
@@ -6801,6 +7383,7 @@ struct PnlSeriesData: Codable, Sendable {
     let toTime: Date
     let asOf: Date
     let markSource: String
+    let rateSources: [PnlFxRateSourceData]
     let calcVersion: String
     let points: [PnlTimelinePointData]
 
@@ -6819,6 +7402,7 @@ struct PnlSeriesData: Codable, Sendable {
         toTime: Date,
         asOf: Date,
         markSource: String,
+        rateSources: [PnlFxRateSourceData],
         calcVersion: String,
         points: [PnlTimelinePointData]
     ) {
@@ -6836,6 +7420,7 @@ struct PnlSeriesData: Codable, Sendable {
         self.toTime = toTime
         self.asOf = asOf
         self.markSource = markSource
+        self.rateSources = rateSources
         self.calcVersion = calcVersion
         self.points = points
     }
@@ -6855,6 +7440,7 @@ struct PnlSeriesData: Codable, Sendable {
         case toTime = "to_time"
         case asOf = "as_of"
         case markSource = "mark_source"
+        case rateSources = "rate_sources"
         case calcVersion = "calc_version"
         case points
     }
@@ -6967,6 +7553,7 @@ struct PnlTimelineData: Codable, Sendable {
     let toTime: Date
     let asOf: Date
     let markSource: String
+    let rateSources: [PnlFxRateSourceData]
     let calcVersion: String
     let points: [PnlTimelinePointData]
     let markerLimit: Int
@@ -6988,6 +7575,7 @@ struct PnlTimelineData: Codable, Sendable {
         toTime: Date,
         asOf: Date,
         markSource: String,
+        rateSources: [PnlFxRateSourceData],
         calcVersion: String,
         points: [PnlTimelinePointData],
         markerLimit: Int,
@@ -7008,6 +7596,7 @@ struct PnlTimelineData: Codable, Sendable {
         self.toTime = toTime
         self.asOf = asOf
         self.markSource = markSource
+        self.rateSources = rateSources
         self.calcVersion = calcVersion
         self.points = points
         self.markerLimit = markerLimit
@@ -7030,6 +7619,7 @@ struct PnlTimelineData: Codable, Sendable {
         case toTime = "to_time"
         case asOf = "as_of"
         case markSource = "mark_source"
+        case rateSources = "rate_sources"
         case calcVersion = "calc_version"
         case points
         case markerLimit = "marker_limit"
@@ -11762,21 +12352,25 @@ struct LoginBody: Codable, Sendable {
     let username: String
     let password: String
     let rememberMe: Bool?
+    let permissions: [Permission]?
 
     init(
         username: String,
         password: String,
-        rememberMe: Bool? = nil
+        rememberMe: Bool? = nil,
+        permissions: [Permission]? = nil
     ) {
         self.username = username
         self.password = password
         self.rememberMe = rememberMe
+        self.permissions = permissions
     }
 
     enum CodingKeys: String, CodingKey {
         case username
         case password
         case rememberMe = "remember_me"
+        case permissions
     }
 }
 
@@ -12369,21 +12963,25 @@ struct DelegateCreateBody: Codable, Sendable {
     let label: String
     let caps: DelegateCapsBody?
     let operatorPublicId: String?
+    let permissions: [Permission]?
 
     init(
         label: String,
         caps: DelegateCapsBody? = nil,
-        operatorPublicId: String? = nil
+        operatorPublicId: String? = nil,
+        permissions: [Permission]? = nil
     ) {
         self.label = label
         self.caps = caps
         self.operatorPublicId = operatorPublicId
+        self.permissions = permissions
     }
 
     enum CodingKeys: String, CodingKey {
         case label
         case caps
         case operatorPublicId = "operator_public_id"
+        case permissions
     }
 }
 
