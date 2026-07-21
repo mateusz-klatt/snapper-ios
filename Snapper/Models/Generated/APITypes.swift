@@ -3,6 +3,13 @@
 
 import Foundation
 
+enum PnlAttributionOrigin: String, Codable, Sendable {
+    case manual
+    case plan
+    case system
+    case unattributed
+}
+
 enum PnlMarkerOutcome: String, Codable, Sendable {
     case executed
     case rejected
@@ -6665,6 +6672,40 @@ struct PnlAiDecisionMarkerData: Codable, Sendable {
     }
 }
 
+struct PnlAttributionContributionData: Codable, Sendable {
+    let origin: PnlAttributionOrigin
+    let strategyName: String?
+    let realizedPnl: Double?
+    let feePnl: Double?
+    let accrualPnl: Double?
+    let unrealizedPnl: Double?
+
+    init(
+        origin: PnlAttributionOrigin,
+        strategyName: String?,
+        realizedPnl: Double?,
+        feePnl: Double?,
+        accrualPnl: Double?,
+        unrealizedPnl: Double?
+    ) {
+        self.origin = origin
+        self.strategyName = strategyName
+        self.realizedPnl = realizedPnl
+        self.feePnl = feePnl
+        self.accrualPnl = accrualPnl
+        self.unrealizedPnl = unrealizedPnl
+    }
+
+    enum CodingKeys: String, CodingKey {
+        case origin
+        case strategyName = "strategy_name"
+        case realizedPnl = "realized_pnl"
+        case feePnl = "fee_pnl"
+        case accrualPnl = "accrual_pnl"
+        case unrealizedPnl = "unrealized_pnl"
+    }
+}
+
 struct PnlFillMarkerData: Codable, Sendable {
     let kind: String?
     let markerTime: Date
@@ -7006,6 +7047,7 @@ struct PnlTimelinePointData: Codable, Sendable {
     let netPnl: Double?
     let valuationStatus: PnlValuationStatus
     let perInstrument: [PnlInstrumentContributionData]
+    let attribution: [PnlAttributionContributionData]
 
     init(
         pointTime: Date,
@@ -7015,7 +7057,8 @@ struct PnlTimelinePointData: Codable, Sendable {
         unrealizedPnl: Double?,
         netPnl: Double?,
         valuationStatus: PnlValuationStatus,
-        perInstrument: [PnlInstrumentContributionData]
+        perInstrument: [PnlInstrumentContributionData],
+        attribution: [PnlAttributionContributionData]
     ) {
         self.pointTime = pointTime
         self.realizedPnl = realizedPnl
@@ -7025,6 +7068,7 @@ struct PnlTimelinePointData: Codable, Sendable {
         self.netPnl = netPnl
         self.valuationStatus = valuationStatus
         self.perInstrument = perInstrument
+        self.attribution = attribution
     }
 
     enum CodingKeys: String, CodingKey {
@@ -7036,6 +7080,7 @@ struct PnlTimelinePointData: Codable, Sendable {
         case netPnl = "net_pnl"
         case valuationStatus = "valuation_status"
         case perInstrument = "per_instrument"
+        case attribution
     }
 }
 
