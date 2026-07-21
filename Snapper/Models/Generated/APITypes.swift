@@ -6712,7 +6712,7 @@ struct PnlFillMarkerData: Codable, Sendable {
     let instrumentPublicId: String
     let side: String
     let size: Double
-    let price: Double
+    let price: Double?
     let executionPublicId: String
     let orderPublicId: String
     let outcome: String?
@@ -6724,7 +6724,7 @@ struct PnlFillMarkerData: Codable, Sendable {
         instrumentPublicId: String,
         side: String,
         size: Double,
-        price: Double,
+        price: Double?,
         executionPublicId: String,
         orderPublicId: String,
         outcome: String? = nil,
