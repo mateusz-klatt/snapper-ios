@@ -3,6 +3,17 @@
 
 import Foundation
 
+enum PnlMarkerOutcome: String, Codable, Sendable {
+    case executed
+    case rejected
+    case noFill = "no_fill"
+}
+
+enum PnlValuationStatus: String, Codable, Sendable {
+    case complete
+    case incomplete
+}
+
 enum PortfolioReconciliationEffectiveStatus: String, Codable, Sendable {
     case matched
     case mismatched
@@ -172,6 +183,16 @@ enum OrderDataOrderType: String, Codable, Sendable {
     case limit
     case stop
     case stopLimit = "stop_limit"
+}
+
+enum PnlSignalMarkerDataOutcome: String, Codable, Sendable {
+    case executed
+    case noFill = "no_fill"
+}
+
+enum PnlSignalMarkerDataStatus: String, Codable, Sendable {
+    case executed
+    case noFill = "no_fill"
 }
 
 enum PortfolioAccountStateExchange: String, Codable, Sendable {
@@ -6591,6 +6612,468 @@ struct PendingReviewSummaryItem: Codable, Sendable {
         case fanoutAfter = "fanout_after"
         case instrument
         case signalEnvelope = "signal_envelope"
+    }
+}
+
+struct PnlAiDecisionMarkerData: Codable, Sendable {
+    let kind: String?
+    let markerTime: Date
+    let instrumentPublicId: String
+    let strategyPublicId: String
+    let reviewPublicId: String
+    let eventPublicId: String
+    let decision: String?
+    let rationale: String?
+    let outcome: PnlMarkerOutcome
+    let status: String
+
+    init(
+        kind: String? = nil,
+        markerTime: Date,
+        instrumentPublicId: String,
+        strategyPublicId: String,
+        reviewPublicId: String,
+        eventPublicId: String,
+        decision: String?,
+        rationale: String?,
+        outcome: PnlMarkerOutcome,
+        status: String
+    ) {
+        self.kind = kind
+        self.markerTime = markerTime
+        self.instrumentPublicId = instrumentPublicId
+        self.strategyPublicId = strategyPublicId
+        self.reviewPublicId = reviewPublicId
+        self.eventPublicId = eventPublicId
+        self.decision = decision
+        self.rationale = rationale
+        self.outcome = outcome
+        self.status = status
+    }
+
+    enum CodingKeys: String, CodingKey {
+        case kind
+        case markerTime = "marker_time"
+        case instrumentPublicId = "instrument_public_id"
+        case strategyPublicId = "strategy_public_id"
+        case reviewPublicId = "review_public_id"
+        case eventPublicId = "event_public_id"
+        case decision
+        case rationale
+        case outcome
+        case status
+    }
+}
+
+struct PnlFillMarkerData: Codable, Sendable {
+    let kind: String?
+    let markerTime: Date
+    let instrumentPublicId: String
+    let side: String
+    let size: Double
+    let price: Double
+    let executionPublicId: String
+    let orderPublicId: String
+    let outcome: String?
+    let status: String
+
+    init(
+        kind: String? = nil,
+        markerTime: Date,
+        instrumentPublicId: String,
+        side: String,
+        size: Double,
+        price: Double,
+        executionPublicId: String,
+        orderPublicId: String,
+        outcome: String? = nil,
+        status: String
+    ) {
+        self.kind = kind
+        self.markerTime = markerTime
+        self.instrumentPublicId = instrumentPublicId
+        self.side = side
+        self.size = size
+        self.price = price
+        self.executionPublicId = executionPublicId
+        self.orderPublicId = orderPublicId
+        self.outcome = outcome
+        self.status = status
+    }
+
+    enum CodingKeys: String, CodingKey {
+        case kind
+        case markerTime = "marker_time"
+        case instrumentPublicId = "instrument_public_id"
+        case side
+        case size
+        case price
+        case executionPublicId = "execution_public_id"
+        case orderPublicId = "order_public_id"
+        case outcome
+        case status
+    }
+}
+
+struct PnlInstrumentContributionData: Codable, Sendable {
+    let instrumentPublicId: String
+    let realizedPnl: Double?
+    let feePnl: Double?
+    let accrualPnl: Double?
+    let unrealizedPnl: Double?
+
+    init(
+        instrumentPublicId: String,
+        realizedPnl: Double?,
+        feePnl: Double?,
+        accrualPnl: Double?,
+        unrealizedPnl: Double?
+    ) {
+        self.instrumentPublicId = instrumentPublicId
+        self.realizedPnl = realizedPnl
+        self.feePnl = feePnl
+        self.accrualPnl = accrualPnl
+        self.unrealizedPnl = unrealizedPnl
+    }
+
+    enum CodingKeys: String, CodingKey {
+        case instrumentPublicId = "instrument_public_id"
+        case realizedPnl = "realized_pnl"
+        case feePnl = "fee_pnl"
+        case accrualPnl = "accrual_pnl"
+        case unrealizedPnl = "unrealized_pnl"
+    }
+}
+
+struct PnlSeriesData: Codable, Sendable {
+    let type: String?
+    let sequenceId: Int
+    let publicId: String
+    let timestamp: Date
+    let sessionId: String
+    let topic: String?
+    let walletPublicId: String
+    let mode: String
+    let granularity: String
+    let valuationCcy: String
+    let fromTime: Date
+    let toTime: Date
+    let asOf: Date
+    let markSource: String
+    let calcVersion: String
+    let points: [PnlTimelinePointData]
+
+    init(
+        type: String? = nil,
+        sequenceId: Int,
+        publicId: String,
+        timestamp: Date,
+        sessionId: String,
+        topic: String? = nil,
+        walletPublicId: String,
+        mode: String,
+        granularity: String,
+        valuationCcy: String,
+        fromTime: Date,
+        toTime: Date,
+        asOf: Date,
+        markSource: String,
+        calcVersion: String,
+        points: [PnlTimelinePointData]
+    ) {
+        self.type = type
+        self.sequenceId = sequenceId
+        self.publicId = publicId
+        self.timestamp = timestamp
+        self.sessionId = sessionId
+        self.topic = topic
+        self.walletPublicId = walletPublicId
+        self.mode = mode
+        self.granularity = granularity
+        self.valuationCcy = valuationCcy
+        self.fromTime = fromTime
+        self.toTime = toTime
+        self.asOf = asOf
+        self.markSource = markSource
+        self.calcVersion = calcVersion
+        self.points = points
+    }
+
+    enum CodingKeys: String, CodingKey {
+        case type
+        case sequenceId = "sequence_id"
+        case publicId = "public_id"
+        case timestamp
+        case sessionId = "session_id"
+        case topic
+        case walletPublicId = "wallet_public_id"
+        case mode
+        case granularity
+        case valuationCcy = "valuation_ccy"
+        case fromTime = "from_time"
+        case toTime = "to_time"
+        case asOf = "as_of"
+        case markSource = "mark_source"
+        case calcVersion = "calc_version"
+        case points
+    }
+}
+
+struct PnlSeriesResponse: Codable, Sendable {
+    let type: String?
+    let sequenceId: Int
+    let publicId: String
+    let timestamp: Date
+    let sessionId: String
+    let topic: String?
+    let payload: PnlSeriesData
+
+    init(
+        type: String? = nil,
+        sequenceId: Int,
+        publicId: String,
+        timestamp: Date,
+        sessionId: String,
+        topic: String? = nil,
+        payload: PnlSeriesData
+    ) {
+        self.type = type
+        self.sequenceId = sequenceId
+        self.publicId = publicId
+        self.timestamp = timestamp
+        self.sessionId = sessionId
+        self.topic = topic
+        self.payload = payload
+    }
+
+    enum CodingKeys: String, CodingKey {
+        case type
+        case sequenceId = "sequence_id"
+        case publicId = "public_id"
+        case timestamp
+        case sessionId = "session_id"
+        case topic
+        case payload
+    }
+}
+
+struct PnlSignalMarkerData: Codable, Sendable {
+    let kind: String?
+    let markerTime: Date
+    let instrumentPublicId: String
+    let side: String
+    let strategyName: String?
+    let strength: Double
+    let reason: String
+    let price: Double?
+    let signalPublicId: String
+    let outcome: String
+    let status: String
+
+    init(
+        kind: String? = nil,
+        markerTime: Date,
+        instrumentPublicId: String,
+        side: String,
+        strategyName: String?,
+        strength: Double,
+        reason: String,
+        price: Double?,
+        signalPublicId: String,
+        outcome: String,
+        status: String
+    ) {
+        self.kind = kind
+        self.markerTime = markerTime
+        self.instrumentPublicId = instrumentPublicId
+        self.side = side
+        self.strategyName = strategyName
+        self.strength = strength
+        self.reason = reason
+        self.price = price
+        self.signalPublicId = signalPublicId
+        self.outcome = outcome
+        self.status = status
+    }
+
+    enum CodingKeys: String, CodingKey {
+        case kind
+        case markerTime = "marker_time"
+        case instrumentPublicId = "instrument_public_id"
+        case side
+        case strategyName = "strategy_name"
+        case strength
+        case reason
+        case price
+        case signalPublicId = "signal_public_id"
+        case outcome
+        case status
+    }
+}
+
+struct PnlTimelineData: Codable, Sendable {
+    let type: String?
+    let sequenceId: Int
+    let publicId: String
+    let timestamp: Date
+    let sessionId: String
+    let topic: String?
+    let walletPublicId: String
+    let mode: String
+    let granularity: String
+    let valuationCcy: String
+    let fromTime: Date
+    let toTime: Date
+    let asOf: Date
+    let markSource: String
+    let calcVersion: String
+    let points: [PnlTimelinePointData]
+    let markerLimit: Int
+    let markersTruncated: Bool
+    let markers: [PnlTimelineMarkerData]
+
+    init(
+        type: String? = nil,
+        sequenceId: Int,
+        publicId: String,
+        timestamp: Date,
+        sessionId: String,
+        topic: String? = nil,
+        walletPublicId: String,
+        mode: String,
+        granularity: String,
+        valuationCcy: String,
+        fromTime: Date,
+        toTime: Date,
+        asOf: Date,
+        markSource: String,
+        calcVersion: String,
+        points: [PnlTimelinePointData],
+        markerLimit: Int,
+        markersTruncated: Bool,
+        markers: [PnlTimelineMarkerData]
+    ) {
+        self.type = type
+        self.sequenceId = sequenceId
+        self.publicId = publicId
+        self.timestamp = timestamp
+        self.sessionId = sessionId
+        self.topic = topic
+        self.walletPublicId = walletPublicId
+        self.mode = mode
+        self.granularity = granularity
+        self.valuationCcy = valuationCcy
+        self.fromTime = fromTime
+        self.toTime = toTime
+        self.asOf = asOf
+        self.markSource = markSource
+        self.calcVersion = calcVersion
+        self.points = points
+        self.markerLimit = markerLimit
+        self.markersTruncated = markersTruncated
+        self.markers = markers
+    }
+
+    enum CodingKeys: String, CodingKey {
+        case type
+        case sequenceId = "sequence_id"
+        case publicId = "public_id"
+        case timestamp
+        case sessionId = "session_id"
+        case topic
+        case walletPublicId = "wallet_public_id"
+        case mode
+        case granularity
+        case valuationCcy = "valuation_ccy"
+        case fromTime = "from_time"
+        case toTime = "to_time"
+        case asOf = "as_of"
+        case markSource = "mark_source"
+        case calcVersion = "calc_version"
+        case points
+        case markerLimit = "marker_limit"
+        case markersTruncated = "markers_truncated"
+        case markers
+    }
+}
+
+struct PnlTimelinePointData: Codable, Sendable {
+    let pointTime: Date
+    let realizedPnl: Double?
+    let feePnl: Double?
+    let accrualPnl: Double?
+    let unrealizedPnl: Double?
+    let netPnl: Double?
+    let valuationStatus: PnlValuationStatus
+    let perInstrument: [PnlInstrumentContributionData]
+
+    init(
+        pointTime: Date,
+        realizedPnl: Double?,
+        feePnl: Double?,
+        accrualPnl: Double?,
+        unrealizedPnl: Double?,
+        netPnl: Double?,
+        valuationStatus: PnlValuationStatus,
+        perInstrument: [PnlInstrumentContributionData]
+    ) {
+        self.pointTime = pointTime
+        self.realizedPnl = realizedPnl
+        self.feePnl = feePnl
+        self.accrualPnl = accrualPnl
+        self.unrealizedPnl = unrealizedPnl
+        self.netPnl = netPnl
+        self.valuationStatus = valuationStatus
+        self.perInstrument = perInstrument
+    }
+
+    enum CodingKeys: String, CodingKey {
+        case pointTime = "point_time"
+        case realizedPnl = "realized_pnl"
+        case feePnl = "fee_pnl"
+        case accrualPnl = "accrual_pnl"
+        case unrealizedPnl = "unrealized_pnl"
+        case netPnl = "net_pnl"
+        case valuationStatus = "valuation_status"
+        case perInstrument = "per_instrument"
+    }
+}
+
+struct PnlTimelineResponse: Codable, Sendable {
+    let type: String?
+    let sequenceId: Int
+    let publicId: String
+    let timestamp: Date
+    let sessionId: String
+    let topic: String?
+    let payload: PnlTimelineData
+
+    init(
+        type: String? = nil,
+        sequenceId: Int,
+        publicId: String,
+        timestamp: Date,
+        sessionId: String,
+        topic: String? = nil,
+        payload: PnlTimelineData
+    ) {
+        self.type = type
+        self.sequenceId = sequenceId
+        self.publicId = publicId
+        self.timestamp = timestamp
+        self.sessionId = sessionId
+        self.topic = topic
+        self.payload = payload
+    }
+
+    enum CodingKeys: String, CodingKey {
+        case type
+        case sequenceId = "sequence_id"
+        case publicId = "public_id"
+        case timestamp
+        case sessionId = "session_id"
+        case topic
+        case payload
     }
 }
 
