@@ -60,6 +60,7 @@ enum RelationshipTypeEnum: String, Codable, Sendable {
 }
 
 enum UserRole: String, Codable, Sendable {
+    case aiResearcher = "ai_researcher"
     case aiDelegate = "ai_delegate"
     case viewer
     case operatorRole = "operator"
@@ -68,6 +69,8 @@ enum UserRole: String, Codable, Sendable {
 
 enum Permission: String, Codable, Sendable {
     case read:marketData = "read:market_data"
+    case read:marketViews = "read:market_views"
+    case submit:marketView = "submit:market_view"
     case read:orders
     case create:orders
     case cancel:orders
@@ -9526,6 +9529,100 @@ struct RelatedInstrumentsUnderlying: Codable, Sendable {
     }
 }
 
+struct ResearcherCreatedPayload: Codable, Sendable {
+    let researcher: ResearcherRead
+    let accessToken: String
+    let expiresIn: Int
+
+    init(
+        researcher: ResearcherRead,
+        accessToken: String,
+        expiresIn: Int
+    ) {
+        self.researcher = researcher
+        self.accessToken = accessToken
+        self.expiresIn = expiresIn
+    }
+
+    enum CodingKeys: String, CodingKey {
+        case researcher
+        case accessToken = "access_token"
+        case expiresIn = "expires_in"
+    }
+}
+
+struct ResearcherCreatedResponse: Codable, Sendable {
+    let type: String?
+    let sequenceId: Int
+    let publicId: String
+    let timestamp: Date
+    let sessionId: String
+    let topic: String?
+    let payload: ResearcherCreatedPayload
+
+    init(
+        type: String? = nil,
+        sequenceId: Int,
+        publicId: String,
+        timestamp: Date,
+        sessionId: String,
+        topic: String? = nil,
+        payload: ResearcherCreatedPayload
+    ) {
+        self.type = type
+        self.sequenceId = sequenceId
+        self.publicId = publicId
+        self.timestamp = timestamp
+        self.sessionId = sessionId
+        self.topic = topic
+        self.payload = payload
+    }
+
+    enum CodingKeys: String, CodingKey {
+        case type
+        case sequenceId = "sequence_id"
+        case publicId = "public_id"
+        case timestamp
+        case sessionId = "session_id"
+        case topic
+        case payload
+    }
+}
+
+struct ResearcherRead: Codable, Sendable {
+    let publicId: String
+    let username: String
+    let label: String
+    let createdByUserPublicId: String
+    let createdAt: Date
+    let isActive: Bool
+
+    init(
+        publicId: String,
+        username: String,
+        label: String,
+        createdByUserPublicId: String,
+        createdAt: Date,
+        isActive: Bool
+    ) {
+        self.publicId = publicId
+        self.username = username
+        self.label = label
+        self.createdByUserPublicId = createdByUserPublicId
+        self.createdAt = createdAt
+        self.isActive = isActive
+    }
+
+    enum CodingKeys: String, CodingKey {
+        case publicId = "public_id"
+        case username
+        case label
+        case createdByUserPublicId = "created_by_user_public_id"
+        case createdAt = "created_at"
+        case isActive = "is_active"
+    }
+}
+
 struct RestRateData: Codable, Sendable {
     let type: String?
     let sequenceId: Int
@@ -13078,6 +13175,57 @@ struct DelegateDeactivateBody: Codable, Sendable {
         reason: String? = nil
     ) {
         self.reason = reason
+    }
+}
+
+struct ResearcherCreateRequest: Codable, Sendable {
+    let type: String?
+    let sequenceId: Int
+    let publicId: String
+    let timestamp: Date
+    let sessionId: String
+    let topic: String?
+    let payload: ResearcherCreateBody
+
+    init(
+        type: String? = nil,
+        sequenceId: Int,
+        publicId: String,
+        timestamp: Date,
+        sessionId: String,
+        topic: String? = nil,
+        payload: ResearcherCreateBody
+    ) {
+        self.type = type
+        self.sequenceId = sequenceId
+        self.publicId = publicId
+        self.timestamp = timestamp
+        self.sessionId = sessionId
+        self.topic = topic
+        self.payload = payload
+    }
+
+    enum CodingKeys: String, CodingKey {
+        case type
+        case sequenceId = "sequence_id"
+        case publicId = "public_id"
+        case timestamp
+        case sessionId = "session_id"
+        case topic
+        case payload
+    }
+}
+
+struct ResearcherCreateBody: Codable, Sendable {
+    let label: String
+    let permissions: [Permission]?
+
+    init(
+        label: String,
+        permissions: [Permission]? = nil
+    ) {
+        self.label = label
+        self.permissions = permissions
     }
 }
 
