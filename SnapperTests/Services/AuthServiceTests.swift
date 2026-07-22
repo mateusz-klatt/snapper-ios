@@ -125,9 +125,12 @@ final class AuthServiceTests: XCTestCase {
         XCTAssertFalse(authService.hasPermission(.cancelOrders))
         XCTAssertFalse(authService.hasPermission(.managePositions))
         XCTAssertFalse(authService.hasPermission(.manageProcesses))
+        XCTAssertFalse(authService.hasPermission(.configureStrategies))
         XCTAssertFalse(authService.hasPermission(.startStrategies))
         XCTAssertFalse(authService.hasPermission(.stopStrategies))
+        XCTAssertFalse(authService.hasPermission(.createBacktestComparisons))
         XCTAssertFalse(authService.hasPermission(.manageBacktests))
+        XCTAssertFalse(authService.hasPermission(.manageRuntimeDiagnostics))
         XCTAssertFalse(authService.hasPermission(.manageAiIntegration))
     }
 
@@ -141,6 +144,24 @@ final class AuthServiceTests: XCTestCase {
             XCTAssertTrue(authService.hasPermission(.createOrders))
             XCTAssertTrue(authService.hasPermission(.cancelOrders))
             XCTAssertTrue(authService.hasPermission(.managePositions))
+            XCTAssertTrue(authService.hasPermission(.configureStrategies))
+            XCTAssertTrue(authService.hasPermission(.createBacktestComparisons))
+            XCTAssertTrue(authService.hasPermission(.manageRuntimeDiagnostics))
+        }
+    }
+
+    func testAiReviewPrincipalsRetainHistoricalComparisonAndDiagnosticsAccess() {
+        for role in [UserRole.aiReviewer, .aiDelegate] {
+            authService.currentUser = makeUser(
+                role: role,
+                effectivePermissions: rolePermissions[role] ?? []
+            )
+
+            XCTAssertTrue(authService.hasPermission(.createBacktestComparisons))
+            XCTAssertTrue(authService.hasPermission(.manageRuntimeDiagnostics))
+            XCTAssertFalse(authService.hasPermission(.configureStrategies))
+            XCTAssertFalse(authService.hasPermission(.startStrategies))
+            XCTAssertFalse(authService.hasPermission(.stopStrategies))
         }
     }
 

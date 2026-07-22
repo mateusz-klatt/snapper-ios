@@ -318,8 +318,8 @@ final class WebSocketManagerTests: XCTestCase {
     /// ``subscribeToServerAllowedDefaults``. This is the v0.6.0
     /// contract — pre-v0.6.0 the dual-set tracker preserved
     /// previously-subscribed concrete topics across disconnect, but
-    /// that left a stale mutation-capable ``orders.events.`` entry
-    /// readable to a subsequent read-only reconnect (authorization leak).
+    /// that left a stale ``orders.events.`` entry readable to a subsequent
+    /// session without ``READ_ORDERS`` (authorization leak).
     func testDisconnectClearsSubscriptionsAndReconnectAutoSubscribesDefaults() async {
         let task1 = FakeWebSocketTask()
         let task2 = FakeWebSocketTask()
@@ -351,7 +351,7 @@ final class WebSocketManagerTests: XCTestCase {
             "timestamp": "2025-11-22T10:00:00Z",
             "session_id": "session-2",
             "available_topics": ["system.heartbeats."],
-            "user_role": "viewer",
+            "user_role": "ai_researcher",
             "ws_token_exp": "2025-11-22T11:00:00Z"
         ]))
         await drainSendTasks()
@@ -363,11 +363,11 @@ final class WebSocketManagerTests: XCTestCase {
         let allTopicsSent = Set(secondConnectSubscribes.flatMap { $0 })
         XCTAssertTrue(
             allTopicsSent.contains("system.heartbeats."),
-            "Read-only reconnect should auto-subscribe to system.heartbeats. via preferred defaults"
+            "Permission-narrowed reconnect should retain the allowed heartbeat default"
         )
         XCTAssertFalse(
             allTopicsSent.contains("orders.events."),
-            "Read-only reconnect must NOT carry orders.events. — permissions are enforced by availableTopics intersection"
+            "Reconnect without READ_ORDERS must not carry the stale order-event topic"
         )
     }
 
@@ -400,9 +400,9 @@ final class WebSocketManagerTests: XCTestCase {
         XCTAssertTrue(topicsSent.contains("orders.events."))
     }
 
-    /// A read-only permission scope lands only ``system.heartbeats.`` (CREATE_ORDERS
-    /// permission missing → ``orders.events.`` not in
-    /// availableTopics → intersection drops it).
+    /// A permission scope without ``READ_ORDERS`` lands only
+    /// ``system.heartbeats.`` because the server omits ``orders.events.``
+    /// and the preferred-default intersection drops it.
     func testAuthCompleteAutoSubscribesOnlyServerAllowedDefaults() async {
         let (manager, _, fakeTask, _) = makeManager()
         manager.connect()
@@ -413,7 +413,7 @@ final class WebSocketManagerTests: XCTestCase {
             "timestamp": "2025-11-22T10:00:00Z",
             "session_id": "s1",
             "available_topics": ["system.heartbeats."],
-            "user_role": "viewer",
+            "user_role": "ai_researcher",
             "ws_token_exp": "2025-11-22T11:00:00Z"
         ]))
         await drainSendTasks()

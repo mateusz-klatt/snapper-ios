@@ -194,9 +194,9 @@ class WebSocketManager: ObservableObject {
     /// State mutations (``subscribedTopics`` reassignment + pending
     /// clear) run BEFORE the empty-set guard so a full permission
     /// downgrade (every prior subscription denied) still resets
-    /// in-memory tracking — without this, a stale mutation-capable
-    /// ``orders.events.`` would persist into a read-only session and
-    /// re-fire on the next reauth.
+    /// in-memory tracking — without this, a stale ``orders.events.``
+    /// subscription would persist into a session without ``READ_ORDERS``
+    /// and re-fire on the next reauth.
     ///
     /// Filter semantics: roots-or-prefix. v0.6.0 root-only topics
     /// (``system.heartbeats.``, ``orders.events.``) match exactly
@@ -235,9 +235,9 @@ class WebSocketManager: ObservableObject {
     /// Subscribe to the iOS preferred-defaults intersected with the
     /// authenticated session's server-shipped ``availableTopics``.
     ///
-    /// A read-only session lands ``availableTopics`` without
-    /// ``orders.events.`` (CREATE_ORDERS gate); a session granted that
-    /// capability lands both. The intersection produces the correct permission envelope
+    /// A session without ``READ_ORDERS`` lands ``availableTopics`` without
+    /// ``orders.events.``; a session granted that read capability lands both.
+    /// The intersection produces the correct permission envelope
     /// without iOS hardcoding named-role logic. Idempotent: backend
     /// ``handle_subscribe`` deduplicates server-side, and iOS
     /// ``subscribe(topics:)`` tracks ``subscribedTopics``.

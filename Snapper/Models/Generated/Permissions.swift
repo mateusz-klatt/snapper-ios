@@ -20,6 +20,7 @@ enum Permission: String, CaseIterable, Codable, Sendable {
     case stopStrategies = "stop:strategies"
     case configureStrategies = "configure:strategies"
     case readSystemStatus = "read:system_status"
+    case manageRuntimeDiagnostics = "manage:runtime_diagnostics"
     case readProcesses = "read:processes"
     case manageProcesses = "manage:processes"
     case readAiReviews = "read:ai_reviews"
@@ -32,6 +33,7 @@ enum Permission: String, CaseIterable, Codable, Sendable {
     case manageScopeGrants = "manage:scope_grants"
     case impersonateOperator = "impersonate:operator"
     case readBacktests = "read:backtests"
+    case createBacktestComparisons = "create:backtest_comparisons"
     case manageBacktests = "manage:backtests"
     case readNotifications = "read:notifications"
     case manageNotificationDevices = "manage:notification_devices"
@@ -45,11 +47,11 @@ enum ResourceRequirement: Sendable {
 
 let rolePermissions: [UserRole: [Permission]] = [
     .aiResearcher: [.readMarketData, .readMarketViews, .submitMarketView],
-    .aiReviewer: [.readBacktests, .readMarketData, .readMarketViews, .readOrders, .readPositions, .readSignals, .readStrategies, .readSystemStatus, .submitAiReviewDecision],
-    .aiDelegate: [.cancelOrders, .createOrders, .managePositions, .readBacktests, .readMarketData, .readMarketViews, .readOrders, .readPositions, .readSignals, .readStrategies, .readSystemStatus, .submitAiReviewDecision],
+    .aiReviewer: [.createBacktestComparisons, .manageRuntimeDiagnostics, .readBacktests, .readMarketData, .readMarketViews, .readOrders, .readPositions, .readSignals, .readStrategies, .readSystemStatus, .submitAiReviewDecision],
+    .aiDelegate: [.cancelOrders, .createBacktestComparisons, .createOrders, .managePositions, .manageRuntimeDiagnostics, .readBacktests, .readMarketData, .readMarketViews, .readOrders, .readPositions, .readSignals, .readStrategies, .readSystemStatus, .submitAiReviewDecision],
     .viewer: [.manageNotificationDevices, .readAccountState, .readAiIntegration, .readAiReviews, .readBacktests, .readMarketData, .readMarketViews, .readNotifications, .readOrders, .readPositions, .readProcesses, .readSignals, .readStrategies, .readSystemStatus],
-    .operatorRole: [.cancelOrders, .createOrders, .manageAiIntegration, .manageBacktests, .manageNotificationDevices, .managePairedExecution, .managePositions, .manageProcesses, .readAccountState, .readAiIntegration, .readAiReviews, .readBacktests, .readMarketData, .readMarketViews, .readNotifications, .readOrders, .readPositions, .readProcesses, .readSignals, .readStrategies, .readSystemStatus, .startStrategies, .stopStrategies],
-    .admin: [.cancelOrders, .configureStrategies, .configureSystem, .createOrders, .impersonateOperator, .manageAiIntegration, .manageBacktests, .manageNotificationDevices, .managePairedExecution, .managePositions, .manageProcesses, .manageScopeGrants, .manageUsers, .manageWalletCredentials, .readAccountState, .readAiIntegration, .readAiReviews, .readBacktests, .readMarketData, .readMarketViews, .readNotifications, .readOrders, .readPositions, .readProcesses, .readSignals, .readStrategies, .readSystemStatus, .readWalletCredentials, .startStrategies, .stopStrategies, .submitAiReviewDecision, .submitMarketView],
+    .operatorRole: [.cancelOrders, .configureStrategies, .createBacktestComparisons, .createOrders, .manageAiIntegration, .manageBacktests, .manageNotificationDevices, .managePairedExecution, .managePositions, .manageProcesses, .manageRuntimeDiagnostics, .readAccountState, .readAiIntegration, .readAiReviews, .readBacktests, .readMarketData, .readMarketViews, .readNotifications, .readOrders, .readPositions, .readProcesses, .readSignals, .readStrategies, .readSystemStatus, .startStrategies, .stopStrategies],
+    .admin: [.cancelOrders, .configureStrategies, .configureSystem, .createBacktestComparisons, .createOrders, .impersonateOperator, .manageAiIntegration, .manageBacktests, .manageNotificationDevices, .managePairedExecution, .managePositions, .manageProcesses, .manageRuntimeDiagnostics, .manageScopeGrants, .manageUsers, .manageWalletCredentials, .readAccountState, .readAiIntegration, .readAiReviews, .readBacktests, .readMarketData, .readMarketViews, .readNotifications, .readOrders, .readPositions, .readProcesses, .readSignals, .readStrategies, .readSystemStatus, .readWalletCredentials, .startStrategies, .stopStrategies, .submitAiReviewDecision, .submitMarketView],
 ]
 
 let resourceRequirements: [String: ResourceRequirement] = [
