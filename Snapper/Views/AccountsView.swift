@@ -40,6 +40,8 @@ struct AccountsView: View {
                             accountList(viewModel: viewModel, now: context.date)
                         }
                     }
+                } else {
+                    ProgressView(LocalizedStringKey("accounts.loading"))
                 }
             }
             .navigationTitle(LocalizedStringKey("accounts.page.title"))

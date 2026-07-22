@@ -63,6 +63,7 @@ final class WalletPickerViewModelTests: XCTestCase {
     func testInitialStateHasNoLoadError() {
         let viewModel = makeViewModel()
         XCTAssertNil(viewModel.loadError)
+        XCTAssertTrue(viewModel.isLoading)
     }
 
     func testInitialAvailableWalletsAreEmpty() {
@@ -126,6 +127,8 @@ final class WalletPickerViewModelTests: XCTestCase {
         await viewModel.loadWallets()
         XCTAssertNil(appState.selectedWalletPublicId)
         XCTAssertTrue(appState.availableWallets.isEmpty)
+        XCTAssertFalse(viewModel.isLoading)
+        XCTAssertEqual(viewModel.currentLabel, "Wallets unavailable")
     }
 
     func testLoadWalletsFailureSetsAPIErrorOnLoadError() async {

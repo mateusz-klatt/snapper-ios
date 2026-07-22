@@ -13,6 +13,14 @@ final class UserRoleDisplayNameTests: XCTestCase {
         XCTAssertEqual(UserRole.aiDelegate.displayName(in: .pl), "Delegat AI")
     }
 
+    func testAiReviewerInEnglish() {
+        XCTAssertEqual(UserRole.aiReviewer.displayName(in: .en), "AI reviewer")
+    }
+
+    func testAiReviewerInPolish() {
+        XCTAssertEqual(UserRole.aiReviewer.displayName(in: .pl), "Recenzent AI")
+    }
+
     func testAiResearcherInEnglish() {
         XCTAssertEqual(UserRole.aiResearcher.displayName(in: .en), "AI researcher")
     }

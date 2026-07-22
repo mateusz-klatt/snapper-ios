@@ -9,6 +9,8 @@ extension UserRole {
         switch self {
         case .aiDelegate:
             return LocaleStrings.localized("user.role.aiDelegate", in: language)
+        case .aiReviewer:
+            return LocaleStrings.localized("user.role.aiReviewer", in: language)
         case .aiResearcher:
             return LocaleStrings.localized("user.role.aiResearcher", in: language)
         case .viewer:

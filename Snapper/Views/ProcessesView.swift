@@ -37,6 +37,8 @@ struct ProcessesView: View {
                 } else if let summary = viewModel.summary {
                     summaryList(summary, processes: viewModel.sortedProcesses)
                 }
+            } else {
+                ProgressView(LocalizedStringKey("common.loading"))
             }
         }
         .navigationTitle(LocalizedStringKey("processes.navTitle"))

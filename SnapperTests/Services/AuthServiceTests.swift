@@ -176,6 +176,33 @@ final class AuthServiceTests: XCTestCase {
         XCTAssertFalse(authService.canAccess("ai-integration"))
     }
 
+    func testCanAccessAiReviewsIsOperatorAdminOnly() {
+        authService.currentUser = makeUser(role: .operatorRole)
+        XCTAssertTrue(authService.canAccess("ai-reviews"))
+
+        authService.currentUser = makeUser(role: .admin)
+        XCTAssertTrue(authService.canAccess("ai-reviews"))
+
+        authService.currentUser = makeUser(role: .viewer)
+        XCTAssertFalse(authService.canAccess("ai-reviews"))
+
+        authService.currentUser = makeUser(role: .aiReviewer)
+        XCTAssertFalse(authService.canAccess("ai-reviews"))
+
+        authService.currentUser = makeUser(role: .aiDelegate)
+        XCTAssertFalse(authService.canAccess("ai-reviews"))
+    }
+
+    func testCanAccessBacktestsRequiresActiveWallet() {
+        for role in [UserRole.viewer, .operatorRole, .admin] {
+            authService.currentUser = makeUser(role: role)
+            XCTAssertFalse(authService.canAccess("backtests"))
+
+            authService.currentUser = makeUser(role: role, activeWalletPublicId: "wallet-1")
+            XCTAssertTrue(authService.canAccess("backtests"))
+        }
+    }
+
     func testRoleAndPermissionChecksReturnFalseWithoutUser() {
         authService.currentUser = nil
 
@@ -184,7 +211,7 @@ final class AuthServiceTests: XCTestCase {
         XCTAssertFalse(authService.canAccess("overview"))
     }
 
-    private func makeUser(role: UserRole) -> UserProfile {
+    private func makeUser(role: UserRole, activeWalletPublicId: String? = nil) -> UserProfile {
         UserProfile(
             type: nil,
             sequenceId: 0,
@@ -199,7 +226,7 @@ final class AuthServiceTests: XCTestCase {
             createdAt: Date(timeIntervalSince1970: 0),
             operatorPublicIds: nil,
             primaryOperatorPublicId: nil,
-            activeWalletPublicId: nil,
+            activeWalletPublicId: activeWalletPublicId,
             defaultLanguage: nil
         )
     }

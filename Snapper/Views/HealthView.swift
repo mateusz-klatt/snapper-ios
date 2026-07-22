@@ -45,6 +45,8 @@ struct HealthView: View {
                         description: Text(LocalizedStringKey("health.empty.message"))
                     )
                 }
+            } else {
+                ProgressView(LocalizedStringKey("common.loading"))
             }
         }
         .navigationTitle(LocalizedStringKey("health.navTitle"))
