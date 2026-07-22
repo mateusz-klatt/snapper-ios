@@ -1,22 +1,21 @@
 import SwiftUI
 
-/// Permission-gated root tabs for the operator surfaces.
+/// Permission-gated root tabs for the application surfaces.
 ///
 /// Permission gating per tab:
 /// - Home: ``canAccess("overview")``.
-/// - Positions: ``readPositions`` / ``managePositions`` (every role
-///   above ``aiDelegate`` already grants ``readPositions``).
+/// - Positions: ``readPositions`` / ``managePositions``.
 /// - Orders: ``canAccess("orders")``.
 /// - Alerts: ``readNotifications`` (push gating).
 /// - Accounts: ``readAccountState`` and the ``accounts`` resource.
 /// - Signals: ``canAccess("signals")`` — read-only trading-signals feed
-///   (``read:market_data``; every role above is granted it). Inserted
-///   before Settings so Alerts stays a directly-tapped tab: a role with
+///   (``read:market_data``). Inserted
+///   before Settings so Alerts stays a directly-tapped tab: a session with
 ///   all seven visible tabs lets iOS collapse the trailing account,
 ///   signal, and settings surfaces into the standard "More" list,
 ///   leaving the APNs deep-link target (Alerts) reachable without
 ///   traversing "More".
-/// - Settings: ``canAccess("overview")`` — every authenticated role
+/// - Settings: ``canAccess("overview")`` — every authenticated session
 ///   per the permission catalog (contract that
 ///   any user can self-manage push notifications + device).
 ///
@@ -67,10 +66,10 @@ struct MainTabView: View {
     }
 
     /// Snap ``selectedTab`` back to an available tab when the
-    /// stored value points at something the current role cannot
+    /// stored value points at something the current permission scope cannot
     /// access. Guards the ``@SceneStorage`` restore path: a
-    /// previous login (different role) may have stored
-    /// ``"alerts"``; logging in again as a role without
+    /// previous login (different permission scope) may have stored
+    /// ``"alerts"``; logging in again without
     /// ``readNotifications`` would render an empty
     /// ``TabView(selection:)`` because the tag is missing.
     /// Falls back to ``"home"`` when present, otherwise the first
@@ -152,10 +151,10 @@ struct MainTabView: View {
         }
         .onAppear {
             /// Normalise the ``@SceneStorage``-restored selection
-            /// against the current role's permissions BEFORE any
+            /// against the current session's permissions BEFORE any
             /// deep-link consumption — otherwise a stored
-            /// ``"alerts"`` from a previous login as a different
-            /// role could leave the ``TabView`` pointing at a tag
+            /// ``"alerts"`` from a previous login with a different
+            /// permission scope could leave the ``TabView`` pointing at a tag
             /// that the current body conditional does not render.
             normalizeSelectedTab()
             /// Consume any pending deep-link that landed BEFORE the
@@ -171,9 +170,8 @@ struct MainTabView: View {
         .onChange(of: navigationCoordinator.pendingDeepLink) { _, _ in
             consumePendingDeepLink()
         }
-        .onChange(of: authService.currentUser?.role.rawValue) { _, _ in
-            /// Re-normalise on role flip (logout-as-A → login-as-B
-            /// within the same scene) so a tab that the new role
+        .onChange(of: authService.currentUser?.effectivePermissions) { _, _ in
+            /// Re-normalise on permission-scope change so a tab that the new session
             /// cannot access is replaced before its body would have
             /// been rendered.
             normalizeSelectedTab()
@@ -199,10 +197,10 @@ struct MainTabView: View {
         ) else { return }
         guard availableTabIDs.contains(nextTab) else {
             /// Recognized route but the target tab is not visible
-            /// for the current role — clear so the stale link does
+            /// for the current permission scope — clear so the stale link does
             /// not linger and re-fire on the next ``MainTabView``
             /// remount (locale flip via ``.id(appState.locale)`` or
-            /// role swap).
+            /// identity swap).
             navigationCoordinator.clearPendingDeepLink()
             return
         }

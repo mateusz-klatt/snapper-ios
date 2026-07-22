@@ -20,7 +20,11 @@ enum Permission: String, CaseIterable, Codable, Sendable {
     case stopStrategies = "stop:strategies"
     case configureStrategies = "configure:strategies"
     case readSystemStatus = "read:system_status"
+    case readProcesses = "read:processes"
     case manageProcesses = "manage:processes"
+    case readAiReviews = "read:ai_reviews"
+    case readAiIntegration = "read:ai_integration"
+    case manageAiIntegration = "manage:ai_integration"
     case configureSystem = "configure:system"
     case manageUsers = "manage:users"
     case readWalletCredentials = "read:wallet_credentials"
@@ -34,29 +38,34 @@ enum Permission: String, CaseIterable, Codable, Sendable {
     case managePairedExecution = "manage:paired_execution"
 }
 
+enum ResourceRequirement: Sendable {
+    case authenticated
+    case anyPermission([Permission])
+}
+
 let rolePermissions: [UserRole: [Permission]] = [
     .aiResearcher: [.readMarketData, .readMarketViews, .submitMarketView],
     .aiReviewer: [.readBacktests, .readMarketData, .readMarketViews, .readOrders, .readPositions, .readSignals, .readStrategies, .readSystemStatus, .submitAiReviewDecision],
     .aiDelegate: [.cancelOrders, .createOrders, .managePositions, .readBacktests, .readMarketData, .readMarketViews, .readOrders, .readPositions, .readSignals, .readStrategies, .readSystemStatus, .submitAiReviewDecision],
-    .viewer: [.manageNotificationDevices, .readAccountState, .readBacktests, .readMarketData, .readMarketViews, .readNotifications, .readOrders, .readPositions, .readSignals, .readStrategies, .readSystemStatus],
-    .operatorRole: [.cancelOrders, .createOrders, .manageBacktests, .manageNotificationDevices, .managePairedExecution, .managePositions, .manageProcesses, .readAccountState, .readBacktests, .readMarketData, .readMarketViews, .readNotifications, .readOrders, .readPositions, .readSignals, .readStrategies, .readSystemStatus, .startStrategies, .stopStrategies],
-    .admin: [.cancelOrders, .configureStrategies, .configureSystem, .createOrders, .impersonateOperator, .manageBacktests, .manageNotificationDevices, .managePairedExecution, .managePositions, .manageProcesses, .manageScopeGrants, .manageUsers, .manageWalletCredentials, .readAccountState, .readBacktests, .readMarketData, .readMarketViews, .readNotifications, .readOrders, .readPositions, .readSignals, .readStrategies, .readSystemStatus, .readWalletCredentials, .startStrategies, .stopStrategies, .submitAiReviewDecision, .submitMarketView],
+    .viewer: [.manageNotificationDevices, .readAccountState, .readAiIntegration, .readAiReviews, .readBacktests, .readMarketData, .readMarketViews, .readNotifications, .readOrders, .readPositions, .readProcesses, .readSignals, .readStrategies, .readSystemStatus],
+    .operatorRole: [.cancelOrders, .createOrders, .manageAiIntegration, .manageBacktests, .manageNotificationDevices, .managePairedExecution, .managePositions, .manageProcesses, .readAccountState, .readAiIntegration, .readAiReviews, .readBacktests, .readMarketData, .readMarketViews, .readNotifications, .readOrders, .readPositions, .readProcesses, .readSignals, .readStrategies, .readSystemStatus, .startStrategies, .stopStrategies],
+    .admin: [.cancelOrders, .configureStrategies, .configureSystem, .createOrders, .impersonateOperator, .manageAiIntegration, .manageBacktests, .manageNotificationDevices, .managePairedExecution, .managePositions, .manageProcesses, .manageScopeGrants, .manageUsers, .manageWalletCredentials, .readAccountState, .readAiIntegration, .readAiReviews, .readBacktests, .readMarketData, .readMarketViews, .readNotifications, .readOrders, .readPositions, .readProcesses, .readSignals, .readStrategies, .readSystemStatus, .readWalletCredentials, .startStrategies, .stopStrategies, .submitAiReviewDecision, .submitMarketView],
 ]
 
-let resourceAccess: [String: [UserRole]] = [
-    "overview": [.aiResearcher, .aiReviewer, .aiDelegate, .viewer, .operatorRole, .admin],
-    "market": [.aiResearcher, .aiReviewer, .aiDelegate, .viewer, .operatorRole, .admin],
-    "processes": [.operatorRole, .admin],
-    "strategies": [.aiReviewer, .aiDelegate, .viewer, .operatorRole, .admin],
-    "orders": [.aiReviewer, .aiDelegate, .viewer, .operatorRole, .admin],
-    "positions": [.aiReviewer, .aiDelegate, .viewer, .operatorRole, .admin],
-    "accounts": [.viewer, .operatorRole, .admin],
-    "signals": [.aiReviewer, .aiDelegate, .viewer, .operatorRole, .admin],
-    "health": [.aiReviewer, .aiDelegate, .viewer, .operatorRole, .admin],
-    "admin": [.admin],
-    "settings": [.admin],
-    "backtests": [.aiReviewer, .aiDelegate, .viewer, .operatorRole, .admin],
-    "ai-integration": [.operatorRole, .admin],
-    "ai-reviews": [.aiReviewer, .aiDelegate, .viewer, .operatorRole, .admin],
-    "notifications": [.viewer, .operatorRole, .admin],
+let resourceRequirements: [String: ResourceRequirement] = [
+    "overview": .authenticated,
+    "market": .anyPermission([.readMarketData]),
+    "processes": .anyPermission([.readProcesses]),
+    "strategies": .anyPermission([.readStrategies]),
+    "orders": .anyPermission([.readOrders]),
+    "positions": .anyPermission([.readPositions]),
+    "accounts": .anyPermission([.readAccountState]),
+    "signals": .anyPermission([.readSignals]),
+    "health": .anyPermission([.readSystemStatus]),
+    "admin": .anyPermission([.manageUsers]),
+    "settings": .anyPermission([.configureSystem]),
+    "backtests": .anyPermission([.readBacktests]),
+    "ai-integration": .anyPermission([.readAiIntegration]),
+    "ai-reviews": .anyPermission([.readAiReviews, .submitAiReviewDecision]),
+    "notifications": .anyPermission([.readNotifications]),
 ]

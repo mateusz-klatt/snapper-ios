@@ -112,8 +112,8 @@ class WebSocketManager: ObservableObject {
     /// Tear down the connection and reset all subscription tracking.
     ///
     /// Clears `subscribedTopics` + `pendingSubscriptions` so a
-    /// subsequent re-connect (e.g. logout-then-login as a different
-    /// role) does not replay stale topics that the new role's
+    /// subsequent re-connect (e.g. logout-then-login under a different
+    /// permission scope) does not replay stale topics that the new session's
     /// ``availableTopics`` no longer permits. The replay-side filter
     /// in ``replayPendingSubscriptions`` is defense-in-depth for the
     /// reauth path where ``disconnect()`` is not invoked.
@@ -188,28 +188,28 @@ class WebSocketManager: ObservableObject {
     }
 
     /// Re-send subscriptions after (re)auth, dropping topics the
-    /// current role's server-shipped ``availableTopics`` no longer
+    /// current session's server-shipped ``availableTopics`` no longer
     /// permits.
     ///
     /// State mutations (``subscribedTopics`` reassignment + pending
-    /// clear) run BEFORE the empty-set guard so a full role
+    /// clear) run BEFORE the empty-set guard so a full permission
     /// downgrade (every prior subscription denied) still resets
-    /// in-memory tracking — without this, a stale OPERATOR-era
-    /// ``orders.events.`` would persist into a VIEWER session and
+    /// in-memory tracking — without this, a stale mutation-capable
+    /// ``orders.events.`` would persist into a read-only session and
     /// re-fire on the next reauth.
     ///
     /// Filter semantics: roots-or-prefix. v0.6.0 root-only topics
     /// (``system.heartbeats.``, ``orders.events.``) match exactly
     /// against ``availableTopics``; v0.7.0 concrete market topics
     /// like ``market.kraken.EUR-USD.candles.1m`` match by prefix
-    /// against the registry root ``market.`` shipped per-role.
+    /// against the registry root ``market.`` shipped for the session.
     ///
     /// Both halves of the OR are evaluated: an exact match wins
     /// when present so root-only topics keep their existing
     /// semantics; otherwise the prefix sweep accepts a topic
     /// whose first segments are an entry in ``availableTopics``.
     /// A topic whose root is NOT in the allow-list is still
-    /// dropped — the server's per-role authorization remains the
+    /// dropped — the server's permission authorization remains the
     /// single source of truth.
     private func replayPendingSubscriptions() {
         let allowed = Set(availableTopics)
@@ -224,21 +224,21 @@ class WebSocketManager: ObservableObject {
     }
 
     /// iOS-side preferred default topics. Intersected with the
-    /// server-shipped ``availableTopics`` per role on every
+    /// server-shipped ``availableTopics`` for the authenticated session on every
     /// auth_complete / reauth_ok hook so subscribed traffic flows
-    /// without iOS hardcoding role-permission logic.
+    /// without iOS hardcoding named-role logic.
     private static let preferredDefaultTopics: [String] = [
         "system.heartbeats.",
         "orders.events.",
     ]
 
     /// Subscribe to the iOS preferred-defaults intersected with the
-    /// role's server-shipped ``availableTopics``.
+    /// authenticated session's server-shipped ``availableTopics``.
     ///
-    /// VIEWER role lands ``availableTopics`` without
-    /// ``orders.events.`` (CREATE_ORDERS gate); OPERATOR + ADMIN land
-    /// both. The intersection produces the correct per-role envelope
-    /// without iOS hardcoding role logic. Idempotent: backend
+    /// A read-only session lands ``availableTopics`` without
+    /// ``orders.events.`` (CREATE_ORDERS gate); a session granted that
+    /// capability lands both. The intersection produces the correct permission envelope
+    /// without iOS hardcoding named-role logic. Idempotent: backend
     /// ``handle_subscribe`` deduplicates server-side, and iOS
     /// ``subscribe(topics:)`` tracks ``subscribedTopics``.
     private func subscribeToServerAllowedDefaults() {

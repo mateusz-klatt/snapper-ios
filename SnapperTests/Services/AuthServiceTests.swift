@@ -39,7 +39,9 @@ final class AuthServiceTests: XCTestCase {
                     "email": "test@example.com",
                     "role": "viewer",
                     "is_active": true,
-                    "created_at": "2025-01-01T00:00:00Z"
+                    "created_at": "2025-01-01T00:00:00Z",
+                    "effective_permissions": ["read:market_data", "read:ai_reviews"],
+                    "delegate_public_id": null
                 }
             }
         }
@@ -54,6 +56,7 @@ final class AuthServiceTests: XCTestCase {
         XCTAssertEqual(response.payload.user.username, "testuser")
         XCTAssertEqual(response.payload.user.email, "test@example.com")
         XCTAssertEqual(response.payload.user.role, .viewer)
+        XCTAssertEqual(response.payload.user.effectivePermissions, [.readMarketData, .readAiReviews])
     }
 
     func testErrorResponseDecoding() throws {
@@ -69,149 +72,197 @@ final class AuthServiceTests: XCTestCase {
         XCTAssertEqual(response.detail, "Invalid credentials")
     }
 
-    func testHasRoleHierarchy() {
-        authService.currentUser = makeUser(role: .operatorRole)
-
-        XCTAssertTrue(authService.hasRole(.viewer))
-        XCTAssertTrue(authService.hasRole(.operatorRole))
-        XCTAssertFalse(authService.hasRole(.admin))
-    }
-
-    func testHasPermissionUsesGeneratedRolePermissions() {
-        authService.currentUser = makeUser(role: .viewer)
+    func testHasPermissionUsesEffectiveSessionPermissions() {
+        authService.currentUser = makeUser(
+            role: .viewer,
+            effectivePermissions: [.readMarketData]
+        )
 
         XCTAssertTrue(authService.hasPermission(.readMarketData))
         XCTAssertFalse(authService.hasPermission(.manageUsers))
     }
 
-    /// UI-gating contract for the trading mutation surfaces
-    /// (OrdersView / PositionsView toolbar + action sheet). Viewer
-    /// role must NOT have any of the three mutation permissions —
-    /// the iOS UI hides New Order / Cancel swipe / Close / Reduce /
-    /// Attach SL+TP / Attach trailing stop based on these flags so
-    /// Apple Reviewer's read-only account doesn't surface buttons
-    /// that 403 against the backend capability guard.
-    func testViewerRoleLacksTradingMutationPermissions() {
-        authService.currentUser = makeUser(role: .viewer)
+    func testHasPermissionDoesNotInferCapabilitiesFromRole() {
+        authService.currentUser = makeUser(role: .admin, effectivePermissions: [])
+        XCTAssertFalse(authService.hasPermission(.manageUsers))
+        XCTAssertFalse(authService.hasPermission(.configureSystem))
 
-        XCTAssertFalse(
-            authService.hasPermission(.createOrders),
-            "Viewer must not have createOrders — UI gates the New Order toolbar button on this."
+        authService.currentUser = makeUser(
+            role: .viewer,
+            effectivePermissions: [.manageUsers]
         )
-        XCTAssertFalse(
-            authService.hasPermission(.cancelOrders),
-            "Viewer must not have cancelOrders — UI gates the Cancel swipe action on this."
-        )
-        XCTAssertFalse(
-            authService.hasPermission(.managePositions),
-            "Viewer must not have managePositions — UI gates the position-row tap + action-sheet (Close/Reduce/Attach) on this."
-        )
-    }
-
-    /// Mirror assertion for the operator + admin paths so any
-    /// future role-permission table refactor that accidentally
-    /// drops mutation perms from those roles fails loudly here
-    /// rather than silently hiding the buttons in production.
-    func testOperatorAndAdminRolesRetainTradingMutationPermissions() {
-        authService.currentUser = makeUser(role: .operatorRole)
-
-        XCTAssertTrue(authService.hasPermission(.createOrders))
-        XCTAssertTrue(authService.hasPermission(.cancelOrders))
-        XCTAssertTrue(authService.hasPermission(.managePositions))
-
-        authService.currentUser = makeUser(role: .admin)
-
-        XCTAssertTrue(authService.hasPermission(.createOrders))
-        XCTAssertTrue(authService.hasPermission(.cancelOrders))
-        XCTAssertTrue(authService.hasPermission(.managePositions))
-    }
-
-    func testHasPermissionAdminAllowsAll() {
-        authService.currentUser = makeUser(role: .admin)
-
         XCTAssertTrue(authService.hasPermission(.manageUsers))
-        XCTAssertTrue(authService.hasPermission(.configureSystem))
     }
 
-    func testCanAccessUsesGeneratedResourceAccess() {
-        authService.currentUser = makeUser(role: .viewer)
+    func testViewerPermissionSetIsFullReadOnlyOperatorAccess() {
+        let viewerPermissions = rolePermissions[.viewer] ?? []
+        XCTAssertEqual(
+            Set(viewerPermissions),
+            Set([
+                .readAccountState,
+                .readAiIntegration,
+                .readAiReviews,
+                .readBacktests,
+                .readMarketData,
+                .readMarketViews,
+                .readNotifications,
+                .readOrders,
+                .readPositions,
+                .readProcesses,
+                .readSignals,
+                .readStrategies,
+                .readSystemStatus,
+                .manageNotificationDevices,
+            ])
+        )
+
+        authService.currentUser = makeUser(
+            role: .viewer,
+            effectivePermissions: viewerPermissions
+        )
+
+        XCTAssertFalse(authService.hasPermission(.createOrders))
+        XCTAssertFalse(authService.hasPermission(.cancelOrders))
+        XCTAssertFalse(authService.hasPermission(.managePositions))
+        XCTAssertFalse(authService.hasPermission(.manageProcesses))
+        XCTAssertFalse(authService.hasPermission(.startStrategies))
+        XCTAssertFalse(authService.hasPermission(.stopStrategies))
+        XCTAssertFalse(authService.hasPermission(.manageBacktests))
+        XCTAssertFalse(authService.hasPermission(.manageAiIntegration))
+    }
+
+    func testOperatorAndAdminPermissionSetsRetainTradingMutations() {
+        for role in [UserRole.operatorRole, .admin] {
+            authService.currentUser = makeUser(
+                role: role,
+                effectivePermissions: rolePermissions[role] ?? []
+            )
+
+            XCTAssertTrue(authService.hasPermission(.createOrders))
+            XCTAssertTrue(authService.hasPermission(.cancelOrders))
+            XCTAssertTrue(authService.hasPermission(.managePositions))
+        }
+    }
+
+    func testCanAccessUsesGeneratedResourceRequirements() {
+        authService.currentUser = makeUser(role: .viewer, effectivePermissions: [])
 
         XCTAssertTrue(authService.canAccess("overview"))
         XCTAssertFalse(authService.canAccess("settings"))
+
+        authService.currentUser = makeUser(
+            role: .viewer,
+            effectivePermissions: [.configureSystem]
+        )
+        XCTAssertTrue(authService.canAccess("settings"))
     }
 
     func testCanAccessRejectsUnknownResource() {
-        authService.currentUser = makeUser(role: .admin)
+        authService.currentUser = makeUser(
+            role: .admin,
+            effectivePermissions: rolePermissions[.admin] ?? []
+        )
 
         XCTAssertFalse(authService.canAccess("unknown-resource"))
     }
 
-    func testVenueAccountsPermissionAndResourceExcludeAiDelegate() {
-        for role in [UserRole.viewer, .operatorRole, .admin] {
-            authService.currentUser = makeUser(role: role)
+    func testCanAccessFailsClosedWhenEffectivePermissionsAreMissing() {
+        authService.currentUser = makeUser(
+            role: .admin,
+            effectivePermissions: nil
+        )
+
+        XCTAssertFalse(authService.hasPermission(.readMarketData))
+        XCTAssertFalse(authService.canAccess("market"))
+        XCTAssertTrue(authService.canAccess("overview"))
+    }
+
+    func testVenueAccountsRequiresReadAccountStateRegardlessOfRole() {
+        for role in allUserRoles {
+            authService.currentUser = makeUser(
+                role: role,
+                effectivePermissions: [.readAccountState]
+            )
             XCTAssertTrue(authService.hasPermission(.readAccountState))
             XCTAssertTrue(authService.canAccess("accounts"))
         }
 
-        authService.currentUser = makeUser(role: .aiDelegate)
+        authService.currentUser = makeUser(role: .admin, effectivePermissions: [])
         XCTAssertFalse(authService.hasPermission(.readAccountState))
         XCTAssertFalse(authService.canAccess("accounts"))
     }
 
-    /// The AI-integration (delegates) surface is operator/admin only —
-    /// guards the generated ``resourceAccess["ai-integration"]`` mapping
-    /// that the Home entry card's ``canAccess("ai-integration")`` gate
-    /// depends on.
-    func testCanAccessAiIntegrationIsOperatorAdminOnly() {
-        authService.currentUser = makeUser(role: .operatorRole)
-        XCTAssertTrue(authService.canAccess("ai-integration"))
+    func testCanAccessAiIntegrationRequiresReadPermission() {
+        for role in allUserRoles {
+            authService.currentUser = makeUser(
+                role: role,
+                effectivePermissions: [.readAiIntegration]
+            )
+            XCTAssertTrue(authService.canAccess("ai-integration"))
+        }
 
-        authService.currentUser = makeUser(role: .admin)
-        XCTAssertTrue(authService.canAccess("ai-integration"))
-
-        authService.currentUser = makeUser(role: .viewer)
-        XCTAssertFalse(authService.canAccess("ai-integration"))
-
-        authService.currentUser = makeUser(role: .aiDelegate)
+        authService.currentUser = makeUser(role: .admin, effectivePermissions: [])
         XCTAssertFalse(authService.canAccess("ai-integration"))
     }
 
-    func testCanAccessAiReviewsIsOperatorAdminOnly() {
-        authService.currentUser = makeUser(role: .operatorRole)
+    /// The iOS AI-review surface is an audit list, so it requires the
+    /// dedicated read permission after the generated any-of resource
+    /// requirement is evaluated. A submit-only delegate can act through
+    /// its own workflow but cannot open this read-only audit surface.
+    func testCanAccessAiReviewAuditRequiresReadPermission() {
+        authService.currentUser = makeUser(
+            role: .viewer,
+            effectivePermissions: [.readAiReviews]
+        )
         XCTAssertTrue(authService.canAccess("ai-reviews"))
 
-        authService.currentUser = makeUser(role: .admin)
+        authService.currentUser = makeUser(
+            role: .aiDelegate,
+            effectivePermissions: [.submitAiReviewDecision]
+        )
+        XCTAssertFalse(authService.canAccess("ai-reviews"))
+
+        authService.currentUser = makeUser(
+            role: .aiDelegate,
+            effectivePermissions: [.readAiReviews, .submitAiReviewDecision]
+        )
         XCTAssertTrue(authService.canAccess("ai-reviews"))
-
-        authService.currentUser = makeUser(role: .viewer)
-        XCTAssertFalse(authService.canAccess("ai-reviews"))
-
-        authService.currentUser = makeUser(role: .aiReviewer)
-        XCTAssertFalse(authService.canAccess("ai-reviews"))
-
-        authService.currentUser = makeUser(role: .aiDelegate)
-        XCTAssertFalse(authService.canAccess("ai-reviews"))
     }
 
     func testCanAccessBacktestsRequiresActiveWallet() {
-        for role in [UserRole.viewer, .operatorRole, .admin] {
-            authService.currentUser = makeUser(role: role)
-            XCTAssertFalse(authService.canAccess("backtests"))
+        authService.currentUser = makeUser(
+            role: .viewer,
+            effectivePermissions: [.readBacktests]
+        )
+        XCTAssertFalse(authService.canAccess("backtests"))
 
-            authService.currentUser = makeUser(role: role, activeWalletPublicId: "wallet-1")
-            XCTAssertTrue(authService.canAccess("backtests"))
-        }
+        authService.currentUser = makeUser(
+            role: .viewer,
+            activeWalletPublicId: "wallet-1",
+            effectivePermissions: [.readBacktests]
+        )
+        XCTAssertTrue(authService.canAccess("backtests"))
+
+        authService.currentUser = makeUser(
+            role: .admin,
+            activeWalletPublicId: "wallet-1",
+            effectivePermissions: []
+        )
+        XCTAssertFalse(authService.canAccess("backtests"))
     }
 
-    func testRoleAndPermissionChecksReturnFalseWithoutUser() {
+    func testPermissionAndResourceChecksReturnFalseWithoutUser() {
         authService.currentUser = nil
 
-        XCTAssertFalse(authService.hasRole(.viewer))
         XCTAssertFalse(authService.hasPermission(.readMarketData))
         XCTAssertFalse(authService.canAccess("overview"))
     }
 
-    private func makeUser(role: UserRole, activeWalletPublicId: String? = nil) -> UserProfile {
+    private func makeUser(
+        role: UserRole,
+        activeWalletPublicId: String? = nil,
+        effectivePermissions: [Permission]? = []
+    ) -> UserProfile {
         UserProfile(
             type: nil,
             sequenceId: 0,
@@ -227,8 +278,14 @@ final class AuthServiceTests: XCTestCase {
             operatorPublicIds: nil,
             primaryOperatorPublicId: nil,
             activeWalletPublicId: activeWalletPublicId,
-            defaultLanguage: nil
+            defaultLanguage: nil,
+            effectivePermissions: effectivePermissions,
+            delegatePublicId: nil
         )
+    }
+
+    private var allUserRoles: [UserRole] {
+        [.aiResearcher, .aiReviewer, .aiDelegate, .viewer, .operatorRole, .admin]
     }
 
 }

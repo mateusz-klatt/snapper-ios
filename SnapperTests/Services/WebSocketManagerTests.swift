@@ -314,12 +314,12 @@ final class WebSocketManagerTests: XCTestCase {
 
     /// User-initiated disconnect (logout / backend-switch / scene
     /// background) clears subscription tracking; reconnect then
-    /// re-establishes only the role-allowed preferred defaults via
+    /// re-establishes only the server-allowed preferred defaults via
     /// ``subscribeToServerAllowedDefaults``. This is the v0.6.0
     /// contract — pre-v0.6.0 the dual-set tracker preserved
     /// previously-subscribed concrete topics across disconnect, but
-    /// that left a stale OPERATOR-era ``orders.events.`` entry
-    /// readable to a subsequent VIEWER reconnect (RBAC leak).
+    /// that left a stale mutation-capable ``orders.events.`` entry
+    /// readable to a subsequent read-only reconnect (authorization leak).
     func testDisconnectClearsSubscriptionsAndReconnectAutoSubscribesDefaults() async {
         let task1 = FakeWebSocketTask()
         let task2 = FakeWebSocketTask()
@@ -363,15 +363,15 @@ final class WebSocketManagerTests: XCTestCase {
         let allTopicsSent = Set(secondConnectSubscribes.flatMap { $0 })
         XCTAssertTrue(
             allTopicsSent.contains("system.heartbeats."),
-            "VIEWER reconnect should auto-subscribe to system.heartbeats. via preferred defaults"
+            "Read-only reconnect should auto-subscribe to system.heartbeats. via preferred defaults"
         )
         XCTAssertFalse(
             allTopicsSent.contains("orders.events."),
-            "VIEWER reconnect must NOT carry orders.events. — RBAC enforced by availableTopics intersection"
+            "Read-only reconnect must NOT carry orders.events. — permissions are enforced by availableTopics intersection"
         )
     }
 
-    /// Fresh connect at OPERATOR role lands both preferred defaults
+    /// A fresh session allowed both topics lands both preferred defaults
     /// (system.heartbeats. and orders.events.) in the auto-subscribe
     /// envelope.
     func testAuthCompleteAutoSubscribesPreferredDefaultsIntersection() async {
@@ -400,10 +400,10 @@ final class WebSocketManagerTests: XCTestCase {
         XCTAssertTrue(topicsSent.contains("orders.events."))
     }
 
-    /// VIEWER role lands only ``system.heartbeats.`` (CREATE_ORDERS
+    /// A read-only permission scope lands only ``system.heartbeats.`` (CREATE_ORDERS
     /// permission missing → ``orders.events.`` not in
     /// availableTopics → intersection drops it).
-    func testAuthCompleteAutoSubscribeViewerRoleHeartbeatsOnly() async {
+    func testAuthCompleteAutoSubscribesOnlyServerAllowedDefaults() async {
         let (manager, _, fakeTask, _) = makeManager()
         manager.connect()
         manager.handleRawMessage(frame([
