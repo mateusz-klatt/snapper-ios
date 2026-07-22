@@ -11,9 +11,31 @@ import Foundation
 /// ``values`` is the full set including Phase H additions.
 enum ExpectedKeys {
 
-    /// Source-language keys introduced with Venue Accounts. The dedicated
-    /// other-locale pass will remove these from this rollout set as translations land.
-    static let englishOnlyRollout: Set<String> = [
+    /// Source-language-only rollout keys awaiting translation.
+    static let englishOnlyRollout: Set<String> = []
+
+    static let v1Locked: Set<String> = [
+        "auth.login.subtitle",
+        "auth.login.usernamePlaceholder",
+        "auth.login.passwordPlaceholder",
+        "auth.login.signIn",
+        "auth.login.advancedDisclosure",
+        "auth.login.currentBackend",
+        "backend.url.placeholder",
+        "backend.url.willSaveAs",
+        "backend.url.invalidDebug",
+        "backend.url.invalidRelease",
+        "backend.url.help",
+        "backend.url.cancel",
+        "backend.url.resetToDefault",
+        "backend.url.save",
+        "settings.section.language",
+        "common.localeSwitcher.triggerAccessibilityLabel",
+        "common.localeSwitcher.flagAccessibilityLabel",
+        "common.localeSwitcher.currentAccessibilityLabel",
+    ]
+
+    static let values: Set<String> = Set([
         "accounts.balance.currency",
         "accounts.balance.free",
         "accounts.balance.total",
@@ -64,30 +86,6 @@ enum ExpectedKeys {
         "accounts.unavailable.message",
         "accounts.unavailable.title",
         "tabs.accounts",
-    ]
-
-    static let v1Locked: Set<String> = [
-        "auth.login.subtitle",
-        "auth.login.usernamePlaceholder",
-        "auth.login.passwordPlaceholder",
-        "auth.login.signIn",
-        "auth.login.advancedDisclosure",
-        "auth.login.currentBackend",
-        "backend.url.placeholder",
-        "backend.url.willSaveAs",
-        "backend.url.invalidDebug",
-        "backend.url.invalidRelease",
-        "backend.url.help",
-        "backend.url.cancel",
-        "backend.url.resetToDefault",
-        "backend.url.save",
-        "settings.section.language",
-        "common.localeSwitcher.triggerAccessibilityLabel",
-        "common.localeSwitcher.flagAccessibilityLabel",
-        "common.localeSwitcher.currentAccessibilityLabel",
-    ]
-
-    static let values: Set<String> = Set([
         "alerts.accessibility.hint.row",
         "alerts.accessibility.label.dismissButton",
         "alerts.alertType.critical_system_error",

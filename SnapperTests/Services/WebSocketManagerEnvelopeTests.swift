@@ -31,26 +31,31 @@ final class WebSocketManagerEnvelopeTests: XCTestCase {
     }
 
     /// `sendJSON` bounces through an unstructured `Task`, so outbound frames
-    /// land in `sentMessages` only after that task runs. Await the fake task's
-    /// send-side signal rather than guessing how many scheduler yields are
-    /// enough under coverage instrumentation.
-    private func waitForFrames(
+    /// land in `sentMessages` only after that task runs — and unrelated frames
+    /// (`authenticate`/`reauth`, minted by the same `sendEnvelope` path) may
+    /// share the queue. Await the *specific* frame type rather than a raw count:
+    /// a differently-ordered auth frame can satisfy `count >= N` before the
+    /// frame under test lands, which showed up as a flake in the coverage job.
+    private func waitForFrame(
         _ fakeTask: FakeWebSocketTask,
-        count: Int,
+        type: String,
         timeoutNanoseconds: UInt64 = 5_000_000_000,
         file: StaticString = #filePath,
         line: UInt = #line
     ) async {
-        let sent = await fakeTask.waitUntilSentMessagesCount(
-            count,
+        let found = await fakeTask.waitUntilSentMessage(
+            where: { message in
+                guard case let .string(text) = message,
+                      let data = text.data(using: .utf8),
+                      let parsed = try? JSONSerialization.jsonObject(with: data) as? [String: Any]
+                else { return false }
+                return (parsed["type"] as? String) == type
+            },
             timeoutNanoseconds: timeoutNanoseconds
         )
-        if sent { return }
-
-        let observed = fakeTask.sentMessagesCount
-        if observed >= count { return }
+        if found { return }
         XCTFail(
-            "waitForFrames timed out: expected \(count) frames, observed \(observed)",
+            "waitForFrame timed out: no '\(type)' frame observed",
             file: file,
             line: line
         )
@@ -92,7 +97,7 @@ final class WebSocketManagerEnvelopeTests: XCTestCase {
         manager.connect()
         manager.handleRawMessage(authCompleteFrame(sessionId: "s-sub"))
         manager.subscribe(topics: ["orders.events.kraken."])
-        await waitForFrames(fakeTask, count: 1)
+        await waitForFrame(fakeTask, type: "subscribe")
 
         let subscribeFrame = fakeTask.sentMessagesSnapshot().compactMap(decodeFrame).first { ($0["type"] as? String) == "subscribe" }
         XCTAssertNotNil(subscribeFrame, "subscribe frame not found in outbound queue")
@@ -106,9 +111,9 @@ final class WebSocketManagerEnvelopeTests: XCTestCase {
         manager.connect()
         manager.handleRawMessage(authCompleteFrame(sessionId: "s-unsub"))
         manager.subscribe(topics: ["orders.events.kraken."])
-        await waitForFrames(fakeTask, count: 1)
+        await waitForFrame(fakeTask, type: "subscribe")
         manager.unsubscribe(topics: ["orders.events.kraken."])
-        await waitForFrames(fakeTask, count: 2)
+        await waitForFrame(fakeTask, type: "unsubscribe")
 
         let unsubscribeFrame = fakeTask.sentMessagesSnapshot().compactMap(decodeFrame).first { ($0["type"] as? String) == "unsubscribe" }
         XCTAssertNotNil(unsubscribeFrame, "unsubscribe frame not found in outbound queue")
@@ -129,7 +134,8 @@ final class WebSocketManagerEnvelopeTests: XCTestCase {
         manager.connect()
         manager.sendEnvelope(["type": "authenticate", "ws_token": "test-token"], counter: .control)
         manager.sendEnvelope(["type": "reauth", "ws_token": "renewed-token"], counter: .control)
-        await waitForFrames(fakeTask, count: 2)
+        await waitForFrame(fakeTask, type: "authenticate")
+        await waitForFrame(fakeTask, type: "reauth")
 
         let frames = fakeTask.sentMessagesSnapshot().compactMap(decodeFrame)
         let authFrame = frames.first { ($0["type"] as? String) == "authenticate" }
@@ -157,7 +163,7 @@ final class WebSocketManagerEnvelopeTests: XCTestCase {
         manager.connect()
         manager.handleRawMessage(authCompleteFrame(sessionId: "s-ping"))
         manager.sendEnvelope(["type": "ping"], counter: .telemetry)
-        await waitForFrames(fakeTask, count: 1)
+        await waitForFrame(fakeTask, type: "ping")
 
         let pingFrame = fakeTask.sentMessagesSnapshot().compactMap(decodeFrame).first { ($0["type"] as? String) == "ping" }
         XCTAssertNotNil(pingFrame, "ping frame not found in outbound queue")

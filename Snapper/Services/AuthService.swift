@@ -190,6 +190,8 @@ class AuthService: ObservableObject {
     }
 
     private static let roleHierarchy: [UserRole: Int] = [
+        .aiResearcher: 0,
+        .aiDelegate: 0,
         .viewer: 1,
         .operatorRole: 2,
         .admin: 3,
