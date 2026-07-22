@@ -47,6 +47,8 @@ struct AdminView: View {
                     .background(Color.bgBase)
                     .refreshable { await viewModel.load() }
                 }
+            } else {
+                ProgressView(LocalizedStringKey("common.loading"))
             }
         }
         .navigationTitle(LocalizedStringKey("admin.navTitle"))
@@ -116,6 +118,7 @@ private struct UserRow: View {
         case .admin: return Color.financialFalling(for: appState)
         case .operatorRole: return .accentColor
         case .aiDelegate: return Color.financialRising(for: appState)
+        case .aiReviewer: return .orange
         case .aiResearcher: return .purple
         case .viewer: return .secondary
         }

@@ -214,7 +214,14 @@ class AuthService: ObservableObject {
     func canAccess(_ resource: String) -> Bool {
         guard let user = currentUser else { return false }
         let allowed = resourceAccess[resource] ?? []
-        return allowed.contains(user.role)
+        guard allowed.contains(user.role) else { return false }
+        if resource == "ai-reviews" {
+            return user.role == .operatorRole || user.role == .admin
+        }
+        if resource == "backtests" {
+            return user.activeWalletPublicId != nil
+        }
+        return true
     }
 
     func getWsToken() -> String? {

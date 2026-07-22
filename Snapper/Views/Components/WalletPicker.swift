@@ -31,6 +31,8 @@ struct WalletPicker: View {
                     Button(LocalizedStringKey("common.retry")) {
                         Task { await viewModel.loadWallets() }
                     }
+                } else if viewModel.availableWallets.isEmpty && !viewModel.isLoading {
+                    Text(LocalizedStringKey("wallet.picker.unavailable"))
                 } else {
                     ForEach(viewModel.availableWallets, id: \.publicId) { wallet in
                         Button {

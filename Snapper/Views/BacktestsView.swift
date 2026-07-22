@@ -49,6 +49,8 @@ struct BacktestsView: View {
                     .background(Color.bgBase)
                     .refreshable { await viewModel.load() }
                 }
+            } else {
+                ProgressView(LocalizedStringKey("common.loading"))
             }
         }
         .navigationTitle(LocalizedStringKey("backtests.navTitle"))

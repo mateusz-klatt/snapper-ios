@@ -151,6 +151,17 @@ final class WalletPickerTests: XCTestCase {
         )
     }
 
+    func testCurrentLabelShowsUnavailableAfterEmptyLoadSettles() {
+        XCTAssertEqual(
+            WalletPickerViewModel.currentLabel(
+                wallets: [],
+                selected: nil,
+                isLoading: false
+            ),
+            "Wallets unavailable"
+        )
+    }
+
     func testCurrentLabelHandlesStaleSelectionWithEmptyWalletCache() {
         XCTAssertEqual(
             WalletPickerViewModel.currentLabel(

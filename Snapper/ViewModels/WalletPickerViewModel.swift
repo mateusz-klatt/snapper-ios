@@ -21,6 +21,7 @@ import os
 final class WalletPickerViewModel {
 
     var loadError: APIError?
+    var isLoading = true
 
     private let api: APIClientProtocol
     private let appState: AppState
@@ -46,6 +47,7 @@ final class WalletPickerViewModel {
             wallets: appState.availableWallets,
             selected: appState.selectedWalletPublicId,
             loadError: loadError,
+            isLoading: isLoading,
             language: appState.locale.catalogLanguage
         )
     }
@@ -63,6 +65,8 @@ final class WalletPickerViewModel {
     /// success path also clears any prior `loadError` so the menu
     /// recovers cleanly.
     func loadWallets() async {
+        isLoading = true
+        defer { isLoading = false }
         do {
             let wallets = try await api.fetchWallets()
             appState.availableWallets = wallets
@@ -98,17 +102,20 @@ final class WalletPickerViewModel {
         wallets: [WalletInfo],
         selected: String?,
         loadError: APIError? = nil,
+        isLoading: Bool = true,
         language: CatalogLanguage = .en
     ) -> String {
         guard
             let id = selected,
             let wallet = wallets.first(where: { $0.publicId == id })
         else {
-            if wallets.isEmpty, loadError != nil {
-                return LocaleStrings.localized("wallet.picker.unavailable", in: language)
+            if wallets.isEmpty {
+                let key = isLoading && loadError == nil
+                    ? "wallet.picker.loading"
+                    : "wallet.picker.unavailable"
+                return LocaleStrings.localized(key, in: language)
             }
-            let key = wallets.isEmpty ? "wallet.picker.loading" : "wallet.picker.selectWallet"
-            return LocaleStrings.localized(key, in: language)
+            return LocaleStrings.localized("wallet.picker.selectWallet", in: language)
         }
         return walletDisplayName(wallet, language: language)
     }
