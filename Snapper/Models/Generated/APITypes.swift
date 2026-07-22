@@ -10,6 +10,25 @@ enum PnlAttributionOrigin: String, Codable, Sendable {
     case unattributed
 }
 
+enum PnlIncompletenessReason: String, Codable, Sendable {
+    case scopeOrderRegression = "scope_order_regression"
+    case beforeActivation = "before_activation"
+    case activationBaselineNonFinite = "activation_baseline_non_finite"
+    case fillEvidenceGap = "fill_evidence_gap"
+    case seedQuantityNonFinite = "seed_quantity_non_finite"
+    case costBasisUnavailable = "cost_basis_unavailable"
+    case executionPriceProvenanceUnproven = "execution_price_provenance_unproven"
+    case executionSizeInvalid = "execution_size_invalid"
+    case executionPriceInvalid = "execution_price_invalid"
+    case fxConversionUnproven = "fx_conversion_unproven"
+    case markUnavailable = "mark_unavailable"
+    case cumulativeNonFinite = "cumulative_non_finite"
+    case unrealizedNonFinite = "unrealized_non_finite"
+    case netNonFinite = "net_non_finite"
+    case attributionValueNonFinite = "attribution_value_non_finite"
+    case attributionReconciliationFailed = "attribution_reconciliation_failed"
+}
+
 enum PnlMarkerOutcome: String, Codable, Sendable {
     case executed
     case rejected
@@ -19,6 +38,16 @@ enum PnlMarkerOutcome: String, Codable, Sendable {
 enum PnlValuationStatus: String, Codable, Sendable {
     case complete
     case incomplete
+}
+
+enum PnlWithholdingScope: String, Codable, Sendable {
+    case global
+    case instrument
+}
+
+enum PnlWithholdingTier: String, Codable, Sendable {
+    case markIncomplete = "mark_incomplete"
+    case untrusted
 }
 
 enum PortfolioReconciliationEffectiveStatus: String, Codable, Sendable {
@@ -61,6 +90,7 @@ enum RelationshipTypeEnum: String, Codable, Sendable {
 
 enum UserRole: String, Codable, Sendable {
     case aiResearcher = "ai_researcher"
+    case aiReviewer = "ai_reviewer"
     case aiDelegate = "ai_delegate"
     case viewer
     case operatorRole = "operator"
@@ -7311,8 +7341,36 @@ struct PnlFxRateSourceData: Codable, Sendable {
     }
 }
 
+struct PnlIncompletenessReasonData: Codable, Sendable {
+    let reason: PnlIncompletenessReason
+    let withholdingTier: PnlWithholdingTier
+    let withholdingScope: PnlWithholdingScope
+    let triggerInstrumentPublicId: String?
+
+    init(
+        reason: PnlIncompletenessReason,
+        withholdingTier: PnlWithholdingTier,
+        withholdingScope: PnlWithholdingScope,
+        triggerInstrumentPublicId: String?
+    ) {
+        self.reason = reason
+        self.withholdingTier = withholdingTier
+        self.withholdingScope = withholdingScope
+        self.triggerInstrumentPublicId = triggerInstrumentPublicId
+    }
+
+    enum CodingKeys: String, CodingKey {
+        case reason
+        case withholdingTier = "withholding_tier"
+        case withholdingScope = "withholding_scope"
+        case triggerInstrumentPublicId = "trigger_instrument_public_id"
+    }
+}
+
 struct PnlInstrumentContributionData: Codable, Sendable {
     let instrumentPublicId: String
+    let nativeSymbol: String?
+    let exchange: String?
     let realizedPnl: Double?
     let feePnl: Double?
     let accrualPnl: Double?
@@ -7320,12 +7378,16 @@ struct PnlInstrumentContributionData: Codable, Sendable {
 
     init(
         instrumentPublicId: String,
+        nativeSymbol: String?,
+        exchange: String?,
         realizedPnl: Double?,
         feePnl: Double?,
         accrualPnl: Double?,
         unrealizedPnl: Double?
     ) {
         self.instrumentPublicId = instrumentPublicId
+        self.nativeSymbol = nativeSymbol
+        self.exchange = exchange
         self.realizedPnl = realizedPnl
         self.feePnl = feePnl
         self.accrualPnl = accrualPnl
@@ -7334,6 +7396,8 @@ struct PnlInstrumentContributionData: Codable, Sendable {
 
     enum CodingKeys: String, CodingKey {
         case instrumentPublicId = "instrument_public_id"
+        case nativeSymbol = "native_symbol"
+        case exchange
         case realizedPnl = "realized_pnl"
         case feePnl = "fee_pnl"
         case accrualPnl = "accrual_pnl"
@@ -7609,6 +7673,7 @@ struct PnlTimelinePointData: Codable, Sendable {
     let unrealizedPnl: Double?
     let netPnl: Double?
     let valuationStatus: PnlValuationStatus
+    let incompletenessReasons: [PnlIncompletenessReasonData]
     let perInstrument: [PnlInstrumentContributionData]
     let attribution: [PnlAttributionContributionData]
 
@@ -7620,6 +7685,7 @@ struct PnlTimelinePointData: Codable, Sendable {
         unrealizedPnl: Double?,
         netPnl: Double?,
         valuationStatus: PnlValuationStatus,
+        incompletenessReasons: [PnlIncompletenessReasonData],
         perInstrument: [PnlInstrumentContributionData],
         attribution: [PnlAttributionContributionData]
     ) {
@@ -7630,6 +7696,7 @@ struct PnlTimelinePointData: Codable, Sendable {
         self.unrealizedPnl = unrealizedPnl
         self.netPnl = netPnl
         self.valuationStatus = valuationStatus
+        self.incompletenessReasons = incompletenessReasons
         self.perInstrument = perInstrument
         self.attribution = attribution
     }
@@ -7642,6 +7709,7 @@ struct PnlTimelinePointData: Codable, Sendable {
         case unrealizedPnl = "unrealized_pnl"
         case netPnl = "net_pnl"
         case valuationStatus = "valuation_status"
+        case incompletenessReasons = "incompleteness_reasons"
         case perInstrument = "per_instrument"
         case attribution
     }
