@@ -18,16 +18,16 @@ final class FakeWebSocketTask: @unchecked Sendable, WebSocketTaskProtocol {
     private var inboundQueue: [URLSessionWebSocketTask.Message] = []
     private var waiter: CheckedContinuation<URLSessionWebSocketTask.Message, Error>?
     private var receivePendingWaiter: CheckedContinuation<Void, Never>?
-    private var sentMessagesCountWaiters: [SentMessagesCountWaiter] = []
-    private var nextSentMessagesCountWaiterID: UInt64 = 0
+    private var sentMessageWaiters: [SentMessageWaiter] = []
+    private var nextSentMessageWaiterID: UInt64 = 0
     private(set) var sentMessages: [URLSessionWebSocketTask.Message] = []
     private(set) var resumeCount = 0
     private(set) var cancelCount = 0
     private(set) var lastCancelCode: URLSessionWebSocketTask.CloseCode?
 
-    private struct SentMessagesCountWaiter {
+    private struct SentMessageWaiter {
         let id: UInt64
-        let minimumCount: Int
+        let predicate: @Sendable (URLSessionWebSocketTask.Message) -> Bool
         let continuation: CheckedContinuation<Bool, Never>
     }
 
@@ -49,21 +49,26 @@ final class FakeWebSocketTask: @unchecked Sendable, WebSocketTaskProtocol {
         lock.withLock { sentMessages }
     }
 
-    func waitUntilSentMessagesCount(
-        _ count: Int,
+    /// Resolves ``true`` once a sent message satisfying ``predicate`` has been
+    /// captured (already-sent messages are checked first), or ``false`` if the
+    /// timeout elapses. Waiting on the specific frame — rather than a raw count —
+    /// is race-free even when unrelated frames (auth/reauth) share the outbound
+    /// queue, so `count >= N` cannot be satisfied early by the wrong frame.
+    func waitUntilSentMessage(
+        where predicate: @escaping @Sendable (URLSessionWebSocketTask.Message) -> Bool,
         timeoutNanoseconds: UInt64 = 5_000_000_000
     ) async -> Bool {
         await withCheckedContinuation { continuation in
             let waiterID: UInt64? = lock.withLock {
-                if sentMessages.count >= count {
+                if sentMessages.contains(where: predicate) {
                     return nil
                 }
-                nextSentMessagesCountWaiterID += 1
-                let id = nextSentMessagesCountWaiterID
-                sentMessagesCountWaiters.append(
-                    SentMessagesCountWaiter(
+                nextSentMessageWaiterID += 1
+                let id = nextSentMessageWaiterID
+                sentMessageWaiters.append(
+                    SentMessageWaiter(
                         id: id,
-                        minimumCount: count,
+                        predicate: predicate,
                         continuation: continuation
                     )
                 )
@@ -78,10 +83,10 @@ final class FakeWebSocketTask: @unchecked Sendable, WebSocketTaskProtocol {
             Task {
                 try? await Task.sleep(nanoseconds: timeoutNanoseconds)
                 let continuationToResume: CheckedContinuation<Bool, Never>? = self.lock.withLock {
-                    guard let index = self.sentMessagesCountWaiters.firstIndex(where: { $0.id == waiterID }) else {
+                    guard let index = self.sentMessageWaiters.firstIndex(where: { $0.id == waiterID }) else {
                         return nil
                     }
-                    return self.sentMessagesCountWaiters.remove(at: index).continuation
+                    return self.sentMessageWaiters.remove(at: index).continuation
                 }
                 continuationToResume?.resume(returning: false)
             }
@@ -135,9 +140,9 @@ final class FakeWebSocketTask: @unchecked Sendable, WebSocketTaskProtocol {
         }
         let waitersToResume: [CheckedContinuation<Bool, Never>] = lock.withLock {
             sentMessages.append(message)
-            let count = sentMessages.count
-            let satisfied = sentMessagesCountWaiters.filter { count >= $0.minimumCount }
-            sentMessagesCountWaiters.removeAll { count >= $0.minimumCount }
+            let satisfiedIDs = Set(sentMessageWaiters.filter { $0.predicate(message) }.map(\.id))
+            let satisfied = sentMessageWaiters.filter { satisfiedIDs.contains($0.id) }
+            sentMessageWaiters.removeAll { satisfiedIDs.contains($0.id) }
             return satisfied.map(\.continuation)
         }
         waitersToResume.forEach { $0.resume(returning: true) }
