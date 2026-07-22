@@ -67,36 +67,6 @@ enum UserRole: String, Codable, Sendable {
     case admin
 }
 
-enum Permission: String, Codable, Sendable {
-    case read:marketData = "read:market_data"
-    case read:marketViews = "read:market_views"
-    case submit:marketView = "submit:market_view"
-    case read:orders
-    case create:orders
-    case cancel:orders
-    case read:positions
-    case manage:positions
-    case read:accountState = "read:account_state"
-    case read:strategies
-    case read:signals
-    case start:strategies
-    case stop:strategies
-    case configure:strategies
-    case read:systemStatus = "read:system_status"
-    case manage:processes
-    case configure:system
-    case manage:users
-    case read:walletCredentials = "read:wallet_credentials"
-    case manage:walletCredentials = "manage:wallet_credentials"
-    case manage:scopeGrants = "manage:scope_grants"
-    case impersonate:operator
-    case read:backtests
-    case manage:backtests
-    case read:notifications
-    case manage:notificationDevices = "manage:notification_devices"
-    case manage:pairedExecution = "manage:paired_execution"
-}
-
 enum AvailableProcessLifecycle: String, Codable, Sendable {
     case longRunning = "long_running"
     case oneShot = "one_shot"
@@ -7561,7 +7531,7 @@ struct PnlTimelineData: Codable, Sendable {
     let points: [PnlTimelinePointData]
     let markerLimit: Int
     let markersTruncated: Bool
-    let markers: [PnlTimelineMarkerData]
+    let markers: [AnyCodable]
 
     init(
         type: String? = nil,
@@ -7583,7 +7553,7 @@ struct PnlTimelineData: Codable, Sendable {
         points: [PnlTimelinePointData],
         markerLimit: Int,
         markersTruncated: Bool,
-        markers: [PnlTimelineMarkerData]
+        markers: [AnyCodable]
     ) {
         self.type = type
         self.sequenceId = sequenceId

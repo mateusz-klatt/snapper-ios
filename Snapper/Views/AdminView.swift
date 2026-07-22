@@ -116,6 +116,7 @@ private struct UserRow: View {
         case .admin: return Color.financialFalling(for: appState)
         case .operatorRole: return .accentColor
         case .aiDelegate: return Color.financialRising(for: appState)
+        case .aiResearcher: return .purple
         case .viewer: return .secondary
         }
     }
