@@ -189,34 +189,30 @@ class AuthService: ObservableObject {
         }
     }
 
-    private static let roleHierarchy: [UserRole: Int] = [
-        .aiResearcher: 0,
-        .aiDelegate: 0,
-        .viewer: 1,
-        .operatorRole: 2,
-        .admin: 3,
-    ]
-
-    func hasRole(_ role: UserRole) -> Bool {
-        guard let user = currentUser else { return false }
-        let userLevel = Self.roleHierarchy[user.role] ?? 0
-        let requiredLevel = Self.roleHierarchy[role] ?? 0
-        return userLevel >= requiredLevel
-    }
-
     func hasPermission(_ permission: Permission) -> Bool {
         guard let user = currentUser else { return false }
-        if user.role == .admin { return true }
-        let perms = rolePermissions[user.role] ?? []
-        return perms.contains(permission)
+        return user.effectivePermissions?.contains(permission) == true
     }
 
     func canAccess(_ resource: String) -> Bool {
-        guard let user = currentUser else { return false }
-        let allowed = resourceAccess[resource] ?? []
-        guard allowed.contains(user.role) else { return false }
+        guard let user = currentUser,
+              let requirement = resourceRequirements[resource] else {
+            return false
+        }
+
+        let requirementSatisfied: Bool
+        switch requirement {
+        case .authenticated:
+            requirementSatisfied = true
+        case let .anyPermission(permissions):
+            requirementSatisfied = permissions.contains { permission in
+                user.effectivePermissions?.contains(permission) == true
+            }
+        }
+        guard requirementSatisfied else { return false }
+
         if resource == "ai-reviews" {
-            return user.role == .operatorRole || user.role == .admin
+            return user.effectivePermissions?.contains(.readAiReviews) == true
         }
         if resource == "backtests" {
             return user.activeWalletPublicId != nil

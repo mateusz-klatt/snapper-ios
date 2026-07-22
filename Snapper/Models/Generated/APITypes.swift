@@ -11723,6 +11723,8 @@ struct UserProfile: Codable, Sendable {
     let primaryOperatorPublicId: String?
     let activeWalletPublicId: String?
     let defaultLanguage: String?
+    let effectivePermissions: [Permission]?
+    let delegatePublicId: String?
 
     init(
         type: String? = nil,
@@ -11739,7 +11741,9 @@ struct UserProfile: Codable, Sendable {
         operatorPublicIds: [String]? = nil,
         primaryOperatorPublicId: String? = nil,
         activeWalletPublicId: String? = nil,
-        defaultLanguage: String? = nil
+        defaultLanguage: String? = nil,
+        effectivePermissions: [Permission]? = nil,
+        delegatePublicId: String? = nil
     ) {
         self.type = type
         self.sequenceId = sequenceId
@@ -11756,6 +11760,8 @@ struct UserProfile: Codable, Sendable {
         self.primaryOperatorPublicId = primaryOperatorPublicId
         self.activeWalletPublicId = activeWalletPublicId
         self.defaultLanguage = defaultLanguage
+        self.effectivePermissions = effectivePermissions
+        self.delegatePublicId = delegatePublicId
     }
 
     enum CodingKeys: String, CodingKey {
@@ -11774,6 +11780,8 @@ struct UserProfile: Codable, Sendable {
         case primaryOperatorPublicId = "primary_operator_public_id"
         case activeWalletPublicId = "active_wallet_public_id"
         case defaultLanguage = "default_language"
+        case effectivePermissions = "effective_permissions"
+        case delegatePublicId = "delegate_public_id"
     }
 }
 
