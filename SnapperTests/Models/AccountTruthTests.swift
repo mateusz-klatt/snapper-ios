@@ -37,7 +37,8 @@ final class AccountTruthTests: XCTestCase {
             currentAttemptObservationId: 1,
             balancePayloadSourceObservationId: 1,
             positionPayloadSourceObservationId: 1,
-            error: nil
+            error: nil,
+            reconciliation: .fixture()
         )
     }
 

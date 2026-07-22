@@ -55,7 +55,8 @@ final class AccountsViewModelTests: XCTestCase {
             currentAttemptObservationId: 1,
             balancePayloadSourceObservationId: 1,
             positionPayloadSourceObservationId: nil,
-            error: nil
+            error: nil,
+            reconciliation: .fixture()
         )
     }
 

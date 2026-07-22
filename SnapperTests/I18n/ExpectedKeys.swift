@@ -418,6 +418,7 @@ enum ExpectedKeys {
         "trading.trailingStop.trailAmountLabel",
         "user.role.admin",
         "user.role.aiDelegate",
+        "user.role.aiResearcher",
         "user.role.operatorRole",
         "user.role.viewer",
         "wallet.error.loadFailed",

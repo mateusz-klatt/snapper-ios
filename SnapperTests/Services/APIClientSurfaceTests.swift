@@ -241,6 +241,9 @@ final class APIClientSurfaceTests: XCTestCase {
         XCTAssertEqual(account.currentAttemptObservationId, 42)
         XCTAssertEqual(account.balancePayloadSourceObservationId, 41)
         XCTAssertNil(account.positionPayloadSourceObservationId)
+        XCTAssertEqual(account.reconciliation.effectiveStatus, .matched)
+        XCTAssertTrue(account.reconciliation.isAuthoritative)
+        XCTAssertEqual(account.reconciliation.consecutiveFullMismatches, 0)
     }
 
     private static func responseEnvelope(for request: URLRequest) -> [String: Any] {
@@ -536,6 +539,11 @@ final class APIClientSurfaceTests: XCTestCase {
             "balance_payload_source_observation_id": 41,
             "position_payload_source_observation_id": NSNull(),
             "error": NSNull(),
+            "reconciliation": [
+                "effective_status": "matched",
+                "is_authoritative": true,
+                "consecutive_full_mismatches": 0,
+            ],
         ]
     }
 
