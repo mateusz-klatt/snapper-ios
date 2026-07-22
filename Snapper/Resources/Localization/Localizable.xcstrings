@@ -2686,7 +2686,7 @@
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "%@ まで信頼性あり"
+            "value": "%@まで信頼できます"
           }
         },
         "ko": {
@@ -2913,7 +2913,7 @@
         "tr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Bakiyeler %@'de gözlemlendi"
+            "value": "Bakiyelerin gözlemlendiği zaman: %@"
           }
         },
         "fil": {
@@ -3463,7 +3463,7 @@
         "tr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Pozisyonlar %@'de gözlemlendi"
+            "value": "Pozisyonların gözlemlendiği zaman: %@"
           }
         },
         "fil": {
@@ -4593,7 +4593,7 @@
         "bn": {
           "stringUnit": {
             "state": "translated",
-            "value": "ভ্যানুর রিপোর্ট অনুযায়ী নগদ ব্যালেন্স এবং খোলা অবস্থানগুলি।"
+            "value": "এক্সচেঞ্জের নগদ ব্যালেন্স ও খোলা পজিশন, এক্সচেঞ্জ যেভাবে রিপোর্ট করেছে সেভাবে লেবেল করা।"
           }
         },
         "zh-Hans": {
@@ -4611,13 +4611,13 @@
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "取引所の報告に基づく、現金残高とオープンポジション。"
+            "value": "取引所の現金残高とオープンポジション。取引所からの報告内容に応じてラベル付けされています。"
           }
         },
         "ko": {
           "stringUnit": {
             "state": "translated",
-            "value": "거래소가 보고한 현금 잔고 및 미결제 약정입니다."
+            "value": "거래소의 현금 잔고와 오픈 포지션이며, 거래소가 보고한 방식에 따라 표시됩니다."
           }
         },
         "th": {
@@ -4665,7 +4665,7 @@
         "hy": {
           "stringUnit": {
             "state": "translated",
-            "value": "Կանխիկ մնացորդներ և բաց դիրքեր, նշված բորսայի զեկույցի համաձայն:"
+            "value": "Կանխիկ մնացորդներ և բաց դիրքեր՝ նշված բորսայի զեկույցի համաձայն։"
           }
         },
         "ga": {
@@ -5244,7 +5244,7 @@
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Marktpreis"
+            "value": "Markpreis"
           }
         },
         "fr": {
@@ -5788,13 +5788,13 @@
         "pl": {
           "stringUnit": {
             "state": "translated",
-            "value": "Rozmiar"
+            "value": "Wielkość"
           }
         },
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Größe"
+            "value": "Positionsgröße"
           }
         },
         "fr": {
@@ -5848,7 +5848,7 @@
         "fi": {
           "stringUnit": {
             "state": "translated",
-            "value": "Koko"
+            "value": "Määrä"
           }
         },
         "cs": {
@@ -5872,7 +5872,7 @@
         "ro": {
           "stringUnit": {
             "state": "translated",
-            "value": "Mărime"
+            "value": "Dimensiune"
           }
         },
         "hr": {
@@ -5902,7 +5902,7 @@
         "lv": {
           "stringUnit": {
             "state": "translated",
-            "value": "Lielums"
+            "value": "Apjoms"
           }
         },
         "sr-Latn": {
@@ -5920,7 +5920,7 @@
         "sq": {
           "stringUnit": {
             "state": "translated",
-            "value": "Madhësia"
+            "value": "Madhësi"
           }
         },
         "is": {
@@ -5944,7 +5944,7 @@
         "fil": {
           "stringUnit": {
             "state": "translated",
-            "value": "Laki"
+            "value": "Sukat"
           }
         },
         "ms": {
@@ -5968,7 +5968,7 @@
         "bn": {
           "stringUnit": {
             "state": "translated",
-            "value": "আকার"
+            "value": "সাইজ"
           }
         },
         "zh-Hans": {
@@ -5980,7 +5980,7 @@
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
-            "value": "數量"
+            "value": "倉位大小"
           }
         },
         "ja": {
@@ -5992,7 +5992,7 @@
         "ko": {
           "stringUnit": {
             "state": "translated",
-            "value": "규모"
+            "value": "수량"
           }
         },
         "th": {
@@ -6004,7 +6004,7 @@
         "vi": {
           "stringUnit": {
             "state": "translated",
-            "value": "Kích thước"
+            "value": "Khối lượng"
           }
         },
         "my": {
@@ -6016,7 +6016,7 @@
         "hi": {
           "stringUnit": {
             "state": "translated",
-            "value": "आकार"
+            "value": "साइज"
           }
         },
         "ar": {
@@ -6034,7 +6034,7 @@
         "fa": {
           "stringUnit": {
             "state": "translated",
-            "value": "حجم"
+            "value": "اندازه"
           }
         },
         "hy": {
@@ -6769,7 +6769,7 @@
         "fil": {
           "stringUnit": {
             "state": "translated",
-            "value": "Hindi pa naisasaakatuparang P&L"
+            "value": "Hindi pa na-realize na P&L"
           }
         },
         "ms": {
@@ -6787,7 +6787,7 @@
         "sw": {
           "stringUnit": {
             "state": "translated",
-            "value": "P&L ambayo haijafikiwa"
+            "value": "P&L ambayo bado haijathibitishwa kwa kufunga nafasi"
           }
         },
         "bn": {
@@ -6835,7 +6835,7 @@
         "my": {
           "stringUnit": {
             "state": "translated",
-            "value": "မရောင်းရသေးသော P&L"
+            "value": "အနေအထားမပိတ်ရသေးသော P&L"
           }
         },
         "hi": {
@@ -7229,7 +7229,7 @@
         "cs": {
           "stringUnit": {
             "state": "translated",
-            "value": "Otvřené pozice"
+            "value": "Otevřené pozice"
           }
         },
         "sk": {
@@ -7319,13 +7319,13 @@
         "fil": {
           "stringUnit": {
             "state": "translated",
-            "value": "Bukas na posisyon"
+            "value": "Mga bukas na posisyon"
           }
         },
         "ms": {
           "stringUnit": {
             "state": "translated",
-            "value": "Kedudukan terbuka"
+            "value": "Posisi terbuka"
           }
         },
         "id": {
@@ -7337,25 +7337,25 @@
         "sw": {
           "stringUnit": {
             "state": "translated",
-            "value": "Nafasi wazi"
+            "value": "Nafasi zilizo wazi"
           }
         },
         "bn": {
           "stringUnit": {
             "state": "translated",
-            "value": "খোলা অবস্থান"
+            "value": "ওপেন পজিশন"
           }
         },
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "当前持仓"
+            "value": "当前仓位"
           }
         },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
-            "value": "未平倉合約"
+            "value": "持倉"
           }
         },
         "ja": {
@@ -7367,13 +7367,13 @@
         "ko": {
           "stringUnit": {
             "state": "translated",
-            "value": "미결제 약정"
+            "value": "오픈 포지션"
           }
         },
         "th": {
           "stringUnit": {
             "state": "translated",
-            "value": "สถานะที่เปิดอยู่"
+            "value": "โพซิชันที่เปิดอยู่"
           }
         },
         "vi": {
@@ -7385,13 +7385,13 @@
         "my": {
           "stringUnit": {
             "state": "translated",
-            "value": "ဖွင့်ထားသည့် အနေအထားများ"
+            "value": "ဖွင့်ထားသော အနေအထားများ"
           }
         },
         "hi": {
           "stringUnit": {
             "state": "translated",
-            "value": "खुली स्थिति"
+            "value": "ओपन पोज़ीशन"
           }
         },
         "ar": {
@@ -7576,7 +7576,7 @@
         "is": {
           "stringUnit": {
             "state": "translated",
-            "value": "Engar inneignir"
+            "value": "Engar tilkynntar inneignir"
           }
         },
         "el": {
@@ -7606,7 +7606,7 @@
         "id": {
           "stringUnit": {
             "state": "translated",
-            "value": "Tidak ada saldo"
+            "value": "Tidak ada saldo yang dilaporkan"
           }
         },
         "sw": {
@@ -7618,7 +7618,7 @@
         "bn": {
           "stringUnit": {
             "state": "translated",
-            "value": "কোনো ব্যালেন্স নেই"
+            "value": "রিপোর্ট করা কোনো ব্যালেন্স নেই"
           }
         },
         "zh-Hans": {
@@ -7690,7 +7690,7 @@
         "hy": {
           "stringUnit": {
             "state": "translated",
-            "value": "Մնացորդներ չկան"
+            "value": "Հաղորդված մնացորդներ չկան"
           }
         },
         "ga": {
@@ -7797,7 +7797,7 @@
         "ro": {
           "stringUnit": {
             "state": "translated",
-            "value": "Fără poziții deschise"
+            "value": "Nicio poziție deschisă"
           }
         },
         "hr": {
@@ -7827,7 +7827,7 @@
         "lv": {
           "stringUnit": {
             "state": "translated",
-            "value": "Nav atvērto pozīciju"
+            "value": "Nav atvērtu pozīciju"
           }
         },
         "sr-Latn": {
@@ -7845,7 +7845,7 @@
         "sq": {
           "stringUnit": {
             "state": "translated",
-            "value": "Asnjë pozicion i hapur"
+            "value": "Nuk ka pozicione të hapura"
           }
         },
         "is": {
@@ -7875,7 +7875,7 @@
         "ms": {
           "stringUnit": {
             "state": "translated",
-            "value": "Tiada kedudukan terbuka"
+            "value": "Tiada posisi terbuka"
           }
         },
         "id": {
@@ -7887,43 +7887,43 @@
         "sw": {
           "stringUnit": {
             "state": "translated",
-            "value": "Hakuna nafasi wazi"
+            "value": "Hakuna nafasi zilizo wazi"
           }
         },
         "bn": {
           "stringUnit": {
             "state": "translated",
-            "value": "কোনো খোলা অবস্থান নেই"
+            "value": "কোনো ওপেন পজিশন নেই"
           }
         },
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "没有持仓"
+            "value": "暂无仓位"
           }
         },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
-            "value": "沒有未平倉合約"
+            "value": "沒有持倉"
           }
         },
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "オープンポジションはありません"
+            "value": "オープンポジションなし"
           }
         },
         "ko": {
           "stringUnit": {
             "state": "translated",
-            "value": "미결제 약정 없음"
+            "value": "오픈 포지션 없음"
           }
         },
         "th": {
           "stringUnit": {
             "state": "translated",
-            "value": "ไม่มีสถานะที่เปิดอยู่"
+            "value": "ไม่มีโพซิชันเปิด"
           }
         },
         "vi": {
@@ -7935,19 +7935,19 @@
         "my": {
           "stringUnit": {
             "state": "translated",
-            "value": "ဖွင့်ထားသည့် အနေအထား မရှိပါ"
+            "value": "ဖွင့်ထားသော အနေအထား မရှိ"
           }
         },
         "hi": {
           "stringUnit": {
             "state": "translated",
-            "value": "कोई खुली स्थिति नहीं"
+            "value": "कोई ओपन पोज़ीशन नहीं"
           }
         },
         "ar": {
           "stringUnit": {
             "state": "translated",
-            "value": "لا توجد مراكز"
+            "value": "لا توجد مراكز مفتوحة"
           }
         },
         "he": {
@@ -7959,7 +7959,7 @@
         "fa": {
           "stringUnit": {
             "state": "translated",
-            "value": "موقعیت بازی وجود ندارد"
+            "value": "هیچ موقعیت بازی وجود ندارد"
           }
         },
         "hy": {
@@ -7971,7 +7971,7 @@
         "ga": {
           "stringUnit": {
             "state": "translated",
-            "value": "Níl suíomhanna oscailte"
+            "value": "Gan suíomhanna oscailte"
           }
         }
       }
@@ -8000,7 +8000,7 @@
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Acheter"
+            "value": "Achat"
           }
         },
         "es": {
@@ -8060,7 +8060,7 @@
         "sk": {
           "stringUnit": {
             "state": "translated",
-            "value": "Kúpiť"
+            "value": "Nákup"
           }
         },
         "hu": {
@@ -8072,13 +8072,13 @@
         "ro": {
           "stringUnit": {
             "state": "translated",
-            "value": "Cumpără"
+            "value": "Cumpărare"
           }
         },
         "hr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Kupi"
+            "value": "Kupnja"
           }
         },
         "uk": {
@@ -8275,7 +8275,7 @@
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Vendre"
+            "value": "Vente"
           }
         },
         "es": {
@@ -8335,7 +8335,7 @@
         "sk": {
           "stringUnit": {
             "state": "translated",
-            "value": "Predať"
+            "value": "Predaj"
           }
         },
         "hu": {
@@ -8347,13 +8347,13 @@
         "ro": {
           "stringUnit": {
             "state": "translated",
-            "value": "Vinde"
+            "value": "Vânzare"
           }
         },
         "hr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Prodaj"
+            "value": "Prodaja"
           }
         },
         "uk": {
@@ -8718,7 +8718,7 @@
         "bn": {
           "stringUnit": {
             "state": "translated",
-            "value": "সময়ের ত্রুটি"
+            "value": "সময়ের ত্রুটি"
           }
         },
         "zh-Hans": {
@@ -10087,7 +10087,7 @@
         "sw": {
           "stringUnit": {
             "state": "translated",
-            "value": "Zimepitwa na wakati"
+            "value": "Imepitwa na wakati"
           }
         },
         "bn": {
@@ -10362,7 +10362,7 @@
         "sw": {
           "stringUnit": {
             "state": "translated",
-            "value": "Hajulikani"
+            "value": "Haijulikani"
           }
         },
         "bn": {
@@ -10990,7 +10990,7 @@
         "hy": {
           "stringUnit": {
             "state": "translated",
-            "value": "Ժամանակի դրոշմը չի համապատասխանում սերվերին:"
+            "value": "Դիտարկման ժամանակի դրոշմը չի համապատասխանում սերվերի ժամացույցին։"
           }
         },
         "ga": {
@@ -11151,7 +11151,7 @@
         "is": {
           "stringUnit": {
             "state": "translated",
-            "value": "Vistun mistókst í staðfestingu. Ekki er hægt að sýna hana sem áreiðanlega stöðu."
+            "value": "Vistaða skyndimyndin stóðst ekki staðfestingu og ekki er hægt að sýna hana sem áreiðanlega stöðu."
           }
         },
         "el": {
@@ -11211,7 +11211,7 @@
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "保存されたスナップショットの検証に失敗しました。 信頼できる状態として表示できません。"
+            "value": "保存されたスナップショットの検証に失敗しました。信頼できる状態として表示できません。"
           }
         },
         "ko": {
@@ -11271,7 +11271,7 @@
         "ga": {
           "stringUnit": {
             "state": "translated",
-            "value": "Theip ar bhailíochtú an tsuímh stóráilte. Ní féidir é a thaispeáint mar staid iontaofa."
+            "value": "Theip ar bhailíochtú an léargais stóráilte. Ní féidir é a thaispeáint mar staid iontaofa."
           }
         }
       }
@@ -11462,7 +11462,7 @@
         "sw": {
           "stringUnit": {
             "state": "translated",
-            "value": "Kipengele hiki hakitumiki kwa ukumbi."
+            "value": "Kipengele hiki hakitumiki kwa soko hili."
           }
         },
         "bn": {
@@ -11540,7 +11540,7 @@
         "hy": {
           "stringUnit": {
             "state": "translated",
-            "value": "Այս բաղադրիչը չի կիրառվում բորսայի վրա:"
+            "value": "Այս բաղադրիչը չի կիրառվում բորսայի համար։"
           }
         },
         "ga": {
@@ -12090,7 +12090,7 @@
         "hy": {
           "stringUnit": {
             "state": "translated",
-            "value": "Թղթային առևտրի թվեր — ոչ իրական մնացորդներ:"
+            "value": "Թղթային առևտրի տվյալներ — դրանք բորսայի իրական մնացորդներ չեն։"
           }
         },
         "ga": {
@@ -12113,7 +12113,7 @@
         "pl": {
           "stringUnit": {
             "state": "translated",
-            "value": "Ostatnia znana migawka; okno autorytetu wygasło. Odpytywanie mogło się też zatrzymać."
+            "value": "Ostatnia znana migawka; okno autorytetu wygasło lub odpytywanie się zatrzymało."
           }
         },
         "de": {
@@ -12131,7 +12131,7 @@
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Última instantánea conocida; la ventana de autoridad ha transcurrido. También puede haberse detenido la consulta."
+            "value": "Última instantánea conocida; la ventana de autoridad ha transcurrido o la consulta se detuvo."
           }
         },
         "it": {
@@ -12149,13 +12149,13 @@
         "pt-BR": {
           "stringUnit": {
             "state": "translated",
-            "value": "Última captura conhecida; a janela de autoridade expirou. A consulta também pode ter parado."
+            "value": "Última captura conhecida; a janela de autoridade expirou ou a consulta parou."
           }
         },
         "sv": {
           "stringUnit": {
             "state": "translated",
-            "value": "Senast kända ögonblicksbild; auktoritetsfönstret har löpt ut. Hämtningen kan också ha stannat."
+            "value": "Senast kända ögonblicksbild; auktoritetsfönstret har löpt ut eller hämtningen har stannat."
           }
         },
         "nb": {
@@ -12173,7 +12173,7 @@
         "fi": {
           "stringUnit": {
             "state": "translated",
-            "value": "Viimeisin tunnettu tilanne; vahvistusikkuna umpeutui. Myös tietojen haku on voinut pysähtyä."
+            "value": "Viimeisin tunnettu tilanne; vahvistusikkuna umpeutui tai tietojen haku pysähtyi."
           }
         },
         "cs": {
@@ -12185,13 +12185,13 @@
         "sk": {
           "stringUnit": {
             "state": "translated",
-            "value": "Posledná známa snímka; okno platnosti vypršalo. Zisťovanie údajov sa tiež mohlo zastaviť."
+            "value": "Posledná známa snímka; interval platnosti vypršal alebo sa zisťovanie údajov zastavilo."
           }
         },
         "hu": {
           "stringUnit": {
             "state": "translated",
-            "value": "Utolsó ismert pillanatkép; a hitelességi ablak lejárt. A lekérdezés is leállhatott."
+            "value": "Utolsó ismert pillanatkép; a hitelességi ablak lejárt, vagy a lekérdezés leállt."
           }
         },
         "ro": {
@@ -12209,25 +12209,25 @@
         "uk": {
           "stringUnit": {
             "state": "translated",
-            "value": "Останній відомий знімок; вікно достовірності минуло. Опитування також могло зупинитися."
+            "value": "Останній відомий знімок; вікно достовірності минуло або опитування зупинилося."
           }
         },
         "ru": {
           "stringUnit": {
             "state": "translated",
-            "value": "Последний известный снимок; окно достоверности истекло. Опрос также мог остановиться."
+            "value": "Последний известный снимок; окно достоверности истекло или опрос остановился."
           }
         },
         "lt": {
           "stringUnit": {
             "state": "translated",
-            "value": "Paskutinė žinoma momentinė kopija; langas baigėsi. Duomenų apklausa taip pat galėjo sustoti."
+            "value": "Paskutinė žinoma momentinė kopija; galiojimo laikotarpis baigėsi arba duomenų apklausa sustojo."
           }
         },
         "lv": {
           "stringUnit": {
             "state": "translated",
-            "value": "Pēdējais zināmais stāvoklis; logs beidzies. Arī datu aptauja varēja apstāties."
+            "value": "Pēdējais zināmais stāvoklis; derīguma logs beidzās vai datu aptauja apstājās."
           }
         },
         "sr-Latn": {
@@ -12251,13 +12251,13 @@
         "is": {
           "stringUnit": {
             "state": "translated",
-            "value": "Síðasta þekkta staða; gildistími rann út. Gagnasöfnun gæti einnig hafa stöðvast."
+            "value": "Síðasta þekkta staða; gildistíminn rann út eða gagnasöfnun stöðvaðist."
           }
         },
         "el": {
           "stringUnit": {
             "state": "translated",
-            "value": "Τελευταίο γνωστό στιγμιότυπο· το παράθυρο εξουσιοδότησης έληξε. Η άντληση δεδομένων μπορεί επίσης να έχει σταματήσει."
+            "value": "Τελευταίο γνωστό στιγμιότυπο· το παράθυρο εγκυρότητας έληξε ή η άντληση δεδομένων σταμάτησε."
           }
         },
         "tr": {
@@ -12281,19 +12281,19 @@
         "id": {
           "stringUnit": {
             "state": "translated",
-            "value": "Snapshot terakhir yang diketahui; jendela otoritas telah berlalu. Polling juga mungkin terhenti."
+            "value": "Snapshot terakhir yang diketahui; jendela otoritas telah berlalu atau polling terhenti."
           }
         },
         "sw": {
           "stringUnit": {
             "state": "translated",
-            "value": "Picha ya mwisho inayojulikana; dirisha limekwisha. Uchunguzi wa data pia unaweza kuwa umekwama."
+            "value": "Picha ya mwisho inayojulikana; muda wa uaminifu uliisha au uchunguzi wa data ulikwama."
           }
         },
         "bn": {
           "stringUnit": {
             "state": "translated",
-            "value": "সর্বশেষ-জানা স্ন্যাপশট; উইন্ডো পার হয়েছে বা পোলিং বন্ধ।"
+            "value": "সর্বশেষ-জানা স্ন্যাপশট; উইন্ডো পার হয়েছে বা পোলিং বন্ধ।"
           }
         },
         "zh-Hans": {
@@ -12311,13 +12311,13 @@
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "最後に確認されたスナップショット。権限ウィンドウが経過しました。 ポーリングが停止している可能性もあります。"
+            "value": "最後に確認されたスナップショット。権限ウィンドウが経過したか、ポーリングが停止しています。"
           }
         },
         "ko": {
           "stringUnit": {
             "state": "translated",
-            "value": "마지막으로 확인된 스냅샷; 권한 기간이 경과했습니다. 폴링이 중단되었을 수도 있습니다."
+            "value": "마지막으로 확인된 스냅샷입니다. 권한 기간이 경과했거나 폴링이 중단되었습니다."
           }
         },
         "th": {
@@ -12329,7 +12329,7 @@
         "vi": {
           "stringUnit": {
             "state": "translated",
-            "value": "Bản ghi nhanh cuối cùng; khung thời gian hợp lệ đã hết. Quá trình thăm dò cũng có thể đã dừng."
+            "value": "Bản ghi nhanh cuối cùng; khung thời gian hợp lệ đã hết hoặc quá trình thăm dò đã dừng."
           }
         },
         "my": {
@@ -12341,7 +12341,7 @@
         "hi": {
           "stringUnit": {
             "state": "translated",
-            "value": "अंतिम ज्ञात स्नैपशॉट; प्राधिकरण विंडो समाप्त हो गई। पोलिंग भी रुक गई हो सकती है।"
+            "value": "अंतिम ज्ञात स्नैपशॉट; प्राधिकरण विंडो समाप्त हो गई या पोलिंग रुक गई।"
           }
         },
         "ar": {
@@ -12353,13 +12353,13 @@
         "he": {
           "stringUnit": {
             "state": "translated",
-            "value": "תמונת מצב אחרונה ידועה; חלון הסמכות פג. ייתכן גם שהדגימה נתקעה."
+            "value": "תמונת המצב האחרונה הידועה; חלון הסמכות פג או שהדגימה נתקעה."
           }
         },
         "fa": {
           "stringUnit": {
             "state": "translated",
-            "value": "آخرین وضعیت ذخیره شده؛ بازه زمانی به پایان رسیده است. ممکن است واکشی دوره‌ای داده‌ها نیز متوقف شده باشد."
+            "value": "آخرین وضعیت ذخیره‌شده؛ بازه اعتبار به پایان رسیده یا واکشی دوره‌ای داده‌ها متوقف شده است."
           }
         },
         "hy": {
@@ -12371,7 +12371,7 @@
         "ga": {
           "stringUnit": {
             "state": "translated",
-            "value": "An seat is déanaí; tá an fhuinneog údaráis imithe in éag. D’fhéadfadh an vótaíocht a bheith stoptha freisin."
+            "value": "An léargas deireanach atá ar eolas; tá an fhuinneog údaráis imithe in éag nó tá an vótaíocht stoptha."
           }
         }
       }
@@ -12538,7 +12538,7 @@
         "tr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Durum sınıflandırılamadı. Yetkili olmayan durum olarak değerlendirilir."
+            "value": "Durum sınıflandırılamadı. Güvenilir olmadığı kabul edilir."
           }
         },
         "fil": {
@@ -12586,7 +12586,7 @@
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "ステータスを分類できませんでした。 信頼できない状態として扱われます。"
+            "value": "ステータスを分類できませんでした。信頼できない状態として扱われます。"
           }
         },
         "ko": {
@@ -12837,7 +12837,7 @@
         "sw": {
           "stringUnit": {
             "state": "translated",
-            "value": "Ukumbi huu hauripoti hali ya akaunti."
+            "value": "Soko hili haliripoti hali ya akaunti."
           }
         },
         "bn": {
@@ -12915,7 +12915,7 @@
         "hy": {
           "stringUnit": {
             "state": "translated",
-            "value": "Բորսան չի զեկուցում հաշվի կարգավիճակը:"
+            "value": "Բորսան չի հաղորդում հաշվի կարգավիճակը։"
           }
         },
         "ga": {
@@ -13190,7 +13190,7 @@
         "hy": {
           "stringUnit": {
             "state": "translated",
-            "value": "Չհաջողվեց բեռնել բորսայի հաշվի վիճակը։ Հաշիվը դատարկ չէ. տվյալներն այս պահին պարզապես անհասանելի են։"
+            "value": "Չհաջողվեց բեռնել բորսայի հաշվի վիճակը։ Հաշիվը դատարկ չէ։ Տվյալներն այս պահին պարզապես անհասանելի են։"
           }
         },
         "ga": {
