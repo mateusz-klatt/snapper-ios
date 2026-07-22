@@ -18,17 +18,25 @@ final class FakeWebSocketTask: @unchecked Sendable, WebSocketTaskProtocol {
     private var inboundQueue: [URLSessionWebSocketTask.Message] = []
     private var waiter: CheckedContinuation<URLSessionWebSocketTask.Message, Error>?
     private var receivePendingWaiter: CheckedContinuation<Void, Never>?
+    private var sentMessagesCountWaiters: [SentMessagesCountWaiter] = []
+    private var nextSentMessagesCountWaiterID: UInt64 = 0
     private(set) var sentMessages: [URLSessionWebSocketTask.Message] = []
     private(set) var resumeCount = 0
     private(set) var cancelCount = 0
     private(set) var lastCancelCode: URLSessionWebSocketTask.CloseCode?
 
+    private struct SentMessagesCountWaiter {
+        let id: UInt64
+        let minimumCount: Int
+        let continuation: CheckedContinuation<Bool, Never>
+    }
+
     /// Lock-serialized read of ``sentMessages.count``. ``send(_:)``
     /// appends under ``lock`` from a detached ``Task``, so polling
     /// the underlying ``private(set)`` storage directly is a data race
     /// (compiler is silenced by ``@unchecked Sendable``, TSan is not).
-    /// Tests that poll for outbound frames between ``Task.yield()`` calls
-    /// must use this accessor.
+    /// Tests that observe outbound frames while send tasks may still be
+    /// appending must use this accessor.
     var sentMessagesCount: Int {
         lock.withLock { sentMessages.count }
     }
@@ -39,6 +47,45 @@ final class FakeWebSocketTask: @unchecked Sendable, WebSocketTaskProtocol {
     /// as ``sentMessagesCount``.
     func sentMessagesSnapshot() -> [URLSessionWebSocketTask.Message] {
         lock.withLock { sentMessages }
+    }
+
+    func waitUntilSentMessagesCount(
+        _ count: Int,
+        timeoutNanoseconds: UInt64 = 5_000_000_000
+    ) async -> Bool {
+        await withCheckedContinuation { continuation in
+            let waiterID: UInt64? = lock.withLock {
+                if sentMessages.count >= count {
+                    return nil
+                }
+                nextSentMessagesCountWaiterID += 1
+                let id = nextSentMessagesCountWaiterID
+                sentMessagesCountWaiters.append(
+                    SentMessagesCountWaiter(
+                        id: id,
+                        minimumCount: count,
+                        continuation: continuation
+                    )
+                )
+                return id
+            }
+
+            guard let waiterID else {
+                continuation.resume(returning: true)
+                return
+            }
+
+            Task {
+                try? await Task.sleep(nanoseconds: timeoutNanoseconds)
+                let continuationToResume: CheckedContinuation<Bool, Never>? = self.lock.withLock {
+                    guard let index = self.sentMessagesCountWaiters.firstIndex(where: { $0.id == waiterID }) else {
+                        return nil
+                    }
+                    return self.sentMessagesCountWaiters.remove(at: index).continuation
+                }
+                continuationToResume?.resume(returning: false)
+            }
+        }
     }
 
     init(sendError: Error? = nil) {
@@ -86,7 +133,14 @@ final class FakeWebSocketTask: @unchecked Sendable, WebSocketTaskProtocol {
         if let sendError {
             throw sendError
         }
-        lock.withLock { sentMessages.append(message) }
+        let waitersToResume: [CheckedContinuation<Bool, Never>] = lock.withLock {
+            sentMessages.append(message)
+            let count = sentMessages.count
+            let satisfied = sentMessagesCountWaiters.filter { count >= $0.minimumCount }
+            sentMessagesCountWaiters.removeAll { count >= $0.minimumCount }
+            return satisfied.map(\.continuation)
+        }
+        waitersToResume.forEach { $0.resume(returning: true) }
     }
 
     func receive() async throws -> URLSessionWebSocketTask.Message {

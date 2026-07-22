@@ -30,43 +30,27 @@ final class WebSocketManagerEnvelopeTests: XCTestCase {
         return .string(String(data: data, encoding: .utf8)!)
     }
 
-    /// `sendJSON` bounces through a detached `Task { try await task.send(...) }`,
-    /// so outbound frames land in `sentMessages` only after the cooperative
-    /// scheduler runs each task to completion. A fixed yield count is racey
-    /// under CI load (observed on macOS-runner when two envelopes are minted
-    /// back-to-back), so this drain polls the expected count with a generous
-    /// upper bound on yields. Any test that calls this must pass the *total*
-    /// number of frames it expects to have been sent up to this point.
-    ///
-    /// Reads ``FakeWebSocketTask.sentMessagesCount`` (lock-serialized)
-    /// rather than the underlying ``sentMessages`` array — ``send(_:)``
-    /// appends to that storage under the same lock from a detached task,
-    /// so an unlocked count read would be a TSan data race.
-    ///
-    /// On exhaustion ``XCTFail`` is raised with the observed/expected
-    /// counts so a real regression surfaces with a precise diagnostic
-    /// here, instead of cascading into a less-informative ``XCTAssertNotNil``
-    /// downstream.
+    /// `sendJSON` bounces through an unstructured `Task`, so outbound frames
+    /// land in `sentMessages` only after that task runs. Await the fake task's
+    /// send-side signal rather than guessing how many scheduler yields are
+    /// enough under coverage instrumentation.
     private func waitForFrames(
         _ fakeTask: FakeWebSocketTask,
         count: Int,
-        iterations: Int = 200,
+        timeoutNanoseconds: UInt64 = 5_000_000_000,
         file: StaticString = #filePath,
         line: UInt = #line
     ) async {
-        for _ in 0..<iterations {
-            await Task.yield()
-            if fakeTask.sentMessagesCount >= count { return }
-        }
-        /// Capture the count ONCE here so the diagnostic message reflects
-        /// the state the loop saw. A late-arriving ``send`` task could land
-        /// between the loop's last check and this read; if it bumps the
-        /// count to ``>= count`` we treat that as a successful (slow)
-        /// drain rather than a misleading "expected N, observed N" failure.
+        let sent = await fakeTask.waitUntilSentMessagesCount(
+            count,
+            timeoutNanoseconds: timeoutNanoseconds
+        )
+        if sent { return }
+
         let observed = fakeTask.sentMessagesCount
         if observed >= count { return }
         XCTFail(
-            "waitForFrames timed out: expected \(count) frames, observed \(observed) after \(iterations) yields",
+            "waitForFrames timed out: expected \(count) frames, observed \(observed)",
             file: file,
             line: line
         )
