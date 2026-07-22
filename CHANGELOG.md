@@ -6,6 +6,39 @@ uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+## [3.0.0] — 2026-07-22
+
+Major release bringing the native iOS app to full feature parity with
+the web experience.
+
+### Added
+
+- Added eight permission-gated, read-only screens: Signals, System
+  Health, Backtests, Processes, AI Reviews, Strategies, Admin Users,
+  and AI Integration delegates.
+- Added Venue Accounts with live account-truth status, balances, open
+  positions, observation timestamps, and clear stale-data warnings.
+- Added complete 45-locale coverage for Venue Accounts and unknown-order
+  alerts, plus the localized AI Researcher role.
+- Added per-process resource summaries and coordinator details, and
+  support for unknown-order safety alerts and user alert defaults.
+
+### Changed
+
+- Changed Positions to show unknown valuations honestly instead of as
+  zero and to enable protective plans or reductions only when the
+  position has the required entry and quantity data.
+- Bumped `MARKETING_VERSION` from `2.0.2` to `3.0.0`.
+
+### Fixed
+
+- Kept Venue Account rows current with a recurring five-second refresh
+  so live observations no longer age into stale state between loads.
+- Regenerated API models to resolve scoped-strategy schema drift, a
+  duplicate `Permission` enum, and P&L timeline union decoding.
+- Replaced timing-dependent WebSocket envelope waits with frame-specific
+  synchronization so coverage runs no longer fail intermittently.
+
 ## [2.0.2] — 2026-05-25
 
 CandlestickChartView SwiftUI primitive rewrite for the App Store 2.0.2
