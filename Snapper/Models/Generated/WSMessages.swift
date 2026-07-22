@@ -272,6 +272,48 @@ struct AccountStateChangedEventData: Codable, Sendable {
     }
 }
 
+struct AiResearchRequestFrameData: Codable, Sendable {
+    let type: String
+    let sequenceId: Int
+    let publicId: String
+    let timestamp: Date
+    let sessionId: String
+    let topic: String?
+    let roundPublicId: String
+    let trigger: String
+
+    init(
+        type: String,
+        sequenceId: Int,
+        publicId: String,
+        timestamp: Date,
+        sessionId: String,
+        topic: String? = nil,
+        roundPublicId: String,
+        trigger: String
+    ) {
+        self.type = type
+        self.sequenceId = sequenceId
+        self.publicId = publicId
+        self.timestamp = timestamp
+        self.sessionId = sessionId
+        self.topic = topic
+        self.roundPublicId = roundPublicId
+        self.trigger = trigger
+    }
+
+    enum CodingKeys: String, CodingKey {
+        case type
+        case sequenceId = "sequence_id"
+        case publicId = "public_id"
+        case timestamp
+        case sessionId = "session_id"
+        case topic
+        case roundPublicId = "round_public_id"
+        case trigger
+    }
+}
+
 struct AiReviewCapsViolationFrameData: Codable, Sendable {
     let type: String
     let sequenceId: Int
