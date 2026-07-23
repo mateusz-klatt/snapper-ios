@@ -26,6 +26,15 @@ class AuthService: ObservableObject {
     /// stampede of refresh requests + race-y double logout when the
     /// refresh itself returns 401.
     private var refreshTask: Task<RefreshData?, Never>?
+    private var refreshTaskId: UInt64?
+    private var nextRefreshTaskId: UInt64 = 0
+    /// Invalidates refresh work that belongs to a session being torn
+    /// down. Cancellation alone is insufficient because another caller
+    /// may already be queued on the cancelled task and otherwise start a
+    /// replacement refresh while ``logout()`` is awaiting the server.
+    private var refreshGeneration: UInt64 = 0
+    private var isLoggingOut = false
+    private var logoutTask: Task<Void, Never>?
 
     private let appStateProvider: @Sendable @MainActor () -> AppState
 
@@ -144,6 +153,14 @@ class AuthService: ObservableObject {
     }()
 
     func logout() async {
+        if let logoutTask {
+            await logoutTask.value
+            return
+        }
+
+        isLoggingOut = true
+        refreshGeneration &+= 1
+
         /// Cancel any in-flight refresh BEFORE tearing down local
         /// session state — without this, ``performRefresh()`` can
         /// resolve after logout completes and re-stamp ``wsToken``
@@ -153,12 +170,20 @@ class AuthService: ObservableObject {
         /// session to the prior identity for that token's lifetime.
         refreshTask?.cancel()
         refreshTask = nil
+        refreshTaskId = nil
 
-        await DeviceRegistrationService.shared().onLogout()
-        await logoutFromServer()
-        wsToken = nil
-        currentUser = nil
-        isAuthenticated = false
+        let task = Task<Void, Never> { @MainActor [weak self] in
+            guard let self else { return }
+            await DeviceRegistrationService.shared().onLogout()
+            await self.logoutFromServer()
+            self.wsToken = nil
+            self.currentUser = nil
+            self.isAuthenticated = false
+            self.isLoggingOut = false
+            self.logoutTask = nil
+        }
+        logoutTask = task
+        await task.value
     }
 
     private func logoutFromServer() async {
@@ -235,7 +260,7 @@ class AuthService: ObservableObject {
     }
 
     func selectActiveWallet(_ publicId: String) async -> Bool {
-        guard currentUser != nil else { return false }
+        guard !isLoggingOut, currentUser != nil else { return false }
         if currentUser?.activeWalletPublicId == publicId {
             return true
         }
@@ -246,22 +271,60 @@ class AuthService: ObservableObject {
     }
 
     private func refresh(payload: RefreshTokenPayload? = nil) async -> RefreshData? {
-        if let existing = refreshTask {
+        let generation = refreshGeneration
+        guard !isLoggingOut, currentUser != nil else { return nil }
+
+        /// Payload callers that need a different wallet scope wait for
+        /// every already-running rotation before taking ownership of
+        /// the slot. Re-evaluating the slot in a loop matters: several
+        /// waiters can resume from the same task, and only the first may
+        /// create the next request. The others must observe and await it
+        /// instead of starting concurrent one-use refresh rotations.
+        while let existing = refreshTask {
             let fresh = await existing.value
-            if payload == nil {
+            guard refreshGeneration == generation, !isLoggingOut else {
+                return nil
+            }
+            if refreshResult(fresh, satisfies: payload) {
                 return fresh
             }
         }
+
+        guard refreshGeneration == generation,
+              !isLoggingOut,
+              currentUser != nil else {
+            return nil
+        }
+
+        nextRefreshTaskId &+= 1
+        let taskId = nextRefreshTaskId
         let task = Task<RefreshData?, Never> { @MainActor [weak self] in
             guard let self else { return nil }
-            defer { self.refreshTask = nil }
+            defer {
+                /// A cancelled task may finish after a new session has
+                /// started. Clear only the exact slot this task owns so
+                /// stale work cannot erase a replacement refresh.
+                if self.refreshGeneration == generation,
+                   self.refreshTaskId == taskId {
+                    self.refreshTask = nil
+                    self.refreshTaskId = nil
+                }
+            }
+            guard !Task.isCancelled,
+                  self.refreshGeneration == generation,
+                  !self.isLoggingOut,
+                  self.currentUser != nil else {
+                return nil
+            }
             let freshToken = await self.performRefresh(payload: payload)
             /// Bail out before the slot write if logout cancelled
             /// the task while the refresh was in flight — applying
             /// a freshly-minted token to a torn-down session would
             /// bind the next login to the prior session's
             /// backend-side state for that token's lifetime.
-            if Task.isCancelled {
+            if Task.isCancelled ||
+                self.refreshGeneration != generation ||
+                self.isLoggingOut {
                 return nil
             }
             if let freshToken {
@@ -271,7 +334,27 @@ class AuthService: ObservableObject {
             return freshToken
         }
         refreshTask = task
+        refreshTaskId = taskId
         return await task.value
+    }
+
+    /// Decide whether a completed rotation already fulfilled the
+    /// caller's requested scope. Plain token callers coalesce with any
+    /// result. Wallet callers continue serially only when the completed
+    /// response represents a different wallet operation.
+    private func refreshResult(
+        _ fresh: RefreshData?,
+        satisfies payload: RefreshTokenPayload?
+    ) -> Bool {
+        guard let payload else { return true }
+        guard let fresh else { return false }
+        if let activeWalletPublicId = payload.activeWalletPublicId {
+            return fresh.user.activeWalletPublicId == activeWalletPublicId
+        }
+        if payload.clearActiveWallet == true {
+            return fresh.user.activeWalletPublicId == nil
+        }
+        return true
     }
 
     /// Bare refresh request — callers go through ``refresh(payload:)``

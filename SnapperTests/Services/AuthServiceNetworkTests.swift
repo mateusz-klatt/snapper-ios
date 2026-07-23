@@ -339,6 +339,8 @@ final class AuthServiceNetworkTests: XCTestCase {
             session: mockSession,
             apiBaseURLProvider: { "http://[::1" }
         )
+        service.currentUser = Self.refreshTestUser(sessionId: "session-invalid-url")
+        service.isAuthenticated = true
 
         let token = await service.fetchFreshWsToken()
 
@@ -468,6 +470,8 @@ final class AuthServiceNetworkTests: XCTestCase {
     /// logout when the second refresh sees the just-rotated session.
     func testConcurrentRefreshCallersCoalesceIntoSingleRequest() async throws {
         let counter = HandlerCallCounter()
+        authService.currentUser = Self.refreshTestUser(sessionId: "session-r")
+        authService.isAuthenticated = true
 
         MockURLProtocol.requestHandler = { request in
             counter.increment()
@@ -534,27 +538,165 @@ final class AuthServiceNetworkTests: XCTestCase {
         )
     }
 
-    /// Logout-during-refresh race (PR #3 fix-up): a logout that
-    /// fires while a refresh is in flight must NOT let the
-    /// refresh's freshly-minted ws_token re-stamp ``wsToken`` after
-    /// the local session is torn down. The ``Task.isCancelled``
-    /// gate protects the slot write so a stale refresh response
-    /// is dropped on the floor — without this, the next login on
-    /// the same install would bind to the prior session's identity
-    /// for the lifetime of the leaked token.
-    func testLogoutDuringRefreshDropsTheRefreshedToken() async throws {
-        MockURLProtocol.requestHandler = { request in
-            /// Hold the URLProtocol thread long enough for logout to
-            /// run and cancel the refresh task. 200 ms is generous —
-            /// logout's local mutations are sub-millisecond.
-            Thread.sleep(forTimeInterval: 0.2)
+    /// Wallet-scoping refreshes cannot coalesce when they request
+    /// different active wallets, but they still MUST execute serially.
+    /// Refresh cookies are rotated atomically, so overlapping even two
+    /// of these requests can invalidate one caller and force logout.
+    func testConcurrentWalletSelectionsSerializeRefreshRequests() async throws {
+        let probe = ConcurrentRequestProbe()
+        let walletIds = [
+            "01961234-5678-7000-8000-000000000610",
+            "01961234-5678-7000-8000-000000000611",
+            "01961234-5678-7000-8000-000000000612"
+        ]
+        authService.currentUser = UserProfile(
+            sequenceId: 1,
+            publicId: "01961234-5678-7000-8000-000000000601",
+            timestamp: Date(timeIntervalSince1970: 0),
+            sessionId: "session-wallet-race",
+            username: "viewer",
+            role: .viewer,
+            isActive: true,
+            createdAt: Date(timeIntervalSince1970: 0),
+            effectivePermissions: [.readBacktests]
+        )
 
+        MockURLProtocol.requestHandler = { request in
+            probe.begin()
+            defer { probe.end() }
+            Thread.sleep(forTimeInterval: 0.1)
+
+            guard let body = Self.readBody(from: request),
+                  let envelope = try JSONSerialization.jsonObject(with: body) as? [String: Any],
+                  let payload = envelope["payload"] as? [String: Any],
+                  let walletId = payload["active_wallet_public_id"] as? String else {
+                throw URLError(.cannotParseResponse)
+            }
             let response = HTTPURLResponse(
                 url: request.url!,
                 statusCode: 200,
                 httpVersion: nil,
                 headerFields: [AppConfig.HTTPHeader.contentType: AppConfig.ContentType.json]
             )!
+            let json: [String: Any] = [
+                "sequence_id": 1,
+                "public_id": "01961234-5678-7000-8000-000000000620",
+                "timestamp": "2025-11-22T11:00:00Z",
+                "session_id": "session-wallet-race",
+                "payload": [
+                    "sequence_id": 1,
+                    "public_id": "01961234-5678-7000-8000-000000000621",
+                    "timestamp": "2025-11-22T11:00:00Z",
+                    "session_id": "session-wallet-race",
+                    "message": "Token refreshed",
+                    "ws_token": "wallet-token-\(walletId)",
+                    "ws_token_exp": "2025-11-22T11:15:00Z",
+                    "csrf_token": "csrf",
+                    "user": [
+                        "sequence_id": 1,
+                        "public_id": "01961234-5678-7000-8000-000000000601",
+                        "timestamp": "2025-01-01T00:00:00Z",
+                        "session_id": "session-wallet-race",
+                        "username": "viewer",
+                        "role": "viewer",
+                        "is_active": true,
+                        "created_at": "2025-01-01T00:00:00Z",
+                        "active_wallet_public_id": walletId,
+                        "effective_permissions": ["read:backtests"]
+                    ]
+                ]
+            ]
+            return (response, try JSONSerialization.data(withJSONObject: json))
+        }
+
+        let firstTask = Task { @MainActor in
+            await self.authService.selectActiveWallet(walletIds[0])
+        }
+        let secondTask = Task { @MainActor in
+            await self.authService.selectActiveWallet(walletIds[1])
+        }
+        let thirdTask = Task { @MainActor in
+            await self.authService.selectActiveWallet(walletIds[2])
+        }
+        let results = await [firstTask.value, secondTask.value, thirdTask.value]
+
+        XCTAssertEqual(results, [true, true, true])
+        XCTAssertEqual(probe.callCount, 3)
+        XCTAssertEqual(
+            probe.maximumActive,
+            1,
+            "Different wallet payloads must rotate the refresh cookie serially, never concurrently."
+        )
+    }
+
+    /// A wallet selection already queued on an in-flight refresh must
+    /// not start a replacement request after logout invalidates that
+    /// session. Concurrent logout callers also await the same teardown
+    /// task rather than returning while local auth state is still live.
+    func testLogoutDuringRefreshDropsTheRefreshedToken() async throws {
+        let refreshCounter = HandlerCallCounter()
+        let logoutCounter = HandlerCallCounter()
+        let walletId = "01961234-5678-7000-8000-000000000699"
+        authService.currentUser = UserProfile(
+            sequenceId: 1,
+            publicId: "01961234-5678-7000-8000-000000000602",
+            timestamp: Date(timeIntervalSince1970: 0),
+            sessionId: "session-r3",
+            username: "alice",
+            role: .viewer,
+            isActive: true,
+            createdAt: Date(timeIntervalSince1970: 0),
+            effectivePermissions: [.readBacktests]
+        )
+        authService.isAuthenticated = true
+
+        MockURLProtocol.requestHandler = { request in
+            if request.url?.path.hasSuffix(AppConfig.Endpoints.logout) == true {
+                logoutCounter.increment()
+                Thread.sleep(forTimeInterval: 0.15)
+                let response = HTTPURLResponse(
+                    url: request.url!,
+                    statusCode: 204,
+                    httpVersion: nil,
+                    headerFields: nil
+                )!
+                return (response, nil)
+            }
+
+            refreshCounter.increment()
+            /// Hold the URLProtocol thread long enough for logout to
+            /// cancel the slot while a wallet caller is queued on it.
+            Thread.sleep(forTimeInterval: 0.2)
+
+            let requestedWalletId: String?
+            if let body = Self.readBody(from: request),
+               let envelope = try? JSONSerialization.jsonObject(with: body) as? [String: Any],
+               let payload = envelope["payload"] as? [String: Any] {
+                requestedWalletId = payload["active_wallet_public_id"] as? String
+            } else {
+                requestedWalletId = nil
+            }
+            let response = HTTPURLResponse(
+                url: request.url!,
+                statusCode: 200,
+                httpVersion: nil,
+                headerFields: [AppConfig.HTTPHeader.contentType: AppConfig.ContentType.json]
+            )!
+            var user: [String: Any] = [
+                "sequence_id": 1,
+                "public_id": "01961234-5678-7000-8000-000000000402",
+                "timestamp": "2025-01-01T00:00:00Z",
+                "session_id": "session-r3",
+                "username": "alice",
+                "email": "alice@example.com",
+                "role": "viewer",
+                "is_active": true,
+                "created_at": "2025-01-01T00:00:00Z",
+                "effective_permissions": ["read:backtests"]
+            ]
+            if let requestedWalletId {
+                user["active_wallet_public_id"] = requestedWalletId
+            }
             let json: [String: Any] = [
                 "sequence_id": 1,
                 "public_id": "01961234-5678-7000-8000-000000000400",
@@ -569,17 +711,7 @@ final class AuthServiceNetworkTests: XCTestCase {
                     "ws_token": "post-logout-token",
                     "ws_token_exp": "2025-11-22T11:15:00Z",
                     "csrf_token": "csrf",
-                    "user": [
-                        "sequence_id": 1,
-                        "public_id": "01961234-5678-7000-8000-000000000402",
-                        "timestamp": "2025-01-01T00:00:00Z",
-                        "session_id": "session-r3",
-                        "username": "alice",
-                        "email": "alice@example.com",
-                        "role": "viewer",
-                        "is_active": true,
-                        "created_at": "2025-01-01T00:00:00Z"
-                    ]
+                    "user": user
                 ]
             ]
             let data = try JSONSerialization.data(withJSONObject: json)
@@ -590,21 +722,69 @@ final class AuthServiceNetworkTests: XCTestCase {
             await self.authService.fetchFreshWsToken()
         }
 
-        /// Yield long enough for the refresh task to enter the
-        /// URLProtocol sleep window, then fire logout.
+        /// Queue a payload refresh behind the generic refresh, then
+        /// invalidate both by logging out.
         try await Task.sleep(nanoseconds: 50_000_000)
-        await authService.logout()
+        let walletTask = Task { @MainActor in
+            await self.authService.selectActiveWallet(walletId)
+        }
+        try await Task.sleep(nanoseconds: 20_000_000)
+        let firstLogoutTask = Task { @MainActor in
+            await self.authService.logout()
+        }
+        try await Task.sleep(nanoseconds: 20_000_000)
+        let secondLogoutTask = Task { @MainActor in
+            await self.authService.logout()
+            return self.authService.currentUser == nil &&
+                !self.authService.isAuthenticated
+        }
 
+        let secondLogoutObservedFinalState = await secondLogoutTask.value
+        await firstLogoutTask.value
         let refreshResult = await refreshTask.value
+        let walletResult = await walletTask.value
 
         XCTAssertNil(
             refreshResult,
             "fetchFreshWsToken must return nil when logout cancels the in-flight refresh."
         )
+        XCTAssertFalse(
+            walletResult,
+            "A wallet refresh queued before logout must not create a replacement session afterward."
+        )
+        XCTAssertEqual(
+            refreshCounter.value,
+            1,
+            "Logout must invalidate queued payload callers instead of letting them issue another refresh."
+        )
+        XCTAssertTrue(
+            secondLogoutObservedFinalState,
+            "Every awaited logout caller must return only after local auth state is cleared."
+        )
+        XCTAssertEqual(
+            logoutCounter.value,
+            1,
+            "Concurrent logout callers must share one server request."
+        )
         XCTAssertNil(
             authService.getWsToken(),
             "wsToken must NOT be re-populated by a refresh response that landed after logout — that would bind the next login to the prior session's identity."
         )
+        XCTAssertNil(authService.currentUser)
+        XCTAssertFalse(authService.isAuthenticated)
+
+        let postLogoutRefresh = await authService.fetchFreshWsToken()
+        XCTAssertNil(
+            postLogoutRefresh,
+            "A late request must not recreate a session after logout has completed."
+        )
+        XCTAssertEqual(
+            refreshCounter.value,
+            1,
+            "A refresh arriving after local teardown must be rejected without touching the network."
+        )
+        XCTAssertNil(authService.currentUser)
+        XCTAssertFalse(authService.isAuthenticated)
     }
 
     /// After a refresh completes, the in-flight slot is cleared so
@@ -614,6 +794,8 @@ final class AuthServiceNetworkTests: XCTestCase {
     /// retry path would loop or force premature logout.
     func testSubsequentRefreshAfterCompletionStartsNewRequest() async throws {
         let counter = HandlerCallCounter()
+        authService.currentUser = Self.refreshTestUser(sessionId: "session-r2")
+        authService.isAuthenticated = true
 
         MockURLProtocol.requestHandler = { request in
             counter.increment()
@@ -665,6 +847,9 @@ final class AuthServiceNetworkTests: XCTestCase {
     }
 
     func testFetchFreshWsTokenNonSuccessReturnsNil() async throws {
+        authService.currentUser = Self.refreshTestUser(sessionId: "session-refresh-503")
+        authService.isAuthenticated = true
+
         MockURLProtocol.requestHandler = { request in
             let response = HTTPURLResponse(
                 url: request.url!,
@@ -680,6 +865,19 @@ final class AuthServiceNetworkTests: XCTestCase {
 
         XCTAssertNil(token)
         XCTAssertNil(authService.getWsToken())
+    }
+
+    private static func refreshTestUser(sessionId: String) -> UserProfile {
+        UserProfile(
+            sequenceId: 1,
+            publicId: "01961234-5678-7000-8000-000000000090",
+            timestamp: Date(timeIntervalSince1970: 0),
+            sessionId: sessionId,
+            username: "alice",
+            role: .viewer,
+            isActive: true,
+            createdAt: Date(timeIntervalSince1970: 0)
+        )
     }
 
     private static func readBody(from request: URLRequest) -> Data? {
@@ -754,6 +952,36 @@ private final class HandlerCallCounter: @unchecked Sendable {
 
     var value: Int {
         lock.withLock { count }
+    }
+}
+
+/// Tracks both total URLProtocol handler calls and the high-water mark
+/// of requests executing at the same time. This catches serialization
+/// regressions that a final call-count assertion alone cannot detect.
+private final class ConcurrentRequestProbe: @unchecked Sendable {
+    private let lock = NSLock()
+    private var calls: Int = 0
+    private var active: Int = 0
+    private var highWaterMark: Int = 0
+
+    func begin() {
+        lock.withLock {
+            calls += 1
+            active += 1
+            highWaterMark = max(highWaterMark, active)
+        }
+    }
+
+    func end() {
+        lock.withLock { active -= 1 }
+    }
+
+    var callCount: Int {
+        lock.withLock { calls }
+    }
+
+    var maximumActive: Int {
+        lock.withLock { highWaterMark }
     }
 }
 

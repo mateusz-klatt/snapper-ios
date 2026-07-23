@@ -6,26 +6,17 @@ uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
-### Added
-
-- Added a repeatable admin/viewer permission UAT screenshot mode for a freshly
-  seeded backend. It records every native read surface and asserts that viewer
-  sessions omit position/order mutation controls and the admin-only Users card.
-
-### Fixed
-
-- Synchronized the wallet picker with the backend session scope so
-  wallet-scoped surfaces such as Backtests become available immediately.
-- Wired the opt-in screenshot workflow through the same backend-aware
-  harness used for local release UAT.
-
-## [3.0.0] — 2026-07-22
+## [3.0.0] — 2026-07-23
 
 Major release expanding the native iOS app with permission-gated,
 read-only coverage of the core operator surfaces.
 
 ### Added
 
+- Added a repeatable admin/viewer permission UAT screenshot mode for a freshly
+  seeded backend. It records every native read surface, exercises real
+  position/order rows, and proves positive admin versus negative viewer
+  mutation controls.
 - Added eight permission-gated, read-only screens: Signals, System
   Health, Backtests, Processes, AI Reviews, Strategies, Admin Users,
   and AI Integration delegates.
@@ -45,6 +36,13 @@ read-only coverage of the core operator surfaces.
 
 ### Fixed
 
+- Synchronized the wallet picker with the backend session scope so
+  wallet-scoped surfaces such as Backtests become available immediately.
+- Serialized refresh-token rotations across wallet changes, made concurrent
+  logout callers await one teardown, and prevented stale refresh work from
+  recreating a logged-out session.
+- Wired the opt-in screenshot workflow through the same backend-aware
+  harness used for local release UAT.
 - Kept Venue Account rows current with a recurring five-second refresh
   so live observations no longer age into stale state between loads.
 - Regenerated API models to resolve scoped-strategy schema drift, a
@@ -943,8 +941,8 @@ v0.2.0 backlog: CSRF header on iOS mutating REST requests,
 public-side type regeneration script, fork-PR Sonar handling, and
 the SwiftUI coverage story.
 
-[Unreleased]: https://github.com/mateusz-klatt/snapper-ios/compare/v3.0.0.27...HEAD
-[3.0.0]: https://github.com/mateusz-klatt/snapper-ios/releases/tag/v3.0.0.27
+[Unreleased]: https://github.com/mateusz-klatt/snapper-ios/compare/v3.0.0.28...HEAD
+[3.0.0]: https://github.com/mateusz-klatt/snapper-ios/releases/tag/v3.0.0.28
 [2.0.2]: https://github.com/mateusz-klatt/snapper-ios/releases/tag/v2.0.2-build25
 [2.0.1]: https://github.com/mateusz-klatt/snapper-ios/releases/tag/v2.0.1
 [2.0.0]: https://github.com/mateusz-klatt/snapper-ios/releases/tag/v2.0.0

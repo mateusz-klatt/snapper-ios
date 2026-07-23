@@ -531,10 +531,12 @@ final class I18nScreenshotUITests: XCTestCase {
                 return
             }
             dismissSavePasswordDialog(app: app)
+            selectRootTab(app: app, title: "Home")
             XCTAssertTrue(
                 app.navigationBars["Home"].waitForExistence(timeout: 20),
                 "\(role) did not reach Home after login"
             )
+            selectWallet(app: app, role: role, displayName: "paper (paper)")
             attach(code: "us", screen: "uat-\(role)-01-home")
 
             let homeScroll = app.scrollViews.firstMatch
@@ -550,6 +552,32 @@ final class I18nScreenshotUITests: XCTestCase {
                 )
             }
 
+            captureRootTab(
+                app: app,
+                role: role,
+                tabTitle: "Positions",
+                navigationTitle: "Positions",
+                screen: "positions"
+            )
+            verifyPositionMutationPath(
+                app: app,
+                role: role,
+                shouldExposeActions: role == "admin"
+            )
+
+            captureRootTab(
+                app: app,
+                role: role,
+                tabTitle: "Orders",
+                navigationTitle: "Orders",
+                screen: "orders"
+            )
+            verifyOrderMutationPath(
+                app: app,
+                role: role,
+                shouldExposeActions: role == "admin"
+            )
+
             for (index, surface) in homeSurfaces.enumerated() {
                 captureHomeSurface(
                     app: app,
@@ -562,32 +590,6 @@ final class I18nScreenshotUITests: XCTestCase {
                         surface.slug
                     )
                 )
-            }
-
-            captureRootTab(
-                app: app,
-                role: role,
-                tabTitle: "Positions",
-                navigationTitle: "Positions",
-                screen: "positions"
-            )
-            if role == "viewer" {
-                XCTAssertFalse(app.buttons["Close position"].exists)
-                XCTAssertFalse(app.buttons["Reduce position"].exists)
-                XCTAssertFalse(app.buttons["Attach bracket"].exists)
-                XCTAssertFalse(app.buttons["Attach trailing stop"].exists)
-            }
-
-            captureRootTab(
-                app: app,
-                role: role,
-                tabTitle: "Orders",
-                navigationTitle: "Orders",
-                screen: "orders"
-            )
-            if role == "viewer" {
-                XCTAssertFalse(app.buttons["New order"].exists)
-                XCTAssertFalse(app.buttons["Cancel order"].exists)
             }
 
             captureRootTab(
@@ -621,6 +623,101 @@ final class I18nScreenshotUITests: XCTestCase {
 
             app.terminate()
         }
+    }
+
+    private func verifyPositionMutationPath(
+        app: XCUIApplication,
+        role: String,
+        shouldExposeActions: Bool
+    ) {
+        let positionRow = app.descendants(matching: .any).matching(
+            NSPredicate(format: "identifier BEGINSWITH %@", "positions.row.")
+        ).firstMatch
+        XCTAssertTrue(
+            positionRow.waitForExistence(timeout: 15),
+            "\(role) did not render a seeded position row"
+        )
+        guard positionRow.exists else { return }
+
+        positionRow.tap()
+
+        let actionLabels = [
+            "Close position",
+            "Reduce position",
+            "Attach SL / TP",
+            "Attach trailing stop",
+        ]
+        if shouldExposeActions {
+            for label in actionLabels {
+                XCTAssertTrue(
+                    app.buttons[label].waitForExistence(timeout: 5),
+                    "\(role) did not expose the \(label) position action"
+                )
+            }
+            let cancelButton = app.buttons["Cancel"]
+            if cancelButton.exists {
+                cancelButton.tap()
+            } else {
+                app.coordinate(
+                    withNormalizedOffset: CGVector(dx: 0.08, dy: 0.18)
+                ).tap()
+            }
+            XCTAssertFalse(
+                app.buttons[actionLabels[0]].waitForExistence(timeout: 5),
+                "\(role) position action dialog could not be dismissed"
+            )
+        } else {
+            for label in actionLabels {
+                XCTAssertFalse(
+                    app.buttons[label].waitForExistence(timeout: 2),
+                    "\(role) must not expose the \(label) position action"
+                )
+            }
+        }
+    }
+
+    private func verifyOrderMutationPath(
+        app: XCUIApplication,
+        role: String,
+        shouldExposeActions: Bool
+    ) {
+        let newOrderButton = app.buttons["New order"]
+        if shouldExposeActions {
+            XCTAssertTrue(
+                newOrderButton.waitForExistence(timeout: 5),
+                "\(role) did not expose the New order action"
+            )
+        } else {
+            XCTAssertFalse(
+                newOrderButton.waitForExistence(timeout: 2),
+                "\(role) must not expose the New order action"
+            )
+        }
+
+        let openOrderRow = app.descendants(matching: .any).matching(
+            NSPredicate(format: "identifier BEGINSWITH %@", "orders.open.row.")
+        ).firstMatch
+        XCTAssertTrue(
+            openOrderRow.waitForExistence(timeout: 15),
+            "\(role) did not render a seeded open order row"
+        )
+        guard openOrderRow.exists else { return }
+
+        openOrderRow.swipeLeft()
+
+        let cancelOrderButton = app.buttons["Cancel order"]
+        if shouldExposeActions {
+            XCTAssertTrue(
+                cancelOrderButton.waitForExistence(timeout: 5),
+                "\(role) did not expose Cancel order after swiping an open order"
+            )
+        } else {
+            XCTAssertFalse(
+                cancelOrderButton.waitForExistence(timeout: 2),
+                "\(role) must not expose Cancel order after swiping an open order"
+            )
+        }
+        openOrderRow.swipeRight()
     }
 
     private func captureHomeSurface(
@@ -668,6 +765,51 @@ final class I18nScreenshotUITests: XCTestCase {
         if backButton.exists {
             backButton.tap()
         }
+    }
+
+    private func selectWallet(
+        app: XCUIApplication,
+        role: String,
+        displayName: String
+    ) {
+        let picker = app.buttons["wallet.picker"]
+        XCTAssertTrue(
+            picker.waitForExistence(timeout: 10),
+            "\(role) could not reach the wallet picker"
+        )
+        guard picker.exists else { return }
+        if picker.label.localizedCaseInsensitiveContains(displayName) {
+            return
+        }
+        picker.tap()
+
+        let option = app.buttons.matching(
+            NSPredicate(
+                format: "label == %@ AND identifier != %@",
+                displayName,
+                "wallet.picker"
+            )
+        ).firstMatch
+        XCTAssertTrue(
+            option.waitForExistence(timeout: 5),
+            "\(role) could not reach the \(displayName) wallet"
+        )
+        guard option.exists else { return }
+        option.tap()
+
+        let selectedPredicate = NSPredicate(
+            format: "label CONTAINS[c] %@",
+            displayName
+        )
+        let selectedExpectation = XCTNSPredicateExpectation(
+            predicate: selectedPredicate,
+            object: picker
+        )
+        XCTAssertEqual(
+            XCTWaiter.wait(for: [selectedExpectation], timeout: 10),
+            .completed,
+            "\(role) could not select the \(displayName) wallet"
+        )
     }
 
     private func captureRootTab(

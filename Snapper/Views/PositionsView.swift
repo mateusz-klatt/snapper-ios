@@ -65,8 +65,10 @@ struct PositionsView: View {
                                     PositionCard(position: position)
                                 }
                                 .buttonStyle(.plain)
+                                .accessibilityIdentifier("positions.row.\(position.publicId)")
                             } else {
                                 PositionCard(position: position)
+                                    .accessibilityIdentifier("positions.row.\(position.publicId)")
                             }
                         }
                         .listStyle(.insetGrouped)
@@ -329,6 +331,7 @@ struct PositionCard: View {
             }
         }
         .padding(.vertical, 4)
+        .contentShape(Rectangle())
     }
 
     static func direction(for quantity: Double) -> String {

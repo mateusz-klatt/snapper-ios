@@ -73,6 +73,7 @@ struct WalletPicker: View {
             .background(Color(.systemGray6))
             .clipShape(Capsule())
         }
+        .accessibilityIdentifier("wallet.picker")
         .task {
             if viewModel == nil {
                 viewModel = WalletPickerViewModel(appState: appState)
