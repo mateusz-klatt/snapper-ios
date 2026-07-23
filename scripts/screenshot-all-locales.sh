@@ -3,11 +3,14 @@
 # and dump per-country PNGs into the proprietary/screenshots/ios/ tree.
 #
 # Usage:
-#   ios/scripts/screenshot-all-locales.sh [smoke|all|retry|showcase|chart-verify]
+#   ios/scripts/screenshot-all-locales.sh [smoke|all|retry|showcase|chart-verify|viewer-uat]
 #
 # Backend URL discovery (in order):
 #   1. SNAPPER_UITEST_BACKEND_URL env var
 #   2. ios/.local-backend-url file (git-ignored)
+#
+# viewer-uat also requires a fresh development fixture with seeded admin and
+# viewer accounts, a paper wallet, static instruments, and a scope grant.
 #
 # Output: <repo-root>/proprietary/screenshots/ios/<country>/<screen>.png
 
@@ -25,7 +28,8 @@ case "$MODE" in
   all)          METHOD="testCaptureAllLocales" ;;
   showcase)     METHOD="testCaptureMarketingShowcase" ;;
   chart-verify) METHOD="testCaptureChartColorVerification" ;;
-  *) echo "usage: $0 [smoke|all|retry|showcase|chart-verify]" >&2 ; exit 2 ;;
+  viewer-uat)   METHOD="testCaptureViewerPermissionsUAT" ;;
+  *) echo "usage: $0 [smoke|all|retry|showcase|chart-verify|viewer-uat]" >&2 ; exit 2 ;;
 esac
 
 URL="${SNAPPER_UITEST_BACKEND_URL:-}"
@@ -100,12 +104,19 @@ if [ "$MODE" = "showcase" ]; then
   fi
 fi
 
-xcodebuild test \
-    -scheme Snapper \
-    -destination 'platform=iOS Simulator,name=iPhone 17 Pro,OS=26.2' \
-    -only-testing:"SnapperUITests/I18nScreenshotUITests/$METHOD" \
-    -resultBundlePath "$XCRESULT" \
-    | xcbeautify 2>/dev/null || true
+XCODEBUILD_ARGS=(
+  test
+  -scheme Snapper
+  -destination 'platform=iOS Simulator,name=iPhone 17 Pro,OS=26.2'
+  -only-testing:"SnapperUITests/I18nScreenshotUITests/$METHOD"
+  -resultBundlePath "$XCRESULT"
+)
+
+if command -v xcbeautify >/dev/null 2>&1; then
+  xcodebuild "${XCODEBUILD_ARGS[@]}" | xcbeautify
+else
+  xcodebuild "${XCODEBUILD_ARGS[@]}"
+fi
 
 if [ ! -d "$XCRESULT/Data" ]; then
   echo "error: xcresult not produced at $XCRESULT" >&2

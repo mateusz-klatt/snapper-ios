@@ -87,9 +87,9 @@ final class WalletPickerViewModel {
         }
     }
 
-    /// Apply a wallet selection to the shared `AppState` so other
-    /// tabs (Positions / Orders / Home) re-scope on the next render.
-    func selectWallet(_ publicId: String) {
+    /// Apply or clear the shared wallet selection so other tabs
+    /// re-scope on the next render.
+    func selectWallet(_ publicId: String?) {
         appState.selectedWalletPublicId = publicId
     }
     /// Backward-compatible test contract.

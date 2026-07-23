@@ -16,18 +16,16 @@ class AuthService: ObservableObject {
     private let session: URLSession
     private let apiBaseURLProvider: @MainActor () -> String
 
-    /// Single-flight slot for ``fetchFreshWsToken()``. When a refresh
-    /// is in flight, concurrent callers ``await`` the same task value
-    /// instead of launching parallel network requests. Cleared by
-    /// the inner task's ``defer`` block once the request resolves so
-    /// the next caller starts a fresh refresh.
+    /// Single-flight slot shared by token refresh and wallet scoping.
+    /// Concurrent callers await the same session rotation so refresh
+    /// cookies cannot race each other.
     ///
     /// Without this coalescing, multiple parallel REST calls (e.g.
     /// ``HomeView.loadData``'s ``async let`` orders + positions) that
     /// each receive a 401 would each call ``fetchFreshWsToken()`` ->
     /// stampede of refresh requests + race-y double logout when the
     /// refresh itself returns 401.
-    private var refreshTask: Task<String?, Never>?
+    private var refreshTask: Task<RefreshData?, Never>?
 
     private let appStateProvider: @Sendable @MainActor () -> AppState
 
@@ -232,13 +230,32 @@ class AuthService: ObservableObject {
     /// their own. Once the inner task completes, ``defer`` clears
     /// the slot so the next refresh window starts fresh.
     func fetchFreshWsToken() async -> String? {
-        if let existing = refreshTask {
-            return await existing.value
+        let fresh = await refresh()
+        return fresh?.wsToken
+    }
+
+    func selectActiveWallet(_ publicId: String) async -> Bool {
+        guard currentUser != nil else { return false }
+        if currentUser?.activeWalletPublicId == publicId {
+            return true
         }
-        let task = Task<String?, Never> { @MainActor [weak self] in
+        let fresh = await refresh(
+            payload: RefreshTokenPayload(activeWalletPublicId: publicId)
+        )
+        return fresh?.user.activeWalletPublicId == publicId
+    }
+
+    private func refresh(payload: RefreshTokenPayload? = nil) async -> RefreshData? {
+        if let existing = refreshTask {
+            let fresh = await existing.value
+            if payload == nil {
+                return fresh
+            }
+        }
+        let task = Task<RefreshData?, Never> { @MainActor [weak self] in
             guard let self else { return nil }
             defer { self.refreshTask = nil }
-            let freshToken = await self.performRefresh()
+            let freshToken = await self.performRefresh(payload: payload)
             /// Bail out before the slot write if logout cancelled
             /// the task while the refresh was in flight — applying
             /// a freshly-minted token to a torn-down session would
@@ -248,7 +265,8 @@ class AuthService: ObservableObject {
                 return nil
             }
             if let freshToken {
-                self.wsToken = freshToken
+                self.wsToken = freshToken.wsToken
+                self.currentUser = freshToken.user
             }
             return freshToken
         }
@@ -256,12 +274,10 @@ class AuthService: ObservableObject {
         return await task.value
     }
 
-    /// Bare refresh request — never call this directly; go through
-    /// ``fetchFreshWsToken()`` so concurrent callers coalesce.
-    /// The slot owner (``fetchFreshWsToken``) is responsible for
-    /// writing ``wsToken`` AFTER a ``Task.isCancelled`` check, so
-    /// this helper deliberately does NOT touch member state.
-    private func performRefresh() async -> String? {
+    /// Bare refresh request — callers go through ``refresh(payload:)``
+    /// so concurrent session rotations coalesce. The slot owner writes
+    /// refreshed session state only after its cancellation check.
+    private func performRefresh(payload: RefreshTokenPayload?) async -> RefreshData? {
         guard let url = URL(string: "\(apiBaseURLProvider())\(AppConfig.Endpoints.refresh)") else {
             return nil
         }
@@ -269,6 +285,24 @@ class AuthService: ObservableObject {
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
         request.setValue(AppConfig.ContentType.json, forHTTPHeaderField: AppConfig.HTTPHeader.contentType)
+        if let payload {
+            let provenance = EnvelopeMinter.shared.next(.control)
+            let envelope = RefreshTokenRequest(
+                type: "refresh_token_request",
+                sequenceId: provenance.sequenceId,
+                publicId: provenance.publicId,
+                timestamp: provenance.timestamp,
+                sessionId: provenance.sessionId,
+                topic: nil,
+                payload: payload
+            )
+            do {
+                request.httpBody = try Self.envelopeEncoder.encode(envelope)
+            } catch {
+                logger.error("Failed to encode refresh request: \(error)")
+                return nil
+            }
+        }
         /// Cap refresh attempts at 10s — see logoutFromServer comment for
         /// rationale. Refresh payload is small, so 10s is generous for
         /// real networks; a legitimate hang means the network is dead.
@@ -285,7 +319,7 @@ class AuthService: ObservableObject {
             let decoder = JSONDecoder()
             decoder.dateDecodingStrategy = .iso8601
             let refreshResponse = try decoder.decode(RefreshResponse.self, from: data)
-            return refreshResponse.payload.wsToken
+            return refreshResponse.payload
         } catch {
             logger.error("Failed to fetch fresh ws_token: \(error)")
             return nil

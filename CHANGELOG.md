@@ -6,10 +6,23 @@ uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Added
+
+- Added a repeatable admin/viewer permission UAT screenshot mode for a freshly
+  seeded backend. It records every native read surface and asserts that viewer
+  sessions omit position/order mutation controls and the admin-only Users card.
+
+### Fixed
+
+- Synchronized the wallet picker with the backend session scope so
+  wallet-scoped surfaces such as Backtests become available immediately.
+- Wired the opt-in screenshot workflow through the same backend-aware
+  harness used for local release UAT.
+
 ## [3.0.0] — 2026-07-22
 
-Major release bringing the native iOS app to full feature parity with
-the web experience.
+Major release expanding the native iOS app with permission-gated,
+read-only coverage of the core operator surfaces.
 
 ### Added
 
@@ -930,7 +943,8 @@ v0.2.0 backlog: CSRF header on iOS mutating REST requests,
 public-side type regeneration script, fork-PR Sonar handling, and
 the SwiftUI coverage story.
 
-[Unreleased]: https://github.com/mateusz-klatt/snapper-ios/compare/v2.0.2-build25...HEAD
+[Unreleased]: https://github.com/mateusz-klatt/snapper-ios/compare/v3.0.0.27...HEAD
+[3.0.0]: https://github.com/mateusz-klatt/snapper-ios/releases/tag/v3.0.0.27
 [2.0.2]: https://github.com/mateusz-klatt/snapper-ios/releases/tag/v2.0.2-build25
 [2.0.1]: https://github.com/mateusz-klatt/snapper-ios/releases/tag/v2.0.1
 [2.0.0]: https://github.com/mateusz-klatt/snapper-ios/releases/tag/v2.0.0

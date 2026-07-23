@@ -13,8 +13,9 @@ This script:
    attachment's ``suggestedHumanReadableName``, drops the numeric prefix
    (``03-home`` -> ``home``), and copies the PNG to
    ``<output-dir>/<country>/<screen>.png``.
-3. Wipes any stale country directories before writing so renames + locale
-   removals don't leave orphans.
+3. Overwrites only attachment paths present in the current result bundle.
+   Other capture modes may share the same country directory, so the
+   extractor never removes the directory wholesale.
 """
 import json
 import re
@@ -101,8 +102,6 @@ def main() -> int:
     skipped: list[str] = []
 
     out_root.mkdir(parents=True, exist_ok=True)
-    cleaned: set[str] = set()
-
     for entry in entries:
         exported_name = entry["exportedFileName"]
         suggested = entry.get("suggestedHumanReadableName", exported_name)
@@ -113,12 +112,6 @@ def main() -> int:
         country, screen = target
         countries_seen.add(country)
         country_dir = out_root / country
-        if country not in cleaned:
-            # First time we see this country in this run: clear any prior
-            # screens so a removed locale or screen doesn't leave stale PNGs.
-            if country_dir.exists():
-                shutil.rmtree(country_dir)
-            cleaned.add(country)
         country_dir.mkdir(parents=True, exist_ok=True)
         src = scratch / exported_name
         dest = country_dir / f"{screen}.png"

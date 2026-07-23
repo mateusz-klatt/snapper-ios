@@ -346,6 +346,73 @@ final class AuthServiceNetworkTests: XCTestCase {
         XCTAssertNil(service.getWsToken())
     }
 
+    func testSelectActiveWalletRefreshesSessionScope() async throws {
+        let walletId = "01961234-5678-7000-8000-000000000099"
+        let captured = CapturedBody()
+        authService.currentUser = UserProfile(
+            sequenceId: 1,
+            publicId: "01961234-5678-7000-8000-000000000101",
+            timestamp: Date(timeIntervalSince1970: 0),
+            sessionId: "session-wallet",
+            username: "viewer",
+            role: .viewer,
+            isActive: true,
+            createdAt: Date(timeIntervalSince1970: 0),
+            effectivePermissions: [.readBacktests]
+        )
+        MockURLProtocol.requestHandler = { request in
+            captured.set(Self.readBody(from: request) ?? Data())
+            let response = HTTPURLResponse(
+                url: request.url!,
+                statusCode: 200,
+                httpVersion: nil,
+                headerFields: [AppConfig.HTTPHeader.contentType: AppConfig.ContentType.json]
+            )!
+            let json: [String: Any] = [
+                "sequence_id": 1,
+                "public_id": "01961234-5678-7000-8000-000000000102",
+                "timestamp": "2025-11-22T11:00:00Z",
+                "session_id": "session-wallet",
+                "payload": [
+                    "sequence_id": 1,
+                    "public_id": "01961234-5678-7000-8000-000000000103",
+                    "timestamp": "2025-11-22T11:00:00Z",
+                    "session_id": "session-wallet",
+                    "message": "Token refreshed",
+                    "ws_token": "wallet-ws-token",
+                    "ws_token_exp": "2025-11-22T11:15:00Z",
+                    "csrf_token": "csrf",
+                    "user": [
+                        "sequence_id": 1,
+                        "public_id": "01961234-5678-7000-8000-000000000101",
+                        "timestamp": "2025-01-01T00:00:00Z",
+                        "session_id": "session-wallet",
+                        "username": "viewer",
+                        "role": "viewer",
+                        "is_active": true,
+                        "created_at": "2025-01-01T00:00:00Z",
+                        "active_wallet_public_id": walletId,
+                        "effective_permissions": ["read:backtests"]
+                    ]
+                ]
+            ]
+            return (response, try JSONSerialization.data(withJSONObject: json))
+        }
+
+        let selected = await authService.selectActiveWallet(walletId)
+
+        XCTAssertTrue(selected)
+        XCTAssertEqual(authService.currentUser?.activeWalletPublicId, walletId)
+        XCTAssertEqual(authService.getWsToken(), "wallet-ws-token")
+        let body = try XCTUnwrap(
+            JSONSerialization.jsonObject(with: captured.value) as? [String: Any]
+        )
+        XCTAssertEqual(body["type"] as? String, "refresh_token_request")
+        let payload = try XCTUnwrap(body["payload"] as? [String: Any])
+        XCTAssertEqual(payload["active_wallet_public_id"] as? String, walletId)
+        XCTAssertNil(payload["clear_active_wallet"])
+    }
+
     /// Regression guard for the envelope/provenance contract enforced
     /// by ``snapper.api.schemas.base.StrictDataSchema``: outbound
     /// login requests must wrap credentials inside ``payload`` and

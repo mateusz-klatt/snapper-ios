@@ -77,7 +77,10 @@ GitHub Actions uses runner-specific workflows:
 - `ci.yml` (`macos-26`) — `make build && make test` on every push to `master` and every PR.
 - `sonarcloud.yml` (`macos-26`) — coverage scan via Xcode `xccov` → SonarCloud generic XML.
 - `gitleaks.yml` (`ubuntu-latest`) — secret scan on push / PR / weekly cron.
-- `i18n-screenshots.yml` (`macos-26`, manual dispatch) — opt-in 45-locale UI screenshot sweep that requires a live backend URL input.
+- `i18n-screenshots.yml` (`macos-26`, manual dispatch) — opt-in screenshot
+  capture modes for the 45-locale sweep, smoke/retry runs, marketing/chart
+  verification, and admin/viewer permission UAT; every mode requires a live
+  backend URL input.
 
 ## Signing & release
 
