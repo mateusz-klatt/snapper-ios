@@ -20,6 +20,7 @@ import SwiftUI
 struct WalletPicker: View {
 
     @Environment(AppState.self) private var appState
+    @EnvironmentObject private var authService: AuthService
     @State private var viewModel: WalletPickerViewModel?
 
     var body: some View {
@@ -36,7 +37,11 @@ struct WalletPicker: View {
                 } else {
                     ForEach(viewModel.availableWallets, id: \.publicId) { wallet in
                         Button {
-                            viewModel.selectWallet(wallet.publicId)
+                            Task {
+                                if await authService.selectActiveWallet(wallet.publicId) {
+                                    viewModel.selectWallet(wallet.publicId)
+                                }
+                            }
                         } label: {
                             HStack {
                                 Text(verbatim: WalletPickerViewModel.walletDisplayName(
@@ -68,11 +73,19 @@ struct WalletPicker: View {
             .background(Color(.systemGray6))
             .clipShape(Capsule())
         }
+        .accessibilityIdentifier("wallet.picker")
         .task {
             if viewModel == nil {
                 viewModel = WalletPickerViewModel(appState: appState)
             }
+            let previousPublicId = viewModel?.selectedWalletPublicId
             await viewModel?.loadWallets()
+            if let publicId = viewModel?.selectedWalletPublicId {
+                let didSelect = await authService.selectActiveWallet(publicId)
+                if !didSelect {
+                    viewModel?.selectWallet(previousPublicId)
+                }
+            }
         }
     }
 }

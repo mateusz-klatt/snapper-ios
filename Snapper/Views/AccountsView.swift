@@ -401,5 +401,6 @@ struct AccountsView_Previews: PreviewProvider {
     static var previews: some View {
         AccountsView()
             .environment(AppState.shared)
+            .environmentObject(AuthService.shared)
     }
 }

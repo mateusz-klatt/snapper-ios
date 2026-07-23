@@ -15,8 +15,8 @@ final class WalletPickerViewModelTests: XCTestCase {
     private var mockAPI: MockAPIClient!
     private var appState: AppState!
 
-    override func setUp() {
-        super.setUp()
+    override func setUp() async throws {
+        try await super.setUp()
         mockAPI = MockAPIClient()
         /// Each test gets a fresh in-memory UserDefaults so wallet
         /// selection writes from one test don't bleed into the next.
@@ -30,10 +30,10 @@ final class WalletPickerViewModelTests: XCTestCase {
         appState.locale = .us
     }
 
-    override func tearDown() {
+    override func tearDown() async throws {
         mockAPI = nil
         appState = nil
-        super.tearDown()
+        try await super.tearDown()
     }
 
     private func makeViewModel() -> WalletPickerViewModel {
@@ -186,6 +186,13 @@ final class WalletPickerViewModelTests: XCTestCase {
         let viewModel = makeViewModel()
         viewModel.selectWallet("p-new")
         XCTAssertEqual(appState.selectedWalletPublicId, "p-new")
+    }
+
+    func testSelectWalletCanClearSelection() {
+        appState.selectedWalletPublicId = "p-old"
+        let viewModel = makeViewModel()
+        viewModel.selectWallet(nil)
+        XCTAssertNil(appState.selectedWalletPublicId)
     }
 
     func testCurrentLabelFromAppStateSnapshot() {

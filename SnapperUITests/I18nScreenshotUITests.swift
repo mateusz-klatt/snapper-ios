@@ -105,16 +105,18 @@ final class I18nScreenshotUITests: XCTestCase {
         super.setUp()
         continueAfterFailure = true
         addUIInterruptionMonitor(withDescription: "SystemAlerts") { alert in
-            for button in alert.buttons.allElementsBoundByIndex {
-                let label = button.label
-                let lower = label.lowercased()
-                if lower.contains("save") || lower.contains("احفظ") || lower.contains("שמור") {
-                    continue
+            MainActor.assumeIsolated {
+                for button in alert.buttons.allElementsBoundByIndex {
+                    let label = button.label
+                    let lower = label.lowercased()
+                    if lower.contains("save") || lower.contains("احفظ") || lower.contains("שמור") {
+                        continue
+                    }
+                    button.tap()
+                    return true
                 }
-                button.tap()
-                return true
+                return false
             }
-            return false
         }
     }
 
@@ -141,6 +143,46 @@ final class I18nScreenshotUITests: XCTestCase {
         for spec in retries {
             captureLocale(spec)
         }
+    }
+
+    /// Release UAT for the permission-derived admin and viewer surfaces.
+    ///
+    /// The isolated fixture gives both users the same default operator
+    /// membership and adds an instrument scope grant for its paper wallet.
+    /// The viewer must therefore reach every operator read surface while
+    /// retaining zero mutation affordances. Admin additionally sees the
+    /// user-management card.
+    func testCaptureViewerPermissionsUAT() throws {
+        try skipUnlessBackendConfigured()
+        capturePermissionUAT(
+            role: "admin",
+            username: "admin",
+            homeSurfaces: [
+                ("Market data", "market-data"),
+                ("System Health", "health"),
+                ("Backtests", "backtests"),
+                ("Processes", "processes"),
+                ("AI Reviews", "ai-reviews"),
+                ("Strategies", "strategies"),
+                ("Users", "users"),
+                ("AI Delegates", "ai-delegates"),
+            ],
+            forbiddenHomeSurfaces: []
+        )
+        capturePermissionUAT(
+            role: "viewer",
+            username: "viewer",
+            homeSurfaces: [
+                ("Market data", "market-data"),
+                ("System Health", "health"),
+                ("Backtests", "backtests"),
+                ("Processes", "processes"),
+                ("AI Reviews", "ai-reviews"),
+                ("Strategies", "strategies"),
+                ("AI Delegates", "ai-delegates"),
+            ],
+            forbiddenHomeSurfaces: ["Users"]
+        )
     }
 
     /// AppStore marketing showcase: one carefully-chosen screen per
@@ -253,6 +295,7 @@ final class I18nScreenshotUITests: XCTestCase {
                 )
                 guard performLogin(in: app) else {
                     attach(code: spec.code, screen: "\(slot)-login-failed")
+                    XCTFail("\(spec.code)/\(slot) did not reach the post-login UI")
                     app.terminate()
                     return
                 }
@@ -326,6 +369,7 @@ final class I18nScreenshotUITests: XCTestCase {
             let app = launchApp(spec: spec, forceRisingRed: forceRisingRed)
             guard performLogin(in: app) else {
                 attach(code: spec.code, screen: "\(slot)-login-failed")
+                XCTFail("showcase \(slot) did not reach the post-login UI")
                 app.terminate()
                 return
             }
@@ -367,7 +411,8 @@ final class I18nScreenshotUITests: XCTestCase {
         spec: LocaleSpec,
         resetSession: Bool = false,
         forceRisingRed: Bool = false,
-        devStartOnMarket: Bool = false
+        devStartOnMarket: Bool = false,
+        useDemoWallet: Bool = true
     ) -> XCUIApplication {
         let app = XCUIApplication()
         var args = [
@@ -375,8 +420,10 @@ final class I18nScreenshotUITests: XCTestCase {
             "-snapper.customBackendURL", backendURL,
             "-AppleLanguages", "(\(spec.appleLanguageTag))",
             "-AppleLocale", spec.appleLanguageTag,
-            "-selected_wallet_public_id", Self.demoPaperWalletPublicId,
         ]
+        if useDemoWallet {
+            args += ["-selected_wallet_public_id", Self.demoPaperWalletPublicId]
+        }
         if resetSession {
             args += ["-snapper.resetSessionState", "YES"]
         }
@@ -406,6 +453,7 @@ final class I18nScreenshotUITests: XCTestCase {
 
             guard performLogin(in: app) else {
                 attach(code: spec.code, screen: "02-login-failed")
+                XCTFail("\(spec.code) did not reach the post-login UI")
                 app.terminate()
                 return
             }
@@ -420,14 +468,16 @@ final class I18nScreenshotUITests: XCTestCase {
         }
     }
 
-    private func performLogin(in app: XCUIApplication) -> Bool {
+    private func performLogin(
+        in app: XCUIApplication,
+        usernameValue: String? = nil,
+        passwordValue: String? = nil
+    ) -> Bool {
         // Cached session may auto-log-us-in. If no login text field appears
         // within a short window, assume we're already logged in.
         let username = app.textFields["login.username"]
         if !username.waitForExistence(timeout: 5) {
-            // No login form → already logged in. Give the app a moment to settle.
-            sleep(3)
-            return true
+            return app.tabBars.firstMatch.waitForExistence(timeout: 20)
         }
         // Race guard (id-ID and other cached-session locales): the
         // auto-login can complete between `waitForExistence` and `tap`,
@@ -435,33 +485,376 @@ final class I18nScreenshotUITests: XCTestCase {
         // each interaction so we don't crash trying to tap an element
         // that's already gone.
         if !username.exists {
-            sleep(3)
-            return true
+            return app.tabBars.firstMatch.waitForExistence(timeout: 20)
         }
         username.tap()
-        username.typeText(demoUsername)
+        username.typeText(usernameValue ?? demoUsername)
 
         let password = app.secureTextFields["login.password"]
         if !password.waitForExistence(timeout: 5) { return false }
         if !password.exists {
-            sleep(3)
-            return true
+            return app.tabBars.firstMatch.waitForExistence(timeout: 20)
         }
         password.tap()
-        password.typeText(demoPassword)
+        password.typeText(passwordValue ?? demoPassword)
 
         let signInButton = app.buttons["login.signIn"]
         if !signInButton.waitForExistence(timeout: 5) { return false }
         if !signInButton.exists {
-            sleep(3)
-            return true
+            return app.tabBars.firstMatch.waitForExistence(timeout: 20)
         }
         signInButton.tap()
 
-        // Brute force: give the app 15s for login + navigation, then
-        // assume we're in post-login state.
-        sleep(15)
-        return true
+        return app.tabBars.firstMatch.waitForExistence(timeout: 20)
+    }
+
+    private func capturePermissionUAT(
+        role: String,
+        username: String,
+        homeSurfaces: [(title: String, slug: String)],
+        forbiddenHomeSurfaces: [String]
+    ) {
+        XCTContext.runActivity(named: "permission-uat-\(role)") { _ in
+            let app = launchApp(
+                spec: LocaleSpec(code: "us", appleLanguageTag: "en-US"),
+                resetSession: true,
+                useDemoWallet: false
+            )
+            guard performLogin(
+                in: app,
+                usernameValue: username,
+                passwordValue: "change-me-after-first-login"
+            ) else {
+                attach(code: "us", screen: "uat-\(role)-login-failed")
+                XCTFail("\(role) did not reach the post-login UI")
+                app.terminate()
+                return
+            }
+            dismissSavePasswordDialog(app: app)
+            selectRootTab(app: app, title: "Home")
+            XCTAssertTrue(
+                app.navigationBars["Home"].waitForExistence(timeout: 20),
+                "\(role) did not reach Home after login"
+            )
+            selectWallet(app: app, role: role, displayName: "paper (paper)")
+            attach(code: "us", screen: "uat-\(role)-01-home")
+
+            let homeScroll = app.scrollViews.firstMatch
+            for _ in 0..<4 where homeScroll.exists {
+                homeScroll.swipeUp()
+            }
+            attach(code: "us", screen: "uat-\(role)-02-home-tools")
+
+            for forbiddenTitle in forbiddenHomeSurfaces {
+                XCTAssertFalse(
+                    app.staticTexts[forbiddenTitle].exists,
+                    "\(role) must not see the \(forbiddenTitle) Home card"
+                )
+            }
+
+            captureRootTab(
+                app: app,
+                role: role,
+                tabTitle: "Positions",
+                navigationTitle: "Positions",
+                screen: "positions"
+            )
+            verifyPositionMutationPath(
+                app: app,
+                role: role,
+                shouldExposeActions: role == "admin"
+            )
+
+            captureRootTab(
+                app: app,
+                role: role,
+                tabTitle: "Orders",
+                navigationTitle: "Orders",
+                screen: "orders"
+            )
+            verifyOrderMutationPath(
+                app: app,
+                role: role,
+                shouldExposeActions: role == "admin"
+            )
+
+            for (index, surface) in homeSurfaces.enumerated() {
+                captureHomeSurface(
+                    app: app,
+                    role: role,
+                    title: surface.title,
+                    screen: String(
+                        format: "uat-%@-%02d-%@",
+                        role,
+                        index + 3,
+                        surface.slug
+                    )
+                )
+            }
+
+            captureRootTab(
+                app: app,
+                role: role,
+                tabTitle: "Alerts",
+                navigationTitle: "Alerts",
+                screen: "alerts"
+            )
+            captureRootTab(
+                app: app,
+                role: role,
+                tabTitle: "Accounts",
+                navigationTitle: "Venue Accounts",
+                screen: "accounts"
+            )
+            captureRootTab(
+                app: app,
+                role: role,
+                tabTitle: "Signals",
+                navigationTitle: "Signals",
+                screen: "signals"
+            )
+            captureRootTab(
+                app: app,
+                role: role,
+                tabTitle: "Settings",
+                navigationTitle: "Settings",
+                screen: "settings"
+            )
+
+            app.terminate()
+        }
+    }
+
+    private func verifyPositionMutationPath(
+        app: XCUIApplication,
+        role: String,
+        shouldExposeActions: Bool
+    ) {
+        let positionRow = app.descendants(matching: .any).matching(
+            NSPredicate(format: "identifier BEGINSWITH %@", "positions.row.")
+        ).firstMatch
+        XCTAssertTrue(
+            positionRow.waitForExistence(timeout: 15),
+            "\(role) did not render a seeded position row"
+        )
+        guard positionRow.exists else { return }
+
+        positionRow.tap()
+
+        let actionLabels = [
+            "Close position",
+            "Reduce position",
+            "Attach SL / TP",
+            "Attach trailing stop",
+        ]
+        if shouldExposeActions {
+            for label in actionLabels {
+                XCTAssertTrue(
+                    app.buttons[label].waitForExistence(timeout: 5),
+                    "\(role) did not expose the \(label) position action"
+                )
+            }
+            let cancelButton = app.buttons["Cancel"]
+            if cancelButton.exists {
+                cancelButton.tap()
+            } else {
+                app.coordinate(
+                    withNormalizedOffset: CGVector(dx: 0.08, dy: 0.18)
+                ).tap()
+            }
+            XCTAssertFalse(
+                app.buttons[actionLabels[0]].waitForExistence(timeout: 5),
+                "\(role) position action dialog could not be dismissed"
+            )
+        } else {
+            for label in actionLabels {
+                XCTAssertFalse(
+                    app.buttons[label].waitForExistence(timeout: 2),
+                    "\(role) must not expose the \(label) position action"
+                )
+            }
+        }
+    }
+
+    private func verifyOrderMutationPath(
+        app: XCUIApplication,
+        role: String,
+        shouldExposeActions: Bool
+    ) {
+        let newOrderButton = app.buttons["New order"]
+        if shouldExposeActions {
+            XCTAssertTrue(
+                newOrderButton.waitForExistence(timeout: 5),
+                "\(role) did not expose the New order action"
+            )
+        } else {
+            XCTAssertFalse(
+                newOrderButton.waitForExistence(timeout: 2),
+                "\(role) must not expose the New order action"
+            )
+        }
+
+        let openOrderRow = app.descendants(matching: .any).matching(
+            NSPredicate(format: "identifier BEGINSWITH %@", "orders.open.row.")
+        ).firstMatch
+        XCTAssertTrue(
+            openOrderRow.waitForExistence(timeout: 15),
+            "\(role) did not render a seeded open order row"
+        )
+        guard openOrderRow.exists else { return }
+
+        openOrderRow.swipeLeft()
+
+        let cancelOrderButton = app.buttons["Cancel order"]
+        if shouldExposeActions {
+            XCTAssertTrue(
+                cancelOrderButton.waitForExistence(timeout: 5),
+                "\(role) did not expose Cancel order after swiping an open order"
+            )
+        } else {
+            XCTAssertFalse(
+                cancelOrderButton.waitForExistence(timeout: 2),
+                "\(role) must not expose Cancel order after swiping an open order"
+            )
+        }
+        openOrderRow.swipeRight()
+    }
+
+    private func captureHomeSurface(
+        app: XCUIApplication,
+        role: String,
+        title: String,
+        screen: String
+    ) {
+        selectRootTab(app: app, title: "Home")
+        XCTAssertTrue(
+            app.navigationBars["Home"].waitForExistence(timeout: 10),
+            "\(role) could not return to Home before opening \(title)"
+        )
+
+        let homeScroll = app.scrollViews.firstMatch
+        for _ in 0..<8 where homeScroll.exists {
+            homeScroll.swipeDown()
+        }
+
+        let titleElement = app.staticTexts[title]
+        var attempts = 0
+        while (!titleElement.exists || !titleElement.isHittable) && attempts < 10 {
+            homeScroll.swipeUp()
+            attempts += 1
+        }
+        XCTAssertTrue(
+            titleElement.exists && titleElement.isHittable,
+            "\(role) cannot reach the \(title) Home card"
+        )
+        guard titleElement.exists, titleElement.isHittable else { return }
+
+        titleElement.tap()
+        XCTAssertTrue(
+            app.navigationBars[title].waitForExistence(timeout: 15),
+            "\(role) could not open \(title)"
+        )
+        sleep(2)
+        attach(code: "us", screen: screen)
+
+        let backButton = app.navigationBars.buttons.firstMatch
+        XCTAssertTrue(
+            backButton.waitForExistence(timeout: 5),
+            "\(title) did not expose a navigation-back button"
+        )
+        if backButton.exists {
+            backButton.tap()
+        }
+    }
+
+    private func selectWallet(
+        app: XCUIApplication,
+        role: String,
+        displayName: String
+    ) {
+        let picker = app.buttons["wallet.picker"]
+        XCTAssertTrue(
+            picker.waitForExistence(timeout: 10),
+            "\(role) could not reach the wallet picker"
+        )
+        guard picker.exists else { return }
+        if picker.label.localizedCaseInsensitiveContains(displayName) {
+            return
+        }
+        picker.tap()
+
+        let option = app.buttons.matching(
+            NSPredicate(
+                format: "label == %@ AND identifier != %@",
+                displayName,
+                "wallet.picker"
+            )
+        ).firstMatch
+        XCTAssertTrue(
+            option.waitForExistence(timeout: 5),
+            "\(role) could not reach the \(displayName) wallet"
+        )
+        guard option.exists else { return }
+        option.tap()
+
+        let selectedPredicate = NSPredicate(
+            format: "label CONTAINS[c] %@",
+            displayName
+        )
+        let selectedExpectation = XCTNSPredicateExpectation(
+            predicate: selectedPredicate,
+            object: picker
+        )
+        XCTAssertEqual(
+            XCTWaiter.wait(for: [selectedExpectation], timeout: 10),
+            .completed,
+            "\(role) could not select the \(displayName) wallet"
+        )
+    }
+
+    private func captureRootTab(
+        app: XCUIApplication,
+        role: String,
+        tabTitle: String,
+        navigationTitle: String,
+        screen: String
+    ) {
+        selectRootTab(app: app, title: tabTitle)
+        XCTAssertTrue(
+            app.navigationBars[navigationTitle].waitForExistence(timeout: 15),
+            "\(role) could not open the \(tabTitle) root surface"
+        )
+        sleep(2)
+        attach(code: "us", screen: "uat-\(role)-tab-\(screen)")
+    }
+
+    private func selectRootTab(app: XCUIApplication, title: String) {
+        let directTab = app.tabBars.buttons.matching(
+            NSPredicate(format: "label BEGINSWITH %@", title)
+        ).firstMatch
+        if directTab.exists {
+            directTab.tap()
+            return
+        }
+
+        let moreTab = app.tabBars.buttons.matching(
+            NSPredicate(format: "label BEGINSWITH %@", "More")
+        ).firstMatch
+        XCTAssertTrue(
+            moreTab.waitForExistence(timeout: 5),
+            "Neither \(title) nor the More tab is reachable"
+        )
+        guard moreTab.exists else { return }
+        moreTab.tap()
+
+        let destination = app.staticTexts[title]
+        XCTAssertTrue(
+            destination.waitForExistence(timeout: 5),
+            "\(title) is missing from the More tab"
+        )
+        if destination.exists {
+            destination.tap()
+        }
     }
 
     private func captureTabSequence(app: XCUIApplication, code: String) {

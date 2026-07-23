@@ -93,8 +93,10 @@ struct OrdersView: View {
                                             .accessibilityLabel(LocalizedStringKey("orders.accessibility.label.cancelButton"))
                                             .disabled(order.planPublicId == nil)
                                         }
+                                        .accessibilityIdentifier("orders.open.row.\(order.publicId)")
                                 } else {
                                     OrderRow(order: order)
+                                        .accessibilityIdentifier("orders.open.row.\(order.publicId)")
                                 }
                             }
                         case .recent:
