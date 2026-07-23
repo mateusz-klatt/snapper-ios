@@ -27,6 +27,8 @@ enum PnlIncompletenessReason: String, Codable, Sendable {
     case netNonFinite = "net_non_finite"
     case attributionValueNonFinite = "attribution_value_non_finite"
     case attributionReconciliationFailed = "attribution_reconciliation_failed"
+    case instrumentReconciliationFailed = "instrument_reconciliation_failed"
+    case latePreActivationExecution = "late_pre_activation_execution"
 }
 
 enum PnlMarkerOutcome: String, Codable, Sendable {
