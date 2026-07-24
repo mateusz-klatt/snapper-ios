@@ -33,6 +33,14 @@ protocol APIClientProtocol: Sendable {
     func fetchExecutions() async throws -> [ExecutionRecord]
     func fetchWallets() async throws -> [WalletInfo]
     func fetchOperators() async throws -> [OperatorInfo]
+    func fetchPnlSeries(
+        walletPublicId: String,
+        mode: String,
+        granularity: String,
+        from: Date,
+        to: Date,
+        valuationCcy: String
+    ) async throws -> PnlSeriesData
 
     func createOrder(command: CreateOrderCommand) async throws -> ExecutionPlanResponse
     func cancelOrder(planPublicId: String, reason: String?) async throws -> ExecutionPlanResponse

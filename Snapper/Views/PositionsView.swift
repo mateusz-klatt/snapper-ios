@@ -21,6 +21,7 @@ struct PositionsView: View {
     @EnvironmentObject private var webSocketManager: WebSocketManager
     @State private var viewModel: PositionsViewModel?
 
+    @State private var segment: PositionsSegment = .current
     @State private var actionSheetPosition: PositionSnapshot?
     @State private var reduceModalPosition: IdentifiedPosition?
     @State private var bracketModalPosition: IdentifiedPosition?
@@ -29,8 +30,19 @@ struct PositionsView: View {
 
     var body: some View {
         NavigationStack {
-            Group {
-                if let viewModel {
+            VStack(spacing: 0) {
+                Picker(LocalizedStringKey("positions.view.label"), selection: $segment) {
+                    ForEach(PositionsSegment.allCases) { seg in
+                        Text(LocalizedStringKey(seg.titleKey)).tag(seg)
+                    }
+                }
+                .pickerStyle(.segmented)
+                .padding()
+
+                switch segment {
+                case .current:
+                    Group {
+                        if let viewModel {
                     if viewModel.isLoading && viewModel.filteredPositions.isEmpty {
                         ProgressView(LocalizedStringKey("positions.loading"))
                     } else if PositionsViewModel.shouldShowLoadError(
@@ -76,6 +88,10 @@ struct PositionsView: View {
                         .background(Color.bgBase)
                         .refreshable { await viewModel.load() }
                     }
+                }
+                    }
+                case .pnlTimeline:
+                    PnlTimelineView()
                 }
             }
             .navigationTitle(LocalizedStringKey("positions.navTitle"))
@@ -203,6 +219,24 @@ struct PositionsView: View {
             }
         } message: { error in
             Text(error)
+        }
+    }
+}
+
+/// In-screen sub-surface toggle for ``PositionsView``: the live
+/// positions list vs. the read-only P&L timeline. Mirrors the web
+/// `'current' | 'timeline'` segmented view.
+enum PositionsSegment: String, CaseIterable, Identifiable {
+    case current
+    case pnlTimeline
+
+    var id: String { rawValue }
+
+    /// Catalog key for the segment's control label.
+    var titleKey: String {
+        switch self {
+        case .current: return "positions.view.current"
+        case .pnlTimeline: return "positions.view.timeline"
         }
     }
 }

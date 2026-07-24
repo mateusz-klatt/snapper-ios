@@ -67,7 +67,20 @@ final class APIClientSurfaceTests: XCTestCase {
         let users = try await apiClient.fetchUsers()
         let delegates = try await apiClient.fetchDelegates()
         let accounts = try await apiClient.fetchAccounts()
+        let pnlFrom = Date(timeIntervalSince1970: 1_767_225_600)
+        let pnlTo = Date(timeIntervalSince1970: 1_767_312_000)
+        let series = try await apiClient.fetchPnlSeries(
+            walletPublicId: "wallet-1",
+            mode: "paper",
+            granularity: "1h",
+            from: pnlFrom,
+            to: pnlTo,
+            valuationCcy: "EUR"
+        )
 
+        XCTAssertEqual(series.points.first?.netPnl, 12.0)
+        XCTAssertEqual(series.mode, "paper")
+        XCTAssertEqual(series.valuationCcy, "EUR")
         XCTAssertEqual(aiReviews.first?.reviewPublicId, "review-1")
         XCTAssertEqual(aiReviews.first?.decision, "approve")
         XCTAssertEqual(strategies.first?.name, "strategy_macd_btc")
@@ -83,7 +96,7 @@ final class APIClientSurfaceTests: XCTestCase {
             "GET", "GET", "PATCH", "GET", "PATCH",
             "GET", "POST",
             "GET", "GET", "GET",
-            "GET", "GET", "GET", "GET", "GET", "GET", "GET"
+            "GET", "GET", "GET", "GET", "GET", "GET", "GET", "GET"
         ])
         XCTAssertEqual(snapshots.map(\.path), [
             "/api/orders",
@@ -118,8 +131,24 @@ final class APIClientSurfaceTests: XCTestCase {
             "/api/strategies",
             "/api/auth/users",
             "/api/ai-delegates",
-            "/api/portfolio/accounts"
+            "/api/portfolio/accounts",
+            "/api/portfolio/pnl/series"
         ])
+        let pnlSeriesQuery = try XCTUnwrap(snapshots[33].query)
+        let pnlSeriesItems = URLComponents(string: "/?\(pnlSeriesQuery)")?.queryItems ?? []
+        let pnlDateFormatter = ISO8601DateFormatter()
+        pnlDateFormatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
+        XCTAssertEqual(
+            Set(pnlSeriesItems),
+            Set([
+                URLQueryItem(name: "wallet_public_id", value: "wallet-1"),
+                URLQueryItem(name: "mode", value: "paper"),
+                URLQueryItem(name: "granularity", value: "1h"),
+                URLQueryItem(name: "from", value: pnlDateFormatter.string(from: pnlFrom)),
+                URLQueryItem(name: "to", value: pnlDateFormatter.string(from: pnlTo)),
+                URLQueryItem(name: "valuation_ccy", value: "EUR"),
+            ])
+        )
         let cachedCandlesQuery = try XCTUnwrap(snapshots[23].query)
         let cachedCandlesItems = URLComponents(string: "/?\(cachedCandlesQuery)")?.queryItems ?? []
         XCTAssertEqual(
@@ -257,6 +286,9 @@ final class APIClientSurfaceTests: XCTestCase {
         }
         if method == "GET", path == "/api/portfolio/accounts" {
             return listEnvelope(payload: [])
+        }
+        if method == "GET", path == "/api/portfolio/pnl/series" {
+            return envelope(payload: pnlSeriesPayload())
         }
         if method == "GET", path == "/api/signals" {
             return listEnvelope(payload: [])
@@ -497,6 +529,38 @@ final class APIClientSurfaceTests: XCTestCase {
             "end_date": "2026-02-01T00:00:00Z",
             "initial_cash": 10000,
             "status": "completed"
+        ]
+    }
+
+    private static func pnlSeriesPayload() -> [String: Any] {
+        return [
+            "type": "pnl_series",
+            "sequence_id": 1,
+            "public_id": "pnl-1",
+            "timestamp": "2026-01-01T00:00:00Z",
+            "session_id": "session-1",
+            "wallet_public_id": "wallet-1",
+            "mode": "paper",
+            "granularity": "1h",
+            "valuation_ccy": "EUR",
+            "from_time": "2026-01-01T00:00:00Z",
+            "to_time": "2026-01-02T00:00:00Z",
+            "as_of": "2026-01-02T00:00:00.123456Z",
+            "mark_source": "finalized_1m_candle_close",
+            "rate_sources": [],
+            "calc_version": "5A.13",
+            "points": [[
+                "point_time": "2026-01-01T12:00:00Z",
+                "realized_pnl": 10.5,
+                "fee_pnl": -0.5,
+                "accrual_pnl": 0.0,
+                "unrealized_pnl": 2.0,
+                "net_pnl": 12.0,
+                "valuation_status": "complete",
+                "incompleteness_reasons": [],
+                "per_instrument": [],
+                "attribution": []
+            ]]
         ]
     }
 

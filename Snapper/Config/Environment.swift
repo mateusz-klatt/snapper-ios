@@ -102,6 +102,14 @@ enum AppConfig {
             return "\(configuration.endpoints.portfolio)/accounts"
         }
 
+        /// Decomposed Net-P&L-since-activation series endpoint.
+        /// Derived from the ``Portfolio`` base (mirrors ``accounts``)
+        /// so no dedicated ``Configuration.plist`` key is required.
+        /// Full wire path resolves to ``/api/portfolio/pnl/series``.
+        static var pnlSeries: String {
+            return "\(configuration.endpoints.portfolio)/pnl/series"
+        }
+
         static var signals: String {
             return configuration.endpoints.signals
         }
