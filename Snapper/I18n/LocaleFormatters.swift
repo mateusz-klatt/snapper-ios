@@ -107,4 +107,20 @@ extension Double {
         let formatter = LocaleFormatters.percent(for: locale, fractionDigits: fractionDigits)
         return formatter.string(from: NSNumber(value: self)) ?? "0%"
     }
+
+    /// Signed P&L rendering for the timeline attribution / contribution
+    /// tables. Mirrors the web ``Intl.NumberFormat`` config
+    /// (``signDisplay: 'exceptZero'``, ``minimumFractionDigits: 2``,
+    /// ``maximumFractionDigits: 8``): a positive value renders with a
+    /// leading ``+``, a negative with ``-``, and a proven zero with no
+    /// sign. Digits stay Western (via ``westernDigitsLocale``) while the
+    /// decimal / grouping separators follow the locale's grammar.
+    func formattedSignedPnl(in locale: AppLocale) -> String {
+        return self.formatted(
+            .number
+                .precision(.fractionLength(2...8))
+                .sign(strategy: .always(includingZero: false))
+                .locale(locale.westernDigitsLocale)
+        )
+    }
 }

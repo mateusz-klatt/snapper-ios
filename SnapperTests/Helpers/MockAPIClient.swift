@@ -72,6 +72,9 @@ final class MockAPIClient: APIClientProtocol, @unchecked Sendable {
         var fetchOperators: @Sendable () async throws -> [OperatorInfo] = {
             throw APIError.invalidResponse
         }
+        var fetchPnlSeries: @Sendable (String, String, String, Date, Date, String) async throws -> PnlSeriesData = { _, _, _, _, _, _ in
+            throw APIError.invalidResponse
+        }
 
         var createOrder: @Sendable (CreateOrderCommand) async throws -> ExecutionPlanResponse = { _ in
             throw APIError.invalidResponse
@@ -205,6 +208,10 @@ final class MockAPIClient: APIClientProtocol, @unchecked Sendable {
     var fetchOperatorsHandler: @Sendable () async throws -> [OperatorInfo] {
         get { read(\.fetchOperators) }
         set { write(\.fetchOperators, newValue) }
+    }
+    var fetchPnlSeriesHandler: @Sendable (String, String, String, Date, Date, String) async throws -> PnlSeriesData {
+        get { read(\.fetchPnlSeries) }
+        set { write(\.fetchPnlSeries, newValue) }
     }
 
     var createOrderHandler: @Sendable (CreateOrderCommand) async throws -> ExecutionPlanResponse {
@@ -348,6 +355,17 @@ final class MockAPIClient: APIClientProtocol, @unchecked Sendable {
 
     func fetchOperators() async throws -> [OperatorInfo] {
         return try await fetchOperatorsHandler()
+    }
+
+    func fetchPnlSeries(
+        walletPublicId: String,
+        mode: String,
+        granularity: String,
+        from: Date,
+        to: Date,
+        valuationCcy: String
+    ) async throws -> PnlSeriesData {
+        return try await fetchPnlSeriesHandler(walletPublicId, mode, granularity, from, to, valuationCcy)
     }
 
     func createOrder(command: CreateOrderCommand) async throws -> ExecutionPlanResponse {

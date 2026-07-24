@@ -294,6 +294,43 @@ final class APIClient: Sendable, APIClientProtocol {
         return envelope.payload
     }
 
+    /// Fetch the decomposed Net-P&L-since-activation series for one
+    /// wallet via ``GET /api/portfolio/pnl/series``.
+    ///
+    /// The backend REQUIRES an explicit ``wallet_public_id`` (there is
+    /// no session active-wallet fallback) plus ``from``/``to`` window
+    /// bounds and a ``mode`` that must match the wallet's
+    /// ``is_paper`` flag. ``from``/``to`` are serialized as ISO-8601
+    /// with fractional seconds (matching the ``fetchCandles``
+    /// precedent).
+    ///
+    /// Routes through ``requestWithFractionalSecondsDates`` because the
+    /// server-resolved ``as_of`` horizon (and the envelope timestamps)
+    /// carry sub-second precision, which the strict ``.iso8601``
+    /// decoder in ``request(...)`` rejects.
+    func fetchPnlSeries(
+        walletPublicId: String,
+        mode: String,
+        granularity: String,
+        from: Date,
+        to: Date,
+        valuationCcy: String
+    ) async throws -> PnlSeriesData {
+        let formatter = ISO8601DateFormatter()
+        formatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
+        let items = [
+            QueryParameter(name: "wallet_public_id", value: walletPublicId),
+            QueryParameter(name: "mode", value: mode),
+            QueryParameter(name: "granularity", value: granularity),
+            QueryParameter(name: "from", value: formatter.string(from: from)),
+            QueryParameter(name: "to", value: formatter.string(from: to)),
+            QueryParameter(name: "valuation_ccy", value: valuationCcy),
+        ]
+        let path = "\(AppConfig.Endpoints.pnlSeries)\(Self.querySuffix(items))"
+        let envelope: PnlSeriesResponse = try await requestWithFractionalSecondsDates(endpoint: path)
+        return envelope.payload
+    }
+
     /// Submit a manual order via the existing ``POST /api/orders``
     /// route.
     ///
