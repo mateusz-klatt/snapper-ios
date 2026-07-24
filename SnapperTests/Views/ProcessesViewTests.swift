@@ -49,4 +49,67 @@ final class ProcessesViewTests: XCTestCase {
         XCTAssertEqual(ProcessesViewModel.formattedMemory(nil), "—")
         XCTAssertNotEqual(ProcessesViewModel.formattedMemory(12_345_678), "—")
     }
+
+    private func configured(
+        role: String = "core",
+        kind: String = "instance",
+        managedRemotely: Bool? = false,
+        enabled: Bool = true,
+        running: Bool = true
+    ) -> ConfiguredProcess {
+        return ConfiguredProcess(
+            sequenceId: 1,
+            publicId: "cfg-1",
+            timestamp: Date(timeIntervalSince1970: 0),
+            sessionId: "s",
+            name: "p",
+            enabled: enabled,
+            running: running,
+            mode: "process",
+            classPath: "snapper.X",
+            method: "run",
+            lifecycle: "long_running",
+            role: role,
+            isOneShot: false,
+            kind: kind,
+            managedRemotely: managedRemotely
+        )
+    }
+
+    /// A viewer (no ``manage:processes``) never sees controls, whatever
+    /// the row is.
+    func testViewerSeesNoControls() {
+        let mode = ProcessesViewModel.controlMode(
+            configured: configured(managedRemotely: false),
+            canManageProcesses: false
+        )
+        XCTAssertEqual(mode, .none)
+        XCTAssertFalse(ProcessesViewModel.showsRestart(mode: mode, running: true, configured: nil))
+    }
+
+    /// A local running row renders start-vs-stop as stop, plus restart.
+    func testLocalRunningRowRendersStopAndRestart() {
+        let cfg = configured(managedRemotely: false, running: true)
+        let mode = ProcessesViewModel.controlMode(configured: cfg, canManageProcesses: true)
+        XCTAssertEqual(mode, .local)
+        XCTAssertTrue(ProcessesViewModel.showsRestart(mode: mode, running: true, configured: cfg))
+    }
+
+    /// A remote enabled-but-stopped row still offers restart (the
+    /// coordinator bounces it on converge) and routes to desired-state.
+    func testRemoteEnabledStoppedRowRendersRestart() {
+        let cfg = configured(managedRemotely: true, enabled: true, running: false)
+        let mode = ProcessesViewModel.controlMode(configured: cfg, canManageProcesses: true)
+        XCTAssertEqual(mode, .remote)
+        XCTAssertTrue(ProcessesViewModel.showsRestart(mode: mode, running: false, configured: cfg))
+    }
+
+    /// A config-only executor template exposes no lifecycle controls.
+    func testTemplateRowRendersNoControls() {
+        let mode = ProcessesViewModel.controlMode(
+            configured: configured(kind: "template"),
+            canManageProcesses: true
+        )
+        XCTAssertEqual(mode, .none)
+    }
 }

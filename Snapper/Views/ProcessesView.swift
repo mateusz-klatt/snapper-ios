@@ -1,17 +1,43 @@
 import SwiftUI
 
-/// Read-only process monitor from `GET /api/processes/summary`: a
-/// per-category running/total header over a per-process list (name,
-/// role, running state, memory, CPU). Pushed from ``HomeView`` (nested
-/// in its ``NavigationStack``) rather than owning a tab, mirroring
-/// ``HealthView``. Not wallet-scoped (system-wide). Pull-to-refresh only
-/// — start / stop / restart and the live-heartbeat WebSocket are out of
-/// scope for this first cut.
+/// A pending destructive confirmation for one row: stop / disable (both
+/// use the stop copy) or restart. Start / enable are plain, non-destructive
+/// actions and bypass this flow.
+private struct ProcessConfirmRequest: Identifiable {
+    enum Kind {
+        case stop
+        case restart
+    }
+
+    let name: String
+    let kind: Kind
+    let mode: ProcessControlMode
+
+    var id: String {
+        return "\(name)-\(kind == .stop ? "stop" : "restart")"
+    }
+}
+
+/// Process monitor from `GET /api/processes/summary` with lifecycle
+/// controls: a per-category running/total header over a per-process list
+/// (name, role, running state, memory, CPU) plus per-row start / stop /
+/// restart and desired-state actions. Pushed from ``HomeView`` (nested in
+/// its ``NavigationStack``) rather than owning a tab, mirroring
+/// ``HealthView``. Not wallet-scoped (system-wide).
+///
+/// Controls appear only for a caller holding ``manage:processes`` and only
+/// on rows with a configured match that is neither a strategy/backtest role
+/// nor a config-only template — the routing (local start/stop vs remote
+/// desired-state) is decided by ``ProcessesViewModel/controlMode``. A stop,
+/// disable, or restart is confirmed first; a start or enable fires
+/// immediately. Pull-to-refresh plus the live process-event observer keep
+/// the list fresh (no optimistic updates).
 struct ProcessesView: View {
 
     @Environment(AppState.self) private var appState
     @EnvironmentObject private var webSocketManager: WebSocketManager
     @State private var viewModel: ProcessesViewModel?
+    @State private var confirmRequest: ProcessConfirmRequest?
 
     var body: some View {
         Group {
@@ -36,13 +62,48 @@ struct ProcessesView: View {
                         .padding()
                     }
                 } else if let summary = viewModel.summary {
-                    summaryList(summary, processes: viewModel.sortedProcesses)
+                    summaryList(viewModel, summary: summary, processes: viewModel.sortedProcesses)
                 }
             } else {
                 ProgressView(LocalizedStringKey("common.loading"))
             }
         }
         .navigationTitle(LocalizedStringKey("processes.navTitle"))
+        .confirmationDialog(
+            confirmTitle(for: confirmRequest),
+            isPresented: Binding(
+                get: { confirmRequest != nil },
+                set: { if !$0 { confirmRequest = nil } }
+            ),
+            titleVisibility: .visible,
+            presenting: confirmRequest
+        ) { request in
+            Button(
+                LocalizedStringKey(request.kind == .stop ? "processes.control.stop" : "processes.control.restart"),
+                role: .destructive
+            ) {
+                runConfirmed(request)
+            }
+            Button(LocalizedStringKey("processes.action.cancel"), role: .cancel) {
+                confirmRequest = nil
+            }
+        } message: { request in
+            confirmMessage(for: request)
+        }
+        .alert(
+            LocalizedStringKey("common.error.submissionFailed"),
+            isPresented: Binding(
+                get: { viewModel?.submitError != nil },
+                set: { if !$0 { viewModel?.submitError = nil } }
+            ),
+            presenting: viewModel?.submitError
+        ) { _ in
+            Button(LocalizedStringKey("common.ok"), role: .cancel) {
+                viewModel?.submitError = nil
+            }
+        } message: { error in
+            Text(verbatim: error)
+        }
         .task {
             if viewModel == nil {
                 viewModel = ProcessesViewModel()
@@ -61,7 +122,11 @@ struct ProcessesView: View {
         }
     }
 
-    private func summaryList(_ summary: ProcessSummaryData, processes: [ProcessSummaryItem]) -> some View {
+    private func summaryList(
+        _ viewModel: ProcessesViewModel,
+        summary: ProcessSummaryData,
+        processes: [ProcessSummaryItem]
+    ) -> some View {
         List {
             Section {
                 HStack(spacing: 12) {
@@ -78,7 +143,7 @@ struct ProcessesView: View {
                         .foregroundStyle(.secondary)
                 } else {
                     ForEach(processes, id: \.name) { item in
-                        ProcessRow(item: item)
+                        row(for: item, viewModel: viewModel)
                     }
                 }
             }
@@ -86,7 +151,47 @@ struct ProcessesView: View {
         .listStyle(.insetGrouped)
         .scrollContentBackground(.hidden)
         .background(Color.bgBase)
-        .refreshable { await viewModel?.load() }
+        .refreshable { await viewModel.load() }
+    }
+
+    private func row(for item: ProcessSummaryItem, viewModel: ProcessesViewModel) -> some View {
+        let mode = viewModel.controlMode(for: item.name)
+        return ProcessRow(
+            item: item,
+            mode: mode,
+            configured: viewModel.configuredByName[item.name],
+            isBusy: viewModel.isInFlight(item.name) || viewModel.isPending(item.name),
+            onStart: { Task { await viewModel.start(name: item.name, expected: mode) } },
+            onStop: { confirmRequest = ProcessConfirmRequest(name: item.name, kind: .stop, mode: mode) },
+            onRestart: { confirmRequest = ProcessConfirmRequest(name: item.name, kind: .restart, mode: mode) }
+        )
+    }
+
+    private func runConfirmed(_ request: ProcessConfirmRequest) {
+        guard let viewModel else { return }
+        Task {
+            switch request.kind {
+            case .stop:
+                await viewModel.stop(name: request.name, expected: request.mode)
+            case .restart:
+                await viewModel.restart(name: request.name, expected: request.mode)
+            }
+        }
+    }
+
+    private func confirmTitle(for request: ProcessConfirmRequest?) -> Text {
+        guard let request else { return Text(verbatim: "") }
+        let key = request.kind == .stop ? "processes.action.stop.title" : "processes.action.restart.title"
+        let language = appState.locale.catalogLanguage
+        let template = LocaleStrings.localized(key, in: language)
+        return Text(verbatim: String(format: template, locale: Locale(identifier: language.rawValue), request.name))
+    }
+
+    private func confirmMessage(for request: ProcessConfirmRequest) -> Text {
+        let key = request.kind == .stop ? "processes.action.stop.message" : "processes.action.restart.message"
+        let language = appState.locale.catalogLanguage
+        let template = LocaleStrings.localized(key, in: language)
+        return Text(verbatim: String(format: template, locale: Locale(identifier: language.rawValue), request.name))
     }
 
     private func categoryTile(labelKey: String, count: ProcessCategoryCount) -> some View {
@@ -102,9 +207,16 @@ struct ProcessesView: View {
     }
 }
 
-/// One process row: name + role tag + running badge, then memory / CPU.
+/// One process row: name + role tag + running badge, then memory / CPU,
+/// then (when the caller may control it) the lifecycle action buttons.
 private struct ProcessRow: View {
     let item: ProcessSummaryItem
+    let mode: ProcessControlMode
+    let configured: ConfiguredProcess?
+    let isBusy: Bool
+    let onStart: () -> Void
+    let onStop: () -> Void
+    let onRestart: () -> Void
 
     @Environment(AppState.self) private var appState
 
@@ -124,8 +236,86 @@ private struct ProcessRow: View {
                 metric(labelKey: "processes.field.cpu", value: cpuText)
                 Spacer()
             }
+            if mode != .none {
+                controls
+            }
         }
         .padding(.vertical, 4)
+    }
+
+    @ViewBuilder
+    private var controls: some View {
+        VStack(alignment: .leading, spacing: 6) {
+            if mode == .remote {
+                managedRemotelyNotice
+            }
+            HStack(spacing: 8) {
+                if item.running {
+                    stopButton
+                } else {
+                    startButton
+                }
+                if ProcessesViewModel.showsRestart(mode: mode, running: item.running, configured: configured) {
+                    restartButton
+                }
+            }
+        }
+        .padding(.top, 2)
+    }
+
+    private var startButton: some View {
+        Button(action: onStart) {
+            controlContent(isBusy ? "processes.control.starting" : "processes.control.start")
+        }
+        .buttonStyle(.bordered)
+        .tint(.green)
+        .disabled(isBusy)
+        .accessibilityIdentifier("processes.control.start.\(item.name)")
+    }
+
+    private var stopButton: some View {
+        Button(role: .destructive, action: onStop) {
+            controlContent(isBusy ? "processes.control.stopping" : "processes.control.stop")
+        }
+        .buttonStyle(.bordered)
+        .disabled(isBusy)
+        .accessibilityIdentifier("processes.control.stop.\(item.name)")
+    }
+
+    private var restartButton: some View {
+        Button(action: onRestart) {
+            controlContent("processes.control.restart")
+        }
+        .buttonStyle(.bordered)
+        .tint(.blue)
+        .disabled(isBusy)
+        .accessibilityIdentifier("processes.control.restart.\(item.name)")
+    }
+
+    private func controlContent(_ key: String) -> some View {
+        HStack(spacing: 6) {
+            if isBusy {
+                ProgressView().controlSize(.mini)
+            }
+            Text(LocalizedStringKey(key))
+                .font(.caption.weight(.medium))
+        }
+    }
+
+    private var managedRemotelyNotice: some View {
+        let language = appState.locale.catalogLanguage
+        let coordinator = configured?.coordinatorLabel
+            ?? configured?.coordinator
+            ?? LocaleStrings.localized("processes.control.remoteCoordinatorUnknown", in: language)
+        let template = LocaleStrings.localized("processes.control.managedRemotely", in: language)
+        return HStack(spacing: 6) {
+            Image(systemName: "dot.radiowaves.left.and.right")
+                .font(.caption2)
+                .foregroundStyle(.secondary)
+            Text(verbatim: String(format: template, locale: Locale(identifier: language.rawValue), coordinator))
+                .font(.caption2)
+                .foregroundStyle(.secondary)
+        }
     }
 
     private var runningBadge: some View {
@@ -196,6 +386,7 @@ struct ProcessesView_Previews: PreviewProvider {
         NavigationStack {
             ProcessesView()
                 .environment(AppState.shared)
+                .environmentObject(AuthService.shared)
                 .environmentObject(WebSocketManager.shared)
         }
     }

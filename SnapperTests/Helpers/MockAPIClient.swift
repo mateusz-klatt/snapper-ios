@@ -51,6 +51,9 @@ final class MockAPIClient: APIClientProtocol, @unchecked Sendable {
         var fetchProcessSummary: @Sendable () async throws -> ProcessSummaryData = {
             throw APIError.invalidResponse
         }
+        var fetchConfiguredProcesses: @Sendable () async throws -> [ConfiguredProcess] = {
+            throw APIError.invalidResponse
+        }
         var fetchAiReviews: @Sendable () async throws -> [AdminAiReviewItem] = {
             throw APIError.invalidResponse
         }
@@ -86,6 +89,16 @@ final class MockAPIClient: APIClientProtocol, @unchecked Sendable {
             throw APIError.invalidResponse
         }
         var createTrailingStop: @Sendable (TrailingStopCreateCommand) async throws -> ExecutionPlanResponse = { _ in
+            throw APIError.invalidResponse
+        }
+
+        var startProcess: @Sendable (String, ProcessStartBody) async throws -> ProcessStartData = { _, _ in
+            throw APIError.invalidResponse
+        }
+        var stopProcess: @Sendable (String) async throws -> ProcessStopData = { _ in
+            throw APIError.invalidResponse
+        }
+        var setProcessDesiredState: @Sendable (String, ProcessDesiredStateBody) async throws -> ProcessDesiredStateData = { _, _ in
             throw APIError.invalidResponse
         }
 
@@ -181,6 +194,10 @@ final class MockAPIClient: APIClientProtocol, @unchecked Sendable {
         get { read(\.fetchProcessSummary) }
         set { write(\.fetchProcessSummary, newValue) }
     }
+    var fetchConfiguredProcessesHandler: @Sendable () async throws -> [ConfiguredProcess] {
+        get { read(\.fetchConfiguredProcesses) }
+        set { write(\.fetchConfiguredProcesses, newValue) }
+    }
     var fetchAiReviewsHandler: @Sendable () async throws -> [AdminAiReviewItem] {
         get { read(\.fetchAiReviews) }
         set { write(\.fetchAiReviews, newValue) }
@@ -229,6 +246,19 @@ final class MockAPIClient: APIClientProtocol, @unchecked Sendable {
     var createTrailingStopHandler: @Sendable (TrailingStopCreateCommand) async throws -> ExecutionPlanResponse {
         get { read(\.createTrailingStop) }
         set { write(\.createTrailingStop, newValue) }
+    }
+
+    var startProcessHandler: @Sendable (String, ProcessStartBody) async throws -> ProcessStartData {
+        get { read(\.startProcess) }
+        set { write(\.startProcess, newValue) }
+    }
+    var stopProcessHandler: @Sendable (String) async throws -> ProcessStopData {
+        get { read(\.stopProcess) }
+        set { write(\.stopProcess, newValue) }
+    }
+    var setProcessDesiredStateHandler: @Sendable (String, ProcessDesiredStateBody) async throws -> ProcessDesiredStateData {
+        get { read(\.setProcessDesiredState) }
+        set { write(\.setProcessDesiredState, newValue) }
     }
 
     var fetchInstrumentsHandler: @Sendable (String) async throws -> [InstrumentDetailData] {
@@ -329,6 +359,10 @@ final class MockAPIClient: APIClientProtocol, @unchecked Sendable {
         return try await fetchProcessSummaryHandler()
     }
 
+    func fetchConfiguredProcesses() async throws -> [ConfiguredProcess] {
+        return try await fetchConfiguredProcessesHandler()
+    }
+
     func fetchAiReviews() async throws -> [AdminAiReviewItem] {
         return try await fetchAiReviewsHandler()
     }
@@ -382,6 +416,21 @@ final class MockAPIClient: APIClientProtocol, @unchecked Sendable {
 
     func createTrailingStop(command: TrailingStopCreateCommand) async throws -> ExecutionPlanResponse {
         return try await createTrailingStopHandler(command)
+    }
+
+    func startProcess(name: String, body: ProcessStartBody) async throws -> ProcessStartData {
+        return try await startProcessHandler(name, body)
+    }
+
+    func stopProcess(name: String) async throws -> ProcessStopData {
+        return try await stopProcessHandler(name)
+    }
+
+    func setProcessDesiredState(
+        name: String,
+        body: ProcessDesiredStateBody
+    ) async throws -> ProcessDesiredStateData {
+        return try await setProcessDesiredStateHandler(name, body)
     }
 
     func fetchInstruments(exchange: String) async throws -> [InstrumentDetailData] {

@@ -242,6 +242,23 @@ final class APIClient: Sendable, APIClientProtocol {
         return envelope.payload
     }
 
+    /// Fetch configured-process rows via ``GET /api/processes/configured``
+    /// (gated by ``read:processes`` server-side).
+    ///
+    /// Powers ``ProcessesView``'s control routing: the summary feed drives
+    /// the row list and its metrics, while these rows carry the
+    /// discriminators (``kind`` / ``managedRemotely`` / ``role`` /
+    /// ``coordinator``) needed to decide whether a row gets local
+    /// start/stop, a desired-state PATCH, or no controls at all. Joined by
+    /// ``name`` in the ViewModel; a summary row with no configured match
+    /// gets no controls.
+    func fetchConfiguredProcesses() async throws -> [ConfiguredProcess] {
+        let envelope: ConfiguredProcessesResponse = try await request(
+            endpoint: AppConfig.Endpoints.processConfigured
+        )
+        return envelope.payload
+    }
+
     func fetchAiReviews() async throws -> [AdminAiReviewItem] {
         let envelope: AdminAiReviewListResponse = try await request(endpoint: AppConfig.Endpoints.aiReviews)
         return envelope.items
@@ -394,6 +411,103 @@ final class APIClient: Sendable, APIClientProtocol {
             method: "POST",
             body: command
         )
+    }
+
+    /// Start a configured process via
+    /// ``POST /api/processes/{name}/start``.
+    ///
+    /// Wraps the caller's ``ProcessStartBody`` in a provenance-stamped
+    /// ``ProcessStartRequest`` envelope (minted from
+    /// ``EnvelopeMinter``) so the backend's ``StrictDataSchema`` gap
+    /// detector accepts the frame; the handler itself re-mints response
+    /// provenance and only reads ``payload``. ``already_running`` is a
+    /// benign HTTP 200 status on ``ProcessStartData`` — NOT an error — so
+    /// the ViewModel must never auto-retry a start.
+    ///
+    /// The shared ``request`` 401-refresh-replay is exactly-once-safe here:
+    /// 401 responses precede handler execution server-side (the auth
+    /// dependency rejects before the route body runs), so the single
+    /// refresh-replay preserves exactly-once semantics; no other automatic
+    /// retry exists. This is identical to the established ``createOrder``
+    /// money path.
+    func startProcess(name: String, body: ProcessStartBody) async throws -> ProcessStartData {
+        let provenance = await MainActor.run {
+            EnvelopeMinter.shared.next(.control)
+        }
+        let command = ProcessStartRequest(
+            type: "process_start_request",
+            sequenceId: provenance.sequenceId,
+            publicId: provenance.publicId,
+            timestamp: provenance.timestamp,
+            sessionId: provenance.sessionId,
+            topic: nil,
+            payload: body
+        )
+        let envelope: ProcessStartResponse = try await request(
+            endpoint: "\(AppConfig.Endpoints.processes)/\(Self.encodePathSegment(name))/start",
+            method: "POST",
+            body: command
+        )
+        return envelope.payload
+    }
+
+    /// Stop a running process via ``POST /api/processes/{name}/stop``.
+    ///
+    /// The route takes no body. ``not_running`` is a benign HTTP 200
+    /// status on ``ProcessStopData`` — NOT an error — so the ViewModel
+    /// must never auto-retry a stop.
+    ///
+    /// The shared ``request`` 401-refresh-replay is exactly-once-safe here:
+    /// 401 responses precede handler execution server-side, so the single
+    /// refresh-replay preserves exactly-once semantics; no other automatic
+    /// retry exists. This is identical to the established ``createOrder``
+    /// money path.
+    func stopProcess(name: String) async throws -> ProcessStopData {
+        let envelope: ProcessStopResponse = try await request(
+            endpoint: "\(AppConfig.Endpoints.processes)/\(Self.encodePathSegment(name))/stop",
+            method: "POST"
+        )
+        return envelope.payload
+    }
+
+    /// Persist a process's desired state via
+    /// ``PATCH /api/processes/{name}/desired-state``.
+    ///
+    /// Writes INTENT only (``enable`` / ``disable`` / ``restart``); the
+    /// owning coordinator's reconcile loop converges the actual running
+    /// state, so a success means "intent persisted", not "process is now
+    /// running/stopped". ``restart`` REQUIRES a client-minted
+    /// ``restart_nonce`` (``^[A-Za-z0-9_-]{8,64}$``) so a retried request
+    /// cannot double-bounce the process. Safe for a process owned by a
+    /// different container (never starts/stops anything locally).
+    ///
+    /// The shared ``request`` 401-refresh-replay is exactly-once-safe here:
+    /// 401 responses precede handler execution server-side, so the single
+    /// refresh-replay preserves exactly-once semantics; no other automatic
+    /// retry exists. This is identical to the established ``createOrder``
+    /// money path.
+    func setProcessDesiredState(
+        name: String,
+        body: ProcessDesiredStateBody
+    ) async throws -> ProcessDesiredStateData {
+        let provenance = await MainActor.run {
+            EnvelopeMinter.shared.next(.control)
+        }
+        let command = ProcessDesiredStateRequest(
+            type: "process_desired_state_request",
+            sequenceId: provenance.sequenceId,
+            publicId: provenance.publicId,
+            timestamp: provenance.timestamp,
+            sessionId: provenance.sessionId,
+            topic: nil,
+            payload: body
+        )
+        let envelope: ProcessDesiredStateResponse = try await request(
+            endpoint: "\(AppConfig.Endpoints.processes)/\(Self.encodePathSegment(name))/desired-state",
+            method: "PATCH",
+            body: command
+        )
+        return envelope.payload
     }
 
     /// Fetch capability-aware instrument rows for a venue via

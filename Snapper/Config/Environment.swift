@@ -175,6 +175,27 @@ enum AppConfig {
         static var trailingStops: String {
             return configuration.endpoints.trailingStops
         }
+
+        /// Root of the processes REST family, derived from
+        /// ``processSummary`` (``/processes/summary``) by dropping its
+        /// ``/summary`` leaf so no dedicated ``Configuration.plist`` key is
+        /// required. Full wire paths resolve to ``/api/processes`` (per-name
+        /// lifecycle mutations) and ``/api/processes/configured``.
+        static var processes: String {
+            let summary = configuration.endpoints.processSummary
+            let suffix = "/summary"
+            guard summary.hasSuffix(suffix) else { return summary }
+            return String(summary.dropLast(suffix.count))
+        }
+
+        /// Configured-process listing endpoint
+        /// (``/processes/configured``). Supplies the control-plane
+        /// discriminators (``kind`` / ``managedRemotely`` / ``role`` /
+        /// ``coordinator``) the summary feed lacks, joined by name in
+        /// ``ProcessesViewModel``.
+        static var processConfigured: String {
+            return "\(processes)/configured"
+        }
     }
 
     struct AppConfiguration {
