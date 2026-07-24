@@ -31,6 +31,48 @@ final class AlertsViewTests: XCTestCase {
         XCTAssertNotNil(row.body)
     }
 
+    func testDeepLinkStepIdleWhenNoPendingId() {
+        XCTAssertEqual(
+            AlertsView.deepLinkStep(pendingId: nil, targetPresent: false),
+            .idle
+        )
+        XCTAssertEqual(
+            AlertsView.deepLinkStep(pendingId: nil, targetPresent: true),
+            .idle
+        )
+    }
+
+    func testDeepLinkStepScrollsAndClearsWhenTargetPresent() {
+        XCTAssertEqual(
+            AlertsView.deepLinkStep(pendingId: "alert-1", targetPresent: true),
+            .scrollThenClear("alert-1")
+        )
+    }
+
+    /// Covers both the initial empty-list miss and a load FAILURE:
+    /// in either case the anchor is absent, so the step must retain
+    /// the pending id (never clear) so a later successful refresh can
+    /// still scroll to it.
+    func testDeepLinkStepFetchesAndRetainsWhenTargetAbsent() {
+        XCTAssertEqual(
+            AlertsView.deepLinkStep(pendingId: "alert-1", targetPresent: false),
+            .fetchAndRetain("alert-1")
+        )
+    }
+
+    func testDeepLinkStepResolvesWhenTargetAppearsAfterRetain() {
+        let pending = "alert-1"
+
+        XCTAssertEqual(
+            AlertsView.deepLinkStep(pendingId: pending, targetPresent: false),
+            .fetchAndRetain(pending)
+        )
+        XCTAssertEqual(
+            AlertsView.deepLinkStep(pendingId: pending, targetPresent: true),
+            .scrollThenClear(pending)
+        )
+    }
+
     func testNavigationCoordinatorPropagatesPendingAlertPublicId() async {
         let coordinator = NavigationCoordinator()
         let response = _makeResponse(userInfo: [
