@@ -754,6 +754,9 @@ final class I18nScreenshotUITests: XCTestCase {
             app.navigationBars[title].waitForExistence(timeout: 15),
             "\(role) could not open \(title)"
         )
+        if title == "Market data" {
+            waitForMarketDataReady(app: app, role: role)
+        }
         sleep(2)
         attach(code: "us", screen: screen)
 
@@ -765,6 +768,24 @@ final class I18nScreenshotUITests: XCTestCase {
         if backButton.exists {
             backButton.tap()
         }
+    }
+
+    private func waitForMarketDataReady(app: XCUIApplication, role: String) {
+        let selectedInstrument = app.buttons.matching(
+            NSPredicate(format: "label CONTAINS %@", "BTC-USD")
+        ).firstMatch
+        XCTAssertTrue(
+            selectedInstrument.waitForExistence(timeout: 30),
+            "\(role) did not auto-select BTC-USD on Market data"
+        )
+        XCTAssertTrue(
+            app.staticTexts["Live"].waitForExistence(timeout: 30),
+            "\(role) Market data did not reach the Live state"
+        )
+        XCTAssertFalse(
+            app.staticTexts["No candles yet"].exists,
+            "\(role) Market data rendered without candles"
+        )
     }
 
     private func selectWallet(
