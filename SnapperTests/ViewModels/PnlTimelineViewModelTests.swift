@@ -99,6 +99,10 @@ final class PnlTimelineViewModelTests: XCTestCase {
             accrualPnl: 0.0,
             unrealizedPnl: 2.5,
             netPnl: net,
+            equity: nil,
+            cash: nil,
+            positionValue: nil,
+            drawdown: nil,
             valuationStatus: status,
             incompletenessReasons: [],
             perInstrument: [],
@@ -122,6 +126,15 @@ final class PnlTimelineViewModelTests: XCTestCase {
             markSource: "finalized_1m_candle_close",
             rateSources: [],
             calcVersion: "5A.13",
+            equityCoverage: PnlEquityCoverageData(
+                sampled: false,
+                venueScope: nil,
+                externalFlowsAdjusted: nil,
+                completeMinutes: 0,
+                firstMinute: nil,
+                lastMinute: nil,
+                sampleCalcVersion: nil
+            ),
             points: points
         )
     }

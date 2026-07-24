@@ -1,14 +1,18 @@
+import CoreTransferable
 import SwiftUI
+import UniformTypeIdentifiers
 
 /// Read-only trading-signals feed. Mirrors ``PositionsView``'s
-/// loading / error / empty / list structure but carries no mutations —
-/// signals are strategy-generated buy/sell recommendations the user
-/// reviews, not acts on from this screen.
+/// loading / error / empty / list structure but carries no order
+/// mutations — signals are strategy-generated buy/sell recommendations
+/// the user reviews, not acts on from this screen.
 ///
 /// A summary header (total / buy / sell / average strength) sits above
-/// the list, matching the web Signals screen. Live updates are not
-/// wired (``WSState`` carries no ``lastSignal`` yet), so the feed
-/// refreshes via pull-to-refresh only.
+/// the list, matching the web Signals screen. A toolbar strategy filter
+/// narrows the list client-side, and a share-sheet export writes the
+/// currently filtered rows to a ``signals.csv`` document. Live updates
+/// arrive via ``SignalsViewModel/startObservingLiveUpdates(from:)`` (a
+/// debounced reload on ``signals.*`` pulses); pull-to-refresh remains.
 struct SignalsView: View {
 
     @Environment(AppState.self) private var appState
@@ -69,6 +73,16 @@ struct SignalsView: View {
             }
             .navigationTitle(LocalizedStringKey("signals.navTitle"))
             .toolbar {
+                if let viewModel, viewModel.showsStrategyFilter {
+                    ToolbarItem(placement: .topBarLeading) {
+                        StrategyFilterMenu(viewModel: viewModel)
+                    }
+                }
+                if let viewModel {
+                    ToolbarItem(placement: .topBarLeading) {
+                        SignalsExportButton(viewModel: viewModel)
+                    }
+                }
                 ToolbarItem(placement: .topBarTrailing) {
                     WalletPicker()
                 }
@@ -246,6 +260,70 @@ private struct SignalRow: View {
             value()
                 .font(.caption)
         }
+    }
+}
+
+/// Toolbar strategy filter — a menu-backed picker fed by the distinct
+/// strategy names in the loaded, wallet-scoped signals plus an "all"
+/// default. The selection is client-side and survives live reloads; the
+/// funnel fills when a strategy is active.
+private struct StrategyFilterMenu: View {
+    @Bindable var viewModel: SignalsViewModel
+
+    var body: some View {
+        Menu {
+            Picker(selection: $viewModel.selectedStrategy) {
+                Text(LocalizedStringKey("signals.filters.allStrategies"))
+                    .tag(String?.none)
+                ForEach(viewModel.availableStrategies, id: \.self) { name in
+                    Text(verbatim: name).tag(String?.some(name))
+                }
+            } label: {
+                EmptyView()
+            }
+            .pickerStyle(.inline)
+        } label: {
+            Image(systemName: viewModel.selectedStrategy == nil
+                ? "line.3.horizontal.decrease.circle"
+                : "line.3.horizontal.decrease.circle.fill")
+        }
+        .accessibilityLabel(Text(LocalizedStringKey("signals.filters.label")))
+    }
+}
+
+/// Toolbar CSV export — shares the currently filtered signals as a
+/// ``signals.csv`` document through the system share sheet. Disabled
+/// when the filtered list is empty.
+private struct SignalsExportButton: View {
+    let viewModel: SignalsViewModel
+
+    var body: some View {
+        ShareLink(
+            item: SignalsCSVDocument(rows: viewModel.filteredSignals),
+            preview: SharePreview(SignalsViewModel.exportFilename)
+        ) {
+            Label {
+                Text(LocalizedStringKey("signals.actions.export"))
+            } icon: {
+                Image(systemName: "square.and.arrow.up")
+            }
+        }
+        .disabled(!viewModel.canExport)
+    }
+}
+
+/// A ``Transferable`` CSV rendering of the filtered signals for
+/// ``ShareLink``. The CSV is built lazily — only when the share is
+/// actually performed — via the pure ``SignalsViewModel/csv(for:)``
+/// builder, and carries the deterministic ``signals.csv`` filename.
+private struct SignalsCSVDocument: Transferable {
+    let rows: [TradingSignal]
+
+    static var transferRepresentation: some TransferRepresentation {
+        DataRepresentation(exportedContentType: .commaSeparatedText) { document in
+            Data(SignalsViewModel.csv(for: document.rows).utf8)
+        }
+        .suggestedFileName(SignalsViewModel.exportFilename)
     }
 }
 

@@ -45,16 +45,18 @@ enum SignalStrengthTier {
     }
 }
 
-/// ViewModel for ``SignalsView`` — the read-only trading-signals feed.
+/// ViewModel for ``SignalsView`` — the trading-signals feed.
 ///
 /// Signals plumbing (``APIClientProtocol.fetchSignals``, the
 /// ``SignalData`` / ``TradingSignal`` type, ``AppConfig.Endpoints.signals``)
 /// already existed; this VM adds the presentation layer. It mirrors
 /// ``PositionsViewModel``'s shape — wallet-scoped filter, typed
-/// load-error handling, and pure ``static`` decision helpers — but is
-/// read-only: no submit flows and (until ``WSState`` carries a
-/// ``lastSignal``) no live-update observation, so the list refreshes
-/// via pull-to-refresh only.
+/// load-error handling, pure ``static`` decision helpers, and debounced
+/// live-reload observation. On top of the wallet scope it composes a
+/// client-side strategy filter (``selectedStrategy`` /
+/// ``availableStrategies``) and a pure, RFC-4180 CSV builder
+/// (``csv(for:)``) driving the share-sheet export. It stays read-only:
+/// no order submit flows.
 @MainActor
 @Observable
 final class SignalsViewModel {
@@ -62,6 +64,12 @@ final class SignalsViewModel {
     var signals: [TradingSignal] = []
     var isLoading: Bool = false
     var loadError: APIError?
+
+    /// Selected strategy for the client-side filter. ``nil`` is the
+    /// "all strategies" default. Held independently of ``signals`` so a
+    /// live reload preserves the selection; a value naming a strategy
+    /// absent from fresh data simply yields an empty filtered list.
+    var selectedStrategy: String?
 
     @ObservationIgnored private let liveUpdates = LiveUpdateObserver()
 
@@ -98,10 +106,45 @@ final class SignalsViewModel {
         liveUpdates.stop(session: token)
     }
 
-    var filteredSignals: [TradingSignal] {
+    /// Signals for the selected wallet only, before the strategy filter.
+    /// Feeds ``availableStrategies`` and the "is there anything to show or
+    /// export" decision so the strategy control stays reachable even when
+    /// the active strategy filter narrows the list to empty.
+    var walletScopedSignals: [TradingSignal] {
         return Self.filter(
             signals: signals,
             selectedWalletPublicId: appState.selectedWalletPublicId
+        )
+    }
+
+    /// Wallet scope composed with the client-side strategy filter.
+    var filteredSignals: [TradingSignal] {
+        return Self.applyStrategyFilter(
+            walletScopedSignals,
+            selectedStrategy: selectedStrategy
+        )
+    }
+
+    /// Distinct, first-appearance-ordered strategy names in the
+    /// wallet-scoped signals — the strategy picker's options. Scoped to
+    /// the selected wallet so the choices match the visible rows.
+    var availableStrategies: [String] {
+        return Self.distinctStrategies(from: walletScopedSignals)
+    }
+
+    /// Whether the CSV export has rows to write — drives the export
+    /// button's disabled state. The export control is always rendered
+    /// while the view model exists; this only toggles ``disabled``.
+    var canExport: Bool {
+        return !filteredSignals.isEmpty
+    }
+
+    /// Whether the strategy filter control should be shown — see
+    /// ``shouldShowStrategyFilter(hasStrategyOptions:hasSelection:)``.
+    var showsStrategyFilter: Bool {
+        return Self.shouldShowStrategyFilter(
+            hasStrategyOptions: !availableStrategies.isEmpty,
+            hasSelection: selectedStrategy != nil
         )
     }
 
@@ -206,5 +249,123 @@ final class SignalsViewModel {
         if strength >= 0.6 { return .medium }
         if strength >= 0.4 { return .weak }
         return .veryWeak
+    }
+
+    /// Client-side strategy predicate. A ``nil`` selection (the "all"
+    /// default) passes every row; otherwise the row's ``strategyName``
+    /// must equal the selection exactly, so a ``nil`` / empty row
+    /// strategy never matches a named selection.
+    static func strategyMatches(strategyName: String?, selectedStrategy: String?) -> Bool {
+        guard let selectedStrategy else { return true }
+        return strategyName == selectedStrategy
+    }
+
+    /// Apply the strategy filter to an already wallet-scoped list. A
+    /// ``nil`` selection passes the list through unchanged.
+    static func applyStrategyFilter(
+        _ signals: [TradingSignal],
+        selectedStrategy: String?
+    ) -> [TradingSignal] {
+        guard selectedStrategy != nil else { return signals }
+        return signals.filter {
+            strategyMatches(strategyName: $0.strategyName, selectedStrategy: selectedStrategy)
+        }
+    }
+
+    /// Whether the strategy filter control should be shown. It appears
+    /// when there are strategy options to pick from OR a selection is
+    /// currently active. The ``hasSelection`` arm is essential: a
+    /// retained selection that survives a reload into rows carrying only
+    /// ``nil`` / empty strategy names leaves ``availableStrategies``
+    /// empty, and without this the menu would vanish while the rows stay
+    /// filtered out — stranding the user with no way to clear back to
+    /// "all strategies".
+    static func shouldShowStrategyFilter(hasStrategyOptions: Bool, hasSelection: Bool) -> Bool {
+        return hasStrategyOptions || hasSelection
+    }
+
+    /// Distinct strategy names in first-appearance order, dropping
+    /// ``nil`` and empty names. Mirrors the web client's
+    /// ``Array.from(new Set(...filter(Boolean)))`` derivation.
+    static func distinctStrategies(from signals: [TradingSignal]) -> [String] {
+        var seen = Set<String>()
+        var ordered: [String] = []
+        for signal in signals {
+            guard let name = signal.strategyName, !name.isEmpty else { continue }
+            if seen.insert(name).inserted {
+                ordered.append(name)
+            }
+        }
+        return ordered
+    }
+
+    /// Deterministic filename for the exported CSV, shared by the share
+    /// sheet and asserted in tests. Matches the web export's
+    /// ``signals.csv`` pattern.
+    nonisolated static let exportFilename = "signals.csv"
+
+    /// Stable English column identifiers for the export. CSV headers are
+    /// a data-interchange contract, not localized UI, so they never route
+    /// through the catalog. The column set mirrors the web export.
+    nonisolated static let csvHeader: [String] = [
+        "instrument",
+        "exchange",
+        "side",
+        "strength",
+        "strategy",
+        "price",
+        "reason",
+        "fired_at",
+    ]
+
+    /// RFC-4180 field escaping: a field containing a comma, double quote,
+    /// carriage return, or line feed is wrapped in double quotes with any
+    /// embedded quote doubled. Every other field passes through unchanged.
+    nonisolated static func csvField(_ value: String) -> String {
+        let mustQuote = value.contains(",")
+            || value.contains("\"")
+            || value.contains("\n")
+            || value.contains("\r")
+        guard mustQuote else { return value }
+        let escaped = value.replacingOccurrences(of: "\"", with: "\"\"")
+        return "\"\(escaped)\""
+    }
+
+    /// ISO-8601 UTC timestamp with millisecond precision (e.g.
+    /// ``2023-11-14T22:13:20.000Z``), matching the web export's
+    /// ``Date.toISOString()`` so both platforms emit identical values.
+    nonisolated static func csvTimestamp(_ date: Date) -> String {
+        let formatter = ISO8601DateFormatter()
+        formatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
+        formatter.timeZone = TimeZone(identifier: "UTC")
+        return formatter.string(from: date)
+    }
+
+    /// The ordered CSV cells for one signal, aligned to ``csvHeader``.
+    /// ``strength`` and ``price`` use the shortest round-trippable
+    /// decimal; a ``nil`` price / strategy becomes an empty field.
+    nonisolated static func csvRow(for signal: TradingSignal) -> [String] {
+        return [
+            signal.instrument,
+            signal.exchange,
+            signal.side,
+            signal.strength.description,
+            signal.strategyName ?? "",
+            signal.price.map { $0.description } ?? "",
+            signal.reason,
+            Self.csvTimestamp(signal.firedAt),
+        ]
+    }
+
+    /// Build the full CSV document for the given signals: a header row
+    /// followed by one row per signal, fields RFC-4180 escaped, records
+    /// separated by CRLF. An empty list yields the header row alone.
+    nonisolated static func csv(for signals: [TradingSignal]) -> String {
+        let recordSeparator = "\r\n"
+        var lines: [String] = [Self.csvHeader.map(Self.csvField).joined(separator: ",")]
+        for signal in signals {
+            lines.append(Self.csvRow(for: signal).map(Self.csvField).joined(separator: ","))
+        }
+        return lines.joined(separator: recordSeparator)
     }
 }

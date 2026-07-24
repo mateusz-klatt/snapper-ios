@@ -221,6 +221,148 @@ final class SignalsViewModelTests: XCTestCase {
         let count = await counter.value
         XCTAssertEqual(count, 1, "cancellation during load must block observation start (no reconciliation reload)")
     }
+
+    func testSelectedStrategyDefaultsToNil() {
+        let viewModel = makeViewModel()
+        XCTAssertNil(viewModel.selectedStrategy)
+    }
+
+    /// The strategy options derive from the wallet-scoped signals, in
+    /// first-appearance order, so the picker offers only strategies whose
+    /// rows are actually visible for the selected wallet.
+    func testAvailableStrategiesAreWalletScopedAndOrdered() async {
+        appState.selectedWalletPublicId = "wallet-1"
+        let viewModel = makeViewModel()
+        let rows = [
+            makeSignal(publicId: "s-1", strategyName: "momentum", walletPublicId: "wallet-1"),
+            makeSignal(publicId: "s-2", strategyName: "reversion", walletPublicId: "wallet-1"),
+            makeSignal(publicId: "s-3", strategyName: "momentum", walletPublicId: "wallet-1"),
+            makeSignal(publicId: "s-4", strategyName: "other-wallet", walletPublicId: "wallet-2"),
+        ]
+        mockAPI.fetchSignalsHandler = { rows }
+        await viewModel.load()
+        XCTAssertEqual(viewModel.availableStrategies, ["momentum", "reversion"])
+    }
+
+    /// The filtered list composes the wallet scope with the strategy
+    /// selection.
+    func testFilteredSignalsComposesWalletAndStrategy() async {
+        appState.selectedWalletPublicId = "wallet-1"
+        let viewModel = makeViewModel()
+        let rows = [
+            makeSignal(publicId: "s-mom", strategyName: "momentum", walletPublicId: "wallet-1"),
+            makeSignal(publicId: "s-rev", strategyName: "reversion", walletPublicId: "wallet-1"),
+            makeSignal(publicId: "s-other", strategyName: "momentum", walletPublicId: "wallet-2"),
+        ]
+        mockAPI.fetchSignalsHandler = { rows }
+        await viewModel.load()
+        viewModel.selectedStrategy = "momentum"
+        XCTAssertEqual(viewModel.filteredSignals.map(\.publicId), ["s-mom"])
+    }
+
+    /// The selection persists across a reload. When fresh data still
+    /// carries the strategy the filter continues to apply; when it does
+    /// not, the filtered list is empty (no crash) while the selection is
+    /// retained.
+    func testSelectionSurvivesReloadAndAbsentStrategyYieldsEmpty() async {
+        appState.selectedWalletPublicId = "wallet-1"
+        let viewModel = makeViewModel()
+        let first = [makeSignal(publicId: "s-1", strategyName: "momentum", walletPublicId: "wallet-1")]
+        mockAPI.fetchSignalsHandler = { first }
+        await viewModel.load()
+        viewModel.selectedStrategy = "momentum"
+        XCTAssertEqual(viewModel.filteredSignals.map(\.publicId), ["s-1"])
+
+        let second = [makeSignal(publicId: "s-2", strategyName: "momentum", walletPublicId: "wallet-1")]
+        mockAPI.fetchSignalsHandler = { second }
+        await viewModel.load()
+        XCTAssertEqual(viewModel.selectedStrategy, "momentum")
+        XCTAssertEqual(viewModel.filteredSignals.map(\.publicId), ["s-2"])
+
+        let third = [makeSignal(publicId: "s-3", strategyName: "reversion", walletPublicId: "wallet-1")]
+        mockAPI.fetchSignalsHandler = { third }
+        await viewModel.load()
+        XCTAssertEqual(viewModel.selectedStrategy, "momentum")
+        XCTAssertTrue(viewModel.filteredSignals.isEmpty)
+    }
+
+    /// A retained selection that survives a reload into rows carrying
+    /// only nil / empty strategy names leaves the options empty, yet the
+    /// filter control must stay visible so the stale selection can be
+    /// cleared back to "all" — otherwise the rows are filtered out with
+    /// no escape.
+    func testFilterStaysVisibleWhenRetainedSelectionHasNoOptions() async {
+        appState.selectedWalletPublicId = "wallet-1"
+        let viewModel = makeViewModel()
+        let named = [makeSignal(publicId: "s-1", strategyName: "momentum", walletPublicId: "wallet-1")]
+        mockAPI.fetchSignalsHandler = { named }
+        await viewModel.load()
+        viewModel.selectedStrategy = "momentum"
+        XCTAssertTrue(viewModel.showsStrategyFilter)
+
+        let unnamed = [makeSignal(publicId: "s-2", strategyName: nil, walletPublicId: "wallet-1")]
+        mockAPI.fetchSignalsHandler = { unnamed }
+        await viewModel.load()
+        XCTAssertTrue(viewModel.availableStrategies.isEmpty)
+        XCTAssertEqual(viewModel.selectedStrategy, "momentum")
+        XCTAssertTrue(viewModel.filteredSignals.isEmpty)
+        XCTAssertTrue(viewModel.showsStrategyFilter, "menu must remain so a stale selection can be cleared")
+    }
+
+    /// With no selection and no named strategies the filter control is
+    /// hidden (nothing to filter by).
+    func testFilterHiddenWhenNoOptionsAndNoSelection() async {
+        appState.selectedWalletPublicId = "wallet-1"
+        let viewModel = makeViewModel()
+        XCTAssertFalse(viewModel.showsStrategyFilter)
+        let unnamed = [makeSignal(publicId: "s-1", strategyName: nil, walletPublicId: "wallet-1")]
+        mockAPI.fetchSignalsHandler = { unnamed }
+        await viewModel.load()
+        XCTAssertFalse(viewModel.showsStrategyFilter)
+    }
+
+    /// An entirely empty dataset leaves the export non-exportable — the
+    /// control is rendered whenever the view model exists and driven to
+    /// disabled by ``canExport``, never hidden.
+    func testCanExportFalseOnEmptyDataset() async {
+        appState.selectedWalletPublicId = "wallet-1"
+        let viewModel = makeViewModel()
+        XCTAssertFalse(viewModel.canExport)
+        let empty: [TradingSignal] = []
+        mockAPI.fetchSignalsHandler = { empty }
+        await viewModel.load()
+        XCTAssertTrue(viewModel.walletScopedSignals.isEmpty)
+        XCTAssertFalse(viewModel.canExport)
+    }
+
+    /// Stats follow the strategy-filtered list, matching the web summary
+    /// tiles which recompute when the filter changes.
+    func testStatsFollowStrategyFilter() async {
+        appState.selectedWalletPublicId = "wallet-1"
+        let viewModel = makeViewModel()
+        let rows = [
+            makeSignal(publicId: "s-1", side: "buy", strength: 0.9, strategyName: "momentum", walletPublicId: "wallet-1"),
+            makeSignal(publicId: "s-2", side: "sell", strength: 0.5, strategyName: "reversion", walletPublicId: "wallet-1"),
+        ]
+        mockAPI.fetchSignalsHandler = { rows }
+        await viewModel.load()
+        viewModel.selectedStrategy = "momentum"
+        XCTAssertEqual(viewModel.stats, SignalStats(total: 1, buy: 1, sell: 0, averageStrength: 0.9))
+    }
+
+    /// The export is disabled while there are no filtered rows and
+    /// enabled once the filter admits at least one.
+    func testCanExportReflectsFilteredRows() async {
+        appState.selectedWalletPublicId = "wallet-1"
+        let viewModel = makeViewModel()
+        XCTAssertFalse(viewModel.canExport)
+        let rows = [makeSignal(publicId: "s-1", strategyName: "momentum", walletPublicId: "wallet-1")]
+        mockAPI.fetchSignalsHandler = { rows }
+        await viewModel.load()
+        XCTAssertTrue(viewModel.canExport)
+        viewModel.selectedStrategy = "ghost"
+        XCTAssertFalse(viewModel.canExport)
+    }
 }
 
 private actor SignalsReloadCounter {
