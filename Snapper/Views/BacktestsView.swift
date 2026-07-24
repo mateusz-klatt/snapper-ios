@@ -34,15 +34,20 @@ struct BacktestsView: View {
                         .buttonStyle(.borderedProminent)
                         .padding()
                     }
-                } else if viewModel.backtests.isEmpty {
-                    ContentUnavailableView(
-                        LocalizedStringKey("backtests.empty.title"),
-                        systemImage: "chart.bar.xaxis",
-                        description: Text(LocalizedStringKey("backtests.empty.message"))
-                    )
                 } else {
-                    List(viewModel.backtests, id: \.publicId) { run in
-                        BacktestRow(run: run)
+                    List {
+                        if viewModel.backtests.isEmpty {
+                            ContentUnavailableView(
+                                LocalizedStringKey("backtests.empty.title"),
+                                systemImage: "chart.bar.xaxis",
+                                description: Text(LocalizedStringKey("backtests.empty.message"))
+                            )
+                            .listRowBackground(Color.clear)
+                        } else {
+                            ForEach(viewModel.backtests, id: \.publicId) { run in
+                                BacktestRow(run: run)
+                            }
+                        }
                     }
                     .listStyle(.insetGrouped)
                     .scrollContentBackground(.hidden)

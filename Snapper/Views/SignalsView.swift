@@ -37,20 +37,23 @@ struct SignalsView: View {
                             .buttonStyle(.borderedProminent)
                             .padding()
                         }
-                    } else if viewModel.filteredSignals.isEmpty {
-                        ContentUnavailableView(
-                            LocalizedStringKey("signals.empty.title"),
-                            systemImage: "waveform.path.ecg",
-                            description: Text(LocalizedStringKey("signals.empty.message"))
-                        )
                     } else {
                         List {
-                            Section {
-                                SignalStatsHeader(stats: viewModel.stats)
-                            }
-                            Section {
-                                ForEach(viewModel.filteredSignals, id: \.publicId) { signal in
-                                    SignalRow(signal: signal)
+                            if viewModel.filteredSignals.isEmpty {
+                                ContentUnavailableView(
+                                    LocalizedStringKey("signals.empty.title"),
+                                    systemImage: "waveform.path.ecg",
+                                    description: Text(LocalizedStringKey("signals.empty.message"))
+                                )
+                                .listRowBackground(Color.clear)
+                            } else {
+                                Section {
+                                    SignalStatsHeader(stats: viewModel.stats)
+                                }
+                                Section {
+                                    ForEach(viewModel.filteredSignals, id: \.publicId) { signal in
+                                        SignalRow(signal: signal)
+                                    }
                                 }
                             }
                         }

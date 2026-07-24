@@ -32,15 +32,20 @@ struct AdminView: View {
                         .buttonStyle(.borderedProminent)
                         .padding()
                     }
-                } else if viewModel.users.isEmpty {
-                    ContentUnavailableView(
-                        LocalizedStringKey("admin.empty.title"),
-                        systemImage: "person.2",
-                        description: Text(LocalizedStringKey("admin.empty.message"))
-                    )
                 } else {
-                    List(viewModel.sortedUsers, id: \.publicId) { user in
-                        UserRow(user: user)
+                    List {
+                        if viewModel.users.isEmpty {
+                            ContentUnavailableView(
+                                LocalizedStringKey("admin.empty.title"),
+                                systemImage: "person.2",
+                                description: Text(LocalizedStringKey("admin.empty.message"))
+                            )
+                            .listRowBackground(Color.clear)
+                        } else {
+                            ForEach(viewModel.sortedUsers, id: \.publicId) { user in
+                                UserRow(user: user)
+                            }
+                        }
                     }
                     .listStyle(.insetGrouped)
                     .scrollContentBackground(.hidden)

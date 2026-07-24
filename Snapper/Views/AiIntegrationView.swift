@@ -34,15 +34,20 @@ struct AiIntegrationView: View {
                         .buttonStyle(.borderedProminent)
                         .padding()
                     }
-                } else if viewModel.delegates.isEmpty {
-                    ContentUnavailableView(
-                        LocalizedStringKey("aiIntegration.empty.title"),
-                        systemImage: "sparkles",
-                        description: Text(LocalizedStringKey("aiIntegration.empty.message"))
-                    )
                 } else {
-                    List(viewModel.sortedDelegates, id: \.publicId) { delegate in
-                        DelegateRow(delegate: delegate)
+                    List {
+                        if viewModel.delegates.isEmpty {
+                            ContentUnavailableView(
+                                LocalizedStringKey("aiIntegration.empty.title"),
+                                systemImage: "sparkles",
+                                description: Text(LocalizedStringKey("aiIntegration.empty.message"))
+                            )
+                            .listRowBackground(Color.clear)
+                        } else {
+                            ForEach(viewModel.sortedDelegates, id: \.publicId) { delegate in
+                                DelegateRow(delegate: delegate)
+                            }
+                        }
                     }
                     .listStyle(.insetGrouped)
                     .scrollContentBackground(.hidden)

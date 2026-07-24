@@ -34,15 +34,20 @@ struct AiReviewsView: View {
                         .buttonStyle(.borderedProminent)
                         .padding()
                     }
-                } else if viewModel.reviews.isEmpty {
-                    ContentUnavailableView(
-                        LocalizedStringKey("aiReviews.empty.title"),
-                        systemImage: "brain",
-                        description: Text(LocalizedStringKey("aiReviews.empty.message"))
-                    )
                 } else {
-                    List(viewModel.reviews, id: \.reviewPublicId) { review in
-                        AiReviewRow(review: review)
+                    List {
+                        if viewModel.reviews.isEmpty {
+                            ContentUnavailableView(
+                                LocalizedStringKey("aiReviews.empty.title"),
+                                systemImage: "brain",
+                                description: Text(LocalizedStringKey("aiReviews.empty.message"))
+                            )
+                            .listRowBackground(Color.clear)
+                        } else {
+                            ForEach(viewModel.reviews, id: \.reviewPublicId) { review in
+                                AiReviewRow(review: review)
+                            }
+                        }
                     }
                     .listStyle(.insetGrouped)
                     .scrollContentBackground(.hidden)

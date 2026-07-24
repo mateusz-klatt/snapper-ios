@@ -33,15 +33,20 @@ struct StrategiesView: View {
                         .buttonStyle(.borderedProminent)
                         .padding()
                     }
-                } else if viewModel.strategies.isEmpty {
-                    ContentUnavailableView(
-                        LocalizedStringKey("strategies.empty.title"),
-                        systemImage: "brain.head.profile",
-                        description: Text(LocalizedStringKey("strategies.empty.message"))
-                    )
                 } else {
-                    List(viewModel.sortedStrategies, id: \.publicId) { strategy in
-                        StrategyRow(strategy: strategy)
+                    List {
+                        if viewModel.strategies.isEmpty {
+                            ContentUnavailableView(
+                                LocalizedStringKey("strategies.empty.title"),
+                                systemImage: "brain.head.profile",
+                                description: Text(LocalizedStringKey("strategies.empty.message"))
+                            )
+                            .listRowBackground(Color.clear)
+                        } else {
+                            ForEach(viewModel.sortedStrategies, id: \.publicId) { strategy in
+                                StrategyRow(strategy: strategy)
+                            }
+                        }
                     }
                     .listStyle(.insetGrouped)
                     .scrollContentBackground(.hidden)

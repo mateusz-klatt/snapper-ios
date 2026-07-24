@@ -39,11 +39,18 @@ struct HealthView: View {
                 } else if let health = viewModel.health {
                     healthList(health)
                 } else {
-                    ContentUnavailableView(
-                        LocalizedStringKey("health.empty.title"),
-                        systemImage: "heart.text.square",
-                        description: Text(LocalizedStringKey("health.empty.message"))
-                    )
+                    List {
+                        ContentUnavailableView(
+                            LocalizedStringKey("health.empty.title"),
+                            systemImage: "heart.text.square",
+                            description: Text(LocalizedStringKey("health.empty.message"))
+                        )
+                        .listRowBackground(Color.clear)
+                    }
+                    .listStyle(.insetGrouped)
+                    .scrollContentBackground(.hidden)
+                    .background(Color.bgBase)
+                    .refreshable { await viewModel.load() }
                 }
             } else {
                 ProgressView(LocalizedStringKey("common.loading"))
