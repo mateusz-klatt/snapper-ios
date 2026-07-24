@@ -30,4 +30,34 @@ final class WSState: ObservableObject {
     /// Drives the "delayed data" pill and feeds the metric
     /// card's `lastPrice` field on the Market screen.
     @Published var lastTick: TickData?
+    /// Pulse timestamp bumped for every `signal` frame. There is no
+    /// generated WS signal struct — the Signals screen refetches over
+    /// REST on each pulse — so this carries no payload, only the arrival
+    /// instant. Observed by ``SignalsViewModel`` via the Combine
+    /// `$lastSignalAt.values.dropFirst()` async-sequence pattern.
+    @Published var lastSignalAt: Date?
+    /// Latest `process_summary_event` frame. Frames are reload pulses:
+    /// ``ProcessesViewModel`` refetches the REST summary on change and
+    /// never renders the frame payload directly.
+    @Published var lastProcessSummary: ProcessSummaryEventData?
+    /// Latest `process_configured_event` frame — a reload pulse for
+    /// ``ProcessesViewModel``.
+    @Published var lastProcessConfigured: ProcessConfiguredEventData?
+    /// Latest `process_run_event` frame — a reload pulse for
+    /// ``ProcessesViewModel``.
+    @Published var lastProcessRun: ProcessRunEventData?
+    /// Latest `strategy_list_event` frame — a reload pulse for
+    /// ``StrategiesViewModel``.
+    @Published var lastStrategyList: StrategyListEventData?
+    /// Pulse timestamp bumped by any of the three ai_review frame types
+    /// (`ai_review.request` / `.decision_ack` / `.caps_violation`) once
+    /// the payload decodes. ``AiReviewsViewModel`` refetches the REST
+    /// audit list on each pulse; frame contents are never rendered.
+    @Published var lastAiReviewActivityAt: Date?
+    /// Per-component heartbeat map keyed by ``HeartbeatData/component``.
+    /// The single-slot ``lastHeartbeat`` remains last-wins across all
+    /// components; this map retains the most recent frame per component
+    /// so callers can inspect an individual feed/executor without the
+    /// last-wins slot clobbering it.
+    @Published var componentHeartbeats: [String: HeartbeatData] = [:]
 }

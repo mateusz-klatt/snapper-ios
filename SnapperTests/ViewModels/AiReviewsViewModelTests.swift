@@ -112,4 +112,55 @@ final class AiReviewsViewModelTests: XCTestCase {
         XCTAssertEqual(viewModel.reviews.count, 1, "Cached list must survive a failed refresh")
         XCTAssertNotNil(viewModel.loadError)
     }
+
+    private func makeWebSocketManager() -> WebSocketManager {
+        return WebSocketManager(
+            authService: FakeAuthService(nextToken: "t"),
+            taskFactory: FakeWebSocketTaskFactory(task: FakeWebSocketTask()),
+            sleeper: FakeSleeper()
+        )
+    }
+
+    /// An ai_review activity pulse arriving after the startup reconciliation
+    /// settles triggers exactly one additional debounced ``load()``.
+    func testLiveAiReviewPulseTriggersOneReload() async throws {
+        let viewModel = makeViewModel()
+        let manager = makeWebSocketManager()
+        let counter = AiReviewsReloadCounter()
+        mockAPI.fetchAiReviewsHandler = { await counter.increment(); return [] }
+
+        let token = viewModel.startObservingLiveUpdates(from: manager)
+        try await Task.sleep(nanoseconds: 500_000_000)
+        let baseline = await counter.value
+        manager.state.lastAiReviewActivityAt = Date()
+        try await Task.sleep(nanoseconds: 500_000_000)
+
+        let after = await counter.value
+        XCTAssertEqual(after, baseline + 1, "one ai_review pulse triggers exactly one reload")
+        viewModel.stopObservingLiveUpdates(token: token)
+    }
+
+    /// Stopping observation before the debounce fires leaves no pending
+    /// reload.
+    func testStopLeavesNoPendingReload() async throws {
+        let viewModel = makeViewModel()
+        let manager = makeWebSocketManager()
+        let counter = AiReviewsReloadCounter()
+        mockAPI.fetchAiReviewsHandler = { await counter.increment(); return [] }
+
+        let token = viewModel.startObservingLiveUpdates(from: manager)
+        try await Task.sleep(nanoseconds: 100_000_000)
+        manager.state.lastAiReviewActivityAt = Date()
+        try await Task.sleep(nanoseconds: 50_000_000)
+        viewModel.stopObservingLiveUpdates(token: token)
+        try await Task.sleep(nanoseconds: 500_000_000)
+
+        let count = await counter.value
+        XCTAssertEqual(count, 0, "stop before the debounce window must cancel the pending reload")
+    }
+}
+
+private actor AiReviewsReloadCounter {
+    var value: Int = 0
+    func increment() { value += 1 }
 }

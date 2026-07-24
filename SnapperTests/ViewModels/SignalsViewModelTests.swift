@@ -145,4 +145,104 @@ final class SignalsViewModelTests: XCTestCase {
         XCTAssertEqual(stats.sell, 1)
         XCTAssertEqual(stats.averageStrength, 0.7, accuracy: 0.0001)
     }
+
+    private func makeWebSocketManager() -> WebSocketManager {
+        return WebSocketManager(
+            authService: FakeAuthService(nextToken: "t"),
+            taskFactory: FakeWebSocketTaskFactory(task: FakeWebSocketTask()),
+            sleeper: FakeSleeper()
+        )
+    }
+
+    /// A `signal` pulse arriving after the startup reconciliation settles
+    /// triggers exactly one additional debounced ``load()``.
+    func testLiveSignalPulseTriggersOneReload() async throws {
+        let viewModel = makeViewModel()
+        let manager = makeWebSocketManager()
+        let counter = SignalsReloadCounter()
+        mockAPI.fetchSignalsHandler = { await counter.increment(); return [] }
+
+        let token = viewModel.startObservingLiveUpdates(from: manager)
+        try await Task.sleep(nanoseconds: 500_000_000)
+        let baseline = await counter.value
+        manager.state.lastSignalAt = Date()
+        try await Task.sleep(nanoseconds: 500_000_000)
+
+        let after = await counter.value
+        XCTAssertEqual(after, baseline + 1, "one signal pulse triggers exactly one reload")
+        viewModel.stopObservingLiveUpdates(token: token)
+    }
+
+    /// Stopping observation before the debounce fires leaves no pending
+    /// reload.
+    func testStopLeavesNoPendingReload() async throws {
+        let viewModel = makeViewModel()
+        let manager = makeWebSocketManager()
+        let counter = SignalsReloadCounter()
+        mockAPI.fetchSignalsHandler = { await counter.increment(); return [] }
+
+        let token = viewModel.startObservingLiveUpdates(from: manager)
+        try await Task.sleep(nanoseconds: 100_000_000)
+        manager.state.lastSignalAt = Date()
+        try await Task.sleep(nanoseconds: 50_000_000)
+        viewModel.stopObservingLiveUpdates(token: token)
+        try await Task.sleep(nanoseconds: 500_000_000)
+
+        let count = await counter.value
+        XCTAssertEqual(count, 0, "stop before the debounce window must cancel the pending reload")
+    }
+
+    /// R-A2: cancelling the enclosing task while the initial ``load()`` is
+    /// suspended must, via the view's post-load ``Task.isCancelled`` guard,
+    /// prevent observation from starting — so no startup reconciliation
+    /// reload fires. Replicates the view's `.task` flow with a gated load.
+    func testCancellationDuringSuspendedLoadPreventsObservation() async throws {
+        let viewModel = makeViewModel()
+        let manager = makeWebSocketManager()
+        let counter = SignalsReloadCounter()
+        let loadGate = SignalsLoadGate()
+        mockAPI.fetchSignalsHandler = {
+            await loadGate.wait()
+            await counter.increment()
+            return []
+        }
+
+        let task = Task { @MainActor in
+            await viewModel.load()
+            if Task.isCancelled { return }
+            _ = viewModel.startObservingLiveUpdates(from: manager)
+        }
+        try await Task.sleep(nanoseconds: 150_000_000)
+        task.cancel()
+        await loadGate.release()
+        _ = await task.value
+        try await Task.sleep(nanoseconds: 600_000_000)
+
+        let count = await counter.value
+        XCTAssertEqual(count, 1, "cancellation during load must block observation start (no reconciliation reload)")
+    }
+}
+
+private actor SignalsReloadCounter {
+    var value: Int = 0
+    func increment() { value += 1 }
+}
+
+/// Gate that suspends the first ``wait()`` until ``release()``. Models a
+/// slow / suspended initial load so a test can cancel the enclosing task
+/// mid-load deterministically.
+private actor SignalsLoadGate {
+    private var continuation: CheckedContinuation<Void, Never>?
+    private var released = false
+
+    func wait() async {
+        if released { return }
+        await withCheckedContinuation { continuation = $0 }
+    }
+
+    func release() {
+        released = true
+        continuation?.resume()
+        continuation = nil
+    }
 }

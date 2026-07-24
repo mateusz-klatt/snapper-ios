@@ -9,6 +9,7 @@ import SwiftUI
 /// are out of scope for this first cut.
 struct StrategiesView: View {
 
+    @EnvironmentObject private var webSocketManager: WebSocketManager
     @State private var viewModel: StrategiesViewModel?
 
     var body: some View {
@@ -63,6 +64,16 @@ struct StrategiesView: View {
                 viewModel = StrategiesViewModel()
             }
             await viewModel?.load()
+
+            guard !Task.isCancelled, let viewModel else { return }
+            let session = viewModel.startObservingLiveUpdates(from: webSocketManager)
+            await withTaskCancellationHandler {
+                try? await Task.sleep(nanoseconds: .max)
+            } onCancel: {
+                Task { @MainActor in
+                    viewModel.stopObservingLiveUpdates(token: session)
+                }
+            }
         }
     }
 }
@@ -155,6 +166,7 @@ struct StrategiesView_Previews: PreviewProvider {
         NavigationStack {
             StrategiesView()
                 .environment(AppState.shared)
+                .environmentObject(WebSocketManager.shared)
         }
     }
 }
