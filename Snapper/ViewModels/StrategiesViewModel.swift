@@ -1,3 +1,4 @@
+import Combine
 import Foundation
 import Observation
 import os
@@ -21,12 +22,34 @@ final class StrategiesViewModel {
     var isLoading: Bool = false
     var loadError: APIError?
 
+    @ObservationIgnored private let liveUpdates = LiveUpdateObserver()
+
     private let api: APIClientProtocol
 
     private let logger = AppLogger.make(category: "StrategiesViewModel")
 
     init(api: APIClientProtocol = APIClient.shared) {
         self.api = api
+    }
+
+    /// Begin observing live `strategy_list_event` frames plus the reconnect
+    /// heal for a debounced REST reload. Returns the session token to hand
+    /// back to ``stopObservingLiveUpdates(token:)`` so a stale view-task
+    /// teardown cannot stop a newer session.
+    @discardableResult
+    func startObservingLiveUpdates(from webSocketManager: WebSocketManager) -> UInt64 {
+        let state = webSocketManager.state
+        return liveUpdates.start(
+            slots: [LiveUpdateObserver.pulse(state.$lastStrategyList)],
+            connection: webSocketManager.$connectionState.eraseToAnyPublisher(),
+            reload: { [weak self] in await self?.load() }
+        )
+    }
+
+    /// Cancel observation + any pending debounced reload for `token`. A
+    /// stale token (a superseded session) is a no-op.
+    func stopObservingLiveUpdates(token: UInt64) {
+        liveUpdates.stop(session: token)
     }
 
     /// Name-sorted rows for a stable render order.

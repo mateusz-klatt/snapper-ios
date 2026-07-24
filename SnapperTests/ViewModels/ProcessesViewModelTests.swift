@@ -126,4 +126,69 @@ final class ProcessesViewModelTests: XCTestCase {
         await viewModel.load()
         XCTAssertEqual(viewModel.sortedProcesses.map(\.name), ["alpha", "mike", "zeta"])
     }
+
+    private func makeWebSocketManager() -> WebSocketManager {
+        return WebSocketManager(
+            authService: FakeAuthService(nextToken: "t"),
+            taskFactory: FakeWebSocketTaskFactory(task: FakeWebSocketTask()),
+            sleeper: FakeSleeper()
+        )
+    }
+
+    private func makeConfiguredEvent() -> ProcessConfiguredEventData {
+        return ProcessConfiguredEventData(
+            type: "process_configured_event",
+            sequenceId: 1,
+            publicId: "pce-1",
+            timestamp: Self.baseTimestamp,
+            sessionId: "session-test",
+            processNames: ["strategy_macd"],
+            snapshotAt: Self.baseTimestamp
+        )
+    }
+
+    /// A process-event frame arriving after the startup reconciliation
+    /// settles triggers exactly one additional debounced ``load()``.
+    func testLiveProcessEventTriggersOneReload() async throws {
+        let viewModel = makeViewModel()
+        let manager = makeWebSocketManager()
+        let counter = ProcessesReloadCounter()
+        let summary = makeSummary(processes: [makeItem(name: "trader")])
+        mockAPI.fetchProcessSummaryHandler = { await counter.increment(); return summary }
+
+        let token = viewModel.startObservingLiveUpdates(from: manager)
+        try await Task.sleep(nanoseconds: 500_000_000)
+        let baseline = await counter.value
+        manager.state.lastProcessConfigured = makeConfiguredEvent()
+        try await Task.sleep(nanoseconds: 500_000_000)
+
+        let after = await counter.value
+        XCTAssertEqual(after, baseline + 1, "one process event triggers exactly one reload")
+        viewModel.stopObservingLiveUpdates(token: token)
+    }
+
+    /// Stopping observation before the debounce fires leaves no pending
+    /// reload.
+    func testStopLeavesNoPendingReload() async throws {
+        let viewModel = makeViewModel()
+        let manager = makeWebSocketManager()
+        let counter = ProcessesReloadCounter()
+        let summary = makeSummary()
+        mockAPI.fetchProcessSummaryHandler = { await counter.increment(); return summary }
+
+        let token = viewModel.startObservingLiveUpdates(from: manager)
+        try await Task.sleep(nanoseconds: 100_000_000)
+        manager.state.lastProcessConfigured = makeConfiguredEvent()
+        try await Task.sleep(nanoseconds: 50_000_000)
+        viewModel.stopObservingLiveUpdates(token: token)
+        try await Task.sleep(nanoseconds: 500_000_000)
+
+        let count = await counter.value
+        XCTAssertEqual(count, 0, "stop before the debounce window must cancel the pending reload")
+    }
+}
+
+private actor ProcessesReloadCounter {
+    var value: Int = 0
+    func increment() { value += 1 }
 }

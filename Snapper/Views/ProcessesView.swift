@@ -10,6 +10,7 @@ import SwiftUI
 struct ProcessesView: View {
 
     @Environment(AppState.self) private var appState
+    @EnvironmentObject private var webSocketManager: WebSocketManager
     @State private var viewModel: ProcessesViewModel?
 
     var body: some View {
@@ -47,6 +48,16 @@ struct ProcessesView: View {
                 viewModel = ProcessesViewModel()
             }
             await viewModel?.load()
+
+            guard !Task.isCancelled, let viewModel else { return }
+            let session = viewModel.startObservingLiveUpdates(from: webSocketManager)
+            await withTaskCancellationHandler {
+                try? await Task.sleep(nanoseconds: .max)
+            } onCancel: {
+                Task { @MainActor in
+                    viewModel.stopObservingLiveUpdates(token: session)
+                }
+            }
         }
     }
 
@@ -185,6 +196,7 @@ struct ProcessesView_Previews: PreviewProvider {
         NavigationStack {
             ProcessesView()
                 .environment(AppState.shared)
+                .environmentObject(WebSocketManager.shared)
         }
     }
 }

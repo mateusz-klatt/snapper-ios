@@ -228,8 +228,14 @@ class WebSocketManager: ObservableObject {
     /// auth_complete / reauth_ok hook so subscribed traffic flows
     /// without iOS hardcoding named-role logic.
     private static let preferredDefaultTopics: [String] = [
-        "system.heartbeats.",
-        "orders.events.",
+        WSTopicRoot.heartbeats,
+        WSTopicRoot.orderEvents,
+        WSTopicRoot.signals,
+        WSTopicRoot.aiReviews,
+        WSTopicRoot.processSummary,
+        WSTopicRoot.processConfigured,
+        WSTopicRoot.processRuns,
+        WSTopicRoot.strategyList,
     ]
 
     /// Subscribe to the iOS preferred-defaults intersected with the
@@ -440,6 +446,7 @@ class WebSocketManager: ObservableObject {
             if let decoded = try? decoder.decode(HeartbeatData.self, from: data) {
                 state.lastHeartbeat = decoded
                 state.lastHeartbeatAt = Date()
+                state.componentHeartbeats[decoded.component] = decoded
             } else {
                 logger.warning("WS heartbeat frame decode failed (\(data.count) bytes)")
             }
@@ -460,6 +467,62 @@ class WebSocketManager: ObservableObject {
                 state.lastTick = decoded
             } else {
                 logger.warning("WS tick frame decode failed (\(data.count) bytes)")
+            }
+        case "signal":
+            /// No dedicated WS signal frame struct is generated, but the
+            /// wire shape matches the REST ``SignalData`` contract. Decode
+            /// against it to validate before pulsing — a malformed payload
+            /// must NOT pulse. The Signals screen refetches over REST on the
+            /// pulse; the decoded value itself is discarded.
+            if (try? decoder.decode(SignalData.self, from: data)) != nil {
+                state.lastSignalAt = Date()
+            } else {
+                logger.warning("WS signal frame decode failed (\(data.count) bytes)")
+            }
+        case "process_summary_event":
+            if let decoded = try? decoder.decode(ProcessSummaryEventData.self, from: data) {
+                state.lastProcessSummary = decoded
+            } else {
+                logger.warning("WS process_summary_event frame decode failed (\(data.count) bytes)")
+            }
+        case "process_configured_event":
+            if let decoded = try? decoder.decode(ProcessConfiguredEventData.self, from: data) {
+                state.lastProcessConfigured = decoded
+            } else {
+                logger.warning("WS process_configured_event frame decode failed (\(data.count) bytes)")
+            }
+        case "process_run_event":
+            if let decoded = try? decoder.decode(ProcessRunEventData.self, from: data) {
+                state.lastProcessRun = decoded
+            } else {
+                logger.warning("WS process_run_event frame decode failed (\(data.count) bytes)")
+            }
+        case "strategy_list_event":
+            if let decoded = try? decoder.decode(StrategyListEventData.self, from: data) {
+                state.lastStrategyList = decoded
+            } else {
+                logger.warning("WS strategy_list_event frame decode failed (\(data.count) bytes)")
+            }
+        case "ai_review.request":
+            /// Decode typed to validate the frame, then pulse. Only the
+            /// arrival triggers a REST refetch of the AI-reviews audit
+            /// list — the payload is never rendered client-side.
+            if (try? decoder.decode(AiReviewRequestFrameData.self, from: data)) != nil {
+                state.lastAiReviewActivityAt = Date()
+            } else {
+                logger.warning("WS ai_review.request frame decode failed (\(data.count) bytes)")
+            }
+        case "ai_review.decision_ack":
+            if (try? decoder.decode(AiReviewDecisionAckFrameData.self, from: data)) != nil {
+                state.lastAiReviewActivityAt = Date()
+            } else {
+                logger.warning("WS ai_review.decision_ack frame decode failed (\(data.count) bytes)")
+            }
+        case "ai_review.caps_violation":
+            if (try? decoder.decode(AiReviewCapsViolationFrameData.self, from: data)) != nil {
+                state.lastAiReviewActivityAt = Date()
+            } else {
+                logger.warning("WS ai_review.caps_violation frame decode failed (\(data.count) bytes)")
             }
         default:
             logger.debug("WS frame type=\(type, privacy: .public) carries no Combine binding yet")

@@ -1,3 +1,4 @@
+import Combine
 import Foundation
 import Observation
 import os
@@ -62,6 +63,8 @@ final class SignalsViewModel {
     var isLoading: Bool = false
     var loadError: APIError?
 
+    @ObservationIgnored private let liveUpdates = LiveUpdateObserver()
+
     private let api: APIClientProtocol
     private let appState: AppState
 
@@ -73,6 +76,26 @@ final class SignalsViewModel {
     ) {
         self.api = api
         self.appState = appState
+    }
+
+    /// Begin observing live `signal` pulses (plus the reconnect heal) for
+    /// a debounced REST reload. Returns the session token to hand back to
+    /// ``stopObservingLiveUpdates(token:)`` so a stale view-task teardown
+    /// cannot stop a newer session. Self-cleaning re-entry.
+    @discardableResult
+    func startObservingLiveUpdates(from webSocketManager: WebSocketManager) -> UInt64 {
+        let state = webSocketManager.state
+        return liveUpdates.start(
+            slots: [LiveUpdateObserver.pulse(state.$lastSignalAt)],
+            connection: webSocketManager.$connectionState.eraseToAnyPublisher(),
+            reload: { [weak self] in await self?.load() }
+        )
+    }
+
+    /// Cancel observation + any pending debounced reload for `token`. A
+    /// stale token (a superseded session) is a no-op.
+    func stopObservingLiveUpdates(token: UInt64) {
+        liveUpdates.stop(session: token)
     }
 
     var filteredSignals: [TradingSignal] {

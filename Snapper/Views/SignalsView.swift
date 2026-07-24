@@ -12,6 +12,7 @@ import SwiftUI
 struct SignalsView: View {
 
     @Environment(AppState.self) private var appState
+    @EnvironmentObject private var webSocketManager: WebSocketManager
     @State private var viewModel: SignalsViewModel?
 
     var body: some View {
@@ -78,6 +79,16 @@ struct SignalsView: View {
                 viewModel = SignalsViewModel(appState: appState)
             }
             await viewModel?.load()
+
+            guard !Task.isCancelled, let viewModel else { return }
+            let session = viewModel.startObservingLiveUpdates(from: webSocketManager)
+            await withTaskCancellationHandler {
+                try? await Task.sleep(nanoseconds: .max)
+            } onCancel: {
+                Task { @MainActor in
+                    viewModel.stopObservingLiveUpdates(token: session)
+                }
+            }
         }
     }
 }
@@ -243,5 +254,6 @@ struct SignalsView_Previews: PreviewProvider {
         SignalsView()
             .environment(AppState.shared)
             .environmentObject(AuthService.shared)
+            .environmentObject(WebSocketManager.shared)
     }
 }
