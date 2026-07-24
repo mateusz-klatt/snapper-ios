@@ -26,6 +26,7 @@ protocol APIClientProtocol: Sendable {
     func fetchSignals() async throws -> [TradingSignal]
     func fetchBacktests() async throws -> [BacktestRunData]
     func fetchProcessSummary() async throws -> ProcessSummaryData
+    func fetchConfiguredProcesses() async throws -> [ConfiguredProcess]
     func fetchAiReviews() async throws -> [AdminAiReviewItem]
     func fetchStrategies() async throws -> [StrategyProcess]
     func fetchUsers() async throws -> [UserProfile]
@@ -46,6 +47,13 @@ protocol APIClientProtocol: Sendable {
     func cancelOrder(planPublicId: String, reason: String?) async throws -> ExecutionPlanResponse
     func createBracket(command: BracketCreateCommand) async throws -> ExecutionPlanResponse
     func createTrailingStop(command: TrailingStopCreateCommand) async throws -> ExecutionPlanResponse
+
+    func startProcess(name: String, body: ProcessStartBody) async throws -> ProcessStartData
+    func stopProcess(name: String) async throws -> ProcessStopData
+    func setProcessDesiredState(
+        name: String,
+        body: ProcessDesiredStateBody
+    ) async throws -> ProcessDesiredStateData
 
     func fetchInstruments(exchange: String) async throws -> [InstrumentDetailData]
     func fetchExchanges() async throws -> [String]

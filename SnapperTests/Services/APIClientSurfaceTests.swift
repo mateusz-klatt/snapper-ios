@@ -77,7 +77,22 @@ final class APIClientSurfaceTests: XCTestCase {
             to: pnlTo,
             valuationCcy: "EUR"
         )
+        let restartNonce = "restartnonce012345"
+        _ = try await apiClient.fetchConfiguredProcesses()
+        let startData = try await apiClient.startProcess(
+            name: "feed/pub",
+            body: ProcessStartBody(mode: nil, parameters: nil)
+        )
+        let stopData = try await apiClient.stopProcess(name: "feed/pub")
+        let desiredData = try await apiClient.setProcessDesiredState(
+            name: "feed/pub",
+            body: ProcessDesiredStateBody(action: "restart", restartNonce: restartNonce)
+        )
 
+        XCTAssertEqual(startData.status, "success")
+        XCTAssertEqual(stopData.status, "not_running")
+        XCTAssertEqual(desiredData.action, "restart")
+        XCTAssertFalse(desiredData.managedRemotely)
         XCTAssertEqual(series.points.first?.netPnl, 12.0)
         XCTAssertEqual(series.mode, "paper")
         XCTAssertEqual(series.valuationCcy, "EUR")
@@ -96,7 +111,8 @@ final class APIClientSurfaceTests: XCTestCase {
             "GET", "GET", "PATCH", "GET", "PATCH",
             "GET", "POST",
             "GET", "GET", "GET",
-            "GET", "GET", "GET", "GET", "GET", "GET", "GET", "GET"
+            "GET", "GET", "GET", "GET", "GET", "GET", "GET", "GET",
+            "GET", "POST", "POST", "PATCH"
         ])
         XCTAssertEqual(snapshots.map(\.path), [
             "/api/orders",
@@ -132,7 +148,11 @@ final class APIClientSurfaceTests: XCTestCase {
             "/api/auth/users",
             "/api/ai-delegates",
             "/api/portfolio/accounts",
-            "/api/portfolio/pnl/series"
+            "/api/portfolio/pnl/series",
+            "/api/processes/configured",
+            "/api/processes/feed%2Fpub/start",
+            "/api/processes/feed%2Fpub/stop",
+            "/api/processes/feed%2Fpub/desired-state"
         ])
         let pnlSeriesQuery = try XCTUnwrap(snapshots[33].query)
         let pnlSeriesItems = URLComponents(string: "/?\(pnlSeriesQuery)")?.queryItems ?? []
@@ -184,6 +204,39 @@ final class APIClientSurfaceTests: XCTestCase {
         XCTAssertNotNil(langBody["session_id"] as? String)
         let langPayload = try XCTUnwrap(langBody["payload"] as? [String: Any])
         XCTAssertEqual(langPayload["default_language"] as? String, "pl")
+
+        let startBody = try XCTUnwrap(snapshots[35].jsonBody)
+        XCTAssertEqual(startBody["type"] as? String, "process_start_request")
+        let startPublicId = try XCTUnwrap(startBody["public_id"] as? String)
+        XCTAssertFalse(startPublicId.isEmpty)
+        let startSession = try XCTUnwrap(startBody["session_id"] as? String)
+        XCTAssertFalse(startSession.isEmpty)
+        let startSequence = try XCTUnwrap(startBody["sequence_id"] as? Int)
+        let startTimestamp = try XCTUnwrap(startBody["timestamp"] as? String)
+        XCTAssertFalse(startTimestamp.isEmpty)
+        XCTAssertNotNil(startBody["payload"] as? [String: Any])
+
+        XCTAssertNil(snapshots[36].jsonBody, "stop takes no request body")
+
+        let desiredBody = try XCTUnwrap(snapshots[37].jsonBody)
+        XCTAssertEqual(desiredBody["type"] as? String, "process_desired_state_request")
+        let desiredPublicId = try XCTUnwrap(desiredBody["public_id"] as? String)
+        XCTAssertFalse(desiredPublicId.isEmpty)
+        let desiredSession = try XCTUnwrap(desiredBody["session_id"] as? String)
+        XCTAssertFalse(desiredSession.isEmpty)
+        let desiredSequence = try XCTUnwrap(desiredBody["sequence_id"] as? Int)
+        let desiredTimestamp = try XCTUnwrap(desiredBody["timestamp"] as? String)
+        XCTAssertFalse(desiredTimestamp.isEmpty)
+        XCTAssertEqual(startSession, desiredSession, "both mutations share the launch EnvelopeMinter session")
+        XCTAssertNotEqual(startPublicId, desiredPublicId, "each mint stamps a fresh public_id")
+        XCTAssertGreaterThan(
+            desiredSequence,
+            startSequence,
+            "desired-state follows start on the monotonic .control sequence counter"
+        )
+        let desiredPayload = try XCTUnwrap(desiredBody["payload"] as? [String: Any])
+        XCTAssertEqual(desiredPayload["action"] as? String, "restart")
+        XCTAssertEqual(desiredPayload["restart_nonce"] as? String, "restartnonce012345")
     }
 
     func testServerErrorDetailAndPlainStatusErrors() async throws {
@@ -298,6 +351,18 @@ final class APIClientSurfaceTests: XCTestCase {
         }
         if method == "GET", path == "/api/processes/summary" {
             return envelope(payload: processSummaryPayload())
+        }
+        if method == "GET", path == "/api/processes/configured" {
+            return listEnvelope(payload: [])
+        }
+        if method == "POST", path == "/api/processes/feed%2Fpub/start" {
+            return envelope(payload: processStartDataPayload())
+        }
+        if method == "POST", path == "/api/processes/feed%2Fpub/stop" {
+            return envelope(payload: processStopDataPayload())
+        }
+        if method == "PATCH", path == "/api/processes/feed%2Fpub/desired-state" {
+            return envelope(payload: processDesiredStateDataPayload())
         }
         if method == "GET", path == "/api/ai-reviews" {
             return ["items": [aiReviewPayload()], "count": 1]
@@ -510,6 +575,42 @@ final class APIClientSurfaceTests: XCTestCase {
                     "cpu_percent": 3.5
                 ]
             ]
+        ]
+    }
+
+    private static func processStartDataPayload() -> [String: Any] {
+        return [
+            "sequence_id": 1,
+            "public_id": "pstart-1",
+            "timestamp": "2026-01-01T00:00:00Z",
+            "session_id": "session-1",
+            "status": "success",
+            "name": "feed/pub",
+            "process_public_id": "proc-1"
+        ]
+    }
+
+    private static func processStopDataPayload() -> [String: Any] {
+        return [
+            "sequence_id": 1,
+            "public_id": "pstop-1",
+            "timestamp": "2026-01-01T00:00:00Z",
+            "session_id": "session-1",
+            "status": "not_running",
+            "name": "feed/pub"
+        ]
+    }
+
+    private static func processDesiredStateDataPayload() -> [String: Any] {
+        return [
+            "sequence_id": 1,
+            "public_id": "pdesired-1",
+            "timestamp": "2026-01-01T00:00:00Z",
+            "session_id": "session-1",
+            "status": "success",
+            "name": "feed/pub",
+            "action": "restart",
+            "managed_remotely": false
         ]
     }
 
