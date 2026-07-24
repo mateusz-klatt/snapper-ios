@@ -549,6 +549,15 @@ final class APIClientSurfaceTests: XCTestCase {
             "mark_source": "finalized_1m_candle_close",
             "rate_sources": [],
             "calc_version": "5A.13",
+            "equity_coverage": [
+                "sampled": false,
+                "venue_scope": NSNull(),
+                "external_flows_adjusted": NSNull(),
+                "complete_minutes": 0,
+                "first_minute": NSNull(),
+                "last_minute": NSNull(),
+                "sample_calc_version": NSNull()
+            ],
             "points": [[
                 "point_time": "2026-01-01T12:00:00Z",
                 "realized_pnl": 10.5,
