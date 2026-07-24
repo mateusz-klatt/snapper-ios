@@ -7263,6 +7263,44 @@ struct PnlAttributionContributionData: Codable, Sendable {
     }
 }
 
+struct PnlEquityCoverageData: Codable, Sendable {
+    let sampled: Bool
+    let venueScope: String?
+    let externalFlowsAdjusted: Bool?
+    let completeMinutes: Int
+    let firstMinute: Date?
+    let lastMinute: Date?
+    let sampleCalcVersion: String?
+
+    init(
+        sampled: Bool,
+        venueScope: String?,
+        externalFlowsAdjusted: Bool?,
+        completeMinutes: Int,
+        firstMinute: Date?,
+        lastMinute: Date?,
+        sampleCalcVersion: String?
+    ) {
+        self.sampled = sampled
+        self.venueScope = venueScope
+        self.externalFlowsAdjusted = externalFlowsAdjusted
+        self.completeMinutes = completeMinutes
+        self.firstMinute = firstMinute
+        self.lastMinute = lastMinute
+        self.sampleCalcVersion = sampleCalcVersion
+    }
+
+    enum CodingKeys: String, CodingKey {
+        case sampled
+        case venueScope = "venue_scope"
+        case externalFlowsAdjusted = "external_flows_adjusted"
+        case completeMinutes = "complete_minutes"
+        case firstMinute = "first_minute"
+        case lastMinute = "last_minute"
+        case sampleCalcVersion = "sample_calc_version"
+    }
+}
+
 struct PnlFillMarkerData: Codable, Sendable {
     let kind: String?
     let markerTime: Date
@@ -7424,6 +7462,7 @@ struct PnlSeriesData: Codable, Sendable {
     let markSource: String
     let rateSources: [PnlFxRateSourceData]
     let calcVersion: String
+    let equityCoverage: PnlEquityCoverageData
     let points: [PnlTimelinePointData]
 
     init(
@@ -7443,6 +7482,7 @@ struct PnlSeriesData: Codable, Sendable {
         markSource: String,
         rateSources: [PnlFxRateSourceData],
         calcVersion: String,
+        equityCoverage: PnlEquityCoverageData,
         points: [PnlTimelinePointData]
     ) {
         self.type = type
@@ -7461,6 +7501,7 @@ struct PnlSeriesData: Codable, Sendable {
         self.markSource = markSource
         self.rateSources = rateSources
         self.calcVersion = calcVersion
+        self.equityCoverage = equityCoverage
         self.points = points
     }
 
@@ -7481,6 +7522,7 @@ struct PnlSeriesData: Codable, Sendable {
         case markSource = "mark_source"
         case rateSources = "rate_sources"
         case calcVersion = "calc_version"
+        case equityCoverage = "equity_coverage"
         case points
     }
 }
@@ -7594,6 +7636,7 @@ struct PnlTimelineData: Codable, Sendable {
     let markSource: String
     let rateSources: [PnlFxRateSourceData]
     let calcVersion: String
+    let equityCoverage: PnlEquityCoverageData
     let points: [PnlTimelinePointData]
     let markerLimit: Int
     let markersTruncated: Bool
@@ -7616,6 +7659,7 @@ struct PnlTimelineData: Codable, Sendable {
         markSource: String,
         rateSources: [PnlFxRateSourceData],
         calcVersion: String,
+        equityCoverage: PnlEquityCoverageData,
         points: [PnlTimelinePointData],
         markerLimit: Int,
         markersTruncated: Bool,
@@ -7637,6 +7681,7 @@ struct PnlTimelineData: Codable, Sendable {
         self.markSource = markSource
         self.rateSources = rateSources
         self.calcVersion = calcVersion
+        self.equityCoverage = equityCoverage
         self.points = points
         self.markerLimit = markerLimit
         self.markersTruncated = markersTruncated
@@ -7660,6 +7705,7 @@ struct PnlTimelineData: Codable, Sendable {
         case markSource = "mark_source"
         case rateSources = "rate_sources"
         case calcVersion = "calc_version"
+        case equityCoverage = "equity_coverage"
         case points
         case markerLimit = "marker_limit"
         case markersTruncated = "markers_truncated"
@@ -7674,6 +7720,10 @@ struct PnlTimelinePointData: Codable, Sendable {
     let accrualPnl: Double?
     let unrealizedPnl: Double?
     let netPnl: Double?
+    let equity: Double?
+    let cash: Double?
+    let positionValue: Double?
+    let drawdown: Double?
     let valuationStatus: PnlValuationStatus
     let incompletenessReasons: [PnlIncompletenessReasonData]
     let perInstrument: [PnlInstrumentContributionData]
@@ -7686,6 +7736,10 @@ struct PnlTimelinePointData: Codable, Sendable {
         accrualPnl: Double?,
         unrealizedPnl: Double?,
         netPnl: Double?,
+        equity: Double?,
+        cash: Double?,
+        positionValue: Double?,
+        drawdown: Double?,
         valuationStatus: PnlValuationStatus,
         incompletenessReasons: [PnlIncompletenessReasonData],
         perInstrument: [PnlInstrumentContributionData],
@@ -7697,6 +7751,10 @@ struct PnlTimelinePointData: Codable, Sendable {
         self.accrualPnl = accrualPnl
         self.unrealizedPnl = unrealizedPnl
         self.netPnl = netPnl
+        self.equity = equity
+        self.cash = cash
+        self.positionValue = positionValue
+        self.drawdown = drawdown
         self.valuationStatus = valuationStatus
         self.incompletenessReasons = incompletenessReasons
         self.perInstrument = perInstrument
@@ -7710,6 +7768,10 @@ struct PnlTimelinePointData: Codable, Sendable {
         case accrualPnl = "accrual_pnl"
         case unrealizedPnl = "unrealized_pnl"
         case netPnl = "net_pnl"
+        case equity
+        case cash
+        case positionValue = "position_value"
+        case drawdown
         case valuationStatus = "valuation_status"
         case incompletenessReasons = "incompleteness_reasons"
         case perInstrument = "per_instrument"
