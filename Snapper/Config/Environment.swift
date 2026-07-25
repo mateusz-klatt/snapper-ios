@@ -122,6 +122,20 @@ enum AppConfig {
         static var aiReviews: String {
             return configuration.endpoints.aiReviews
         }
+
+        /// Delegate pending-review queue (``/ai-reviews/pending``),
+        /// derived from the ``aiReviews`` root so no dedicated
+        /// ``Configuration.plist`` key is required. Full wire path
+        /// resolves to ``/api/ai-reviews/pending``.
+        ///
+        /// The sibling decision write
+        /// (``/ai-reviews/{review_public_id}/decision``) is composed in
+        /// ``APIClient`` instead, because the review id must be
+        /// percent-encoded as a path segment — the same split used by
+        /// ``processes`` and its per-name lifecycle routes.
+        static var aiReviewsPending: String {
+            return "\(configuration.endpoints.aiReviews)/pending"
+        }
         static var strategies: String {
             return configuration.endpoints.strategies
         }

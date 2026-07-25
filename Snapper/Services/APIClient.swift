@@ -85,12 +85,25 @@ final class APIClient: Sendable, APIClientProtocol {
         return upper == "GET" || upper == "HEAD"
     }
 
-    private func request<T: Decodable>(
+    /// Shared transport for every REST call: URL build, JSON headers,
+    /// CSRF attachment, body encoding, and the exactly-once
+    /// 401-refresh-replay. Returns the raw bytes plus the status code so
+    /// each caller applies its OWN response semantics — the generic
+    /// ``request`` decodes strict ISO-8601,
+    /// ``requestWithFractionalSecondsDates`` accepts fractional seconds,
+    /// and the AI-review routes additionally understand a structured
+    /// (object-valued) FastAPI ``detail``.
+    ///
+    /// Keeping the transport in one place means the 401 replay — the
+    /// only automatic retry in the client, and exactly-once-safe because
+    /// 401s are produced by the auth dependency BEFORE any handler body
+    /// runs — has a single implementation.
+    private func transport(
         endpoint: String,
-        method: String = "GET",
-        body: Encodable? = nil,
+        method: String,
+        body: Encodable?,
         isRetry: Bool = false
-    ) async throws -> T {
+    ) async throws -> (data: Data, statusCode: Int) {
         guard let url = URL(string: "\(apiBaseURLProvider())\(endpoint)") else {
             throw APIError.invalidURL
         }
@@ -104,10 +117,11 @@ final class APIClient: Sendable, APIClientProtocol {
         if let body = body {
             let encoder = JSONEncoder()
             encoder.keyEncodingStrategy = .convertToSnakeCase
-            /// ISO-8601 mirrors the response decoder set below at line ~63;
-            /// Codable Date fields (e.g. DeviceAlertPrefBody.mute_until)
-            /// would otherwise serialize as numeric Unix timestamps and
-            /// decode to a wrong instant on the backend.
+            /// ISO-8601 mirrors the response decoders used by the
+            /// callers; Codable Date fields (e.g.
+            /// DeviceAlertPrefBody.mute_until) would otherwise serialize
+            /// as numeric Unix timestamps and decode to a wrong instant
+            /// on the backend.
             encoder.dateEncodingStrategy = .iso8601
             request.httpBody = try encoder.encode(body)
         }
@@ -130,14 +144,32 @@ final class APIClient: Sendable, APIClientProtocol {
                 await authService.logout()
                 throw APIError.httpError(401)
             }
-            return try await self.request(endpoint: endpoint, method: method, body: body, isRetry: true)
+            return try await self.transport(endpoint: endpoint, method: method, body: body, isRetry: true)
         }
 
-        guard (200...299).contains(httpResponse.statusCode) else {
-            if let errorResponse = try? JSONDecoder().decode(ErrorResponse.self, from: data) {
-                throw APIError.serverError(errorResponse.detail)
-            }
-            throw APIError.httpError(httpResponse.statusCode)
+        return (data, httpResponse.statusCode)
+    }
+
+    /// Map a non-2xx response to the typed error the ViewModels surface.
+    /// A string-valued FastAPI ``detail`` becomes ``serverError`` so the
+    /// backend copy reaches the user verbatim; anything else degrades to
+    /// the bare status code.
+    private static func failure(data: Data, statusCode: Int) -> APIError {
+        if let errorResponse = try? JSONDecoder().decode(ErrorResponse.self, from: data) {
+            return APIError.serverError(errorResponse.detail)
+        }
+        return APIError.httpError(statusCode)
+    }
+
+    private func request<T: Decodable>(
+        endpoint: String,
+        method: String = "GET",
+        body: Encodable? = nil
+    ) async throws -> T {
+        let (data, statusCode) = try await transport(endpoint: endpoint, method: method, body: body)
+
+        guard (200...299).contains(statusCode) else {
+            throw Self.failure(data: data, statusCode: statusCode)
         }
 
         let decoder = JSONDecoder()
@@ -161,55 +193,27 @@ final class APIClient: Sendable, APIClientProtocol {
     private func requestWithFractionalSecondsDates<T: Decodable>(
         endpoint: String,
         method: String = "GET",
-        body: Encodable? = nil,
-        isRetry: Bool = false
+        body: Encodable? = nil
     ) async throws -> T {
-        guard let url = URL(string: "\(apiBaseURLProvider())\(endpoint)") else {
-            throw APIError.invalidURL
-        }
+        let (data, statusCode) = try await transport(endpoint: endpoint, method: method, body: body)
 
-        var request = URLRequest(url: url)
-        request.httpMethod = method
-        request.setValue(AppConfig.ContentType.json, forHTTPHeaderField: AppConfig.HTTPHeader.contentType)
-        Self.attachCSRFHeader(to: &request, method: method)
-
-        if let body = body {
-            let encoder = JSONEncoder()
-            encoder.keyEncodingStrategy = .convertToSnakeCase
-            encoder.dateEncodingStrategy = .iso8601
-            request.httpBody = try encoder.encode(body)
-        }
-
-        let (data, response) = try await session.data(for: request)
-
-        guard let httpResponse = response as? HTTPURLResponse else {
-            throw APIError.invalidResponse
-        }
-
-        if httpResponse.statusCode == 401 {
-            if isRetry {
-                await authService.logout()
-                throw APIError.httpError(401)
-            }
-            guard await authService.fetchFreshWsToken() != nil else {
-                await authService.logout()
-                throw APIError.httpError(401)
-            }
-            return try await self.requestWithFractionalSecondsDates(
-                endpoint: endpoint, method: method, body: body, isRetry: true
-            )
-        }
-
-        guard (200...299).contains(httpResponse.statusCode) else {
-            if let errorResponse = try? JSONDecoder().decode(ErrorResponse.self, from: data) {
-                throw APIError.serverError(errorResponse.detail)
-            }
-            throw APIError.httpError(httpResponse.statusCode)
+        guard (200...299).contains(statusCode) else {
+            throw Self.failure(data: data, statusCode: statusCode)
         }
 
         let decoder = JSONDecoder()
         decoder.dateDecodingStrategy = .custom(SnapperJSON.decodeFractionalOrPlainISO8601)
         return try decoder.decode(T.self, from: data)
+    }
+
+    /// Envelope for the AI-review routes' error bodies. FastAPI wraps a
+    /// handler's ``HTTPException(detail=...)`` in ``{"detail": ...}``;
+    /// those routes pass an OBJECT (``success`` / ``error_code`` /
+    /// ``message`` / ``details``) rather than the string every other
+    /// Snapper route uses, so ``ErrorResponse`` cannot decode it and the
+    /// error code would otherwise be lost behind a bare status code.
+    private struct DetailEnvelope<Body: Decodable>: Decodable {
+        let detail: Body
     }
 
     func fetchOrders() async throws -> [OrderStatus] {
@@ -262,6 +266,105 @@ final class APIClient: Sendable, APIClientProtocol {
     func fetchAiReviews() async throws -> [AdminAiReviewItem] {
         let envelope: AdminAiReviewListResponse = try await request(endpoint: AppConfig.Endpoints.aiReviews)
         return envelope.items
+    }
+
+    /// Fetch the caller's pending CONSULT reviews via
+    /// ``GET /api/ai-reviews/pending`` (gated by ``read:signals``).
+    ///
+    /// The snapshot is keyed SERVER-SIDE on the caller's AI-delegate
+    /// identity, so no wallet parameter is sent: intersecting it with the
+    /// app's local wallet picker could only hide rows the delegate is
+    /// actually responsible for. A caller whose principal carries no
+    /// ``delegate_public_id`` gets 422 ``not_a_delegate``; that is
+    /// unreachable behind the ViewModel's delegate gate, and is surfaced
+    /// as a normal typed error (with the backend message) rather than
+    /// treated as a crash-worthy invariant.
+    func fetchPendingAiReviews() async throws -> PendingReviewListResponse {
+        let (data, statusCode) = try await transport(
+            endpoint: AppConfig.Endpoints.aiReviewsPending,
+            method: "GET",
+            body: nil
+        )
+
+        guard (200...299).contains(statusCode) else {
+            throw Self.aiReviewFailure(data: data, statusCode: statusCode)
+        }
+
+        let decoder = JSONDecoder()
+        decoder.dateDecodingStrategy = .iso8601
+        return try decoder.decode(PendingReviewListResponse.self, from: data)
+    }
+
+    /// Record an AI-delegate verdict via
+    /// ``POST /api/ai-reviews/{review_public_id}/decision``.
+    ///
+    /// Wraps the caller's decision in a provenance-stamped
+    /// ``AiReviewDecisionCommand`` envelope (minted from
+    /// ``EnvelopeMinter``) exactly like the ``createOrder`` money path;
+    /// CSRF is attached automatically because the method is not safe.
+    ///
+    /// Both the 200 body and the route's structured error bodies decode
+    /// to the SAME ``AiReviewDecisionResponse`` shape, so this method
+    /// RETURNS the envelope for every outcome the backend classified
+    /// (``decision_already_recorded``, ``review_already_resolved_by_peer``,
+    /// ``review_id_expired``, ``review_not_found``, ``not_authorized``,
+    /// and the defensive race default) and throws only when the response
+    /// is not a classified outcome at all — transport failures, an
+    /// undecodable body, or a terminal 401. The ViewModel owns the
+    /// error-code → user-facing behavior mapping.
+    ///
+    /// The shared ``transport`` 401-refresh-replay is exactly-once-safe
+    /// here: 401 responses precede handler execution server-side (the
+    /// auth dependency rejects before the route body runs), and the
+    /// replay re-sends the SAME minted envelope, so no second decision
+    /// can be recorded. No other automatic retry exists — a stale or
+    /// racing outcome is reported to the user, never re-attempted. This
+    /// is identical to the established ``createOrder`` money path.
+    func submitAiReviewDecision(
+        reviewPublicId: String,
+        decision: String,
+        rationale: String?
+    ) async throws -> AiReviewDecisionResponse {
+        let provenance = await MainActor.run {
+            EnvelopeMinter.shared.next(.control)
+        }
+        let command = AiReviewDecisionCommand(
+            type: "ai_review_decision_command",
+            sequenceId: provenance.sequenceId,
+            publicId: provenance.publicId,
+            timestamp: provenance.timestamp,
+            sessionId: provenance.sessionId,
+            topic: nil,
+            payload: AiReviewDecisionRequest(decision: decision, rationale: rationale)
+        )
+        let (data, statusCode) = try await transport(
+            endpoint: "\(AppConfig.Endpoints.aiReviews)/\(Self.encodePathSegment(reviewPublicId))/decision",
+            method: "POST",
+            body: command
+        )
+
+        let decoder = JSONDecoder()
+        decoder.dateDecodingStrategy = .iso8601
+
+        if (200...299).contains(statusCode) {
+            return try decoder.decode(AiReviewDecisionResponse.self, from: data)
+        }
+        if let envelope = try? decoder.decode(DetailEnvelope<AiReviewDecisionResponse>.self, from: data) {
+            return envelope.detail
+        }
+        throw Self.aiReviewFailure(data: data, statusCode: statusCode)
+    }
+
+    /// Non-2xx mapping for the AI-review routes. Prefers the structured
+    /// ``detail`` object's ``message`` (the only place the backend puts
+    /// the human-readable reason for ``not_a_delegate`` and friends),
+    /// then falls back to the shared string-``detail`` / status-code
+    /// handling every other route uses.
+    private static func aiReviewFailure(data: Data, statusCode: Int) -> APIError {
+        if let envelope = try? JSONDecoder().decode(DetailEnvelope<AiReviewErrorDetail>.self, from: data) {
+            return APIError.serverError(envelope.detail.message)
+        }
+        return Self.failure(data: data, statusCode: statusCode)
     }
 
     func fetchStrategies() async throws -> [StrategyProcess] {
@@ -854,6 +957,14 @@ struct CandleListResponseLocal: Decodable, Sendable {
         case payload
         case count
     }
+}
+
+/// Minimal projection of the AI-review routes' object-valued FastAPI
+/// ``detail``. Only ``message`` is read here — the decision route's full
+/// envelope decodes into the generated ``AiReviewDecisionResponse``
+/// instead, and ``error_code`` is interpreted there.
+struct AiReviewErrorDetail: Decodable, Sendable {
+    let message: String
 }
 
 enum APIError: LocalizedError {

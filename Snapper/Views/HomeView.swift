@@ -11,6 +11,7 @@ struct HomeView: View {
     @State private var positions: [PositionSnapshot] = []
     @State private var orders: [OrderStatus] = []
     @State private var latestAlert: AlertEventInfo?
+    @State private var pendingAiReviewCount = 0
     @State private var isLoading = true
     @State private var errorMessage: String?
 
@@ -78,7 +79,7 @@ struct HomeView: View {
                         NavigationLink {
                             AiReviewsView()
                         } label: {
-                            AiReviewsEntryCard()
+                            AiReviewsEntryCard(pendingCount: pendingAiReviewCount)
                         }
                         .buttonStyle(.plain)
                     }
@@ -469,7 +470,34 @@ struct HomeView: View {
             logger.error("Failed to fetch orders: \(error)")
         }
 
+        await loadPendingAiReviewCount()
+
         isLoading = false
+    }
+
+    /// Resolve the AI-review inbox badge count.
+    ///
+    /// Fetched ONCE per Home load (initial appear and pull-to-refresh),
+    /// and only for a delegate session — the endpoint is keyed on the
+    /// delegate identity and 422s everyone else. Deliberately NOT polled:
+    /// the badge is a nudge toward the screen, and the screen itself
+    /// carries the authoritative, live-updating list. A failure zeroes the
+    /// badge rather than surfacing an error, because a stale badge would
+    /// be worse than none on a screen the user did not ask to load.
+    private func loadPendingAiReviewCount() async {
+        guard AiReviewsViewModel.showsPendingInbox(
+            delegatePublicId: authService.currentUser?.delegatePublicId,
+            canReadSignals: authService.hasPermission(.readSignals)
+        ) else {
+            pendingAiReviewCount = 0
+            return
+        }
+        do {
+            pendingAiReviewCount = try await APIClient.shared.fetchPendingAiReviews().count
+        } catch {
+            logger.error("Failed to fetch pending AI reviews: \(error)")
+            pendingAiReviewCount = 0
+        }
     }
 
     private func statusColor(for status: String) -> Color {
