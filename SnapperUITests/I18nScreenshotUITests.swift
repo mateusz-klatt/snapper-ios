@@ -152,20 +152,25 @@ final class I18nScreenshotUITests: XCTestCase {
     /// The viewer must therefore reach every operator read surface while
     /// retaining zero mutation affordances. Admin additionally sees the
     /// user-management card.
+    ///
+    /// Build 29 widened the surface, so the sweep also covers the P&L
+    /// timeline segment, the Processes lifecycle controls, the Signals
+    /// strategy filter and CSV export, the absent AI-review delegate
+    /// segment, and one refreshable empty state.
     func testCaptureViewerPermissionsUAT() throws {
         try skipUnlessBackendConfigured()
         capturePermissionUAT(
             role: "admin",
             username: "admin",
             homeSurfaces: [
-                ("Market data", "market-data"),
-                ("System Health", "health"),
-                ("Backtests", "backtests"),
-                ("Processes", "processes"),
-                ("AI Reviews", "ai-reviews"),
-                ("Strategies", "strategies"),
-                ("Users", "users"),
-                ("AI Delegates", "ai-delegates"),
+                ("Market data", "market-data", .none),
+                ("System Health", "health", .none),
+                ("Backtests", "backtests", .none),
+                ("Processes", "processes", .processLifecycleControls),
+                ("AI Reviews", "ai-reviews", .aiReviewDelegateSegment),
+                ("Strategies", "strategies", .none),
+                ("Users", "users", .none),
+                ("AI Delegates", "ai-delegates", .none),
             ],
             forbiddenHomeSurfaces: []
         )
@@ -173,13 +178,13 @@ final class I18nScreenshotUITests: XCTestCase {
             role: "viewer",
             username: "viewer",
             homeSurfaces: [
-                ("Market data", "market-data"),
-                ("System Health", "health"),
-                ("Backtests", "backtests"),
-                ("Processes", "processes"),
-                ("AI Reviews", "ai-reviews"),
-                ("Strategies", "strategies"),
-                ("AI Delegates", "ai-delegates"),
+                ("Market data", "market-data", .none),
+                ("System Health", "health", .none),
+                ("Backtests", "backtests", .none),
+                ("Processes", "processes", .processLifecycleControls),
+                ("AI Reviews", "ai-reviews", .aiReviewDelegateSegment),
+                ("Strategies", "strategies", .none),
+                ("AI Delegates", "ai-delegates", .none),
             ],
             forbiddenHomeSurfaces: ["Users"]
         )
@@ -508,10 +513,20 @@ final class I18nScreenshotUITests: XCTestCase {
         return app.tabBars.firstMatch.waitForExistence(timeout: 20)
     }
 
+    /// Extra release-29 assertion run while one Home destination is open,
+    /// after its screenshot and before the harness navigates back. Keeping
+    /// it on the surface descriptor means the widened checks reuse the
+    /// existing single navigation pass instead of re-entering each screen.
+    private enum UatSurfaceInspection {
+        case none
+        case processLifecycleControls
+        case aiReviewDelegateSegment
+    }
+
     private func capturePermissionUAT(
         role: String,
         username: String,
-        homeSurfaces: [(title: String, slug: String)],
+        homeSurfaces: [(title: String, slug: String, inspection: UatSurfaceInspection)],
         forbiddenHomeSurfaces: [String]
     ) {
         XCTContext.runActivity(named: "permission-uat-\(role)") { _ in
@@ -564,6 +579,7 @@ final class I18nScreenshotUITests: XCTestCase {
                 role: role,
                 shouldExposeActions: role == "admin"
             )
+            capturePnlTimelineSegment(app: app, role: role)
 
             captureRootTab(
                 app: app,
@@ -588,7 +604,8 @@ final class I18nScreenshotUITests: XCTestCase {
                         role,
                         index + 3,
                         surface.slug
-                    )
+                    ),
+                    inspection: surface.inspection
                 )
             }
 
@@ -606,6 +623,7 @@ final class I18nScreenshotUITests: XCTestCase {
                 navigationTitle: "Venue Accounts",
                 screen: "accounts"
             )
+            captureRefreshableEmptyState(app: app, role: role)
             captureRootTab(
                 app: app,
                 role: role,
@@ -613,6 +631,7 @@ final class I18nScreenshotUITests: XCTestCase {
                 navigationTitle: "Signals",
                 screen: "signals"
             )
+            captureSignalsToolbar(app: app, role: role)
             captureRootTab(
                 app: app,
                 role: role,
@@ -720,11 +739,194 @@ final class I18nScreenshotUITests: XCTestCase {
         openOrderRow.swipeRight()
     }
 
+    /// Resolve one segmented-control segment by its rendered title.
+    ///
+    /// SwiftUI bridges `.pickerStyle(.segmented)` to a `segmentedControl`
+    /// whose segments are buttons, but the flattened `buttons` query also
+    /// reaches them; querying the container first keeps the match from
+    /// colliding with a same-labeled button elsewhere on screen.
+    private func segment(in app: XCUIApplication, title: String) -> XCUIElement {
+        let scoped = app.segmentedControls.buttons[title]
+        if scoped.exists {
+            return scoped
+        }
+        return app.buttons[title]
+    }
+
+    /// Open the `Current | P&L Timeline` segment inside Positions and
+    /// retain both the chart region and the tables below it.
+    ///
+    /// The timeline is a read-only surface for every role, so the pass is
+    /// identical for admin and viewer: both must reach it and both must
+    /// render either populated points or the screen's own empty state.
+    private func capturePnlTimelineSegment(app: XCUIApplication, role: String) {
+        selectRootTab(app: app, title: "Positions")
+        XCTAssertTrue(
+            app.navigationBars["Positions"].waitForExistence(timeout: 15),
+            "\(role) could not return to Positions for the P&L timeline"
+        )
+
+        let timeline = segment(in: app, title: "P&L Timeline")
+        XCTAssertTrue(
+            timeline.waitForExistence(timeout: 10),
+            "\(role) cannot reach the P&L Timeline segment"
+        )
+        guard timeline.exists else { return }
+        timeline.tap()
+        sleep(8)
+        attach(code: "us", screen: "uat-\(role)-pnl-timeline-chart")
+
+        let timelineScroll = app.scrollViews.firstMatch
+        for _ in 0..<3 where timelineScroll.exists {
+            timelineScroll.swipeUp()
+        }
+        sleep(2)
+        attach(code: "us", screen: "uat-\(role)-pnl-timeline-tables")
+
+        let current = segment(in: app, title: "Current")
+        if current.exists {
+            current.tap()
+            sleep(2)
+        }
+    }
+
+    /// Prove the Processes lifecycle controls follow `manage:processes`.
+    ///
+    /// Admin must reach at least one control on an eligible row and must
+    /// still see none on a strategy row (those are excluded by routing,
+    /// not by permission). Viewer must see no control anywhere — the
+    /// query is on the stable `processes.control.*` identifiers, so an
+    /// absent match is an absent affordance rather than an unopened view.
+    private func verifyProcessLifecycleControls(app: XCUIApplication, role: String) {
+        let controls = app.descendants(matching: .any).matching(
+            NSPredicate(format: "identifier BEGINSWITH %@", "processes.control.")
+        )
+        let strategyControls = app.descendants(matching: .any).matching(
+            NSPredicate(format: "identifier CONTAINS %@", "processes.control.start.strategy_")
+        )
+
+        if role == "admin" {
+            let processScroll = app.scrollViews.firstMatch
+            var attempts = 0
+            while !controls.firstMatch.exists && attempts < 6 {
+                if processScroll.exists {
+                    processScroll.swipeUp()
+                }
+                attempts += 1
+            }
+            XCTAssertTrue(
+                controls.firstMatch.waitForExistence(timeout: 10),
+                "\(role) did not expose any process lifecycle control"
+            )
+            sleep(1)
+            attach(code: "us", screen: "uat-\(role)-processes-controls")
+            XCTAssertFalse(
+                strategyControls.firstMatch.exists,
+                "\(role) must not expose lifecycle controls on a strategy row"
+            )
+        } else {
+            XCTAssertFalse(
+                controls.firstMatch.waitForExistence(timeout: 3),
+                "\(role) must not expose any process lifecycle control"
+            )
+            let processScroll = app.scrollViews.firstMatch
+            for _ in 0..<4 where processScroll.exists {
+                processScroll.swipeUp()
+            }
+            XCTAssertFalse(
+                controls.firstMatch.exists,
+                "\(role) must not expose a process lifecycle control further down the list"
+            )
+            sleep(1)
+            attach(code: "us", screen: "uat-\(role)-processes-no-controls")
+        }
+    }
+
+    /// Prove the AI-review delegate inbox stays hidden for both roles.
+    ///
+    /// Neither session carries a `delegate_public_id`, so the
+    /// `Pending reviews | AI Decisions` segment — and with it every
+    /// approve / reject affordance — must be absent. That absence IS the
+    /// gating proof for these two roles; the delegate-positive path is
+    /// pinned by the unit suite.
+    private func verifyAiReviewDelegateSegmentAbsent(app: XCUIApplication, role: String) {
+        for title in ["Pending reviews", "AI Decisions"] {
+            XCTAssertFalse(
+                segment(in: app, title: title).waitForExistence(timeout: 2),
+                "\(role) must not see the \(title) AI-review segment without a delegate identity"
+            )
+        }
+        for decision in ["Approve", "Reject"] {
+            XCTAssertFalse(
+                app.buttons[decision].exists,
+                "\(role) must not expose the \(decision) AI-review decision action"
+            )
+        }
+    }
+
+    /// Retain the Signals strategy filter and CSV export affordances.
+    ///
+    /// Both are read-side tools rather than mutations, so both roles must
+    /// reach them; the menu is opened so the retained screenshot shows the
+    /// seeded strategy options rather than just the toolbar glyph.
+    private func captureSignalsToolbar(app: XCUIApplication, role: String) {
+        let exportButton = app.buttons["Export"]
+        XCTAssertTrue(
+            exportButton.waitForExistence(timeout: 10),
+            "\(role) did not expose the Signals CSV export action"
+        )
+        XCTAssertTrue(
+            exportButton.isEnabled,
+            "\(role) Signals export is disabled despite seeded signals"
+        )
+
+        let filterButton = app.buttons["Filter by strategy"]
+        XCTAssertTrue(
+            filterButton.waitForExistence(timeout: 10),
+            "\(role) did not expose the Signals strategy filter"
+        )
+        guard filterButton.exists else { return }
+        filterButton.tap()
+        sleep(2)
+        attach(code: "us", screen: "uat-\(role)-signals-strategy-filter")
+
+        let allStrategies = app.buttons["All Strategies"]
+        if allStrategies.waitForExistence(timeout: 3), allStrategies.exists {
+            allStrategies.tap()
+        } else {
+            app.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.92)).tap()
+        }
+        sleep(1)
+    }
+
+    /// Retain one empty state mid-pull, proving refresh stayed reachable.
+    ///
+    /// Venue Accounts is empty in this fixture and keeps its
+    /// `ContentUnavailableView` inside the refreshable list, which is
+    /// exactly the regression the build-29 empty-state work fixed: a
+    /// whole-screen placeholder outside the scroll view cannot be pulled.
+    private func captureRefreshableEmptyState(app: XCUIApplication, role: String) {
+        XCTAssertTrue(
+            app.staticTexts["No venue accounts"].waitForExistence(timeout: 15),
+            "\(role) did not reach the Venue Accounts empty state"
+        )
+        let start = app.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.35))
+        let end = app.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.85))
+        start.press(forDuration: 0.1, thenDragTo: end)
+        attach(code: "us", screen: "uat-\(role)-accounts-empty-pull-to-refresh")
+        sleep(3)
+        XCTAssertTrue(
+            app.staticTexts["No venue accounts"].waitForExistence(timeout: 15),
+            "\(role) lost the Venue Accounts empty state after pull-to-refresh"
+        )
+    }
+
     private func captureHomeSurface(
         app: XCUIApplication,
         role: String,
         title: String,
-        screen: String
+        screen: String,
+        inspection: UatSurfaceInspection = .none
     ) {
         selectRootTab(app: app, title: "Home")
         XCTAssertTrue(
@@ -759,6 +961,15 @@ final class I18nScreenshotUITests: XCTestCase {
         }
         sleep(2)
         attach(code: "us", screen: screen)
+
+        switch inspection {
+        case .none:
+            break
+        case .processLifecycleControls:
+            verifyProcessLifecycleControls(app: app, role: role)
+        case .aiReviewDelegateSegment:
+            verifyAiReviewDelegateSegmentAbsent(app: app, role: role)
+        }
 
         let backButton = app.navigationBars.buttons.firstMatch
         XCTAssertTrue(
