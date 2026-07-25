@@ -6,12 +6,27 @@ uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
-## [3.0.0] — 2026-07-23
+## [3.0.0] — 2026-07-25
 
 Major release expanding the native iOS app with permission-gated,
 read-only coverage of the core operator surfaces.
 
 ### Added
+- Added the P&L Timeline segment inside Positions: cumulative net,
+  realized, and unrealized series on a hand-rolled null-gap-preserving
+  chart, incompleteness disclosure, and latest-point attribution and
+  per-instrument contribution tables.
+- Added a shared live-update WebSocket layer: Signals, Processes,
+  Strategies, and AI Reviews reload automatically on activity frames,
+  with serialized generation-protected reloads and reconnect healing.
+- Added Processes lifecycle controls for operators: start, stop, and
+  restart with ownership-aware routing between local commands and
+  desired-state intents, and execution-time permission re-resolution.
+- Added the AI Review delegate inbox: a pending queue with per-review
+  approve/reject, optional rationale, honest decision-outcome handling,
+  and a pending-count badge on the Home entry card.
+- Added a Signals strategy filter and RFC-4180 CSV export of the
+  filtered rows.
 
 - Added a repeatable admin/viewer permission UAT screenshot mode for a freshly
   seeded backend. It records every native read surface, exercises real
@@ -35,6 +50,12 @@ read-only coverage of the core operator surfaces.
 - Bumped `MARKETING_VERSION` from `2.0.2` to `3.0.0`.
 
 ### Fixed
+- Made empty states pull-to-refreshable on every list screen, and fixed
+  alert deep-link scroll retention so a pending alert target survives a
+  failed or slow load.
+- Timed-out and superseded AI reviews now render honest status badges
+  instead of "Pending", and wide P&L tables show pinned horizontal
+  scroll indicators.
 
 - Synchronized the wallet picker with the backend session scope so
   wallet-scoped surfaces such as Backtests become available immediately.
