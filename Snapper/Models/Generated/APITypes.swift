@@ -10,6 +10,16 @@ enum PnlAttributionOrigin: String, Codable, Sendable {
     case unattributed
 }
 
+enum PnlExecutionCorrectionReason: String, Codable, Sendable {
+    case unwitnessedPhantom = "unwitnessed_phantom"
+    case unwitnessedLegacyLineage = "unwitnessed_legacy_lineage"
+}
+
+enum PnlExecutionHistoryStatus: String, Codable, Sendable {
+    case asRecorded = "as_recorded"
+    case operatorCorrected = "operator_corrected"
+}
+
 enum PnlIncompletenessReason: String, Codable, Sendable {
     case scopeOrderRegression = "scope_order_regression"
     case beforeActivation = "before_activation"
@@ -7301,6 +7311,53 @@ struct PnlEquityCoverageData: Codable, Sendable {
     }
 }
 
+struct PnlExecutionCorrectionData: Codable, Sendable {
+    let correctionPublicId: String
+    let targetExecutionPublicId: String
+    let exchange: String
+    let scopeSequence: Int
+    let reason: PnlExecutionCorrectionReason
+    let correctionTime: Date
+
+    init(
+        correctionPublicId: String,
+        targetExecutionPublicId: String,
+        exchange: String,
+        scopeSequence: Int,
+        reason: PnlExecutionCorrectionReason,
+        correctionTime: Date
+    ) {
+        self.correctionPublicId = correctionPublicId
+        self.targetExecutionPublicId = targetExecutionPublicId
+        self.exchange = exchange
+        self.scopeSequence = scopeSequence
+        self.reason = reason
+        self.correctionTime = correctionTime
+    }
+
+    enum CodingKeys: String, CodingKey {
+        case correctionPublicId = "correction_public_id"
+        case targetExecutionPublicId = "target_execution_public_id"
+        case exchange
+        case scopeSequence = "scope_sequence"
+        case reason
+        case correctionTime = "correction_time"
+    }
+}
+
+struct PnlExecutionHistoryData: Codable, Sendable {
+    let status: PnlExecutionHistoryStatus
+    let corrections: [PnlExecutionCorrectionData]
+
+    init(
+        status: PnlExecutionHistoryStatus,
+        corrections: [PnlExecutionCorrectionData]
+    ) {
+        self.status = status
+        self.corrections = corrections
+    }
+}
+
 struct PnlFillMarkerData: Codable, Sendable {
     let kind: String?
     let markerTime: Date
@@ -7463,6 +7520,7 @@ struct PnlSeriesData: Codable, Sendable {
     let rateSources: [PnlFxRateSourceData]
     let calcVersion: String
     let equityCoverage: PnlEquityCoverageData
+    let executionHistory: PnlExecutionHistoryData
     let points: [PnlTimelinePointData]
 
     init(
@@ -7483,6 +7541,7 @@ struct PnlSeriesData: Codable, Sendable {
         rateSources: [PnlFxRateSourceData],
         calcVersion: String,
         equityCoverage: PnlEquityCoverageData,
+        executionHistory: PnlExecutionHistoryData,
         points: [PnlTimelinePointData]
     ) {
         self.type = type
@@ -7502,6 +7561,7 @@ struct PnlSeriesData: Codable, Sendable {
         self.rateSources = rateSources
         self.calcVersion = calcVersion
         self.equityCoverage = equityCoverage
+        self.executionHistory = executionHistory
         self.points = points
     }
 
@@ -7523,6 +7583,7 @@ struct PnlSeriesData: Codable, Sendable {
         case rateSources = "rate_sources"
         case calcVersion = "calc_version"
         case equityCoverage = "equity_coverage"
+        case executionHistory = "execution_history"
         case points
     }
 }
@@ -7637,6 +7698,7 @@ struct PnlTimelineData: Codable, Sendable {
     let rateSources: [PnlFxRateSourceData]
     let calcVersion: String
     let equityCoverage: PnlEquityCoverageData
+    let executionHistory: PnlExecutionHistoryData
     let points: [PnlTimelinePointData]
     let markerLimit: Int
     let markersTruncated: Bool
@@ -7660,6 +7722,7 @@ struct PnlTimelineData: Codable, Sendable {
         rateSources: [PnlFxRateSourceData],
         calcVersion: String,
         equityCoverage: PnlEquityCoverageData,
+        executionHistory: PnlExecutionHistoryData,
         points: [PnlTimelinePointData],
         markerLimit: Int,
         markersTruncated: Bool,
@@ -7682,6 +7745,7 @@ struct PnlTimelineData: Codable, Sendable {
         self.rateSources = rateSources
         self.calcVersion = calcVersion
         self.equityCoverage = equityCoverage
+        self.executionHistory = executionHistory
         self.points = points
         self.markerLimit = markerLimit
         self.markersTruncated = markersTruncated
@@ -7706,6 +7770,7 @@ struct PnlTimelineData: Codable, Sendable {
         case rateSources = "rate_sources"
         case calcVersion = "calc_version"
         case equityCoverage = "equity_coverage"
+        case executionHistory = "execution_history"
         case points
         case markerLimit = "marker_limit"
         case markersTruncated = "markers_truncated"
