@@ -102,6 +102,116 @@ final class APIClientTests: XCTestCase {
         XCTAssertEqual(logoutCalls, 1, "logout must fire when refresh returns nil")
     }
 
+    /// The 401-refresh-replay lives in the shared ``transport``, so the
+    /// fractional-seconds decoding variant MUST inherit exactly the same
+    /// behavior as the strict-ISO one. These two characterize it through
+    /// ``fetchPnlSeries`` (a fractional-date caller) so a future change
+    /// that re-splits the transport cannot silently give one variant a
+    /// different retry policy.
+    ///
+    /// 401 → refresh once → replay once → 200 decodes.
+    func testFractionalDateVariantRetriesOnceAfter401() async throws {
+        let fakeAuth = FakeAuthService(nextToken: "new-token")
+        let client = APIClient(session: mockSession, authService: fakeAuth)
+
+        var callCount = 0
+        MockURLProtocol.requestHandler = { _ in
+            callCount += 1
+            if callCount == 1 {
+                return MockURLProtocol.errorResponse(statusCode: 401, message: "Token expired")
+            }
+            return MockURLProtocol.jsonResponse(statusCode: 200, json: Self.pnlSeriesEnvelope())
+        }
+
+        let series = try await client.fetchPnlSeries(
+            walletPublicId: "wallet-1",
+            mode: "paper",
+            granularity: "1h",
+            from: Date(timeIntervalSince1970: 1_767_225_600),
+            to: Date(timeIntervalSince1970: 1_767_312_000),
+            valuationCcy: "EUR"
+        )
+
+        XCTAssertEqual(callCount, 2, "request must be replayed exactly once after 401")
+        XCTAssertEqual(series.mode, "paper")
+        let fetchCalls = await fakeAuth.fetchCalls
+        let logoutCalls = await fakeAuth.logoutCalls
+        XCTAssertEqual(fetchCalls, 1, "exactly one refresh between the 401 and the replay")
+        XCTAssertEqual(logoutCalls, 0, "a successful replay must not log out")
+    }
+
+    /// 401 → refresh → 401 again → logout, and NO second replay.
+    func testFractionalDateVariantDoesNotReplayTwiceOn401() async {
+        let fakeAuth = FakeAuthService(nextToken: "fresh")
+        let client = APIClient(session: mockSession, authService: fakeAuth)
+
+        var callCount = 0
+        MockURLProtocol.requestHandler = { _ in
+            callCount += 1
+            return MockURLProtocol.errorResponse(statusCode: 401, message: "Token still bad")
+        }
+
+        do {
+            _ = try await client.fetchPnlSeries(
+                walletPublicId: "wallet-1",
+                mode: "paper",
+                granularity: "1h",
+                from: Date(timeIntervalSince1970: 1_767_225_600),
+                to: Date(timeIntervalSince1970: 1_767_312_000),
+                valuationCcy: "EUR"
+            )
+            XCTFail("expected APIError.httpError(401)")
+        } catch let error as APIError {
+            guard case .httpError(let code) = error else {
+                return XCTFail("wrong error: \(error)")
+            }
+            XCTAssertEqual(code, 401)
+        } catch {
+            XCTFail("unexpected error type: \(error)")
+        }
+
+        XCTAssertEqual(callCount, 2, "the replay happens once and is never repeated")
+        let logoutCalls = await fakeAuth.logoutCalls
+        XCTAssertEqual(logoutCalls, 1, "a second 401 forces logout")
+    }
+
+    private static func pnlSeriesEnvelope() -> [String: Any] {
+        return [
+            "sequence_id": 1,
+            "public_id": "env-1",
+            "timestamp": "2026-01-01T00:00:00.000Z",
+            "session_id": "session-1",
+            "payload": [
+                "type": "pnl_series",
+                "sequence_id": 1,
+                "public_id": "pnl-1",
+                "timestamp": "2026-01-01T00:00:00Z",
+                "session_id": "session-1",
+                "wallet_public_id": "wallet-1",
+                "mode": "paper",
+                "granularity": "1h",
+                "valuation_ccy": "EUR",
+                "from_time": "2026-01-01T00:00:00Z",
+                "to_time": "2026-01-02T00:00:00Z",
+                "as_of": "2026-01-02T00:00:00.123456Z",
+                "mark_source": "finalized_1m_candle_close",
+                "rate_sources": [],
+                "calc_version": "5A.13",
+                "execution_history": ["status": "as_recorded", "corrections": []],
+                "equity_coverage": [
+                    "sampled": false,
+                    "venue_scope": NSNull(),
+                    "external_flows_adjusted": NSNull(),
+                    "complete_minutes": 0,
+                    "first_minute": NSNull(),
+                    "last_minute": NSNull(),
+                    "sample_calc_version": NSNull(),
+                ],
+                "points": [],
+            ],
+        ]
+    }
+
     /// Asserts that ``fetchWallets`` decodes the canonical
     /// ``WalletListResponse`` envelope and returns the inner
     /// ``WalletInfo`` payload preserving ``label`` + ``isPaper``.

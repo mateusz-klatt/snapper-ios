@@ -58,7 +58,7 @@ protocol APIClientProtocol: Sendable {
 
     func submitAiReviewDecision(
         reviewPublicId: String,
-        decision: String,
+        decision: AiReviewDecisionIntent,
         rationale: String?
     ) async throws -> AiReviewDecisionResponse
 

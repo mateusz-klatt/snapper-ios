@@ -83,36 +83,54 @@ struct AiReviewsView: View {
         } message: { _ in
             Text(LocalizedStringKey("aiReviews.decision.confirmReject.message"))
         }
+        /// A confirmation the user leaves open outlives its row: a peer
+        /// can resolve the review, or a reload can drop it, while the
+        /// dialog sits on screen. Retract it as soon as the row leaves the
+        /// inbox so the destructive button cannot act on something that is
+        /// no longer there. ``submitDecision`` re-checks membership too —
+        /// this only avoids showing an offer that is already void.
+        .onChange(of: pendingReviewIds) { _, ids in
+            if let request = rejectRequest, !ids.contains(request.reviewPublicId) {
+                rejectRequest = nil
+            }
+        }
+        /// Dismissal lives in the binding's setter, NOT in the button:
+        /// SwiftUI flips ``isPresented`` for any button tap, so doing it
+        /// in both places would pop TWO entries and swallow a queued
+        /// failure the user never saw.
         .alert(
             LocalizedStringKey("common.error.submissionFailed"),
             isPresented: Binding(
-                get: { viewModel?.submitError != nil },
-                set: { if !$0 { viewModel?.submitError = nil } }
+                get: { viewModel?.currentSubmitAlert != nil },
+                set: { presented in
+                    guard !presented,
+                          let viewModel,
+                          let alert = viewModel.currentSubmitAlert else { return }
+                    viewModel.dismissSubmitAlert(alert)
+                }
             ),
-            presenting: viewModel?.submitError
+            presenting: viewModel?.currentSubmitAlert
         ) { _ in
-            Button(LocalizedStringKey("common.ok"), role: .cancel) {
-                viewModel?.submitError = nil
-            }
-        } message: { error in
-            Text(verbatim: error)
+            Button(LocalizedStringKey("common.ok"), role: .cancel) { }
+        } message: { alert in
+            Text(verbatim: alert.message)
         }
+        /// The appearance lifecycle — session open, initial load, live
+        /// observation, teardown on disappear — lives in the ViewModel so
+        /// its ordering is unit-tested. Installing the teardown here,
+        /// after the initial `await`, is exactly the bug that let a view
+        /// disappearing mid-load leave its session active.
         .task {
             if viewModel == nil {
                 viewModel = AiReviewsViewModel()
             }
-            await viewModel?.load()
-
-            guard !Task.isCancelled, let viewModel else { return }
-            let session = viewModel.startObservingLiveUpdates(from: webSocketManager)
-            await withTaskCancellationHandler {
-                try? await Task.sleep(nanoseconds: .max)
-            } onCancel: {
-                Task { @MainActor in
-                    viewModel.stopObservingLiveUpdates(token: session)
-                }
-            }
+            await viewModel?.runSession(observing: webSocketManager)
         }
+    }
+
+    /// Ids currently in the inbox — the stale-confirmation trigger.
+    private var pendingReviewIds: [String] {
+        return viewModel?.pending.map(\.reviewPublicId) ?? []
     }
 
     /// The read-only audit list — loading placeholder, whole-screen error
@@ -420,7 +438,7 @@ private struct AiReviewRow: View {
     }
 
     private var decisionBadge: some View {
-        let verdict = AiReviewsViewModel.decision(for: review.decision)
+        let verdict = AiReviewsViewModel.verdict(decision: review.decision, status: review.status)
         let color = decisionColor(verdict)
         return Text(LocalizedStringKey(verdict.localizationKey))
             .font(.caption2.bold())
@@ -431,11 +449,15 @@ private struct AiReviewRow: View {
             .clipShape(Capsule())
     }
 
+    /// Only a real verdict earns a financial colour. The states nobody
+    /// decided — timed out, superseded, still pending — stay neutral, and
+    /// are told apart by their LABEL rather than by hue alone, which
+    /// colour-blind users could not read.
     private func decisionColor(_ verdict: AiReviewDecision) -> Color {
         switch verdict {
         case .approved: return Color.financialRising(for: appState)
         case .rejected: return Color.financialFalling(for: appState)
-        case .pending: return .secondary
+        case .timedOut, .superseded, .pending: return .secondary
         }
     }
 }

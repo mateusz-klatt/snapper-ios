@@ -322,7 +322,7 @@ final class APIClient: Sendable, APIClientProtocol {
     /// is identical to the established ``createOrder`` money path.
     func submitAiReviewDecision(
         reviewPublicId: String,
-        decision: String,
+        decision: AiReviewDecisionIntent,
         rationale: String?
     ) async throws -> AiReviewDecisionResponse {
         let provenance = await MainActor.run {
@@ -335,7 +335,7 @@ final class APIClient: Sendable, APIClientProtocol {
             timestamp: provenance.timestamp,
             sessionId: provenance.sessionId,
             topic: nil,
-            payload: AiReviewDecisionRequest(decision: decision, rationale: rationale)
+            payload: AiReviewDecisionRequest(decision: decision.wireValue, rationale: rationale)
         )
         let (data, statusCode) = try await transport(
             endpoint: "\(AppConfig.Endpoints.aiReviews)/\(Self.encodePathSegment(reviewPublicId))/decision",

@@ -138,7 +138,7 @@ final class AiReviewsViewModelTests: XCTestCase {
         XCTAssertFalse(viewModel.isLoading)
         XCTAssertNil(viewModel.loadError)
         XCTAssertNil(viewModel.pendingLoadError)
-        XCTAssertNil(viewModel.submitError)
+        XCTAssertNil(viewModel.currentSubmitAlert)
         XCTAssertFalse(viewModel.showsPendingInbox)
         XCTAssertFalse(viewModel.canSubmitDecisions)
     }
@@ -344,10 +344,10 @@ final class AiReviewsViewModelTests: XCTestCase {
         )
 
         XCTAssertTrue(accepted)
-        XCTAssertNil(viewModel.submitError)
+        XCTAssertNil(viewModel.currentSubmitAlert)
         let calls = await recorder.calls
         XCTAssertEqual(calls.count, 1)
-        XCTAssertEqual(calls.first?.decision, "approve")
+        XCTAssertEqual(calls.first?.decision, .approve)
         XCTAssertEqual(calls.first?.rationale, "looks right", "the rationale is trimmed before it is sent")
         let reloads = await counter.value
         XCTAssertEqual(reloads, 1, "an accepted decision reloads exactly once through the coordinator")
@@ -373,7 +373,7 @@ final class AiReviewsViewModelTests: XCTestCase {
         )
 
         XCTAssertTrue(accepted)
-        XCTAssertNil(viewModel.submitError)
+        XCTAssertNil(viewModel.currentSubmitAlert)
         let reloads = await counter.value
         XCTAssertEqual(reloads, 1)
     }
@@ -414,7 +414,7 @@ final class AiReviewsViewModelTests: XCTestCase {
             )
 
             XCTAssertFalse(accepted, "\(testCase.code) is not a success")
-            XCTAssertEqual(viewModel.submitError, testCase.message, "\(testCase.code) message")
+            XCTAssertEqual(viewModel.currentSubmitAlert?.message, testCase.message, "\(testCase.code) message")
             let reloads = await counter.value
             XCTAssertEqual(reloads, 1, "\(testCase.code) reconciles the stale snapshot")
         }
@@ -440,7 +440,7 @@ final class AiReviewsViewModelTests: XCTestCase {
         )
 
         XCTAssertFalse(accepted)
-        XCTAssertEqual(viewModel.submitError, "no scope grant covers wallet-1 / instrument-1")
+        XCTAssertEqual(viewModel.currentSubmitAlert?.message, "no scope grant covers wallet-1 / instrument-1")
         let reloads = await counter.value
         XCTAssertEqual(reloads, 0, "an authorization failure changed nothing to reconcile")
     }
@@ -468,7 +468,7 @@ final class AiReviewsViewModelTests: XCTestCase {
         )
 
         XCTAssertFalse(accepted)
-        XCTAssertEqual(viewModel.submitError, "Submit failed: transient race")
+        XCTAssertEqual(viewModel.currentSubmitAlert?.message, "Submit failed: transient race")
         let calls = await recorder.calls
         XCTAssertEqual(calls.count, 1, "a race outcome is NEVER auto-retried")
         let reloads = await counter.value
@@ -489,7 +489,7 @@ final class AiReviewsViewModelTests: XCTestCase {
         )
 
         XCTAssertFalse(accepted)
-        XCTAssertEqual(viewModel.submitError, "Submit failed: gateway timeout")
+        XCTAssertEqual(viewModel.currentSubmitAlert?.message, "Submit failed: gateway timeout")
         XCTAssertEqual(viewModel.pending.count, 1, "a failed write leaves the row in the inbox")
         XCTAssertFalse(viewModel.isInFlight("r-1"))
     }
@@ -523,7 +523,7 @@ final class AiReviewsViewModelTests: XCTestCase {
         )
 
         XCTAssertFalse(accepted)
-        XCTAssertEqual(viewModel.submitError, "Your delegate access changed. Reload before deciding.")
+        XCTAssertEqual(viewModel.currentSubmitAlert?.message, "Your delegate access changed. Reload before deciding.")
         let calls = await recorder.calls
         XCTAssertTrue(calls.isEmpty, "the request is never sent once the identity is gone")
     }
@@ -554,7 +554,7 @@ final class AiReviewsViewModelTests: XCTestCase {
         )
 
         XCTAssertFalse(accepted)
-        XCTAssertEqual(viewModel.submitError, "Your delegate access changed. Reload before deciding.")
+        XCTAssertEqual(viewModel.currentSubmitAlert?.message, "Your delegate access changed. Reload before deciding.")
         let calls = await recorder.calls
         XCTAssertTrue(calls.isEmpty)
     }
@@ -595,12 +595,21 @@ final class AiReviewsViewModelTests: XCTestCase {
     }
 
     /// ...and it does NOT cross-block a different review.
+    ///
+    /// BOTH submissions are gated so the overlap is real rather than
+    /// incidental, and membership is asserted after each controlled
+    /// release: while r-1 is still writing, r-2 must remain in the inbox
+    /// and be accepted on its own. A wholesale `inFlight.removeAll()` or
+    /// a `pending` reset would pass the id-set assertion alone, so the
+    /// intermediate states are what actually pin the per-review scoping.
     func testConcurrentDecisionsOnDifferentReviewsBothProceed() async {
         let viewModel = makeDelegateViewModel()
         await primeDelegate(viewModel: viewModel, pendingIds: ["r-1", "r-2"])
         let recorder = AiReviewDecisionRecorder()
+        let gates = ["r-1": DecisionHandshake(), "r-2": DecisionHandshake()]
         mockAPI.submitAiReviewDecisionHandler = { reviewPublicId, decision, rationale in
             await recorder.record(reviewPublicId: reviewPublicId, decision: decision, rationale: rationale)
+            await gates[reviewPublicId]?.markStartedAndWait()
             return AiReviewDecisionResponse(
                 success: true, errorCode: nil, message: "ok", details: JsonObject()
             )
@@ -609,14 +618,38 @@ final class AiReviewsViewModelTests: XCTestCase {
         let taskA = Task { @MainActor in
             await viewModel.submitDecision(reviewPublicId: "r-1", decision: .approve, rationale: nil)
         }
+        await gates["r-1"]?.awaitStarted()
+        XCTAssertTrue(viewModel.isInFlight("r-1"))
+        XCTAssertFalse(viewModel.isInFlight("r-2"), "one row's write must not mark another in-flight")
+
         let taskB = Task { @MainActor in
             await viewModel.submitDecision(reviewPublicId: "r-2", decision: .reject, rationale: nil)
         }
-        let okA = await taskA.value
-        let okB = await taskB.value
+        await gates["r-2"]?.awaitStarted()
+        XCTAssertTrue(viewModel.isInFlight("r-1"), "r-1 is still writing while r-2 started")
+        XCTAssertTrue(viewModel.isInFlight("r-2"))
+        XCTAssertEqual(
+            Set(viewModel.pending.map(\.reviewPublicId)),
+            ["r-1", "r-2"],
+            "neither row leaves the inbox until its own write is accepted"
+        )
 
+        await gates["r-1"]?.release()
+        let okA = await taskA.value
         XCTAssertTrue(okA)
+        XCTAssertFalse(viewModel.isInFlight("r-1"), "an accepted write clears only its own row")
+        XCTAssertTrue(viewModel.isInFlight("r-2"), "the sibling write is untouched by r-1 completing")
+        XCTAssertEqual(
+            viewModel.pending.map(\.reviewPublicId),
+            ["r-2"],
+            "r-1 left the inbox; r-2 is still there mid-write"
+        )
+
+        await gates["r-2"]?.release()
+        let okB = await taskB.value
         XCTAssertTrue(okB)
+        XCTAssertFalse(viewModel.isInFlight("r-2"))
+        XCTAssertTrue(viewModel.pending.isEmpty, "both decided rows are gone")
         let ids = await Set(recorder.calls.map(\.reviewPublicId))
         XCTAssertEqual(ids, ["r-1", "r-2"])
     }
@@ -632,22 +665,30 @@ final class AiReviewsViewModelTests: XCTestCase {
         let freshReviews = [makeReview(reviewPublicId: "audit-fresh")]
         let freshPending = [makePending(reviewPublicId: "fresh")]
 
+        let pendingHandshake = DecisionHandshake()
         mockAPI.fetchAiReviewsHandler = {
             await handshake.markStartedAndWait()
             return staleReviews
         }
+        /// BOTH feeds are gated. Left free-running, the stale pending
+        /// fetch would resolve before the test ever swapped the handlers,
+        /// and the assertion below would pass without proving anything
+        /// about ordering.
         mockAPI.fetchPendingAiReviewsHandler = {
-            PendingReviewListResponse(items: stalePending, count: stalePending.count)
+            await pendingHandshake.markStartedAndWait()
+            return PendingReviewListResponse(items: stalePending, count: stalePending.count)
         }
 
         let first = Task { @MainActor in await viewModel.load() }
         await handshake.awaitStarted()
+        await pendingHandshake.awaitStarted()
         mockAPI.fetchAiReviewsHandler = { freshReviews }
         mockAPI.fetchPendingAiReviewsHandler = {
             PendingReviewListResponse(items: freshPending, count: freshPending.count)
         }
         let second = Task { @MainActor in await viewModel.load() }
         await handshake.release()
+        await pendingHandshake.release()
         _ = await first.value
         _ = await second.value
 
@@ -747,6 +788,537 @@ final class AiReviewsViewModelTests: XCTestCase {
         XCTAssertEqual(AiReviewDecisionIntent.allCases.count, 2)
     }
 
+    /// Let queued MainActor work run. Bounded and finite: the mock's
+    /// handlers return without suspending, so a feed's commit needs only
+    /// a few hops to land — this never waits on wall-clock time.
+    private func settle() async {
+        for _ in 0..<50 {
+            await Task.yield()
+        }
+    }
+
+    /// A rationale exactly at the backend's column limit is sent; one
+    /// character over is REFUSED locally, with no request at all. Sending
+    /// it would return a plain validation 422 — a different shape from
+    /// the decision route's error envelope — which the outcome table
+    /// cannot classify, leaving the row unreconciled in the inbox.
+    func testRationaleAtLimitIsSentAndOverLimitIsRefusedWithoutRequest() async {
+        let recorder = AiReviewDecisionRecorder()
+        mockAPI.submitAiReviewDecisionHandler = { reviewPublicId, decision, rationale in
+            await recorder.record(reviewPublicId: reviewPublicId, decision: decision, rationale: rationale)
+            return AiReviewDecisionResponse(
+                success: true, errorCode: nil, message: "ok", details: JsonObject()
+            )
+        }
+
+        let atLimit = String(repeating: "a", count: AiReviewRationale.characterLimit)
+        let viewModel = makeDelegateViewModel()
+        await primeDelegate(viewModel: viewModel)
+        let acceptedAtLimit = await viewModel.submitDecision(
+            reviewPublicId: "r-1",
+            decision: .approve,
+            rationale: atLimit
+        )
+        XCTAssertTrue(acceptedAtLimit)
+        let atLimitCalls = await recorder.calls
+        XCTAssertEqual(atLimitCalls.count, 1)
+        XCTAssertEqual(atLimitCalls.first?.rationale?.count, 4096)
+
+        let overLimit = String(repeating: "a", count: AiReviewRationale.characterLimit + 1)
+        let secondViewModel = makeDelegateViewModel()
+        await primeDelegate(viewModel: secondViewModel)
+        let acceptedOverLimit = await secondViewModel.submitDecision(
+            reviewPublicId: "r-1",
+            decision: .approve,
+            rationale: overLimit
+        )
+
+        XCTAssertFalse(acceptedOverLimit)
+        /// The limit is rendered through the catalog template with an
+        /// EXPLICIT locale, so the number carries its locale's grouping
+        /// separator ("4,096" in English) rather than a bare 4096.
+        XCTAssertEqual(
+            secondViewModel.currentSubmitAlert?.message,
+            "Rationale is too long (limit 4,096 characters)."
+        )
+        let afterCalls = await recorder.calls
+        XCTAssertEqual(afterCalls.count, 1, "the over-limit rationale is never put on the wire")
+        XCTAssertEqual(
+            secondViewModel.pending.map(\.reviewPublicId),
+            ["r-1"],
+            "a locally refused decision leaves the row in the inbox to retry"
+        )
+    }
+
+    /// The limit is counted in unicode scalars, matching Python's
+    /// ``len()`` server-side. Grapheme counting would let an emoji-heavy
+    /// rationale the backend rejects slip past the guard.
+    func testRationaleLimitCountsUnicodeScalarsNotGraphemes() {
+        XCTAssertFalse(AiReviewRationale.exceedsLimit(nil))
+        XCTAssertFalse(AiReviewRationale.exceedsLimit(""))
+        XCTAssertFalse(
+            AiReviewRationale.exceedsLimit(String(repeating: "a", count: 4096))
+        )
+        XCTAssertTrue(
+            AiReviewRationale.exceedsLimit(String(repeating: "a", count: 4097))
+        )
+
+        let family = "\u{1F468}\u{200D}\u{1F469}\u{200D}\u{1F467}"
+        XCTAssertEqual(family.count, 1, "one grapheme cluster")
+        XCTAssertEqual(family.unicodeScalars.count, 5, "five scalars — what the backend counts")
+        let justOver = String(repeating: family, count: 820)
+        XCTAssertEqual(justOver.count, 820, "grapheme counting would call this well under the limit")
+        XCTAssertTrue(
+            AiReviewRationale.exceedsLimit(justOver),
+            "4100 scalars must be refused even though it is only 820 graphemes"
+        )
+    }
+
+    /// The inbox must reach the screen on ITS OWN completion. A delegate
+    /// whose audit request is slow (or hung) previously sat in front of an
+    /// empty inbox for the whole duration, because the pending result was
+    /// not committed until the audit await returned.
+    func testPendingFeedCommitsWithoutWaitingForASlowAuditFeed() async {
+        let viewModel = makeDelegateViewModel()
+        let auditGate = DecisionHandshake()
+        let reviews = [makeReview(reviewPublicId: "audit-1")]
+        let pending = [makePending(reviewPublicId: "r-1")]
+        mockAPI.fetchAiReviewsHandler = {
+            await auditGate.markStartedAndWait()
+            return reviews
+        }
+        mockAPI.fetchPendingAiReviewsHandler = {
+            PendingReviewListResponse(items: pending, count: pending.count)
+        }
+
+        let task = Task { @MainActor in await viewModel.load() }
+        await auditGate.awaitStarted()
+        await settle()
+
+        XCTAssertEqual(
+            viewModel.pending.map(\.reviewPublicId),
+            ["r-1"],
+            "the inbox committed while the audit request is still in flight"
+        )
+        XCTAssertTrue(viewModel.reviews.isEmpty, "the audit feed genuinely has not committed yet")
+
+        await auditGate.release()
+        await task.value
+        XCTAssertEqual(viewModel.reviews.count, 1)
+        XCTAssertEqual(viewModel.pending.count, 1)
+    }
+
+    /// ...and symmetrically, an operator's audit list is not held back by
+    /// a slow inbox.
+    func testAuditFeedCommitsWithoutWaitingForASlowPendingFeed() async {
+        let viewModel = makeDelegateViewModel()
+        let pendingGate = DecisionHandshake()
+        let reviews = [makeReview(reviewPublicId: "audit-1")]
+        let pending = [makePending(reviewPublicId: "r-1")]
+        mockAPI.fetchAiReviewsHandler = { reviews }
+        mockAPI.fetchPendingAiReviewsHandler = {
+            await pendingGate.markStartedAndWait()
+            return PendingReviewListResponse(items: pending, count: pending.count)
+        }
+
+        let task = Task { @MainActor in await viewModel.load() }
+        await pendingGate.awaitStarted()
+        await settle()
+
+        XCTAssertEqual(viewModel.reviews.map(\.reviewPublicId), ["audit-1"])
+        XCTAssertTrue(viewModel.pending.isEmpty)
+
+        await pendingGate.release()
+        await task.value
+        XCTAssertEqual(viewModel.pending.count, 1)
+    }
+
+    /// A snapshot already in flight when the decision lands can still
+    /// carry the decided row. It must NOT resurrect it — and the filter
+    /// must release once the server catches up, so a genuinely re-opened
+    /// review can come back.
+    func testStaleSnapshotCannotResurrectADecidedRowAndFilterReleases() async {
+        let viewModel = makeDelegateViewModel()
+        await primeDelegate(viewModel: viewModel, pendingIds: ["r-1", "r-2"])
+        mockAPI.submitAiReviewDecisionHandler = { _, _, _ in
+            AiReviewDecisionResponse(
+                success: true, errorCode: nil, message: "ok", details: JsonObject()
+            )
+        }
+
+        let accepted = await viewModel.submitDecision(
+            reviewPublicId: "r-1",
+            decision: .approve,
+            rationale: nil
+        )
+        XCTAssertTrue(accepted)
+        XCTAssertEqual(
+            viewModel.pending.map(\.reviewPublicId),
+            ["r-2"],
+            "the post-decision reload still served the decided row; it must stay gone"
+        )
+
+        await viewModel.load()
+        XCTAssertEqual(
+            viewModel.pending.map(\.reviewPublicId),
+            ["r-2"],
+            "a repeated lagging snapshot still cannot resurrect it"
+        )
+
+        let caughtUp = [makePending(reviewPublicId: "r-2")]
+        mockAPI.fetchPendingAiReviewsHandler = {
+            PendingReviewListResponse(items: caughtUp, count: caughtUp.count)
+        }
+        await viewModel.load()
+        XCTAssertEqual(viewModel.pending.map(\.reviewPublicId), ["r-2"])
+
+        let reopened = [makePending(reviewPublicId: "r-1"), makePending(reviewPublicId: "r-2")]
+        mockAPI.fetchPendingAiReviewsHandler = {
+            PendingReviewListResponse(items: reopened, count: reopened.count)
+        }
+        await viewModel.load()
+        XCTAssertEqual(
+            Set(viewModel.pending.map(\.reviewPublicId)),
+            ["r-1", "r-2"],
+            "the filter released once the server stopped serving the row, so a genuine re-open returns"
+        )
+    }
+
+    /// A reject confirmation the user leaves open outlives its row. Once
+    /// the row is gone the write must be refused locally rather than
+    /// firing at a review that is no longer the caller's to decide.
+    func testDecisionForARowNoLongerPendingIsRefusedWithoutRequest() async {
+        let viewModel = makeDelegateViewModel()
+        await primeDelegate(viewModel: viewModel, pendingIds: ["r-1"])
+        let recorder = AiReviewDecisionRecorder()
+        mockAPI.submitAiReviewDecisionHandler = { reviewPublicId, decision, rationale in
+            await recorder.record(reviewPublicId: reviewPublicId, decision: decision, rationale: rationale)
+            return AiReviewDecisionResponse(
+                success: true, errorCode: nil, message: "ok", details: JsonObject()
+            )
+        }
+
+        let accepted = await viewModel.submitDecision(
+            reviewPublicId: "ghost",
+            decision: .reject,
+            rationale: nil
+        )
+
+        XCTAssertFalse(accepted)
+        XCTAssertEqual(viewModel.currentSubmitAlert?.message, "This review no longer exists.")
+        let calls = await recorder.calls
+        XCTAssertTrue(calls.isEmpty, "no request is issued for a row that left the inbox")
+    }
+
+    /// Two rows failing concurrently produce TWO alerts. With a single
+    /// shared slot the second would overwrite the first, and dismissing
+    /// would clear a failure the user never saw.
+    func testConcurrentFailuresQueueIndependentlyAndDismissOneAtATime() async throws {
+        let viewModel = makeDelegateViewModel()
+        await primeDelegate(viewModel: viewModel, pendingIds: ["r-1", "r-2"])
+        let gates = ["r-1": DecisionHandshake(), "r-2": DecisionHandshake()]
+        mockAPI.submitAiReviewDecisionHandler = { reviewPublicId, _, _ in
+            await gates[reviewPublicId]?.markStartedAndWait()
+            throw APIError.serverError("\(reviewPublicId) exploded")
+        }
+
+        let taskA = Task { @MainActor in
+            await viewModel.submitDecision(reviewPublicId: "r-1", decision: .approve, rationale: nil)
+        }
+        await gates["r-1"]?.awaitStarted()
+        let taskB = Task { @MainActor in
+            await viewModel.submitDecision(reviewPublicId: "r-2", decision: .reject, rationale: nil)
+        }
+        await gates["r-2"]?.awaitStarted()
+        await gates["r-1"]?.release()
+        _ = await taskA.value
+        await gates["r-2"]?.release()
+        _ = await taskB.value
+
+        XCTAssertEqual(viewModel.submitAlerts.count, 2, "neither failure overwrote the other")
+        XCTAssertEqual(viewModel.submitAlerts.map(\.reviewPublicId), ["r-1", "r-2"])
+        XCTAssertEqual(
+            viewModel.currentSubmitAlert?.message,
+            "Submit failed: r-1 exploded",
+            "the oldest unacknowledged failure is presented first"
+        )
+
+        let first = try XCTUnwrap(viewModel.currentSubmitAlert)
+        viewModel.dismissSubmitAlert(first)
+        XCTAssertEqual(
+            viewModel.currentSubmitAlert?.message,
+            "Submit failed: r-2 exploded",
+            "dismissing one alert reveals the queued sibling"
+        )
+        XCTAssertEqual(viewModel.submitAlerts.count, 1)
+
+        viewModel.dismissSubmitAlert(try XCTUnwrap(viewModel.currentSubmitAlert))
+        XCTAssertNil(viewModel.currentSubmitAlert)
+        XCTAssertTrue(viewModel.submitAlerts.isEmpty)
+    }
+
+    /// Dismissing an alert that is no longer current (a stale handle) must
+    /// not pop somebody else's alert.
+    func testDismissingAStaleAlertHandleIsANoOp() async throws {
+        let viewModel = makeDelegateViewModel()
+        await primeDelegate(viewModel: viewModel, pendingIds: ["r-1"])
+        mockAPI.submitAiReviewDecisionHandler = { _, _, _ in
+            throw APIError.serverError("boom")
+        }
+        _ = await viewModel.submitDecision(reviewPublicId: "r-1", decision: .approve, rationale: nil)
+        let alert = try XCTUnwrap(viewModel.currentSubmitAlert)
+        viewModel.dismissSubmitAlert(alert)
+        XCTAssertTrue(viewModel.submitAlerts.isEmpty)
+
+        _ = await viewModel.submitDecision(reviewPublicId: "r-1", decision: .approve, rationale: nil)
+        XCTAssertEqual(viewModel.submitAlerts.count, 1)
+        viewModel.dismissSubmitAlert(alert)
+        XCTAssertEqual(
+            viewModel.submitAlerts.count,
+            1,
+            "the already-dismissed handle must not consume the newer alert"
+        )
+    }
+
+    /// Work started on screen keeps running after the screen goes away —
+    /// cancelling a decision mid-write would be worse — but it must not
+    /// commit to a ViewModel nobody is looking at.
+    func testEndedSessionSuppressesFeedCommits() async {
+        let viewModel = makeDelegateViewModel()
+        let token = viewModel.beginSession()
+        let gate = DecisionHandshake()
+        let reviews = [makeReview(reviewPublicId: "audit-1")]
+        let pending = [makePending(reviewPublicId: "r-1")]
+        mockAPI.fetchAiReviewsHandler = {
+            await gate.markStartedAndWait()
+            return reviews
+        }
+        mockAPI.fetchPendingAiReviewsHandler = {
+            await gate.markStartedAndWait()
+            return PendingReviewListResponse(items: pending, count: pending.count)
+        }
+
+        let task = Task { @MainActor in await viewModel.load() }
+        await gate.awaitStarted()
+        viewModel.endSession(token: token)
+        await gate.release()
+        await task.value
+
+        XCTAssertTrue(viewModel.reviews.isEmpty, "a departed screen must not commit its audit feed")
+        XCTAssertTrue(viewModel.pending.isEmpty, "nor its inbox")
+    }
+
+    func testEndedSessionSuppressesSubmitAlerts() async {
+        let viewModel = makeDelegateViewModel()
+        await primeDelegate(viewModel: viewModel, pendingIds: ["r-1"])
+        let token = viewModel.beginSession()
+        let gate = DecisionHandshake()
+        mockAPI.submitAiReviewDecisionHandler = { _, _, _ in
+            await gate.markStartedAndWait()
+            throw APIError.serverError("late failure")
+        }
+
+        let task = Task { @MainActor in
+            await viewModel.submitDecision(reviewPublicId: "r-1", decision: .approve, rationale: nil)
+        }
+        await gate.awaitStarted()
+        viewModel.endSession(token: token)
+        await gate.release()
+        _ = await task.value
+
+        XCTAssertNil(
+            viewModel.currentSubmitAlert,
+            "an alert must not be raised on a screen the user already left"
+        )
+    }
+
+    /// A teardown from a PREVIOUS appearance must not deactivate the
+    /// current one — the token is what distinguishes them.
+    func testStaleSessionTeardownDoesNotDeactivateTheCurrentAppearance() async {
+        let viewModel = makeDelegateViewModel()
+        let stale = viewModel.beginSession()
+        let current = viewModel.beginSession()
+        XCTAssertNotEqual(stale, current)
+
+        viewModel.endSession(token: stale)
+
+        let pending = [makePending(reviewPublicId: "r-1")]
+        mockAPI.fetchAiReviewsHandler = { [] }
+        mockAPI.fetchPendingAiReviewsHandler = {
+            PendingReviewListResponse(items: pending, count: pending.count)
+        }
+        await viewModel.load()
+
+        XCTAssertEqual(
+            viewModel.pending.count,
+            1,
+            "the live appearance still commits after a stale teardown"
+        )
+    }
+
+    /// THE regression: a view that disappears while its INITIAL load is
+    /// still in flight must still tear its session down.
+    ///
+    /// The teardown used to be installed only after the initial load
+    /// returned, so cancelling during that first await ran no teardown at
+    /// all — the session stayed active and the unstructured reload worker
+    /// committed into a screen the user had already left. Gate the load,
+    /// cancel, and the session must already be closed BEFORE the gate is
+    /// released; the response that lands afterwards must commit nothing.
+    func testDisappearanceDuringInitialLoadEndsSessionAndSuppressesCommit() async {
+        let viewModel = makeDelegateViewModel()
+        let manager = makeWebSocketManager()
+        let gate = DecisionHandshake()
+        let reviews = [makeReview(reviewPublicId: "audit-1")]
+        let pending = [makePending(reviewPublicId: "r-1")]
+        mockAPI.fetchAiReviewsHandler = {
+            await gate.markStartedAndWait()
+            return reviews
+        }
+        mockAPI.fetchPendingAiReviewsHandler = {
+            await gate.markStartedAndWait()
+            return PendingReviewListResponse(items: pending, count: pending.count)
+        }
+
+        let task = Task { @MainActor in await viewModel.runSession(observing: manager) }
+        await gate.awaitStarted()
+        XCTAssertTrue(viewModel.isSessionActive, "the appearance is open while the first load runs")
+
+        task.cancel()
+        await settle()
+        XCTAssertFalse(
+            viewModel.isSessionActive,
+            "teardown must run even though the initial load never returned"
+        )
+
+        await gate.release()
+        await task.value
+
+        XCTAssertTrue(
+            viewModel.reviews.isEmpty,
+            "the audit response landed after the user left and must not commit"
+        )
+        XCTAssertTrue(viewModel.pending.isEmpty, "nor the inbox response")
+    }
+
+    /// A session that completes normally still tears down on cancel, and
+    /// the live observer it started is stopped by the same teardown.
+    func testRunSessionStopsLiveObservationOnTeardown() async throws {
+        let viewModel = makeDelegateViewModel()
+        let manager = makeWebSocketManager()
+        let counter = AiReviewsReloadCounter()
+        mockAPI.fetchAiReviewsHandler = { await counter.increment(); return [] }
+        mockAPI.fetchPendingAiReviewsHandler = {
+            PendingReviewListResponse(items: [], count: 0)
+        }
+
+        let task = Task { @MainActor in await viewModel.runSession(observing: manager) }
+        try await Task.sleep(nanoseconds: 500_000_000)
+        XCTAssertTrue(viewModel.isSessionActive)
+        let baseline = await counter.value
+
+        task.cancel()
+        await task.value
+        await settle()
+        XCTAssertFalse(viewModel.isSessionActive)
+
+        manager.state.lastAiReviewActivityAt = Date()
+        try await Task.sleep(nanoseconds: 500_000_000)
+        let after = await counter.value
+        XCTAssertEqual(
+            after,
+            baseline,
+            "a pulse after teardown must not reload — the observer was stopped with the session"
+        )
+    }
+
+    /// An unacknowledged failure belongs to the appearance that raised
+    /// it. A retained ViewModel must not ambush the next visit with an
+    /// alert from a visit the user already walked away from.
+    func testAlertsDoNotSurviveIntoTheNextSession() async {
+        let viewModel = makeDelegateViewModel()
+        let token = viewModel.beginSession()
+        await primeDelegate(viewModel: viewModel, pendingIds: ["r-1"])
+        mockAPI.submitAiReviewDecisionHandler = { _, _, _ in
+            throw APIError.serverError("boom")
+        }
+        _ = await viewModel.submitDecision(reviewPublicId: "r-1", decision: .approve, rationale: nil)
+        XCTAssertEqual(viewModel.submitAlerts.count, 1)
+
+        viewModel.endSession(token: token)
+        XCTAssertTrue(viewModel.submitAlerts.isEmpty, "leaving the screen dismisses its alerts")
+        XCTAssertNil(viewModel.currentSubmitAlert)
+
+        viewModel.beginSession()
+        XCTAssertNil(
+            viewModel.currentSubmitAlert,
+            "the new appearance starts clean instead of replaying the old failure"
+        )
+    }
+
+    /// A re-appearance re-opens the session so the screen works again
+    /// after having been closed.
+    func testBeginSessionReactivatesCommitsAfterATeardown() async {
+        let viewModel = makeDelegateViewModel()
+        let token = viewModel.beginSession()
+        viewModel.endSession(token: token)
+        let pending = [makePending(reviewPublicId: "r-1")]
+        mockAPI.fetchAiReviewsHandler = { [] }
+        mockAPI.fetchPendingAiReviewsHandler = {
+            PendingReviewListResponse(items: pending, count: pending.count)
+        }
+
+        await viewModel.load()
+        XCTAssertTrue(viewModel.pending.isEmpty, "closed screen commits nothing")
+
+        viewModel.beginSession()
+        await viewModel.load()
+        XCTAssertEqual(viewModel.pending.count, 1, "re-appearing restores commits")
+    }
+
+    /// Home's badge is a snapshot taken at Home load. The accepted
+    /// decision bumps a shared invalidation tick so the badge refetches
+    /// instead of counting a review the user already resolved.
+    func testAcceptedDecisionBumpsTheBadgeInvalidationTick() async {
+        let viewModel = makeDelegateViewModel()
+        await primeDelegate(viewModel: viewModel, pendingIds: ["r-1"])
+        let before = appState.aiReviewDecisionTick
+        mockAPI.submitAiReviewDecisionHandler = { _, _, _ in
+            AiReviewDecisionResponse(
+                success: true, errorCode: nil, message: "ok", details: JsonObject()
+            )
+        }
+
+        let accepted = await viewModel.submitDecision(
+            reviewPublicId: "r-1",
+            decision: .approve,
+            rationale: nil
+        )
+
+        XCTAssertTrue(accepted)
+        XCTAssertEqual(appState.aiReviewDecisionTick, before + 1)
+    }
+
+    /// A failed decision changed nothing server-side, so the badge is
+    /// still accurate and must not be invalidated.
+    func testFailedDecisionLeavesTheBadgeInvalidationTickAlone() async {
+        let viewModel = makeDelegateViewModel()
+        await primeDelegate(viewModel: viewModel, pendingIds: ["r-1"])
+        let before = appState.aiReviewDecisionTick
+        mockAPI.submitAiReviewDecisionHandler = { _, _, _ in
+            AiReviewDecisionResponse(
+                success: false,
+                errorCode: "not_authorized",
+                message: "no scope grant",
+                details: JsonObject()
+            )
+        }
+
+        _ = await viewModel.submitDecision(reviewPublicId: "r-1", decision: .approve, rationale: nil)
+
+        XCTAssertEqual(appState.aiReviewDecisionTick, before)
+    }
+
     private func makeWebSocketManager() -> WebSocketManager {
         return WebSocketManager(
             authService: FakeAuthService(nextToken: "t"),
@@ -826,13 +1398,13 @@ private actor AiReviewsReloadCounter {
 private actor AiReviewDecisionRecorder {
     struct Call {
         let reviewPublicId: String
-        let decision: String
+        let decision: AiReviewDecisionIntent
         let rationale: String?
     }
 
     var calls: [Call] = []
 
-    func record(reviewPublicId: String, decision: String, rationale: String?) {
+    func record(reviewPublicId: String, decision: AiReviewDecisionIntent, rationale: String?) {
         calls.append(Call(reviewPublicId: reviewPublicId, decision: decision, rationale: rationale))
     }
 }

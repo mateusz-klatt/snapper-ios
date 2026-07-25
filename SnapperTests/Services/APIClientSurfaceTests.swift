@@ -91,13 +91,19 @@ final class APIClientSurfaceTests: XCTestCase {
         let pendingReviews = try await apiClient.fetchPendingAiReviews()
         let decisionWithRationale = try await apiClient.submitAiReviewDecision(
             reviewPublicId: "review/1",
-            decision: "approve",
+            decision: .approve,
             rationale: "momentum confirmed"
         )
         let decisionWithoutRationale = try await apiClient.submitAiReviewDecision(
             reviewPublicId: "review/1",
-            decision: "reject",
+            decision: .reject,
             rationale: nil
+        )
+        let maxRationale = String(repeating: "r", count: AiReviewRationale.characterLimit)
+        let decisionAtRationaleLimit = try await apiClient.submitAiReviewDecision(
+            reviewPublicId: "review/1",
+            decision: .approve,
+            rationale: maxRationale
         )
 
         XCTAssertEqual(pendingReviews.count, 1)
@@ -106,6 +112,7 @@ final class APIClientSurfaceTests: XCTestCase {
         XCTAssertTrue(decisionWithRationale.success)
         XCTAssertNil(decisionWithRationale.errorCode)
         XCTAssertTrue(decisionWithoutRationale.success)
+        XCTAssertTrue(decisionAtRationaleLimit.success)
         XCTAssertEqual(startData.status, "success")
         XCTAssertEqual(stopData.status, "not_running")
         XCTAssertEqual(desiredData.action, "restart")
@@ -130,7 +137,7 @@ final class APIClientSurfaceTests: XCTestCase {
             "GET", "GET", "GET",
             "GET", "GET", "GET", "GET", "GET", "GET", "GET", "GET",
             "GET", "POST", "POST", "PATCH",
-            "GET", "POST", "POST"
+            "GET", "POST", "POST", "POST"
         ])
         XCTAssertEqual(snapshots.map(\.path), [
             "/api/orders",
@@ -172,6 +179,7 @@ final class APIClientSurfaceTests: XCTestCase {
             "/api/processes/feed%2Fpub/stop",
             "/api/processes/feed%2Fpub/desired-state",
             "/api/ai-reviews/pending",
+            "/api/ai-reviews/review%2F1/decision",
             "/api/ai-reviews/review%2F1/decision",
             "/api/ai-reviews/review%2F1/decision"
         ])
@@ -301,6 +309,16 @@ final class APIClientSurfaceTests: XCTestCase {
             bareDecisionPayload["rationale"],
             "an absent rationale is omitted from the wire payload, not sent as an empty string"
         )
+
+        /// A rationale exactly at the backend column limit must survive
+        /// the round trip byte for byte — the client refuses ABOVE the
+        /// limit, so this boundary is the largest payload it will ever
+        /// put on the wire and must not be truncated in transit.
+        let limitDecisionBody = try XCTUnwrap(snapshots[41].jsonBody)
+        let limitPayload = try XCTUnwrap(limitDecisionBody["payload"] as? [String: Any])
+        let sentRationale = try XCTUnwrap(limitPayload["rationale"] as? String)
+        XCTAssertEqual(sentRationale.count, AiReviewRationale.characterLimit)
+        XCTAssertEqual(sentRationale, maxRationale)
     }
 
     /// The decision route answers a stale review with a NON-2xx status
@@ -325,7 +343,7 @@ final class APIClientSurfaceTests: XCTestCase {
 
         let response = try await apiClient.submitAiReviewDecision(
             reviewPublicId: "review-1",
-            decision: "approve",
+            decision: .approve,
             rationale: nil
         )
 
@@ -803,6 +821,7 @@ final class APIClientSurfaceTests: XCTestCase {
             "mark_source": "finalized_1m_candle_close",
             "rate_sources": [],
             "calc_version": "5A.13",
+            "execution_history": ["status": "as_recorded", "corrections": []],
             "equity_coverage": [
                 "sampled": false,
                 "venue_scope": NSNull(),
