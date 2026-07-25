@@ -234,9 +234,16 @@ class AuthService: ObservableObject {
         }
         guard requirementSatisfied else { return false }
 
-        if resource == "ai-reviews" {
-            return user.effectivePermissions?.contains(.readAiReviews) == true
-        }
+        /// ``ai-reviews`` deliberately has NO extra clause: the generated
+        /// requirement is ``anyPermission([readAiReviews,
+        /// submitAiReviewDecision])`` and the screen now hosts two
+        /// surfaces — the read-only decision audit list (``read:ai_reviews``)
+        /// and the delegate pending inbox (``submit:ai_review_decision``
+        /// plus the delegate identity). Narrowing the gate back to
+        /// ``read:ai_reviews`` would lock a pure ``aiDelegate`` — the very
+        /// principal the inbox exists for — out of the screen. Which of the
+        /// two surfaces actually renders is decided per-session by
+        /// ``AiReviewsViewModel``.
         if resource == "backtests" {
             return user.activeWalletPublicId != nil
         }

@@ -28,6 +28,7 @@ protocol APIClientProtocol: Sendable {
     func fetchProcessSummary() async throws -> ProcessSummaryData
     func fetchConfiguredProcesses() async throws -> [ConfiguredProcess]
     func fetchAiReviews() async throws -> [AdminAiReviewItem]
+    func fetchPendingAiReviews() async throws -> PendingReviewListResponse
     func fetchStrategies() async throws -> [StrategyProcess]
     func fetchUsers() async throws -> [UserProfile]
     func fetchDelegates() async throws -> [DelegateRead]
@@ -54,6 +55,12 @@ protocol APIClientProtocol: Sendable {
         name: String,
         body: ProcessDesiredStateBody
     ) async throws -> ProcessDesiredStateData
+
+    func submitAiReviewDecision(
+        reviewPublicId: String,
+        decision: String,
+        rationale: String?
+    ) async throws -> AiReviewDecisionResponse
 
     func fetchInstruments(exchange: String) async throws -> [InstrumentDetailData]
     func fetchExchanges() async throws -> [String]

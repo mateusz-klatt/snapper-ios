@@ -57,6 +57,12 @@ final class MockAPIClient: APIClientProtocol, @unchecked Sendable {
         var fetchAiReviews: @Sendable () async throws -> [AdminAiReviewItem] = {
             throw APIError.invalidResponse
         }
+        var fetchPendingAiReviews: @Sendable () async throws -> PendingReviewListResponse = {
+            throw APIError.invalidResponse
+        }
+        var submitAiReviewDecision: @Sendable (String, String, String?) async throws -> AiReviewDecisionResponse = { _, _, _ in
+            throw APIError.invalidResponse
+        }
         var fetchStrategies: @Sendable () async throws -> [StrategyProcess] = {
             throw APIError.invalidResponse
         }
@@ -201,6 +207,14 @@ final class MockAPIClient: APIClientProtocol, @unchecked Sendable {
     var fetchAiReviewsHandler: @Sendable () async throws -> [AdminAiReviewItem] {
         get { read(\.fetchAiReviews) }
         set { write(\.fetchAiReviews, newValue) }
+    }
+    var fetchPendingAiReviewsHandler: @Sendable () async throws -> PendingReviewListResponse {
+        get { read(\.fetchPendingAiReviews) }
+        set { write(\.fetchPendingAiReviews, newValue) }
+    }
+    var submitAiReviewDecisionHandler: @Sendable (String, String, String?) async throws -> AiReviewDecisionResponse {
+        get { read(\.submitAiReviewDecision) }
+        set { write(\.submitAiReviewDecision, newValue) }
     }
     var fetchStrategiesHandler: @Sendable () async throws -> [StrategyProcess] {
         get { read(\.fetchStrategies) }
@@ -365,6 +379,18 @@ final class MockAPIClient: APIClientProtocol, @unchecked Sendable {
 
     func fetchAiReviews() async throws -> [AdminAiReviewItem] {
         return try await fetchAiReviewsHandler()
+    }
+
+    func fetchPendingAiReviews() async throws -> PendingReviewListResponse {
+        return try await fetchPendingAiReviewsHandler()
+    }
+
+    func submitAiReviewDecision(
+        reviewPublicId: String,
+        decision: String,
+        rationale: String?
+    ) async throws -> AiReviewDecisionResponse {
+        return try await submitAiReviewDecisionHandler(reviewPublicId, decision, rationale)
     }
 
     func fetchStrategies() async throws -> [StrategyProcess] {

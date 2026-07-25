@@ -88,7 +88,24 @@ final class APIClientSurfaceTests: XCTestCase {
             name: "feed/pub",
             body: ProcessDesiredStateBody(action: "restart", restartNonce: restartNonce)
         )
+        let pendingReviews = try await apiClient.fetchPendingAiReviews()
+        let decisionWithRationale = try await apiClient.submitAiReviewDecision(
+            reviewPublicId: "review/1",
+            decision: "approve",
+            rationale: "momentum confirmed"
+        )
+        let decisionWithoutRationale = try await apiClient.submitAiReviewDecision(
+            reviewPublicId: "review/1",
+            decision: "reject",
+            rationale: nil
+        )
 
+        XCTAssertEqual(pendingReviews.count, 1)
+        XCTAssertEqual(pendingReviews.items.first?.reviewPublicId, "pending-1")
+        XCTAssertEqual(pendingReviews.items.first?.instrument, "BTC/USD")
+        XCTAssertTrue(decisionWithRationale.success)
+        XCTAssertNil(decisionWithRationale.errorCode)
+        XCTAssertTrue(decisionWithoutRationale.success)
         XCTAssertEqual(startData.status, "success")
         XCTAssertEqual(stopData.status, "not_running")
         XCTAssertEqual(desiredData.action, "restart")
@@ -112,7 +129,8 @@ final class APIClientSurfaceTests: XCTestCase {
             "GET", "POST",
             "GET", "GET", "GET",
             "GET", "GET", "GET", "GET", "GET", "GET", "GET", "GET",
-            "GET", "POST", "POST", "PATCH"
+            "GET", "POST", "POST", "PATCH",
+            "GET", "POST", "POST"
         ])
         XCTAssertEqual(snapshots.map(\.path), [
             "/api/orders",
@@ -152,7 +170,10 @@ final class APIClientSurfaceTests: XCTestCase {
             "/api/processes/configured",
             "/api/processes/feed%2Fpub/start",
             "/api/processes/feed%2Fpub/stop",
-            "/api/processes/feed%2Fpub/desired-state"
+            "/api/processes/feed%2Fpub/desired-state",
+            "/api/ai-reviews/pending",
+            "/api/ai-reviews/review%2F1/decision",
+            "/api/ai-reviews/review%2F1/decision"
         ])
         let pnlSeriesQuery = try XCTUnwrap(snapshots[33].query)
         let pnlSeriesItems = URLComponents(string: "/?\(pnlSeriesQuery)")?.queryItems ?? []
@@ -237,6 +258,110 @@ final class APIClientSurfaceTests: XCTestCase {
         let desiredPayload = try XCTUnwrap(desiredBody["payload"] as? [String: Any])
         XCTAssertEqual(desiredPayload["action"] as? String, "restart")
         XCTAssertEqual(desiredPayload["restart_nonce"] as? String, "restartnonce012345")
+
+        XCTAssertNil(snapshots[38].jsonBody, "the pending snapshot is a plain GET")
+        XCTAssertNil(
+            snapshots[38].query,
+            "no wallet filter is sent — /pending is scoped server-side by the delegate identity"
+        )
+
+        let decisionBody = try XCTUnwrap(snapshots[39].jsonBody)
+        XCTAssertEqual(decisionBody["type"] as? String, "ai_review_decision_command")
+        let decisionPublicId = try XCTUnwrap(decisionBody["public_id"] as? String)
+        XCTAssertFalse(decisionPublicId.isEmpty)
+        let decisionSession = try XCTUnwrap(decisionBody["session_id"] as? String)
+        XCTAssertFalse(decisionSession.isEmpty)
+        let decisionSequence = try XCTUnwrap(decisionBody["sequence_id"] as? Int)
+        let decisionTimestamp = try XCTUnwrap(decisionBody["timestamp"] as? String)
+        XCTAssertFalse(decisionTimestamp.isEmpty)
+        XCTAssertEqual(
+            decisionSession,
+            desiredSession,
+            "the decision write shares the launch EnvelopeMinter session"
+        )
+        XCTAssertGreaterThan(
+            decisionSequence,
+            desiredSequence,
+            "the decision follows the process mutations on the monotonic .control counter"
+        )
+        let decisionPayload = try XCTUnwrap(decisionBody["payload"] as? [String: Any])
+        XCTAssertEqual(decisionPayload["decision"] as? String, "approve")
+        XCTAssertEqual(decisionPayload["rationale"] as? String, "momentum confirmed")
+
+        let bareDecisionBody = try XCTUnwrap(snapshots[40].jsonBody)
+        let bareDecisionPublicId = try XCTUnwrap(bareDecisionBody["public_id"] as? String)
+        XCTAssertNotEqual(
+            bareDecisionPublicId,
+            decisionPublicId,
+            "each decision mint stamps a fresh public_id"
+        )
+        let bareDecisionPayload = try XCTUnwrap(bareDecisionBody["payload"] as? [String: Any])
+        XCTAssertEqual(bareDecisionPayload["decision"] as? String, "reject")
+        XCTAssertNil(
+            bareDecisionPayload["rationale"],
+            "an absent rationale is omitted from the wire payload, not sent as an empty string"
+        )
+    }
+
+    /// The decision route answers a stale review with a NON-2xx status
+    /// whose FastAPI ``detail`` is an OBJECT, not the string every other
+    /// Snapper route uses. The client decodes that envelope and returns
+    /// it so the ViewModel can act on ``error_code`` instead of seeing a
+    /// bare status code.
+    func testDecisionStructuredErrorDetailIsReturnedNotThrown() async throws {
+        MockURLProtocol.requestHandler = { request in
+            return MockURLProtocol.jsonResponse(
+                statusCode: 409,
+                json: [
+                    "detail": [
+                        "success": false,
+                        "error_code": "review_already_resolved_by_peer",
+                        "message": "another delegate already resolved this review",
+                        "details": ["status": "resolved_approved"],
+                    ],
+                ]
+            )
+        }
+
+        let response = try await apiClient.submitAiReviewDecision(
+            reviewPublicId: "review-1",
+            decision: "approve",
+            rationale: nil
+        )
+
+        XCTAssertFalse(response.success)
+        XCTAssertEqual(response.errorCode, "review_already_resolved_by_peer")
+        XCTAssertEqual(response.message, "another delegate already resolved this review")
+    }
+
+    /// A non-delegate principal gets 422 ``not_a_delegate`` from the
+    /// pending snapshot, again with an object-valued ``detail``. The
+    /// backend message must reach the user rather than degrading to
+    /// ``httpError(422)``.
+    func testPendingNotADelegateSurfacesBackendMessage() async throws {
+        MockURLProtocol.requestHandler = { _ in
+            return MockURLProtocol.jsonResponse(
+                statusCode: 422,
+                json: [
+                    "detail": [
+                        "success": false,
+                        "error_code": "not_a_delegate",
+                        "message": "ai-reviews endpoints require an AI_DELEGATE principal",
+                        "details": [:],
+                    ],
+                ]
+            )
+        }
+
+        do {
+            _ = try await apiClient.fetchPendingAiReviews()
+            XCTFail("Expected serverError")
+        } catch let error as APIError {
+            guard case .serverError(let message) = error else {
+                return XCTFail("Wrong APIError: \(error)")
+            }
+            XCTAssertEqual(message, "ai-reviews endpoints require an AI_DELEGATE principal")
+        }
     }
 
     func testServerErrorDetailAndPlainStatusErrors() async throws {
@@ -366,6 +491,12 @@ final class APIClientSurfaceTests: XCTestCase {
         }
         if method == "GET", path == "/api/ai-reviews" {
             return ["items": [aiReviewPayload()], "count": 1]
+        }
+        if method == "GET", path == "/api/ai-reviews/pending" {
+            return ["items": [pendingReviewPayload()], "count": 1]
+        }
+        if method == "POST", path == "/api/ai-reviews/review%2F1/decision" {
+            return aiReviewDecisionPayload()
         }
         if method == "GET", path == "/api/strategies" {
             return listEnvelope(payload: [strategyProcessPayload()])
@@ -551,6 +682,28 @@ final class APIClientSurfaceTests: XCTestCase {
             "created_at": "2026-01-01T00:00:00Z",
             "resolved_at": "2026-01-01T00:30:00Z",
             "deadline": "2026-01-01T01:00:00Z"
+        ]
+    }
+
+    private static func pendingReviewPayload() -> [String: Any] {
+        return [
+            "review_public_id": "pending-1",
+            "selected_delegate_public_id": "delegate-1",
+            "wallet_public_id": "wallet-1",
+            "dispatch_version": 1,
+            "status": "pending",
+            "deadline": "2026-01-01T01:00:00Z",
+            "fanout_after": "2026-01-01T00:00:00Z",
+            "instrument": "BTC/USD",
+            "signal_envelope": ["thesis": "momentum breakout"]
+        ]
+    }
+
+    private static func aiReviewDecisionPayload() -> [String: Any] {
+        return [
+            "success": true,
+            "message": "decision recorded",
+            "details": ["status": "resolved_approved"]
         ]
     }
 

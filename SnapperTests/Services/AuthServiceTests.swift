@@ -226,11 +226,14 @@ final class AuthServiceTests: XCTestCase {
         XCTAssertFalse(authService.canAccess("ai-integration"))
     }
 
-    /// The iOS AI-review surface is an audit list, so it requires the
-    /// dedicated read permission after the generated any-of resource
-    /// requirement is evaluated. A submit-only delegate can act through
-    /// its own workflow but cannot open this read-only audit surface.
-    func testCanAccessAiReviewAuditRequiresReadPermission() {
+    /// The AI-review screen now hosts BOTH the read-only decision audit
+    /// list and the delegate pending inbox, so its entry gate is exactly
+    /// the generated any-of requirement — ``read:ai_reviews`` OR
+    /// ``submit:ai_review_decision``. A submit-only delegate is the very
+    /// principal the inbox exists for and must be able to open the
+    /// screen; which surface renders is decided per-session by
+    /// ``AiReviewsViewModel``.
+    func testCanAccessAiReviewUsesGeneratedAnyPermissionSemantics() {
         authService.currentUser = makeUser(
             role: .viewer,
             effectivePermissions: [.readAiReviews]
@@ -241,13 +244,25 @@ final class AuthServiceTests: XCTestCase {
             role: .aiDelegate,
             effectivePermissions: [.submitAiReviewDecision]
         )
-        XCTAssertFalse(authService.canAccess("ai-reviews"))
+        XCTAssertTrue(
+            authService.canAccess("ai-reviews"),
+            "a pure aiDelegate must reach the inbox it is the audience for"
+        )
 
         authService.currentUser = makeUser(
             role: .aiDelegate,
             effectivePermissions: [.readAiReviews, .submitAiReviewDecision]
         )
         XCTAssertTrue(authService.canAccess("ai-reviews"))
+
+        authService.currentUser = makeUser(
+            role: .aiResearcher,
+            effectivePermissions: [.readMarketData]
+        )
+        XCTAssertFalse(
+            authService.canAccess("ai-reviews"),
+            "holding neither permission still fails closed"
+        )
     }
 
     func testCanAccessBacktestsRequiresActiveWallet() {
