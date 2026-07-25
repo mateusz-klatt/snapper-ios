@@ -564,6 +564,8 @@ enum ExpectedKeys {
         "aiReviews.decision.error.notFound",
         "aiReviews.decision.error.notDelegate",
         "aiReviews.entry.pendingBadgeAccessibilityLabel",
+        "aiReviews.decision.error.rationaleTooLong",
+        "aiReviews.decision.superseded",
         "strategies.navTitle",
         "strategies.entry.subtitle",
         "strategies.status.running",

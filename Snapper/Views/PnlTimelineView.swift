@@ -413,7 +413,16 @@ private struct PnlAttributionSection: View {
                     .font(.subheadline)
                     .foregroundStyle(.secondary)
             } else {
-                ScrollView(.horizontal, showsIndicators: false) {
+                /// These tables are WIDER than an iPhone: the last
+                /// column (fees on attribution, net on contributions)
+                /// falls off the right edge on a 6.3" screen. They have
+                /// always scrolled, but with the indicator suppressed
+                /// there was nothing telling the reader a value was cut
+                /// off rather than malformed. Indicators are shown, and
+                /// pinned visible so the affordance survives the idle
+                /// state a screenshot captures — matching the wide
+                /// tables in ``AccountsView``.
+                ScrollView(.horizontal) {
                     Grid(alignment: .leading, horizontalSpacing: 16, verticalSpacing: 8) {
                         GridRow {
                             headerCell("positions.timeline.attribution.origin")
@@ -433,6 +442,7 @@ private struct PnlAttributionSection: View {
                         }
                     }
                 }
+                .scrollIndicators(.visible)
             }
         }
         .padding()
@@ -503,7 +513,16 @@ private struct PnlContributionSection: View {
                     .font(.subheadline)
                     .foregroundStyle(.secondary)
             } else {
-                ScrollView(.horizontal, showsIndicators: false) {
+                /// These tables are WIDER than an iPhone: the last
+                /// column (fees on attribution, net on contributions)
+                /// falls off the right edge on a 6.3" screen. They have
+                /// always scrolled, but with the indicator suppressed
+                /// there was nothing telling the reader a value was cut
+                /// off rather than malformed. Indicators are shown, and
+                /// pinned visible so the affordance survives the idle
+                /// state a screenshot captures — matching the wide
+                /// tables in ``AccountsView``.
+                ScrollView(.horizontal) {
                     Grid(alignment: .leading, horizontalSpacing: 16, verticalSpacing: 8) {
                         GridRow {
                             headerCell("positions.timeline.contributions.instrument")
@@ -526,6 +545,7 @@ private struct PnlContributionSection: View {
                         }
                     }
                 }
+                .scrollIndicators(.visible)
             }
         }
         .padding()

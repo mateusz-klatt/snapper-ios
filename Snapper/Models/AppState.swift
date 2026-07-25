@@ -50,6 +50,17 @@ final class AppState {
 
     var availableWallets: [WalletInfo] = []
 
+    /// Monotonic invalidation tick, bumped whenever the AI-review inbox
+    /// records an accepted decision.
+    ///
+    /// Surfaces holding a CACHED pending count — ``HomeView``'s
+    /// entry-card badge — observe it to learn their snapshot went stale
+    /// while the user was inside the inbox. It carries no data and is
+    /// never persisted: it is an invalidation signal, not a channel, so
+    /// the badge refetches its own authoritative count rather than
+    /// trusting a number pushed from another screen.
+    var aiReviewDecisionTick: Int = 0
+
     /// Operators the caller may act AS, populated by
     /// ``EditDevicePrefView`` on appearance via
     /// ``APIClient.fetchOperators``. Treated as a read-through

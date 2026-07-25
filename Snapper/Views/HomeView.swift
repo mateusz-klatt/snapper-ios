@@ -12,6 +12,7 @@ struct HomeView: View {
     @State private var orders: [OrderStatus] = []
     @State private var latestAlert: AlertEventInfo?
     @State private var pendingAiReviewCount = 0
+    @State private var pendingBadgeSeq = 0
     @State private var isLoading = true
     @State private var errorMessage: String?
 
@@ -134,6 +135,16 @@ struct HomeView: View {
         .task {
             await loadData()
             applyDevAutoNavigateIfRequested()
+        }
+        /// The badge is a SNAPSHOT taken at Home load, so it goes stale
+        /// the moment the user records a decision inside the inbox. The
+        /// tick is an invalidation signal (no data crosses), and the
+        /// refetch below re-reads the authoritative count — cheaper and
+        /// less error-prone than trying to decrement locally, and it
+        /// lands while the user is still in the inbox rather than after
+        /// they pop back.
+        .onChange(of: appState.aiReviewDecisionTick) {
+            Task { await loadPendingAiReviewCount() }
         }
         .task(id: appState.selectedWalletPublicId) {
             await loadLatestAlert()
@@ -484,18 +495,35 @@ struct HomeView: View {
     /// carries the authoritative, live-updating list. A failure zeroes the
     /// badge rather than surfacing an error, because a stale badge would
     /// be worse than none on a screen the user did not ask to load.
+    ///
+    /// Also re-run on ``AppState/aiReviewDecisionTick`` so a decision
+    /// recorded in the inbox does not leave the badge counting a review
+    /// the user already resolved.
+    ///
+    /// Overlapping runs (the initial appear racing a pull-to-refresh, or
+    /// racing the invalidation refetch) are ordered by a monotonic token:
+    /// only the NEWEST run may apply its result, so a slower earlier
+    /// response cannot install an older count last. The token guards the
+    /// badge only — the sibling Home fields carry the same latent race,
+    /// but they predate this screen and are left alone here.
     private func loadPendingAiReviewCount() async {
+        pendingBadgeSeq += 1
+        let token = pendingBadgeSeq
         guard AiReviewsViewModel.showsPendingInbox(
             delegatePublicId: authService.currentUser?.delegatePublicId,
             canReadSignals: authService.hasPermission(.readSignals)
         ) else {
+            guard token == pendingBadgeSeq else { return }
             pendingAiReviewCount = 0
             return
         }
         do {
-            pendingAiReviewCount = try await APIClient.shared.fetchPendingAiReviews().count
+            let count = try await APIClient.shared.fetchPendingAiReviews().count
+            guard token == pendingBadgeSeq else { return }
+            pendingAiReviewCount = count
         } catch {
             logger.error("Failed to fetch pending AI reviews: \(error)")
+            guard token == pendingBadgeSeq else { return }
             pendingAiReviewCount = 0
         }
     }

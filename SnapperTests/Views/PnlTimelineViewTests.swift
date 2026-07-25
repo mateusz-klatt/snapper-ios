@@ -94,6 +94,10 @@ final class PnlTimelineViewTests: XCTestCase {
                 lastMinute: nil,
                 sampleCalcVersion: nil
             ),
+            /// #184 regenerated ``PnlSeriesData`` with a REQUIRED
+            /// ``execution_history``. The uncorrected default keeps every
+            /// existing expectation about these fixtures intact.
+            executionHistory: PnlExecutionHistoryData(status: .asRecorded, corrections: []),
             points: points
         )
     }

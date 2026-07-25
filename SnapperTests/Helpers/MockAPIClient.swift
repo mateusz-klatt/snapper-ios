@@ -60,7 +60,7 @@ final class MockAPIClient: APIClientProtocol, @unchecked Sendable {
         var fetchPendingAiReviews: @Sendable () async throws -> PendingReviewListResponse = {
             throw APIError.invalidResponse
         }
-        var submitAiReviewDecision: @Sendable (String, String, String?) async throws -> AiReviewDecisionResponse = { _, _, _ in
+        var submitAiReviewDecision: @Sendable (String, AiReviewDecisionIntent, String?) async throws -> AiReviewDecisionResponse = { _, _, _ in
             throw APIError.invalidResponse
         }
         var fetchStrategies: @Sendable () async throws -> [StrategyProcess] = {
@@ -212,7 +212,7 @@ final class MockAPIClient: APIClientProtocol, @unchecked Sendable {
         get { read(\.fetchPendingAiReviews) }
         set { write(\.fetchPendingAiReviews, newValue) }
     }
-    var submitAiReviewDecisionHandler: @Sendable (String, String, String?) async throws -> AiReviewDecisionResponse {
+    var submitAiReviewDecisionHandler: @Sendable (String, AiReviewDecisionIntent, String?) async throws -> AiReviewDecisionResponse {
         get { read(\.submitAiReviewDecision) }
         set { write(\.submitAiReviewDecision, newValue) }
     }
@@ -387,7 +387,7 @@ final class MockAPIClient: APIClientProtocol, @unchecked Sendable {
 
     func submitAiReviewDecision(
         reviewPublicId: String,
-        decision: String,
+        decision: AiReviewDecisionIntent,
         rationale: String?
     ) async throws -> AiReviewDecisionResponse {
         return try await submitAiReviewDecisionHandler(reviewPublicId, decision, rationale)
