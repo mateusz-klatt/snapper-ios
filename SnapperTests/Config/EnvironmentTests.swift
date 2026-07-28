@@ -20,6 +20,7 @@ final class EnvironmentTests: XCTestCase {
             "Signals": "/signals",
             "Backtests": "/backtests",
             "ProcessSummary": "/processes/summary",
+            "Processes": "/processes",
             "AiReviews": "/ai-reviews",
             "Strategies": "/strategies",
             "Users": "/auth/users",
@@ -85,6 +86,8 @@ final class EnvironmentTests: XCTestCase {
         XCTAssertEqual(AppConfig.Endpoints.signals, "/signals")
         XCTAssertEqual(AppConfig.Endpoints.backtests, "/backtests")
         XCTAssertEqual(AppConfig.Endpoints.processSummary, "/processes/summary")
+        XCTAssertEqual(AppConfig.Endpoints.processes, "/processes")
+        XCTAssertEqual(AppConfig.Endpoints.processConfigured, "/processes/configured")
         XCTAssertEqual(AppConfig.Endpoints.aiReviews, "/ai-reviews")
         XCTAssertEqual(AppConfig.Endpoints.strategies, "/strategies")
         XCTAssertEqual(AppConfig.Endpoints.users, "/auth/users")
@@ -120,6 +123,7 @@ final class EnvironmentTests: XCTestCase {
         XCTAssertEqual(parsed.endpoints.signals, "/signals")
         XCTAssertEqual(parsed.endpoints.backtests, "/backtests")
         XCTAssertEqual(parsed.endpoints.processSummary, "/processes/summary")
+        XCTAssertEqual(parsed.endpoints.processes, "/processes")
         XCTAssertEqual(parsed.endpoints.aiReviews, "/ai-reviews")
         XCTAssertEqual(parsed.endpoints.strategies, "/strategies")
         XCTAssertEqual(parsed.endpoints.users, "/auth/users")
@@ -155,6 +159,7 @@ final class EnvironmentTests: XCTestCase {
         XCTAssertEqual(parsed.endpoints.orders, "/orders")
         XCTAssertEqual(parsed.endpoints.portfolio, "")
         XCTAssertEqual(parsed.endpoints.logout, "")
+        XCTAssertEqual(parsed.endpoints.processes, "")
         XCTAssertEqual(parsed.endpoints.trailingStops, "")
     }
 
@@ -171,6 +176,7 @@ final class EnvironmentTests: XCTestCase {
         XCTAssertEqual(parsed.endpoints.login, "")
         XCTAssertEqual(parsed.endpoints.orders, "")
         XCTAssertEqual(parsed.endpoints.portfolio, "")
+        XCTAssertEqual(parsed.endpoints.processes, "")
         XCTAssertEqual(parsed.endpoints.trailingStops, "")
     }
 
@@ -254,6 +260,7 @@ final class EnvironmentTests: XCTestCase {
         XCTAssertEqual(empty.endpoints.signals, "")
         XCTAssertEqual(empty.endpoints.backtests, "")
         XCTAssertEqual(empty.endpoints.processSummary, "")
+        XCTAssertEqual(empty.endpoints.processes, "")
         XCTAssertEqual(empty.endpoints.aiReviews, "")
         XCTAssertEqual(empty.endpoints.strategies, "")
         XCTAssertEqual(empty.endpoints.users, "")
