@@ -94,24 +94,18 @@ struct AiReviewsView: View {
                 rejectRequest = nil
             }
         }
-        /// Dismissal lives in the binding's setter, NOT in the button:
-        /// SwiftUI flips ``isPresented`` for any button tap, so doing it
-        /// in both places would pop TWO entries and swallow a queued
-        /// failure the user never saw.
+        /// The alert has one dismissal affordance, and that button removes
+        /// the specific queue entry SwiftUI presented. A constant binding
+        /// keeps SwiftUI's presentation write from consuming the next entry;
+        /// removing the model entry re-renders the presentation state.
         .alert(
             LocalizedStringKey("common.error.submissionFailed"),
-            isPresented: Binding(
-                get: { viewModel?.currentSubmitAlert != nil },
-                set: { presented in
-                    guard !presented,
-                          let viewModel,
-                          let alert = viewModel.currentSubmitAlert else { return }
-                    viewModel.dismissSubmitAlert(alert)
-                }
-            ),
+            isPresented: .constant(viewModel?.currentSubmitAlert != nil),
             presenting: viewModel?.currentSubmitAlert
-        ) { _ in
-            Button(LocalizedStringKey("common.ok"), role: .cancel) { }
+        ) { alert in
+            Button(LocalizedStringKey("common.ok"), role: .cancel) {
+                viewModel?.dismissSubmitAlert(alert)
+            }
         } message: { alert in
             Text(verbatim: alert.message)
         }

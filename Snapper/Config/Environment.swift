@@ -190,16 +190,11 @@ enum AppConfig {
             return configuration.endpoints.trailingStops
         }
 
-        /// Root of the processes REST family, derived from
-        /// ``processSummary`` (``/processes/summary``) by dropping its
-        /// ``/summary`` leaf so no dedicated ``Configuration.plist`` key is
-        /// required. Full wire paths resolve to ``/api/processes`` (per-name
-        /// lifecycle mutations) and ``/api/processes/configured``.
+        /// Root of the processes REST family. Full wire paths resolve to
+        /// ``/api/processes`` (per-name lifecycle mutations) and
+        /// ``/api/processes/configured``.
         static var processes: String {
-            let summary = configuration.endpoints.processSummary
-            let suffix = "/summary"
-            guard summary.hasSuffix(suffix) else { return summary }
-            return String(summary.dropLast(suffix.count))
+            return configuration.endpoints.processes
         }
 
         /// Configured-process listing endpoint
@@ -229,6 +224,7 @@ enum AppConfig {
             let signals: String
             let backtests: String
             let processSummary: String
+            let processes: String
             let aiReviews: String
             let strategies: String
             let users: String
@@ -287,6 +283,7 @@ enum AppConfig {
                     signals: endpoints["Signals"] as? String ?? "",
                     backtests: endpoints["Backtests"] as? String ?? "",
                     processSummary: endpoints["ProcessSummary"] as? String ?? "",
+                    processes: endpoints["Processes"] as? String ?? "",
                     aiReviews: endpoints["AiReviews"] as? String ?? "",
                     strategies: endpoints["Strategies"] as? String ?? "",
                     users: endpoints["Users"] as? String ?? "",
@@ -332,6 +329,7 @@ enum AppConfig {
                     signals: "",
                     backtests: "",
                     processSummary: "",
+                    processes: "",
                     aiReviews: "",
                     strategies: "",
                     users: "",
