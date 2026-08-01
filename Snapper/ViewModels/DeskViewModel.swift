@@ -61,6 +61,20 @@ final class DeskViewModel {
         return desks.contains { $0.id == selectedDeskPublicId }
     }
 
+    /// Stable UI-test signal for the catalogue request lifecycle.
+    var loadStateAccessibilityIdentifier: String {
+        if !hasLoaded {
+            return "desk.state.loading"
+        }
+        if isLoading {
+            return "desk.state.refreshing"
+        }
+        if loadError != nil {
+            return "desk.state.failed"
+        }
+        return desks.isEmpty ? "desk.state.loaded.empty" : "desk.state.loaded.content"
+    }
+
     /// Fetch the caller and their server-filtered desk catalogue together.
     /// Concurrent invocations collapse while a load is already in flight.
     func load() async {

@@ -199,6 +199,7 @@ struct SettingsView: View {
             .navigationTitle(LocalizedStringKey("tabs.settings"))
             .scrollContentBackground(.hidden)
             .background(Color.bgBase)
+            .accessibilityIdentifier("settings.form")
             .task {
                 await notificationService.refreshAuthorizationStatus()
                 await refreshDeviceState()

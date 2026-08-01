@@ -69,6 +69,7 @@ final class DeskViewModelTests: XCTestCase {
         XCTAssertFalse(viewModel.canManageMemberships)
         XCTAssertFalse(viewModel.isLoading)
         XCTAssertFalse(viewModel.hasLoaded)
+        XCTAssertEqual(viewModel.loadStateAccessibilityIdentifier, "desk.state.loading")
         XCTAssertNil(viewModel.loadError)
         XCTAssertNil(viewModel.selectedDeskPublicId)
         XCTAssertFalse(viewModel.canAttemptAttachment)
@@ -102,6 +103,7 @@ final class DeskViewModelTests: XCTestCase {
         XCTAssertEqual(viewModel.selectedDeskPublicId, "desk-primary")
         XCTAssertFalse(viewModel.canManageMemberships)
         XCTAssertTrue(viewModel.hasLoaded)
+        XCTAssertEqual(viewModel.loadStateAccessibilityIdentifier, "desk.state.loaded.content")
         XCTAssertNil(viewModel.loadError)
     }
 
@@ -133,6 +135,7 @@ final class DeskViewModelTests: XCTestCase {
         XCTAssertTrue(viewModel.hasLoaded)
         XCTAssertNil(viewModel.selectedDeskPublicId)
         XCTAssertNil(viewModel.loadError)
+        XCTAssertEqual(viewModel.loadStateAccessibilityIdentifier, "desk.state.loaded.empty")
         XCTAssertFalse(viewModel.canAttemptAttachment)
     }
 
@@ -178,6 +181,7 @@ final class DeskViewModelTests: XCTestCase {
         XCTAssertNil(viewModel.selectedDeskPublicId)
         XCTAssertFalse(viewModel.canManageMemberships)
         XCTAssertTrue(viewModel.hasLoaded)
+        XCTAssertEqual(viewModel.loadStateAccessibilityIdentifier, "desk.state.failed")
         guard case .httpError(let status) = viewModel.loadError else {
             return XCTFail("Expected typed HTTP error")
         }
@@ -214,6 +218,7 @@ final class DeskViewModelTests: XCTestCase {
 
         let firstLoad = Task { await viewModel.load() }
         await gate.waitUntilStarted()
+        XCTAssertEqual(viewModel.loadStateAccessibilityIdentifier, "desk.state.loading")
         await viewModel.load()
         let fetchCount = await gate.fetchCount
         XCTAssertEqual(fetchCount, 1)
@@ -221,7 +226,26 @@ final class DeskViewModelTests: XCTestCase {
         await firstLoad.value
 
         XCTAssertFalse(viewModel.isLoading)
+        XCTAssertEqual(viewModel.loadStateAccessibilityIdentifier, "desk.state.loaded.content")
         XCTAssertEqual(viewModel.desks.map(\.id), [desk.publicId])
+    }
+
+    func testRefreshExposesRefreshingAccessibilityStateUntilItSettles() async {
+        let desk = makeOperator(publicId: "desk-1", label: "Main")
+        let user = makeUser(primaryOperatorPublicId: desk.publicId)
+        configureLoad(user: user, operators: [desk])
+        let viewModel = makeViewModel()
+        await viewModel.load()
+        let gate = DeskLoadGate(user: user)
+        mockAPI.fetchCurrentUserHandler = { await gate.fetch() }
+
+        let refresh = Task { await viewModel.load() }
+        await gate.waitUntilStarted()
+
+        XCTAssertEqual(viewModel.loadStateAccessibilityIdentifier, "desk.state.refreshing")
+        await gate.finish()
+        await refresh.value
+        XCTAssertEqual(viewModel.loadStateAccessibilityIdentifier, "desk.state.loaded.content")
     }
 
     func testWhitespaceUsernameFailsValidationWithoutRequest() async {

@@ -157,15 +157,16 @@ final class I18nScreenshotUITests: XCTestCase {
         }
     }
 
-    /// Release UAT for the permission-derived admin, operator, and viewer surfaces.
+    /// Release UAT for the admin, operator, and viewer fixture sessions.
     ///
     /// The isolated fixture gives admin and operator the default desk, creates
     /// `deskviewer` without a membership, adds an instrument scope grant for
     /// the paper wallet, and creates one additional unscoped desk. Admin must
-    /// see both desks and attach `deskviewer`; operator then sees only default
-    /// and repeats that attach idempotently; the viewer's next login must see
-    /// only default. Viewer retains zero mutation affordances; admin also sees
-    /// Users.
+    /// see both desks and attach `deskviewer`. A fresh viewer session must then
+    /// see exactly the recorded default desk. Operator sees only default and
+    /// repeats the same attachment idempotently; another fresh viewer session
+    /// must still see exactly that one desk. Viewer retains zero mutation
+    /// affordances; admin also sees Users.
     ///
     /// The 3.1 sweep retains build 29's P&L, Processes, Signals, AI-review,
     /// and refreshable-empty-state checks while extending them to operator
@@ -185,6 +186,10 @@ final class I18nScreenshotUITests: XCTestCase {
             expectedDeskLabels: ["default", "ios-uat-secondary"],
             expectedDeskPublicIds: [deskUATDefaultPublicId, deskUATSecondaryPublicId],
             expectedFixtureMarker: deskUATFixtureMarker,
+            deskAttachmentExpectation: .attachViewer(
+                targetPublicId: deskUATDefaultPublicId,
+                evidence: "admin initial attachment"
+            ),
             homeSurfaces: [
                 ("Market data", "market-data", .none),
                 ("System Health", "health", .none),
@@ -197,13 +202,20 @@ final class I18nScreenshotUITests: XCTestCase {
             ],
             forbiddenHomeSurfaces: []
         ) else { return }
-        guard verifyViewerDeskAfterAdminAttachment(username: "deskviewer") else { return }
+        guard verifyViewerDeskMembership(
+            username: "deskviewer",
+            phase: "after-admin-attach"
+        ) else { return }
         guard capturePermissionUAT(
             role: "operator",
             username: "operator",
             expectedDeskLabels: ["default"],
             expectedDeskPublicIds: [deskUATDefaultPublicId],
             expectedFixtureMarker: nil,
+            deskAttachmentExpectation: .attachViewer(
+                targetPublicId: deskUATDefaultPublicId,
+                evidence: "operator idempotent repeat"
+            ),
             homeSurfaces: [
                 ("Market data", "market-data", .none),
                 ("System Health", "health", .none),
@@ -215,12 +227,17 @@ final class I18nScreenshotUITests: XCTestCase {
             ],
             forbiddenHomeSurfaces: ["Users"]
         ) else { return }
+        guard verifyViewerDeskMembership(
+            username: "deskviewer",
+            phase: "after-operator-repeat"
+        ) else { return }
         guard capturePermissionUAT(
             role: "viewer",
             username: "deskviewer",
             expectedDeskLabels: ["default"],
             expectedDeskPublicIds: [deskUATDefaultPublicId],
             expectedFixtureMarker: nil,
+            deskAttachmentExpectation: .hidden,
             homeSurfaces: [
                 ("Market data", "market-data", .none),
                 ("System Health", "health", .none),
@@ -567,12 +584,21 @@ final class I18nScreenshotUITests: XCTestCase {
         case aiReviewDelegateSegment
     }
 
+    /// Expected membership-control behavior for one named fixture session.
+    /// The UI sweep proves these concrete sessions; unit tests independently
+    /// prove that production visibility is derived from effective permissions.
+    private enum DeskAttachmentExpectation {
+        case hidden
+        case attachViewer(targetPublicId: String, evidence: String)
+    }
+
     private func capturePermissionUAT(
         role: String,
         username: String,
         expectedDeskLabels: [String],
         expectedDeskPublicIds: [String],
         expectedFixtureMarker: String?,
+        deskAttachmentExpectation: DeskAttachmentExpectation,
         homeSurfaces: [(title: String, slug: String, inspection: UatSurfaceInspection)],
         forbiddenHomeSurfaces: [String]
     ) -> Bool {
@@ -693,7 +719,7 @@ final class I18nScreenshotUITests: XCTestCase {
                 expectedDeskLabels: expectedDeskLabels,
                 expectedDeskPublicIds: expectedDeskPublicIds,
                 expectedFixtureMarker: expectedFixtureMarker,
-                shouldExposeAttachment: role != "viewer"
+                attachmentExpectation: deskAttachmentExpectation
             )
 
             app.terminate()
@@ -899,46 +925,43 @@ final class I18nScreenshotUITests: XCTestCase {
         }
     }
 
-    /// Prove the 3.1 desk surface renders the server-filtered catalogue and
-    /// the deployed capability matrix. Unit tests separately pin the exact
-    /// effective-permission decision independently of role.
+    /// Prove the 3.1 desk surface renders the exact server-filtered catalogue
+    /// and the expected membership controls for this named fixture session.
+    /// Unit tests separately pin the effective-permission decision independently
+    /// of role; this live sweep does not claim to distinguish that implementation.
     private func captureDeskSurface(
         app: XCUIApplication,
         role: String,
         expectedDeskLabels: [String],
         expectedDeskPublicIds: [String],
         expectedFixtureMarker: String?,
-        shouldExposeAttachment: Bool
+        attachmentExpectation: DeskAttachmentExpectation
     ) -> Bool {
         guard openDeskFromSettings(app: app, role: role) else { return false }
+        let fixtureIsConsistent = expectedDeskLabels.count == expectedDeskPublicIds.count
+        XCTAssertTrue(
+            fixtureIsConsistent,
+            "\(role) UAT expectation must pair every desk label with a public id"
+        )
+        guard fixtureIsConsistent else { return false }
+        guard waitForSuccessfulDeskLoad(
+            app: app,
+            evidence: role,
+            expectedDeskPublicIds: expectedDeskPublicIds
+        ) else { return false }
         let deskRows = app.descendants(matching: .any).matching(
             NSPredicate(format: "identifier BEGINSWITH %@", "desk.row.")
         )
-        let firstRowExists = deskRows.firstMatch.waitForExistence(timeout: 15)
-        XCTAssertTrue(
-            firstRowExists,
-            "\(role) did not render an attached desk"
+        let exactRowsMatch = waitForExactDeskIdentifiers(
+            expectedDeskPublicIds,
+            in: app
         )
-        guard firstRowExists else { return false }
-        var countAttempts = 0
-        while deskRows.count != expectedDeskLabels.count && countAttempts < 10 {
-            sleep(1)
-            countAttempts += 1
-        }
-        let countMatches = deskRows.count == expectedDeskLabels.count
         XCTAssertTrue(
-            countMatches,
-            "\(role) received an unexpected server-filtered desk catalogue"
+            exactRowsMatch,
+            "\(role) received desk identifiers other than \(expectedDeskPublicIds)"
         )
+        guard exactRowsMatch else { return false }
         let renderedLabels = deskRows.allElementsBoundByIndex.map(\.label)
-        var publicIdsMatch = expectedDeskPublicIds.count == expectedDeskLabels.count
-        for publicId in expectedDeskPublicIds {
-            let rowExists = app.descendants(matching: .any).matching(
-                identifier: "desk.row.\(publicId)"
-            ).firstMatch.exists
-            XCTAssertTrue(rowExists, "\(role) did not receive expected desk id \(publicId)")
-            publicIdsMatch = publicIdsMatch && rowExists
-        }
         var labelsMatch = true
         for expectedLabel in expectedDeskLabels {
             let containsLabel = renderedLabels.contains {
@@ -950,16 +973,6 @@ final class I18nScreenshotUITests: XCTestCase {
             )
             labelsMatch = labelsMatch && containsLabel
         }
-        var excludesSecondary = true
-        if !expectedDeskLabels.contains("ios-uat-secondary") {
-            excludesSecondary = !renderedLabels.contains {
-                $0.localizedCaseInsensitiveContains("ios-uat-secondary")
-            }
-            XCTAssertTrue(
-                excludesSecondary,
-                "\(role) must not receive the admin-only secondary desk"
-            )
-        }
         var fixtureMarkerMatches = true
         if let expectedFixtureMarker {
             fixtureMarkerMatches = renderedLabels.contains {
@@ -970,19 +983,23 @@ final class I18nScreenshotUITests: XCTestCase {
                 "\(role) is not connected to the recorded disposable desk fixture"
             )
         }
-        guard countMatches,
-              publicIdsMatch,
-              labelsMatch,
-              excludesSecondary,
+        guard labelsMatch,
               fixtureMarkerMatches else { return false }
         attach(code: "us", screen: "uat-\(role)-desk")
 
         let username = app.textFields["desk.attach.username"]
         let submit = app.buttons["desk.attach.submit"]
-        if shouldExposeAttachment {
-            let usernameExists = username.waitForExistence(timeout: 5)
+        switch attachmentExpectation {
+        case .attachViewer(let targetPublicId, let evidence):
+            let deskSurface = app.descendants(matching: .any).matching(
+                identifier: "desk.state.loaded.content"
+            ).firstMatch
+            let usernameHittable = waitUntilHittable(
+                username,
+                byScrolling: deskSurface
+            )
             XCTAssertTrue(
-                usernameExists,
+                usernameHittable,
                 "\(role) did not expose the viewer attachment form"
             )
             let submitExists = submit.waitForExistence(timeout: 5)
@@ -991,25 +1008,33 @@ final class I18nScreenshotUITests: XCTestCase {
                 "\(role) did not expose the viewer attachment action"
             )
             let selector = app.descendants(matching: .any).matching(
-                identifier: "desk.attach.selector"
+                NSPredicate(
+                    format: "identifier BEGINSWITH %@",
+                    "desk.attach.selector."
+                )
             ).firstMatch
             let selectorExists = selector.waitForExistence(timeout: 5)
             XCTAssertTrue(
                 selectorExists,
                 "\(role) did not expose the desk selector"
             )
-            guard usernameExists, submitExists, selectorExists else { return false }
-            let selectedDesk = "\(selector.label) \(String(describing: selector.value))"
-            let targetsDefault = selectedDesk.localizedCaseInsensitiveContains("default")
-            XCTAssertTrue(
-                targetsDefault,
-                "\(role) must target the same primary default desk"
+            guard usernameHittable, submitExists, selectorExists else { return false }
+            let expectedSelectorIdentifier = "desk.attach.selector.\(targetPublicId)"
+            XCTAssertEqual(
+                selector.identifier,
+                expectedSelectorIdentifier,
+                "\(role) \(evidence) targeted a different desk public id"
             )
-            guard targetsDefault else { return false }
+            guard selector.identifier == expectedSelectorIdentifier else { return false }
             username.tap()
             username.typeText("deskviewer")
+            let submitHittable = waitUntilHittable(
+                submit,
+                byScrolling: deskSurface
+            )
+            XCTAssertTrue(submitHittable, "\(role) attachment action was not hittable")
             XCTAssertTrue(submit.isEnabled, "\(role) attachment action stayed disabled")
-            guard submit.isEnabled else { return false }
+            guard submitHittable, submit.isEnabled else { return false }
             submit.tap()
 
             let success = app.descendants(matching: .any).matching(
@@ -1018,11 +1043,11 @@ final class I18nScreenshotUITests: XCTestCase {
             let successExists = success.waitForExistence(timeout: 15)
             XCTAssertTrue(
                 successExists,
-                "\(role) could not attach the UAT viewer"
+                "\(role) could not complete \(evidence)"
             )
             attach(code: "us", screen: "uat-\(role)-desk-attach-success")
             return successExists
-        } else {
+        case .hidden:
             let usernameHidden = !username.waitForExistence(timeout: 3)
             XCTAssertTrue(
                 usernameHidden,
@@ -1034,7 +1059,10 @@ final class I18nScreenshotUITests: XCTestCase {
                 "\(role) must not expose the viewer attachment action"
             )
             let selectorHidden = !app.descendants(matching: .any).matching(
-                identifier: "desk.attach.selector"
+                NSPredicate(
+                    format: "identifier BEGINSWITH %@",
+                    "desk.attach.selector."
+                )
             ).firstMatch.exists
             XCTAssertTrue(
                 selectorHidden,
@@ -1044,24 +1072,88 @@ final class I18nScreenshotUITests: XCTestCase {
         }
     }
 
+    private func waitForSuccessfulDeskLoad(
+        app: XCUIApplication,
+        evidence: String,
+        expectedDeskPublicIds: [String],
+        timeout: TimeInterval = 15
+    ) -> Bool {
+        let stateIdentifier = expectedDeskPublicIds.isEmpty
+            ? "desk.state.loaded.empty"
+            : "desk.state.loaded.content"
+        let loaded = app.descendants(matching: .any).matching(
+            identifier: stateIdentifier
+        ).firstMatch
+        let loadedExists = loaded.waitForExistence(timeout: timeout)
+        XCTAssertTrue(
+            loadedExists,
+            "\(evidence) desk catalogue did not reach a successful loaded state"
+        )
+        return loadedExists
+    }
+
+    /// Require the same exact identifier set across consecutive accessibility
+    /// snapshots so transient collection counts cannot satisfy the UAT gate.
+    private func waitForExactDeskIdentifiers(
+        _ expectedPublicIds: [String],
+        in app: XCUIApplication,
+        timeout: TimeInterval = 15
+    ) -> Bool {
+        let expected = Set(expectedPublicIds.map { "desk.row.\($0)" })
+        let rows = app.descendants(matching: .any).matching(
+            NSPredicate(format: "identifier BEGINSWITH %@", "desk.row.")
+        )
+        let deadline = Date().addingTimeInterval(timeout)
+        var consecutiveMatches = 0
+        repeat {
+            let identifiers = rows.allElementsBoundByIndex.map(\.identifier)
+            let isExact = identifiers.count == expected.count
+                && Set(identifiers) == expected
+            consecutiveMatches = isExact ? consecutiveMatches + 1 : 0
+            if consecutiveMatches == 3 {
+                return true
+            }
+            Thread.sleep(forTimeInterval: 0.25)
+        } while Date() < deadline
+        return false
+    }
+
+    private func waitUntilHittable(
+        _ element: XCUIElement,
+        byScrolling scrollContainer: XCUIElement,
+        timeout: TimeInterval = 8
+    ) -> Bool {
+        let deadline = Date().addingTimeInterval(timeout)
+        var swipeCount = 0
+        repeat {
+            if element.exists && element.isHittable {
+                return true
+            }
+            if scrollContainer.exists && swipeCount < 8 {
+                scrollContainer.swipeUp()
+                swipeCount += 1
+            }
+            Thread.sleep(forTimeInterval: 0.25)
+        } while Date() < deadline
+        return element.exists && element.isHittable
+    }
+
     private func openDeskFromSettings(app: XCUIApplication, role: String) -> Bool {
         let deskLink = app.descendants(matching: .any).matching(
             identifier: "settings.desk"
         ).firstMatch
-        let settingsForm = app.collectionViews.firstMatch
-        let settingsScroll = settingsForm.exists ? settingsForm : app.scrollViews.firstMatch
-        var attempts = 0
-        while (!deskLink.exists || !deskLink.isHittable) && attempts < 8 {
-            if settingsScroll.exists {
-                settingsScroll.swipeUp()
-            }
-            attempts += 1
-        }
+        let settingsForm = app.descendants(matching: .any).matching(
+            identifier: "settings.form"
+        ).firstMatch
+        let deskLinkHittable = waitUntilHittable(
+            deskLink,
+            byScrolling: settingsForm
+        )
         XCTAssertTrue(
-            deskLink.exists && deskLink.isHittable,
+            deskLinkHittable,
             "\(role) did not expose a hittable My desks link in Settings"
         )
-        guard deskLink.exists, deskLink.isHittable else { return false }
+        guard deskLinkHittable else { return false }
         deskLink.tap()
         XCTAssertTrue(
             app.navigationBars["My desks"].waitForExistence(timeout: 15),
@@ -1071,9 +1163,8 @@ final class I18nScreenshotUITests: XCTestCase {
     }
 
     /// Establish the negative half of the membership activation boundary.
-    /// The fixture creates `deskviewer` without a membership; after this
-    /// session is discarded, admin attaches it and the final viewer sweep
-    /// must acquire exactly one desk on its next login.
+    /// The successful-loaded signal prevents the initial empty SwiftUI frame
+    /// from satisfying this assertion before the API requests have settled.
     private func verifyUnattachedViewerBeforeAttach(username: String) -> Bool {
         let app = launchApp(
             spec: LocaleSpec(code: "us", appleLanguageTag: "en-US"),
@@ -1101,12 +1192,14 @@ final class I18nScreenshotUITests: XCTestCase {
             app.terminate()
             return false
         }
-        let empty = app.descendants(matching: .any).matching(
-            identifier: "desk.empty"
-        ).firstMatch
-        let emptyExists = empty.waitForExistence(timeout: 15)
+        let loaded = waitForSuccessfulDeskLoad(
+            app: app,
+            evidence: "unattached viewer",
+            expectedDeskPublicIds: []
+        )
+        let exactZeroDesks = loaded && waitForExactDeskIdentifiers([], in: app)
         XCTAssertTrue(
-            emptyExists,
+            exactZeroDesks,
             "unattached viewer must see the honest zero-desk state"
         )
         let hasDeskRow = app.descendants(matching: .any).matching(
@@ -1119,17 +1212,24 @@ final class I18nScreenshotUITests: XCTestCase {
         let formHidden = !app.textFields["desk.attach.username"].exists
             && !app.buttons["desk.attach.submit"].exists
             && !app.descendants(matching: .any).matching(
-                identifier: "desk.attach.selector"
+                NSPredicate(
+                    format: "identifier BEGINSWITH %@",
+                    "desk.attach.selector."
+                )
             ).firstMatch.exists
         XCTAssertTrue(formHidden, "unattached viewer must not expose the attach form")
         attach(code: "us", screen: "uat-viewer-desk-before-attach")
         app.terminate()
-        return emptyExists && !hasDeskRow && formHidden
+        return exactZeroDesks && !hasDeskRow && formHidden
     }
 
-    /// Observe the membership after admin's write and before operator's
-    /// idempotent repeat, so the first 2xx cannot be a silent no-op.
-    private func verifyViewerDeskAfterAdminAttachment(username: String) -> Bool {
+    /// Observe one exact membership in a fresh viewer session. The caller runs
+    /// this once after admin's write and again after operator's idempotent repeat.
+    private func verifyViewerDeskMembership(
+        username: String,
+        phase: String
+    ) -> Bool {
+        let evidence = phase.replacingOccurrences(of: "-", with: " ")
         let app = launchApp(
             spec: LocaleSpec(code: "us", appleLanguageTag: "en-US"),
             resetSession: true,
@@ -1140,43 +1240,44 @@ final class I18nScreenshotUITests: XCTestCase {
             usernameValue: username,
             passwordValue: "change-me-after-first-login"
         ) else {
-            XCTFail("viewer could not log in after admin desk attachment")
+            XCTFail("viewer could not log in \(evidence)")
             app.terminate()
             return false
         }
         dismissSavePasswordDialog(app: app)
         captureRootTab(
             app: app,
-            role: "viewer-after-admin-attach",
+            role: "viewer-\(phase)",
             tabTitle: "Settings",
             navigationTitle: "Settings",
-            screen: "settings-after-admin-attach"
+            screen: "settings"
         )
-        guard openDeskFromSettings(app: app, role: "viewer-after-admin-attach") else {
+        guard openDeskFromSettings(app: app, role: "viewer \(evidence)") else {
             app.terminate()
             return false
         }
-        let rows = app.descendants(matching: .any).matching(
-            NSPredicate(format: "identifier BEGINSWITH %@", "desk.row.")
+        let loaded = waitForSuccessfulDeskLoad(
+            app: app,
+            evidence: "viewer \(evidence)",
+            expectedDeskPublicIds: [deskUATDefaultPublicId]
         )
-        let rowExists = rows.firstMatch.waitForExistence(timeout: 15)
-        let countMatches = rows.count == 1
-        let expectedIdentifier = "desk.row.\(deskUATDefaultPublicId)"
-        let isDefault = app.descendants(matching: .any).matching(
-            identifier: expectedIdentifier
-        ).firstMatch.exists
+        let exactDesk = loaded && waitForExactDeskIdentifiers(
+            [deskUATDefaultPublicId],
+            in: app
+        )
         let formHidden = !app.textFields["desk.attach.username"].exists
             && !app.buttons["desk.attach.submit"].exists
             && !app.descendants(matching: .any).matching(
-                identifier: "desk.attach.selector"
+                NSPredicate(
+                    format: "identifier BEGINSWITH %@",
+                    "desk.attach.selector."
+                )
             ).firstMatch.exists
-        XCTAssertTrue(rowExists)
-        XCTAssertTrue(countMatches)
-        XCTAssertTrue(isDefault)
-        XCTAssertTrue(formHidden)
-        attach(code: "us", screen: "uat-viewer-desk-after-admin-attach")
+        XCTAssertTrue(exactDesk, "viewer must have exactly the recorded default desk \(evidence)")
+        XCTAssertTrue(formHidden, "viewer must not expose membership controls \(evidence)")
+        attach(code: "us", screen: "uat-viewer-desk-\(phase)")
         app.terminate()
-        return rowExists && countMatches && isDefault && formHidden
+        return exactDesk && formHidden
     }
 
     /// Prove the AI-review delegate inbox stays hidden for both roles.
