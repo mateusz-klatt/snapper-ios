@@ -54,6 +54,12 @@ This document captures the design decisions a reader would otherwise need to rev
 - `FinancialColorPreference` persists the user's market-color convention (`auto`, rising green, rising red). `auto` resolves from the active locale.
 - Trading screens fetch fresh data on appear via `.task(id:)` modifiers keyed on the selected wallet — switching wallets re-runs the fetch automatically.
 
+### Desk membership surface
+
+- Settings → My desks joins the server-filtered `GET /api/operators` catalogue with `GET /api/auth/me` to mark the caller's primary desk. The client does not widen desk visibility by role; administrators see more rows only because the server authorizes and returns them.
+- Every authenticated user can inspect their accessible desk labels and descriptions. The viewer-attachment form appears only when `/auth/me` includes the effective `manage:desk_memberships` permission, so capability UI remains fail-closed when the current-user request fails.
+- Attachment accepts an exact viewer username and one accessible desk. Success explicitly requires the target viewer to sign out and sign in again before the new membership takes effect. Member listing and detach are intentionally outside this surface.
+
 ## Localization
 
 - `AppLocale` is the 45-country picker surface; `CatalogLanguage` is the string-catalog language set. Most country codes map one-to-one to a translated catalog column, while `us` uses English.
@@ -87,8 +93,9 @@ Two CI surfaces collaborate, each playing the role it is best suited for:
 - `gitleaks.yml` (`ubuntu-latest`) — secret scan on push / PR / weekly cron.
 - `i18n-screenshots.yml` (`macos-26`, manual dispatch) — opt-in screenshot
   capture modes for the 45-locale sweep, smoke/retry runs, marketing/chart
-  verification, and admin/viewer permission UAT; every mode requires a live
-  backend URL input.
+  verification; every workflow mode requires a live backend URL input. The
+  mutating admin/operator/viewer Desk release UAT runs locally against a
+  disposable, fingerprinted loopback fixture via `viewer-uat`.
 
 This is the **gate**: nothing reaches `master` without these green.
 

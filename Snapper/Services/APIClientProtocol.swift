@@ -30,7 +30,9 @@ protocol APIClientProtocol: Sendable {
     func fetchAiReviews() async throws -> [AdminAiReviewItem]
     func fetchPendingAiReviews() async throws -> PendingReviewListResponse
     func fetchStrategies() async throws -> [StrategyProcess]
+    func fetchCurrentUser() async throws -> UserProfile
     func fetchUsers() async throws -> [UserProfile]
+    func attachViewerToDesk(operatorPublicId: String, username: String) async throws
     func fetchDelegates() async throws -> [DelegateRead]
     func fetchExecutions() async throws -> [ExecutionRecord]
     func fetchWallets() async throws -> [WalletInfo]

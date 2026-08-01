@@ -372,9 +372,33 @@ final class APIClient: Sendable, APIClientProtocol {
         return envelope.payload
     }
 
+    /// Fetch the authenticated user's current server-derived profile.
+    ///
+    /// The response is authoritative for desk memberships and the primary
+    /// desk. Both fields are session-derived, so callers should refresh this
+    /// snapshot after login rather than infer membership from the role.
+    func fetchCurrentUser() async throws -> UserProfile {
+        let envelope: UserResponse = try await request(endpoint: AppConfig.Endpoints.me)
+        return envelope.payload
+    }
+
     func fetchUsers() async throws -> [UserProfile] {
         let envelope: UserListResponse = try await request(endpoint: AppConfig.Endpoints.users)
         return envelope.payload
+    }
+
+    /// Attach an existing viewer to a desk by username.
+    ///
+    /// The endpoint intentionally has no request body. The shared transport
+    /// still supplies cookie authentication, CSRF for this POST, and the
+    /// exactly-once 401 refresh replay. A successful response only confirms
+    /// the mutation; the viewer receives the new membership on next login.
+    func attachViewerToDesk(operatorPublicId: String, username: String) async throws {
+        let endpoint = "/auth/desks/\(Self.encodePathSegment(operatorPublicId))/members/\(Self.encodePathSegment(username))"
+        let (data, statusCode) = try await transport(endpoint: endpoint, method: "POST", body: nil)
+        guard (200...299).contains(statusCode) else {
+            throw Self.failure(data: data, statusCode: statusCode)
+        }
     }
 
     func fetchDelegates() async throws -> [DelegateRead] {

@@ -20,7 +20,7 @@ on:
         required: true
         type: string
       capture_mode:
-        description: 'Capture mode; viewer-uat requires the seeded development fixture'
+        description: 'Non-mutating screenshot capture mode'
         required: true
         default: 'all'
         type: choice
@@ -30,7 +30,6 @@ on:
           - retry
           - showcase
           - chart-verify
-          - viewer-uat
 
 concurrency:
   group: i18n-screenshots-${{ github.ref }}

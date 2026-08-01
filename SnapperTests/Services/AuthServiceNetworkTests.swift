@@ -89,6 +89,56 @@ final class AuthServiceNetworkTests: XCTestCase {
         }
     }
 
+    func testLoginPreservesFuturePermissionWithoutGrantingKnownCapabilities() async throws {
+        let futurePermission = "future:manage_teleportation"
+        MockURLProtocol.requestHandler = { request in
+            let response = HTTPURLResponse(
+                url: request.url!,
+                statusCode: 200,
+                httpVersion: nil,
+                headerFields: [AppConfig.HTTPHeader.contentType: AppConfig.ContentType.json]
+            )!
+            let json: [String: Any] = [
+                "sequence_id": 1,
+                "public_id": "01961234-5678-7000-8000-000000000520",
+                "timestamp": "2025-01-01T00:00:00Z",
+                "session_id": "session-future-permission",
+                "payload": [
+                    "sequence_id": 1,
+                    "public_id": "01961234-5678-7000-8000-000000000521",
+                    "timestamp": "2025-01-01T00:00:00Z",
+                    "session_id": "session-future-permission",
+                    "message": "Login successful",
+                    "expires_in": 900,
+                    "user": [
+                        "sequence_id": 1,
+                        "public_id": "01961234-5678-7000-8000-000000000522",
+                        "timestamp": "2025-01-01T00:00:00Z",
+                        "session_id": "session-future-permission",
+                        "username": "future-user",
+                        "role": "viewer",
+                        "is_active": true,
+                        "created_at": "2025-01-01T00:00:00Z",
+                        "effective_permissions": [futurePermission]
+                    ]
+                ]
+            ]
+            return (response, try JSONSerialization.data(withJSONObject: json))
+        }
+
+        await authService.login(username: "future-user", password: "testpass")
+
+        XCTAssertTrue(authService.isAuthenticated)
+        XCTAssertNil(authService.error)
+        XCTAssertEqual(authService.currentUser?.effectivePermissions?.map(\.rawValue), [futurePermission])
+        for knownPermission in Permission.allCases {
+            XCTAssertFalse(
+                authService.hasPermission(knownPermission),
+                "Unknown permission must not grant \(knownPermission.rawValue)"
+            )
+        }
+    }
+
     /// Login MUST persist the locale BEFORE flipping
     /// ``isAuthenticated`` so the first post-login fetch sees the
     /// backend-resolved description in the user's catalog language.
@@ -284,6 +334,26 @@ final class AuthServiceNetworkTests: XCTestCase {
 
         XCTAssertFalse(authService.isAuthenticated)
         XCTAssertEqual(authService.error, .loginFailed)
+    }
+
+    func testLoginMalformedSuccessPayloadFailsClosedOverExistingSession() async throws {
+        authService.currentUser = Self.refreshTestUser(sessionId: "existing-session")
+        authService.isAuthenticated = true
+        MockURLProtocol.requestHandler = { request in
+            let response = HTTPURLResponse(
+                url: request.url!,
+                statusCode: 200,
+                httpVersion: nil,
+                headerFields: [AppConfig.HTTPHeader.contentType: AppConfig.ContentType.json]
+            )!
+            return (response, Data("{\"payload\":{}}".utf8))
+        }
+
+        await authService.login(username: "testuser", password: "testpass")
+
+        XCTAssertFalse(authService.isAuthenticated)
+        XCTAssertNil(authService.currentUser)
+        XCTAssertEqual(authService.error, .invalidResponse)
     }
 
     func testLoginNonHTTPResponseSetsInvalidResponse() async {

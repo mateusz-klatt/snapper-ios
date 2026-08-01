@@ -6,6 +6,27 @@ uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+## [3.1.0] — 2026-08-01
+
+### Added
+
+- Added a Desk screen in Settings. Every signed-in user can see the desks
+  attached to their account and which desk is primary; users holding the
+  exact `manage:desk_memberships` capability can attach an existing viewer
+  by username. Membership changes intentionally take effect after that
+  viewer signs in again.
+
+### Changed
+
+- Bumped `MARKETING_VERSION` from `3.0.0` to `3.1.0`.
+
+### Fixed
+
+- Made permission decoding forward-compatible so a backend that adds a new
+  capability no longer prevents otherwise valid admin or operator sessions
+  from signing in. Unknown permissions remain inert until the app explicitly
+  understands them.
+
 ## [3.0.0] — 2026-07-25
 
 Major release expanding the native iOS app with permission-gated,
@@ -962,8 +983,9 @@ v0.2.0 backlog: CSRF header on iOS mutating REST requests,
 public-side type regeneration script, fork-PR Sonar handling, and
 the SwiftUI coverage story.
 
-[Unreleased]: https://github.com/mateusz-klatt/snapper-ios/compare/v3.0.0.28...HEAD
-[3.0.0]: https://github.com/mateusz-klatt/snapper-ios/releases/tag/v3.0.0.28
+[Unreleased]: https://github.com/mateusz-klatt/snapper-ios/compare/v3.1.0.30...HEAD
+[3.1.0]: https://github.com/mateusz-klatt/snapper-ios/releases/tag/v3.1.0.30
+[3.0.0]: https://github.com/mateusz-klatt/snapper-ios/releases/tag/v3.0.0.29
 [2.0.2]: https://github.com/mateusz-klatt/snapper-ios/releases/tag/v2.0.2-build25
 [2.0.1]: https://github.com/mateusz-klatt/snapper-ios/releases/tag/v2.0.1
 [2.0.0]: https://github.com/mateusz-klatt/snapper-ios/releases/tag/v2.0.0

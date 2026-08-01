@@ -36,6 +36,18 @@ final class I18nScreenshotUITests: XCTestCase {
         return "https://snapper-uitest-no-backend.invalid"
     }
 
+    private var deskUATDefaultPublicId: String {
+        return "snapper-uitest-no-default-desk.invalid"
+    }
+
+    private var deskUATSecondaryPublicId: String {
+        return "snapper-uitest-no-secondary-desk.invalid"
+    }
+
+    private var deskUATFixtureMarker: String {
+        return "snapper-uitest-no-fixture-marker.invalid"
+    }
+
     /// Skip when ``backendURL`` is still the sentinel — CI without the
     /// screenshot script would otherwise stall on 45 doomed login retries.
     private func skipUnlessBackendConfigured() throws {
@@ -145,23 +157,34 @@ final class I18nScreenshotUITests: XCTestCase {
         }
     }
 
-    /// Release UAT for the permission-derived admin and viewer surfaces.
+    /// Release UAT for the permission-derived admin, operator, and viewer surfaces.
     ///
-    /// The isolated fixture gives both users the same default operator
-    /// membership and adds an instrument scope grant for its paper wallet.
-    /// The viewer must therefore reach every operator read surface while
-    /// retaining zero mutation affordances. Admin additionally sees the
-    /// user-management card.
+    /// The isolated fixture gives admin and operator the default desk, creates
+    /// `deskviewer` without a membership, adds an instrument scope grant for
+    /// the paper wallet, and creates one additional unscoped desk. Admin must
+    /// see both desks and attach `deskviewer`; operator then sees only default
+    /// and repeats that attach idempotently; the viewer's next login must see
+    /// only default. Viewer retains zero mutation affordances; admin also sees
+    /// Users.
     ///
-    /// Build 29 widened the surface, so the sweep also covers the P&L
-    /// timeline segment, the Processes lifecycle controls, the Signals
-    /// strategy filter and CSV export, the absent AI-review delegate
-    /// segment, and one refreshable empty state.
+    /// The 3.1 sweep retains build 29's P&L, Processes, Signals, AI-review,
+    /// and refreshable-empty-state checks while extending them to operator
+    /// and the Desk surface.
     func testCaptureViewerPermissionsUAT() throws {
         try skipUnlessBackendConfigured()
-        capturePermissionUAT(
+        guard !deskUATDefaultPublicId.contains(".invalid"),
+              !deskUATSecondaryPublicId.contains(".invalid"),
+              !deskUATFixtureMarker.contains(".invalid") else {
+            XCTFail("viewer-uat requires a validated .desk-uat-fixture.json record")
+            return
+        }
+        guard verifyUnattachedViewerBeforeAttach(username: "deskviewer") else { return }
+        guard capturePermissionUAT(
             role: "admin",
             username: "admin",
+            expectedDeskLabels: ["default", "ios-uat-secondary"],
+            expectedDeskPublicIds: [deskUATDefaultPublicId, deskUATSecondaryPublicId],
+            expectedFixtureMarker: deskUATFixtureMarker,
             homeSurfaces: [
                 ("Market data", "market-data", .none),
                 ("System Health", "health", .none),
@@ -173,10 +196,14 @@ final class I18nScreenshotUITests: XCTestCase {
                 ("AI Delegates", "ai-delegates", .none),
             ],
             forbiddenHomeSurfaces: []
-        )
-        capturePermissionUAT(
-            role: "viewer",
-            username: "viewer",
+        ) else { return }
+        guard verifyViewerDeskAfterAdminAttachment(username: "deskviewer") else { return }
+        guard capturePermissionUAT(
+            role: "operator",
+            username: "operator",
+            expectedDeskLabels: ["default"],
+            expectedDeskPublicIds: [deskUATDefaultPublicId],
+            expectedFixtureMarker: nil,
             homeSurfaces: [
                 ("Market data", "market-data", .none),
                 ("System Health", "health", .none),
@@ -187,7 +214,24 @@ final class I18nScreenshotUITests: XCTestCase {
                 ("AI Delegates", "ai-delegates", .none),
             ],
             forbiddenHomeSurfaces: ["Users"]
-        )
+        ) else { return }
+        guard capturePermissionUAT(
+            role: "viewer",
+            username: "deskviewer",
+            expectedDeskLabels: ["default"],
+            expectedDeskPublicIds: [deskUATDefaultPublicId],
+            expectedFixtureMarker: nil,
+            homeSurfaces: [
+                ("Market data", "market-data", .none),
+                ("System Health", "health", .none),
+                ("Backtests", "backtests", .none),
+                ("Processes", "processes", .processLifecycleControls),
+                ("AI Reviews", "ai-reviews", .aiReviewDelegateSegment),
+                ("Strategies", "strategies", .none),
+                ("AI Delegates", "ai-delegates", .none),
+            ],
+            forbiddenHomeSurfaces: ["Users"]
+        ) else { return }
     }
 
     /// AppStore marketing showcase: one carefully-chosen screen per
@@ -526,9 +570,13 @@ final class I18nScreenshotUITests: XCTestCase {
     private func capturePermissionUAT(
         role: String,
         username: String,
+        expectedDeskLabels: [String],
+        expectedDeskPublicIds: [String],
+        expectedFixtureMarker: String?,
         homeSurfaces: [(title: String, slug: String, inspection: UatSurfaceInspection)],
         forbiddenHomeSurfaces: [String]
-    ) {
+    ) -> Bool {
+        var deskGatePassed = false
         XCTContext.runActivity(named: "permission-uat-\(role)") { _ in
             let app = launchApp(
                 spec: LocaleSpec(code: "us", appleLanguageTag: "en-US"),
@@ -577,7 +625,7 @@ final class I18nScreenshotUITests: XCTestCase {
             verifyPositionMutationPath(
                 app: app,
                 role: role,
-                shouldExposeActions: role == "admin"
+                shouldExposeActions: role != "viewer"
             )
             capturePnlTimelineSegment(app: app, role: role)
 
@@ -591,7 +639,7 @@ final class I18nScreenshotUITests: XCTestCase {
             verifyOrderMutationPath(
                 app: app,
                 role: role,
-                shouldExposeActions: role == "admin"
+                shouldExposeActions: role != "viewer"
             )
 
             for (index, surface) in homeSurfaces.enumerated() {
@@ -639,9 +687,18 @@ final class I18nScreenshotUITests: XCTestCase {
                 navigationTitle: "Settings",
                 screen: "settings"
             )
+            deskGatePassed = captureDeskSurface(
+                app: app,
+                role: role,
+                expectedDeskLabels: expectedDeskLabels,
+                expectedDeskPublicIds: expectedDeskPublicIds,
+                expectedFixtureMarker: expectedFixtureMarker,
+                shouldExposeAttachment: role != "viewer"
+            )
 
             app.terminate()
         }
+        return deskGatePassed
     }
 
     private func verifyPositionMutationPath(
@@ -805,7 +862,7 @@ final class I18nScreenshotUITests: XCTestCase {
             NSPredicate(format: "identifier CONTAINS %@", "processes.control.start.strategy_")
         )
 
-        if role == "admin" {
+        if role != "viewer" {
             let processScroll = app.scrollViews.firstMatch
             var attempts = 0
             while !controls.firstMatch.exists && attempts < 6 {
@@ -840,6 +897,286 @@ final class I18nScreenshotUITests: XCTestCase {
             sleep(1)
             attach(code: "us", screen: "uat-\(role)-processes-no-controls")
         }
+    }
+
+    /// Prove the 3.1 desk surface renders the server-filtered catalogue and
+    /// the deployed capability matrix. Unit tests separately pin the exact
+    /// effective-permission decision independently of role.
+    private func captureDeskSurface(
+        app: XCUIApplication,
+        role: String,
+        expectedDeskLabels: [String],
+        expectedDeskPublicIds: [String],
+        expectedFixtureMarker: String?,
+        shouldExposeAttachment: Bool
+    ) -> Bool {
+        guard openDeskFromSettings(app: app, role: role) else { return false }
+        let deskRows = app.descendants(matching: .any).matching(
+            NSPredicate(format: "identifier BEGINSWITH %@", "desk.row.")
+        )
+        let firstRowExists = deskRows.firstMatch.waitForExistence(timeout: 15)
+        XCTAssertTrue(
+            firstRowExists,
+            "\(role) did not render an attached desk"
+        )
+        guard firstRowExists else { return false }
+        var countAttempts = 0
+        while deskRows.count != expectedDeskLabels.count && countAttempts < 10 {
+            sleep(1)
+            countAttempts += 1
+        }
+        let countMatches = deskRows.count == expectedDeskLabels.count
+        XCTAssertTrue(
+            countMatches,
+            "\(role) received an unexpected server-filtered desk catalogue"
+        )
+        let renderedLabels = deskRows.allElementsBoundByIndex.map(\.label)
+        var publicIdsMatch = expectedDeskPublicIds.count == expectedDeskLabels.count
+        for publicId in expectedDeskPublicIds {
+            let rowExists = app.descendants(matching: .any).matching(
+                identifier: "desk.row.\(publicId)"
+            ).firstMatch.exists
+            XCTAssertTrue(rowExists, "\(role) did not receive expected desk id \(publicId)")
+            publicIdsMatch = publicIdsMatch && rowExists
+        }
+        var labelsMatch = true
+        for expectedLabel in expectedDeskLabels {
+            let containsLabel = renderedLabels.contains {
+                $0.localizedCaseInsensitiveContains(expectedLabel)
+            }
+            XCTAssertTrue(
+                containsLabel,
+                "\(role) did not receive expected desk \(expectedLabel)"
+            )
+            labelsMatch = labelsMatch && containsLabel
+        }
+        var excludesSecondary = true
+        if !expectedDeskLabels.contains("ios-uat-secondary") {
+            excludesSecondary = !renderedLabels.contains {
+                $0.localizedCaseInsensitiveContains("ios-uat-secondary")
+            }
+            XCTAssertTrue(
+                excludesSecondary,
+                "\(role) must not receive the admin-only secondary desk"
+            )
+        }
+        var fixtureMarkerMatches = true
+        if let expectedFixtureMarker {
+            fixtureMarkerMatches = renderedLabels.contains {
+                $0.localizedCaseInsensitiveContains(expectedFixtureMarker)
+            }
+            XCTAssertTrue(
+                fixtureMarkerMatches,
+                "\(role) is not connected to the recorded disposable desk fixture"
+            )
+        }
+        guard countMatches,
+              publicIdsMatch,
+              labelsMatch,
+              excludesSecondary,
+              fixtureMarkerMatches else { return false }
+        attach(code: "us", screen: "uat-\(role)-desk")
+
+        let username = app.textFields["desk.attach.username"]
+        let submit = app.buttons["desk.attach.submit"]
+        if shouldExposeAttachment {
+            let usernameExists = username.waitForExistence(timeout: 5)
+            XCTAssertTrue(
+                usernameExists,
+                "\(role) did not expose the viewer attachment form"
+            )
+            let submitExists = submit.waitForExistence(timeout: 5)
+            XCTAssertTrue(
+                submitExists,
+                "\(role) did not expose the viewer attachment action"
+            )
+            let selector = app.descendants(matching: .any).matching(
+                identifier: "desk.attach.selector"
+            ).firstMatch
+            let selectorExists = selector.waitForExistence(timeout: 5)
+            XCTAssertTrue(
+                selectorExists,
+                "\(role) did not expose the desk selector"
+            )
+            guard usernameExists, submitExists, selectorExists else { return false }
+            let selectedDesk = "\(selector.label) \(String(describing: selector.value))"
+            let targetsDefault = selectedDesk.localizedCaseInsensitiveContains("default")
+            XCTAssertTrue(
+                targetsDefault,
+                "\(role) must target the same primary default desk"
+            )
+            guard targetsDefault else { return false }
+            username.tap()
+            username.typeText("deskviewer")
+            XCTAssertTrue(submit.isEnabled, "\(role) attachment action stayed disabled")
+            guard submit.isEnabled else { return false }
+            submit.tap()
+
+            let success = app.descendants(matching: .any).matching(
+                identifier: "desk.attach.success"
+            ).firstMatch
+            let successExists = success.waitForExistence(timeout: 15)
+            XCTAssertTrue(
+                successExists,
+                "\(role) could not attach the UAT viewer"
+            )
+            attach(code: "us", screen: "uat-\(role)-desk-attach-success")
+            return successExists
+        } else {
+            let usernameHidden = !username.waitForExistence(timeout: 3)
+            XCTAssertTrue(
+                usernameHidden,
+                "\(role) must not expose the viewer attachment form"
+            )
+            let submitHidden = !submit.exists
+            XCTAssertTrue(
+                submitHidden,
+                "\(role) must not expose the viewer attachment action"
+            )
+            let selectorHidden = !app.descendants(matching: .any).matching(
+                identifier: "desk.attach.selector"
+            ).firstMatch.exists
+            XCTAssertTrue(
+                selectorHidden,
+                "\(role) must not expose the desk selector"
+            )
+            return usernameHidden && submitHidden && selectorHidden
+        }
+    }
+
+    private func openDeskFromSettings(app: XCUIApplication, role: String) -> Bool {
+        let deskLink = app.descendants(matching: .any).matching(
+            identifier: "settings.desk"
+        ).firstMatch
+        let settingsForm = app.collectionViews.firstMatch
+        let settingsScroll = settingsForm.exists ? settingsForm : app.scrollViews.firstMatch
+        var attempts = 0
+        while (!deskLink.exists || !deskLink.isHittable) && attempts < 8 {
+            if settingsScroll.exists {
+                settingsScroll.swipeUp()
+            }
+            attempts += 1
+        }
+        XCTAssertTrue(
+            deskLink.exists && deskLink.isHittable,
+            "\(role) did not expose a hittable My desks link in Settings"
+        )
+        guard deskLink.exists, deskLink.isHittable else { return false }
+        deskLink.tap()
+        XCTAssertTrue(
+            app.navigationBars["My desks"].waitForExistence(timeout: 15),
+            "\(role) could not open My desks"
+        )
+        return app.navigationBars["My desks"].exists
+    }
+
+    /// Establish the negative half of the membership activation boundary.
+    /// The fixture creates `deskviewer` without a membership; after this
+    /// session is discarded, admin attaches it and the final viewer sweep
+    /// must acquire exactly one desk on its next login.
+    private func verifyUnattachedViewerBeforeAttach(username: String) -> Bool {
+        let app = launchApp(
+            spec: LocaleSpec(code: "us", appleLanguageTag: "en-US"),
+            resetSession: true,
+            useDemoWallet: false
+        )
+        guard performLogin(
+            in: app,
+            usernameValue: username,
+            passwordValue: "change-me-after-first-login"
+        ) else {
+            XCTFail("unattached viewer could not log in before desk attachment")
+            app.terminate()
+            return false
+        }
+        dismissSavePasswordDialog(app: app)
+        captureRootTab(
+            app: app,
+            role: "unattached-viewer",
+            tabTitle: "Settings",
+            navigationTitle: "Settings",
+            screen: "settings-before-attach"
+        )
+        guard openDeskFromSettings(app: app, role: "unattached-viewer") else {
+            app.terminate()
+            return false
+        }
+        let empty = app.descendants(matching: .any).matching(
+            identifier: "desk.empty"
+        ).firstMatch
+        let emptyExists = empty.waitForExistence(timeout: 15)
+        XCTAssertTrue(
+            emptyExists,
+            "unattached viewer must see the honest zero-desk state"
+        )
+        let hasDeskRow = app.descendants(matching: .any).matching(
+            NSPredicate(format: "identifier BEGINSWITH %@", "desk.row.")
+        ).firstMatch.exists
+        XCTAssertFalse(
+            hasDeskRow,
+            "unattached viewer must not receive a desk before attachment"
+        )
+        let formHidden = !app.textFields["desk.attach.username"].exists
+            && !app.buttons["desk.attach.submit"].exists
+            && !app.descendants(matching: .any).matching(
+                identifier: "desk.attach.selector"
+            ).firstMatch.exists
+        XCTAssertTrue(formHidden, "unattached viewer must not expose the attach form")
+        attach(code: "us", screen: "uat-viewer-desk-before-attach")
+        app.terminate()
+        return emptyExists && !hasDeskRow && formHidden
+    }
+
+    /// Observe the membership after admin's write and before operator's
+    /// idempotent repeat, so the first 2xx cannot be a silent no-op.
+    private func verifyViewerDeskAfterAdminAttachment(username: String) -> Bool {
+        let app = launchApp(
+            spec: LocaleSpec(code: "us", appleLanguageTag: "en-US"),
+            resetSession: true,
+            useDemoWallet: false
+        )
+        guard performLogin(
+            in: app,
+            usernameValue: username,
+            passwordValue: "change-me-after-first-login"
+        ) else {
+            XCTFail("viewer could not log in after admin desk attachment")
+            app.terminate()
+            return false
+        }
+        dismissSavePasswordDialog(app: app)
+        captureRootTab(
+            app: app,
+            role: "viewer-after-admin-attach",
+            tabTitle: "Settings",
+            navigationTitle: "Settings",
+            screen: "settings-after-admin-attach"
+        )
+        guard openDeskFromSettings(app: app, role: "viewer-after-admin-attach") else {
+            app.terminate()
+            return false
+        }
+        let rows = app.descendants(matching: .any).matching(
+            NSPredicate(format: "identifier BEGINSWITH %@", "desk.row.")
+        )
+        let rowExists = rows.firstMatch.waitForExistence(timeout: 15)
+        let countMatches = rows.count == 1
+        let expectedIdentifier = "desk.row.\(deskUATDefaultPublicId)"
+        let isDefault = app.descendants(matching: .any).matching(
+            identifier: expectedIdentifier
+        ).firstMatch.exists
+        let formHidden = !app.textFields["desk.attach.username"].exists
+            && !app.buttons["desk.attach.submit"].exists
+            && !app.descendants(matching: .any).matching(
+                identifier: "desk.attach.selector"
+            ).firstMatch.exists
+        XCTAssertTrue(rowExists)
+        XCTAssertTrue(countMatches)
+        XCTAssertTrue(isDefault)
+        XCTAssertTrue(formHidden)
+        attach(code: "us", screen: "uat-viewer-desk-after-admin-attach")
+        app.terminate()
+        return rowExists && countMatches && isDefault && formHidden
     }
 
     /// Prove the AI-review delegate inbox stays hidden for both roles.
