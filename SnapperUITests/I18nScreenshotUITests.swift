@@ -1120,8 +1120,23 @@ final class I18nScreenshotUITests: XCTestCase {
 
     private func waitUntilHittable(
         _ element: XCUIElement,
-        byScrolling scrollContainer: XCUIElement,
         timeout: TimeInterval = 8
+    ) -> Bool {
+        let deadline = Date().addingTimeInterval(timeout)
+        repeat {
+            if element.exists && element.isHittable {
+                return true
+            }
+            Thread.sleep(forTimeInterval: 0.25)
+        } while Date() < deadline
+        return element.exists && element.isHittable
+    }
+
+    private func waitUntilHittable(
+        _ element: XCUIElement,
+        byScrolling scrollContainer: XCUIElement,
+        timeout: TimeInterval = 8,
+        maximumSwipes: Int = 8
     ) -> Bool {
         let deadline = Date().addingTimeInterval(timeout)
         var swipeCount = 0
@@ -1129,7 +1144,7 @@ final class I18nScreenshotUITests: XCTestCase {
             if element.exists && element.isHittable {
                 return true
             }
-            if scrollContainer.exists && swipeCount < 8 {
+            if scrollContainer.exists && swipeCount < maximumSwipes {
                 scrollContainer.swipeUp()
                 swipeCount += 1
             }
@@ -1367,10 +1382,13 @@ final class I18nScreenshotUITests: XCTestCase {
         inspection: UatSurfaceInspection = .none
     ) {
         selectRootTab(app: app, title: "Home")
+        let homeNavigationBar = app.navigationBars["Home"]
+        let homeIsActive = waitUntilHittable(homeNavigationBar, timeout: 10)
         XCTAssertTrue(
-            app.navigationBars["Home"].waitForExistence(timeout: 10),
+            homeIsActive,
             "\(role) could not return to Home before opening \(title)"
         )
+        guard homeIsActive else { return }
 
         let homeScroll = app.scrollViews.firstMatch
         for _ in 0..<8 where homeScroll.exists {
@@ -1378,16 +1396,17 @@ final class I18nScreenshotUITests: XCTestCase {
         }
 
         let titleElement = app.staticTexts[title]
-        var attempts = 0
-        while (!titleElement.exists || !titleElement.isHittable) && attempts < 10 {
-            homeScroll.swipeUp()
-            attempts += 1
-        }
+        let titleIsHittable = waitUntilHittable(
+            titleElement,
+            byScrolling: homeScroll,
+            timeout: 15,
+            maximumSwipes: 12
+        )
         XCTAssertTrue(
-            titleElement.exists && titleElement.isHittable,
+            titleIsHittable,
             "\(role) cannot reach the \(title) Home card"
         )
-        guard titleElement.exists, titleElement.isHittable else { return }
+        guard titleIsHittable else { return }
 
         titleElement.tap()
         XCTAssertTrue(
@@ -1409,13 +1428,24 @@ final class I18nScreenshotUITests: XCTestCase {
             verifyAiReviewDelegateSegmentAbsent(app: app, role: role)
         }
 
-        let backButton = app.navigationBars.buttons.firstMatch
+        let destinationNavigationBar = app.navigationBars[title]
+        let backButton = destinationNavigationBar.buttons.firstMatch
+        let backButtonIsHittable = waitUntilHittable(backButton, timeout: 5)
         XCTAssertTrue(
-            backButton.waitForExistence(timeout: 5),
+            backButtonIsHittable,
             "\(title) did not expose a navigation-back button"
         )
-        if backButton.exists {
+        if backButtonIsHittable {
             backButton.tap()
+            var returnedHome = waitUntilHittable(homeNavigationBar, timeout: 10)
+            if !returnedHome && waitUntilHittable(backButton, timeout: 2) {
+                backButton.tap()
+                returnedHome = waitUntilHittable(homeNavigationBar, timeout: 10)
+            }
+            XCTAssertTrue(
+                returnedHome,
+                "\(role) did not finish returning Home after \(title)"
+            )
         }
     }
 
