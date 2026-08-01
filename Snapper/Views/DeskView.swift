@@ -51,19 +51,6 @@ struct DeskView: View {
 
     private var deskForm: some View {
         Form {
-            if viewModel.loadError != nil {
-                Section {
-                    Label(
-                        LocalizedStringKey("desk.load.error"),
-                        systemImage: "exclamationmark.triangle"
-                    )
-                    .foregroundStyle(.secondary)
-                    Button(LocalizedStringKey("common.retry")) {
-                        Task { await viewModel.load() }
-                    }
-                }
-            }
-
             Section(LocalizedStringKey("desk.section.accessible")) {
                 ForEach(viewModel.desks) { desk in
                     AccessibleDeskRow(desk: desk)

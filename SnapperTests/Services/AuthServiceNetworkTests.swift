@@ -336,7 +336,9 @@ final class AuthServiceNetworkTests: XCTestCase {
         XCTAssertEqual(authService.error, .loginFailed)
     }
 
-    func testLoginMalformedSuccessPayloadSetsInvalidResponse() async throws {
+    func testLoginMalformedSuccessPayloadFailsClosedOverExistingSession() async throws {
+        authService.currentUser = Self.refreshTestUser(sessionId: "existing-session")
+        authService.isAuthenticated = true
         MockURLProtocol.requestHandler = { request in
             let response = HTTPURLResponse(
                 url: request.url!,

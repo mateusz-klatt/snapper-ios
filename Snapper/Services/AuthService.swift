@@ -137,6 +137,13 @@ class AuthService: ObservableObject {
             logger.error(
                 "Login response decoding failed: \(String(describing: decodingError), privacy: .public)"
             )
+            refreshGeneration &+= 1
+            refreshTask?.cancel()
+            refreshTask = nil
+            refreshTaskId = nil
+            wsToken = nil
+            currentUser = nil
+            isAuthenticated = false
             self.error = .invalidResponse
         } catch {
             self.error = .network(error.localizedDescription)
