@@ -10,21 +10,24 @@ struct DeskView: View {
         Group {
             if !viewModel.hasLoaded || (viewModel.isLoading && viewModel.desks.isEmpty) {
                 ProgressView(LocalizedStringKey("common.loading"))
+                    .accessibilityIdentifier(viewModel.loadStateAccessibilityIdentifier)
             } else if DeskViewModel.shouldShowLoadError(
                 deskCount: viewModel.desks.count,
                 loadError: viewModel.loadError,
                 isLoading: viewModel.isLoading
             ) {
                 loadErrorView
+                    .accessibilityIdentifier(viewModel.loadStateAccessibilityIdentifier)
             } else if viewModel.desks.isEmpty {
                 ContentUnavailableView(
                     LocalizedStringKey("desk.empty.title"),
                     systemImage: "person.2.slash",
                     description: Text(LocalizedStringKey("desk.empty.message"))
                 )
-                .accessibilityIdentifier("desk.empty")
+                .accessibilityIdentifier(viewModel.loadStateAccessibilityIdentifier)
             } else {
                 deskForm
+                    .accessibilityIdentifier(viewModel.loadStateAccessibilityIdentifier)
             }
         }
         .navigationTitle(LocalizedStringKey("desk.navTitle"))
@@ -80,7 +83,9 @@ struct DeskView: View {
                 }
             }
             .disabled(viewModel.isAttaching)
-            .accessibilityIdentifier("desk.attach.selector")
+            .accessibilityIdentifier(
+                "desk.attach.selector.\(viewModel.selectedDeskPublicId ?? "none")"
+            )
 
             TextField(
                 LocalizedStringKey("desk.attach.username.placeholder"),
