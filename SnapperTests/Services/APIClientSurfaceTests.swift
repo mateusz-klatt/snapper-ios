@@ -105,6 +105,11 @@ final class APIClientSurfaceTests: XCTestCase {
             decision: .approve,
             rationale: maxRationale
         )
+        let currentUser = try await apiClient.fetchCurrentUser()
+        try await apiClient.attachViewerToDesk(
+            operatorPublicId: "desk/primary",
+            username: "viewer+desk@example.com"
+        )
 
         XCTAssertEqual(pendingReviews.count, 1)
         XCTAssertEqual(pendingReviews.items.first?.reviewPublicId, "pending-1")
@@ -124,6 +129,10 @@ final class APIClientSurfaceTests: XCTestCase {
         XCTAssertEqual(aiReviews.first?.decision, "approve")
         XCTAssertEqual(strategies.first?.name, "strategy_macd_btc")
         XCTAssertEqual(users.first?.username, "viewer")
+        XCTAssertEqual(currentUser.username, "viewer")
+        XCTAssertEqual(currentUser.defaultLanguage, "pl")
+        XCTAssertEqual(currentUser.operatorPublicIds, ["desk-1", "desk-2"])
+        XCTAssertEqual(currentUser.primaryOperatorPublicId, "desk-1")
         XCTAssertEqual(delegates.first?.username, "delegate-mcp")
         XCTAssertTrue(accounts.isEmpty)
 
@@ -137,7 +146,8 @@ final class APIClientSurfaceTests: XCTestCase {
             "GET", "GET", "GET",
             "GET", "GET", "GET", "GET", "GET", "GET", "GET", "GET",
             "GET", "POST", "POST", "PATCH",
-            "GET", "POST", "POST", "POST"
+            "GET", "POST", "POST", "POST",
+            "GET", "POST"
         ])
         XCTAssertEqual(snapshots.map(\.path), [
             "/api/orders",
@@ -181,7 +191,9 @@ final class APIClientSurfaceTests: XCTestCase {
             "/api/ai-reviews/pending",
             "/api/ai-reviews/review%2F1/decision",
             "/api/ai-reviews/review%2F1/decision",
-            "/api/ai-reviews/review%2F1/decision"
+            "/api/ai-reviews/review%2F1/decision",
+            "/api/auth/me",
+            "/api/auth/desks/desk%2Fprimary/members/viewer%2Bdesk%40example.com"
         ])
         let pnlSeriesQuery = try XCTUnwrap(snapshots[33].query)
         let pnlSeriesItems = URLComponents(string: "/?\(pnlSeriesQuery)")?.queryItems ?? []
@@ -319,6 +331,8 @@ final class APIClientSurfaceTests: XCTestCase {
         let sentRationale = try XCTUnwrap(limitPayload["rationale"] as? String)
         XCTAssertEqual(sentRationale.count, AiReviewRationale.characterLimit)
         XCTAssertEqual(sentRationale, maxRationale)
+        XCTAssertNil(snapshots[42].jsonBody, "the current-user snapshot is a plain GET")
+        XCTAssertNil(snapshots[43].jsonBody, "desk attach carries no request body")
     }
 
     /// The decision route answers a stale review with a NON-2xx status
@@ -417,6 +431,90 @@ final class APIClientSurfaceTests: XCTestCase {
             } else {
                 XCTFail("Wrong APIError: \(error)")
             }
+        }
+    }
+
+    func testAttachViewerUsesCSRFEncodedSegmentsAndNoRequestBody() async throws {
+        let apiBase = "https://desk-contract.example/api"
+        let targetURL = try XCTUnwrap(URL(string: "\(apiBase)/auth/desks/desk/members/viewer"))
+        let host = try XCTUnwrap(targetURL.host)
+        let cookie = try XCTUnwrap(HTTPCookie(properties: [
+            .domain: host,
+            .path: "/",
+            .name: AppConfig.CookieName.csrfToken,
+            .value: "desk-csrf-token",
+            .secure: "TRUE"
+        ]))
+        HTTPCookieStorage.shared.setCookie(cookie)
+        defer { HTTPCookieStorage.shared.deleteCookie(cookie) }
+
+        let requests = self.requests!
+        MockURLProtocol.requestHandler = { request in
+            requests.append(request)
+            let response = HTTPURLResponse(
+                url: request.url!,
+                statusCode: 204,
+                httpVersion: nil,
+                headerFields: nil
+            )!
+            return (response, nil)
+        }
+        let client = APIClient(
+            session: mockSession,
+            authService: FakeAuthService(nextToken: "fresh-token"),
+            apiBaseURLProvider: { apiBase }
+        )
+
+        try await client.attachViewerToDesk(
+            operatorPublicId: "desk/primary",
+            username: "viewer+desk@example.com"
+        )
+
+        let snapshot = try XCTUnwrap(requests.snapshots.last)
+        XCTAssertEqual(snapshot.method, "POST")
+        XCTAssertEqual(
+            snapshot.path,
+            "/api/auth/desks/desk%2Fprimary/members/viewer%2Bdesk%40example.com"
+        )
+        XCTAssertEqual(snapshot.csrfHeader, "desk-csrf-token")
+        XCTAssertNil(snapshot.jsonBody)
+    }
+
+    func testAttachViewerSurfacesBackendErrorDetail() async throws {
+        MockURLProtocol.requestHandler = { _ in
+            return MockURLProtocol.errorResponse(
+                statusCode: 422,
+                message: "Only active human viewers can be attached to a desk"
+            )
+        }
+
+        do {
+            try await apiClient.attachViewerToDesk(
+                operatorPublicId: "desk-1",
+                username: "delegate"
+            )
+            XCTFail("Expected serverError")
+        } catch let error as APIError {
+            guard case .serverError(let message) = error else {
+                return XCTFail("Wrong APIError: \(error)")
+            }
+            XCTAssertEqual(message, "Only active human viewers can be attached to a desk")
+        }
+    }
+
+    func testFetchCurrentUserRejectsMalformedProfile() async throws {
+        MockURLProtocol.requestHandler = { _ in
+            return MockURLProtocol.jsonResponse(
+                statusCode: 200,
+                json: Self.envelope(payload: ["username": "viewer"])
+            )
+        }
+
+        do {
+            _ = try await apiClient.fetchCurrentUser()
+            XCTFail("Expected DecodingError")
+        } catch let error as DecodingError {
+            XCTAssertFalse(String(describing: error).isEmpty)
         }
     }
 
@@ -521,6 +619,12 @@ final class APIClientSurfaceTests: XCTestCase {
         }
         if method == "GET", path == "/api/auth/users" {
             return listEnvelope(payload: [userProfilePayload()])
+        }
+        if method == "GET", path == "/api/auth/me" {
+            return envelope(payload: userProfilePayload())
+        }
+        if method == "POST", path.hasPrefix("/api/auth/desks/") {
+            return envelope(payload: "Viewer attached")
         }
         if method == "GET", path == "/api/ai-delegates" {
             return listEnvelope(payload: [delegatePayload()])
@@ -988,7 +1092,10 @@ final class APIClientSurfaceTests: XCTestCase {
             "role": "viewer",
             "is_active": true,
             "created_at": "2026-01-01T00:00:00Z",
-            "default_language": "pl"
+            "operator_public_ids": ["desk-1", "desk-2"],
+            "primary_operator_public_id": "desk-1",
+            "default_language": "pl",
+            "effective_permissions": ["read:market_data"]
         ]
     }
 
@@ -1156,12 +1263,14 @@ private struct RequestSnapshot {
     let path: String
     let query: String?
     let jsonBody: [String: Any]?
+    let csrfHeader: String?
 
     init(request: URLRequest) {
         method = request.httpMethod ?? "GET"
         let components = request.url.flatMap { URLComponents(url: $0, resolvingAgainstBaseURL: false) }
         path = components?.percentEncodedPath ?? request.url?.path ?? ""
         query = components?.percentEncodedQuery
+        csrfHeader = request.value(forHTTPHeaderField: AppConfig.HTTPHeader.xCSRFToken)
         if let data = Self.readBody(from: request),
            let parsed = try? JSONSerialization.jsonObject(with: data) as? [String: Any] {
             jsonBody = parsed

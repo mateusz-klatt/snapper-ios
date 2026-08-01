@@ -4,7 +4,7 @@ Native iOS client for the [Snapper](https://github.com/mateusz-klatt/snapper) tr
 
 ## Status
 
-- Current source: order entry, cancel, brackets, trailing stops, alerts, push notifications, wallet picker, live WebSocket order/heartbeat updates, market-data charts, runtime backend URL override, and 45-country localization. See [`CHANGELOG.md`](CHANGELOG.md) for the per-release breakdown.
+- Current source: order entry, cancel, brackets, trailing stops, alerts, push notifications, wallet and desk visibility, permission-gated viewer-to-desk attachment, live WebSocket order/heartbeat updates, market-data charts, runtime backend URL override, and 45-country localization. See [`CHANGELOG.md`](CHANGELOG.md) for the per-release breakdown.
 - Public source mirror; the maintainer owns the App Store / TestFlight pipeline. Forks build for the simulator out of the box.
 
 ## Screenshots
@@ -79,8 +79,9 @@ GitHub Actions uses runner-specific workflows:
 - `gitleaks.yml` (`ubuntu-latest`) — secret scan on push / PR / weekly cron.
 - `i18n-screenshots.yml` (`macos-26`, manual dispatch) — opt-in screenshot
   capture modes for the 45-locale sweep, smoke/retry runs, marketing/chart
-  verification, and admin/viewer permission UAT; every mode requires a live
-  backend URL input.
+  verification; every workflow mode requires a live backend URL input. The
+  mutating admin/operator/viewer Desk release UAT runs locally against a
+  disposable, fingerprinted loopback fixture via `viewer-uat`.
 
 ## Signing & release
 

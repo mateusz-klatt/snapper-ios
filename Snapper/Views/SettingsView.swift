@@ -97,6 +97,13 @@ struct SettingsView: View {
                             )
                         }
                     }
+
+                    NavigationLink {
+                        DeskView()
+                    } label: {
+                        Label(LocalizedStringKey("desk.navTitle"), systemImage: "person.2")
+                    }
+                    .accessibilityIdentifier("settings.desk")
                 }
 
                 Section(LocalizedStringKey("settings.section.connection")) {

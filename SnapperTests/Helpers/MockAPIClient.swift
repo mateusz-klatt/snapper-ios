@@ -66,7 +66,13 @@ final class MockAPIClient: APIClientProtocol, @unchecked Sendable {
         var fetchStrategies: @Sendable () async throws -> [StrategyProcess] = {
             throw APIError.invalidResponse
         }
+        var fetchCurrentUser: @Sendable () async throws -> UserProfile = {
+            throw APIError.invalidResponse
+        }
         var fetchUsers: @Sendable () async throws -> [UserProfile] = {
+            throw APIError.invalidResponse
+        }
+        var attachViewerToDesk: @Sendable (String, String) async throws -> Void = { _, _ in
             throw APIError.invalidResponse
         }
         var fetchDelegates: @Sendable () async throws -> [DelegateRead] = {
@@ -220,9 +226,17 @@ final class MockAPIClient: APIClientProtocol, @unchecked Sendable {
         get { read(\.fetchStrategies) }
         set { write(\.fetchStrategies, newValue) }
     }
+    var fetchCurrentUserHandler: @Sendable () async throws -> UserProfile {
+        get { read(\.fetchCurrentUser) }
+        set { write(\.fetchCurrentUser, newValue) }
+    }
     var fetchUsersHandler: @Sendable () async throws -> [UserProfile] {
         get { read(\.fetchUsers) }
         set { write(\.fetchUsers, newValue) }
+    }
+    var attachViewerToDeskHandler: @Sendable (String, String) async throws -> Void {
+        get { read(\.attachViewerToDesk) }
+        set { write(\.attachViewerToDesk, newValue) }
     }
     var fetchDelegatesHandler: @Sendable () async throws -> [DelegateRead] {
         get { read(\.fetchDelegates) }
@@ -397,8 +411,16 @@ final class MockAPIClient: APIClientProtocol, @unchecked Sendable {
         return try await fetchStrategiesHandler()
     }
 
+    func fetchCurrentUser() async throws -> UserProfile {
+        return try await fetchCurrentUserHandler()
+    }
+
     func fetchUsers() async throws -> [UserProfile] {
         return try await fetchUsersHandler()
+    }
+
+    func attachViewerToDesk(operatorPublicId: String, username: String) async throws {
+        try await attachViewerToDeskHandler(operatorPublicId, username)
     }
 
     func fetchDelegates() async throws -> [DelegateRead] {

@@ -6,7 +6,7 @@ Xcode Cloud post-clone hook. Runs in the cloud build environment only; never on 
 
 The public source tree intentionally ships with neutral defaults so a fork builds for the simulator without an Apple Developer account:
 
-- `project.yml`: `PRODUCT_BUNDLE_IDENTIFIER: com.example.snapper`, no `DEVELOPMENT_TEAM`, `CURRENT_PROJECT_VERSION: 1`, `MARKETING_VERSION: 3.0.0`
+- `project.yml`: `PRODUCT_BUNDLE_IDENTIFIER: com.example.snapper`, no `DEVELOPMENT_TEAM`, `CURRENT_PROJECT_VERSION: 1`, `MARKETING_VERSION: 3.1.0`
 - `Snapper/Config/Configuration.plist`: `BaseURL: http://localhost:8000`
 
 For the maintainer's TestFlight / App Store builds those values must be replaced with production values. Keeping the secrets out of the public repo means: configure them as **secret environment variables on the Xcode Cloud Workflow** in App Store Connect; this script reads them and patches the cloned tree before `xcodegen generate` runs.

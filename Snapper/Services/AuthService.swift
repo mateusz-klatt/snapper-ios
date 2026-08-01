@@ -133,6 +133,11 @@ class AuthService: ObservableObject {
                 let errorResponse = try? JSONDecoder().decode(ErrorResponse.self, from: data)
                 self.error = errorResponse.map { .serverDetail($0.detail) } ?? .loginFailed
             }
+        } catch let decodingError as DecodingError {
+            logger.error(
+                "Login response decoding failed: \(String(describing: decodingError), privacy: .public)"
+            )
+            self.error = .invalidResponse
         } catch {
             self.error = .network(error.localizedDescription)
         }
