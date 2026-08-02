@@ -35,15 +35,15 @@ concurrency:
   group: i18n-screenshots-${{ github.ref }}
   cancel-in-progress: true
 
-permissions:
-  contents: read
-
 jobs:
   screenshots:
     name: i18n screenshot capture
     runs-on: macos-26
     timeout-minutes: 60
+    permissions:
+      contents: read
     env:
+      SNAPPER_SCREENSHOT_CAPTURE_MODE: ${{ inputs.capture_mode }}
       SNAPPER_UITEST_BACKEND_URL: ${{ inputs.backend_url }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
@@ -60,11 +60,11 @@ jobs:
         run: make setup
 
       - name: Run screenshot capture
-        run: bash scripts/screenshot-all-locales.sh "${{ inputs.capture_mode }}"
+        run: bash scripts/screenshot-all-locales.sh "$SNAPPER_SCREENSHOT_CAPTURE_MODE"
 
       - name: Upload xcresult bundle
         if: always()
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
         with:
           name: i18n-screenshots-xcresult
           path: build/screenshots.xcresult
