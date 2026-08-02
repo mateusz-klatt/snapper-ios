@@ -77,28 +77,24 @@ final class XxxViewModel {
 
 ## Coverage philosophy
 
-Hybrid path enacted in v0.3.1:
+The v0.3.1 MVVM extraction remains the coverage strategy:
 
 1. **Step 1 (Strategy C)** — push load / submit / filter / decision
    logic into VMs (DONE in v0.3.1: NewOrderSheet / WalletPicker /
    AttachBracket / AttachTrailing / OrdersView / PositionsView /
    NotificationPrefsView all extracted; ViewModels directory
    reaches 97% line coverage).
-2. **Step 2 (Strategy A — fallback enacted)** — exclude SwiftUI
-   chrome from coverage measurement. Configured in
-   `sonar-project.properties`:
-   - `Snapper/Views/**` — post-MVVM, View files are SwiftUI body
-     chrome (declarative layout); the testable logic lives in
-     `Snapper/ViewModels/`. View bodies are unreachable without
-     ViewInspector.
-   - `Snapper/SnapperApp.swift` — app-entry / scene lifecycle wiring
-     not unit-testable without a UIApplication harness.
-   - `Snapper/Models/Generated/**` — auto-generated structs.
-   - `SnapperTests/**` — industry standard (test code does not
-     count to coverage).
+2. **Step 2 (full-source reporting)** — SonarCloud consumes the generic
+   Xcode coverage report without source or coverage exclusions. SwiftUI
+   views, app lifecycle wiring, and generated models remain visible in the
+   project-wide denominator and issue analysis; `SnapperTests` and
+   `SnapperUITests` remain test code through `sonar.tests`, not excluded
+   source trees.
 
-Sonar-reportable coverage after exclusions: **83.8%** at v0.3.1
-ship (1746/2083 production-logic lines). Layered breakdown:
+The historical v0.3.1 metric after exclusions was **83.8%**
+(1746/2083 production-logic lines). It is no longer comparable to the
+full-source project metric. Its layered breakdown remains useful as a
+diagnostic baseline:
 
 | Layer | Coverage |
 |---|---|
@@ -107,13 +103,12 @@ ship (1746/2083 production-logic lines). Layered breakdown:
 | Config (`Snapper/Config/`) | 68.0% |
 | Models (`Snapper/Models/`, non-generated) | 54.5% |
 
-We deliberately do **not** adopt ViewInspector or snapshot
-testing — both were rejected at the v0.3.0 architect consensus
-and the rejection was reaffirmed for v0.3.1. ViewInspector is
-fragile to SwiftUI internal changes and snapshot testing inflates
-coverage without exercising real branches. The honest alternative
-is the layered metric above: VMs and services bear the testable
-load; chrome is excluded from the denominator.
+We deliberately do **not** adopt ViewInspector or snapshot testing — both
+were rejected at the v0.3.0 architect consensus and the rejection was
+reaffirmed for v0.3.1. ViewInspector is fragile to SwiftUI internal changes
+and snapshot testing inflates coverage without exercising real branches.
+VMs and services continue to bear the testable load, while the aggregate
+Sonar metric now reports unexecuted declarative chrome instead of hiding it.
 
 ## When to extract a ViewModel vs not
 

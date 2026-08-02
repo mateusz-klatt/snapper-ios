@@ -28,10 +28,10 @@ The maintainer's TestFlight bundle id and team live outside the public source tr
 
 The deployment target is **iOS 26.2** to match the SDK shipped with Xcode 26.2 on GitHub Actions' `macos-26` runner image. Features that require a newer SDK are unavailable until either the runner image upgrades or the project moves those call sites behind `@available` conditionals.
 
-## SwiftUI chrome is excluded from Sonar coverage
+## SwiftUI chrome lowers full-source Sonar coverage
 
-The project deliberately excludes `Snapper/Views/**` and `Snapper/SnapperApp.swift` from Sonar coverage measurement. Post-MVVM, business logic lives in `Snapper/ViewModels/`, services, config, and model helpers; SwiftUI `body` chrome is not unit-testable without ViewInspector or snapshot testing.
+SonarCloud analyzes every file under `Snapper/` and applies the generic Xcode coverage report without source or coverage exclusions. This includes SwiftUI views, `SnapperApp.swift`, and generated models even when Xcode reports no executable coverage for their declarative or generated lines.
 
-This is not a missing CI step: `make coverage` still runs the Xcode coverage job and exports `build/sonarqube-generic-coverage.xml`. The exclusion model is documented in `docs/architecture-mvvm.md` and configured in `sonar-project.properties`.
+This is not a missing CI step: `make coverage` runs the complete Xcode coverage job and exports `build/sonarqube-generic-coverage.xml`. Post-MVVM, business logic lives in `Snapper/ViewModels/`, services, config, and model helpers, so the layered figures in `docs/architecture-mvvm.md` remain more actionable than the aggregate percentage.
 
 **Plan**: keep moving reusable decisions into ViewModels or pure helpers as screens evolve. ViewInspector and snapshot-testing dependencies remain out of scope so the project stays zero-SPM-dependency.
