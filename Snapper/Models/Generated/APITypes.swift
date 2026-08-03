@@ -7319,6 +7319,11 @@ struct PnlEquityCoverageData: Codable, Sendable {
     let firstMinute: Date?
     let lastMinute: Date?
     let sampleCalcVersion: String?
+    let valuationBasis: String?
+    let convertedFrom: String?
+    let conversionRateSource: String?
+    let conversionWithheldMinutes: Int
+    let drawdownWithheldReason: String?
 
     init(
         sampled: Bool,
@@ -7327,7 +7332,12 @@ struct PnlEquityCoverageData: Codable, Sendable {
         completeMinutes: Int,
         firstMinute: Date?,
         lastMinute: Date?,
-        sampleCalcVersion: String?
+        sampleCalcVersion: String?,
+        valuationBasis: String?,
+        convertedFrom: String?,
+        conversionRateSource: String?,
+        conversionWithheldMinutes: Int,
+        drawdownWithheldReason: String?
     ) {
         self.sampled = sampled
         self.venueScope = venueScope
@@ -7336,6 +7346,11 @@ struct PnlEquityCoverageData: Codable, Sendable {
         self.firstMinute = firstMinute
         self.lastMinute = lastMinute
         self.sampleCalcVersion = sampleCalcVersion
+        self.valuationBasis = valuationBasis
+        self.convertedFrom = convertedFrom
+        self.conversionRateSource = conversionRateSource
+        self.conversionWithheldMinutes = conversionWithheldMinutes
+        self.drawdownWithheldReason = drawdownWithheldReason
     }
 
     enum CodingKeys: String, CodingKey {
@@ -7346,6 +7361,11 @@ struct PnlEquityCoverageData: Codable, Sendable {
         case firstMinute = "first_minute"
         case lastMinute = "last_minute"
         case sampleCalcVersion = "sample_calc_version"
+        case valuationBasis = "valuation_basis"
+        case convertedFrom = "converted_from"
+        case conversionRateSource = "conversion_rate_source"
+        case conversionWithheldMinutes = "conversion_withheld_minutes"
+        case drawdownWithheldReason = "drawdown_withheld_reason"
     }
 }
 
