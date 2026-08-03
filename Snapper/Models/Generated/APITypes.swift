@@ -5136,6 +5136,44 @@ struct FrontMonthResponse: Codable, Sendable {
     }
 }
 
+struct FxShadowPinMetrics: Codable, Sendable {
+    let creation: Int
+    let reuse: Int
+    let conflict: Int
+    let upgradeRequired: Int
+    let mismatch: Int
+    let failure: Int
+    let dropped: Int
+
+    init(
+        creation: Int,
+        reuse: Int,
+        conflict: Int,
+        upgradeRequired: Int,
+        mismatch: Int,
+        failure: Int,
+        dropped: Int
+    ) {
+        self.creation = creation
+        self.reuse = reuse
+        self.conflict = conflict
+        self.upgradeRequired = upgradeRequired
+        self.mismatch = mismatch
+        self.failure = failure
+        self.dropped = dropped
+    }
+
+    enum CodingKeys: String, CodingKey {
+        case creation
+        case reuse
+        case conflict
+        case upgradeRequired = "upgrade_required"
+        case mismatch
+        case failure
+        case dropped
+    }
+}
+
 struct GapDetectionStats: Codable, Sendable {
     let bridge: GapStats
     let restClients: [String: GapStats]?
@@ -10851,6 +10889,7 @@ struct SystemMetricsData: Codable, Sendable {
     let saturation: SaturationMetrics
     let dbInternal: DbInternalMetrics
     let disk: DiskMetrics
+    let fxShadowPins: FxShadowPinMetrics
     let tracemallocActive: Bool
     let cgroupVersion: String?
 
@@ -10871,6 +10910,7 @@ struct SystemMetricsData: Codable, Sendable {
         saturation: SaturationMetrics,
         dbInternal: DbInternalMetrics,
         disk: DiskMetrics,
+        fxShadowPins: FxShadowPinMetrics,
         tracemallocActive: Bool,
         cgroupVersion: String?
     ) {
@@ -10890,6 +10930,7 @@ struct SystemMetricsData: Codable, Sendable {
         self.saturation = saturation
         self.dbInternal = dbInternal
         self.disk = disk
+        self.fxShadowPins = fxShadowPins
         self.tracemallocActive = tracemallocActive
         self.cgroupVersion = cgroupVersion
     }
@@ -10911,6 +10952,7 @@ struct SystemMetricsData: Codable, Sendable {
         case saturation
         case dbInternal = "db_internal"
         case disk
+        case fxShadowPins = "fx_shadow_pins"
         case tracemallocActive = "tracemalloc_active"
         case cgroupVersion = "cgroup_version"
     }
@@ -10933,6 +10975,7 @@ struct SystemMetricsHistoryItem: Codable, Sendable {
     let saturation: SaturationMetrics
     let dbInternal: DbInternalMetrics
     let disk: DiskMetrics
+    let fxShadowPins: FxShadowPinMetrics
     let tracemallocActive: Bool
     let cgroupVersion: String?
 
@@ -10953,6 +10996,7 @@ struct SystemMetricsHistoryItem: Codable, Sendable {
         saturation: SaturationMetrics,
         dbInternal: DbInternalMetrics,
         disk: DiskMetrics,
+        fxShadowPins: FxShadowPinMetrics,
         tracemallocActive: Bool,
         cgroupVersion: String?
     ) {
@@ -10972,6 +11016,7 @@ struct SystemMetricsHistoryItem: Codable, Sendable {
         self.saturation = saturation
         self.dbInternal = dbInternal
         self.disk = disk
+        self.fxShadowPins = fxShadowPins
         self.tracemallocActive = tracemallocActive
         self.cgroupVersion = cgroupVersion
     }
@@ -10993,6 +11038,7 @@ struct SystemMetricsHistoryItem: Codable, Sendable {
         case saturation
         case dbInternal = "db_internal"
         case disk
+        case fxShadowPins = "fx_shadow_pins"
         case tracemallocActive = "tracemalloc_active"
         case cgroupVersion = "cgroup_version"
     }
