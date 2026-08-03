@@ -13,10 +13,12 @@ final class SignalsViewTests: XCTestCase {
         walletPublicId: String? = "wallet-1"
     ) -> TradingSignal {
         return SignalData(
+            type: nil,
             sequenceId: 1,
             publicId: publicId,
             timestamp: Self.baseTimestamp,
             sessionId: "session-test",
+            topic: nil,
             instrument: "BTC-USD",
             exchange: "kraken",
             side: side,
@@ -25,7 +27,19 @@ final class SignalsViewTests: XCTestCase {
             price: 100.0,
             strategyName: "momentum",
             firedAt: Self.baseTimestamp,
-            walletPublicId: walletPublicId
+            walletPublicId: walletPublicId,
+            operatorPublicId: nil,
+            userPublicId: nil,
+            aiReviewPublicId: nil,
+            aiReviewDispatchVersion: nil,
+            pairedGroupId: nil,
+            pairedGroupSize: nil,
+            pairedGroupIndex: nil,
+            pairedGroupPolicy: nil,
+            pairedGroupKey: nil,
+            origin: nil,
+            replayWindowStart: nil,
+            replayWindowEnd: nil
         )
     }
 
@@ -168,10 +182,12 @@ final class SignalsViewTests: XCTestCase {
         strategyName: String? = "momentum"
     ) -> TradingSignal {
         return SignalData(
+            type: nil,
             sequenceId: 1,
             publicId: "s-1",
             timestamp: Self.baseTimestamp,
             sessionId: "session-test",
+            topic: nil,
             instrument: instrument,
             exchange: exchange,
             side: side,
@@ -180,7 +196,19 @@ final class SignalsViewTests: XCTestCase {
             price: price,
             strategyName: strategyName,
             firedAt: Self.baseTimestamp,
-            walletPublicId: "wallet-1"
+            walletPublicId: "wallet-1",
+            operatorPublicId: nil,
+            userPublicId: nil,
+            aiReviewPublicId: nil,
+            aiReviewDispatchVersion: nil,
+            pairedGroupId: nil,
+            pairedGroupSize: nil,
+            pairedGroupIndex: nil,
+            pairedGroupPolicy: nil,
+            pairedGroupKey: nil,
+            origin: nil,
+            replayWindowStart: nil,
+            replayWindowEnd: nil
         )
     }
 

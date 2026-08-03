@@ -80,7 +80,12 @@ class AuthService: ObservableObject {
             timestamp: provenance.timestamp,
             sessionId: provenance.sessionId,
             topic: nil,
-            payload: LoginBody(username: username, password: password, rememberMe: nil)
+            payload: LoginBody(
+                username: username,
+                password: password,
+                rememberMe: nil,
+                permissions: nil
+            )
         )
         do {
             request.httpBody = try Self.envelopeEncoder.encode(envelope)
@@ -284,7 +289,10 @@ class AuthService: ObservableObject {
             return true
         }
         let fresh = await refresh(
-            payload: RefreshTokenPayload(activeWalletPublicId: publicId)
+            payload: RefreshTokenPayload(
+                activeWalletPublicId: publicId,
+                clearActiveWallet: nil
+            )
         )
         return fresh?.user.activeWalletPublicId == publicId
     }

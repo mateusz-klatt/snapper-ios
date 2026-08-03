@@ -32,14 +32,20 @@ final class BackendURLStore: @unchecked Sendable {
 
     static let userDefaultsKey = "snapper.customBackendURL"
 
-    /// Compiled-in fallback URL used when ``Configuration.plist``
-    /// fails to load (missing, unparseable, or empty BaseURL). The
-    /// value is intentional and matches the committed dev default —
-    /// `Environment.swift` already crashes loud in DEBUG so this
-    /// branch only fires on a broken bundle (e.g. test target with
-    /// no plist), where pointing at a local dev backend is the
-    /// least-surprising recovery.
-    static let compiledInFallbackURLString = "http://localhost:8000"
+    /// Development fallback used when ``Configuration.plist`` fails
+    /// to load. Building it from URL components keeps the origin
+    /// structured, while initializer injection lets tests and alternate
+    /// compositions select a different recovery endpoint.
+    private static var developmentFallbackURL: URL {
+        var components = URLComponents()
+        components.scheme = "http"
+        components.host = "localhost"
+        components.port = 8000
+        guard let url = components.url else {
+            preconditionFailure("Unable to construct the development backend URL")
+        }
+        return url
+    }
 
     private static let logger = AppLogger.make(category: "BackendURLStore")
 
@@ -55,9 +61,13 @@ final class BackendURLStore: @unchecked Sendable {
     private let userDefaults: UserDefaults
     private let lock: OSAllocatedUnfairLock<State>
 
-    init(userDefaults: UserDefaults) {
+    convenience init(userDefaults: UserDefaults) {
+        self.init(userDefaults: userDefaults, fallbackURL: Self.developmentFallbackURL)
+    }
+
+    init(userDefaults: UserDefaults, fallbackURL: URL) {
         self.userDefaults = userDefaults
-        let bundled = Self.loadBundledBaseURL()
+        let bundled = Self.loadBundledBaseURL(fallbackURL: fallbackURL)
         let initialOverride = Self.loadValidatedOverride(from: userDefaults)
         self.lock = OSAllocatedUnfairLock(initialState: State(
             bundledBaseURL: bundled,
@@ -166,7 +176,7 @@ final class BackendURLStore: @unchecked Sendable {
         return components.url
     }
 
-    private static func loadBundledBaseURL() -> URL {
+    private static func loadBundledBaseURL(fallbackURL: URL) -> URL {
         guard
             let url = Bundle.main.url(forResource: "Configuration", withExtension: "plist"),
             let data = try? Data(contentsOf: url),
@@ -176,10 +186,10 @@ final class BackendURLStore: @unchecked Sendable {
             !baseURLString.isEmpty,
             let baseURL = URL(string: baseURLString)
         else {
-            let message = "BackendURLStore: Configuration.plist missing or unparsable. App configuration is broken; defaulting to \(compiledInFallbackURLString) so DEBUG launches surface the failure instead of crashing."
+            let message = "BackendURLStore: Configuration.plist missing or unparsable. App configuration is broken; defaulting to \(fallbackURL.absoluteString) so DEBUG launches surface the failure instead of crashing."
             logger.error("\(message, privacy: .public)")
             assertionFailure(message)
-            return URL(string: compiledInFallbackURLString)!
+            return fallbackURL
         }
         return baseURL
     }

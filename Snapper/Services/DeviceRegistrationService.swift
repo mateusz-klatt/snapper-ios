@@ -1,5 +1,4 @@
 import Foundation
-import UIKit
 import os
 
 /// Actor that owns the APNs token → backend registration flow.
@@ -59,8 +58,11 @@ actor DeviceRegistrationService {
     /// etc.) rather than the device looping forever in the background.
     private static let retryDelaysSeconds: [TimeInterval] = [1, 4, 16, 60]
 
+    private static let deviceIdentifierKey = "snapper.notificationDeviceIdentifier"
+
     private let apiClient: APIClient
     private let sleeper: Sleeper
+    private let deviceIdentifier: String
     private let logger = AppLogger.make(category: "DeviceRegistration")
     private var pendingToken: Data?
     private var isLoggedIn: Bool = false
@@ -68,9 +70,14 @@ actor DeviceRegistrationService {
     private var status: DeviceRegistrationStatus = .idle
     private var retryTask: Task<Void, Never>?
 
-    init(apiClient: APIClient, sleeper: Sleeper = TaskSleeper()) {
+    init(
+        apiClient: APIClient,
+        sleeper: Sleeper = TaskSleeper(),
+        userDefaultsSuiteName: String? = nil
+    ) {
         self.apiClient = apiClient
         self.sleeper = sleeper
+        self.deviceIdentifier = Self.loadOrCreateDeviceIdentifier(suiteName: userDefaultsSuiteName)
     }
 
     /// Store an incoming APNs token; register immediately if logged-in.
@@ -160,12 +167,9 @@ actor DeviceRegistrationService {
         status = .inFlight
         let hex = token.map { String(format: "%02x", $0) }.joined()
         let appVersion = Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String
-        let deviceId = await MainActor.run {
-            UIDevice.current.identifierForVendor?.uuidString ?? UUID().uuidString
-        }
         let body = RegisterDeviceBody(
             deviceToken: hex,
-            deviceId: deviceId,
+            deviceId: deviceIdentifier,
             env: currentEnv(),
             appVersion: appVersion ?? "unknown",
             previewsMode: nil
@@ -220,6 +224,28 @@ actor DeviceRegistrationService {
                 logger.error("Device registration giving up after \(attempt - 1) attempts; user can retry from Settings")
             }
         }
+    }
+
+    /// Return an app-scoped identifier that remains stable for this
+    /// installation and resets when the app's local storage is removed.
+    /// A malformed stored value is replaced instead of being sent to the
+    /// backend as device metadata.
+    private static func loadOrCreateDeviceIdentifier(suiteName: String?) -> String {
+        let userDefaults: UserDefaults
+        if let suiteName {
+            guard let suiteDefaults = UserDefaults(suiteName: suiteName) else {
+                preconditionFailure("Unable to open device identifier storage")
+            }
+            userDefaults = suiteDefaults
+        } else {
+            userDefaults = .standard
+        }
+        if let stored = userDefaults.string(forKey: deviceIdentifierKey), UUID(uuidString: stored) != nil {
+            return stored
+        }
+        let generated = UUID().uuidString
+        userDefaults.set(generated, forKey: deviceIdentifierKey)
+        return generated
     }
 
     private func scheduleRetry(after delay: TimeInterval, nextAttempt: Int) {

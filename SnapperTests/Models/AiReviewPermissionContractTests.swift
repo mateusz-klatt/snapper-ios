@@ -204,13 +204,21 @@ final class AiReviewPermissionContractTests: XCTestCase {
         effectivePermissions: [Permission]
     ) -> UserProfile {
         return UserProfile(
+            type: nil,
             sequenceId: 1,
             publicId: "user-1",
             timestamp: Date(timeIntervalSince1970: 1_700_000_000),
             sessionId: "session-test",
+            topic: nil,
             username: "principal",
+            email: nil,
             role: role,
+            isActive: nil,
             createdAt: Date(timeIntervalSince1970: 1_700_000_000),
+            operatorPublicIds: nil,
+            primaryOperatorPublicId: nil,
+            activeWalletPublicId: nil,
+            defaultLanguage: nil,
             effectivePermissions: effectivePermissions,
             delegatePublicId: delegatePublicId
         )

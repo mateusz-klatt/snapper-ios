@@ -933,7 +933,12 @@ final class APIClientSurfaceTests: XCTestCase {
                 "complete_minutes": 0,
                 "first_minute": NSNull(),
                 "last_minute": NSNull(),
-                "sample_calc_version": NSNull()
+                "sample_calc_version": NSNull(),
+                "valuation_basis": NSNull(),
+                "converted_from": NSNull(),
+                "conversion_rate_source": NSNull(),
+                "conversion_withheld_minutes": 0,
+                "drawdown_withheld_reason": NSNull()
             ],
             "points": [[
                 "point_time": "2026-01-01T12:00:00Z",

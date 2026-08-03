@@ -71,10 +71,12 @@ final class PnlTimelineViewTests: XCTestCase {
 
     private func makeSeries(points: [PnlTimelinePointData]) -> PnlSeriesData {
         return PnlSeriesData(
+            type: nil,
             sequenceId: 1,
             publicId: "pnl-1",
             timestamp: Self.base,
             sessionId: "session-1",
+            topic: nil,
             walletPublicId: "wallet-1",
             mode: "live",
             granularity: "1h",
@@ -92,7 +94,12 @@ final class PnlTimelineViewTests: XCTestCase {
                 completeMinutes: 0,
                 firstMinute: nil,
                 lastMinute: nil,
-                sampleCalcVersion: nil
+                sampleCalcVersion: nil,
+                valuationBasis: nil,
+                convertedFrom: nil,
+                conversionRateSource: nil,
+                conversionWithheldMinutes: 0,
+                drawdownWithheldReason: nil
             ),
             /// #184 regenerated ``PnlSeriesData`` with a REQUIRED
             /// ``execution_history``. The uncorrected default keeps every

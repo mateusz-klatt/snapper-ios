@@ -18,6 +18,8 @@
 		<string>/auth/refresh</string>
 		<key>Me</key>
 		<string>/auth/me</string>
+		<key>UpdateMe</key>
+		<string>/auth/me/update</string>
 		<key>Orders</key>
 		<string>/orders</string>
 		<key>Portfolio</key>
@@ -44,6 +46,10 @@
 		<string>/health</string>
 		<key>MarketData</key>
 		<string>/market/data</string>
+		<key>ConfiguredPairStats</key>
+		<string>/market/cache/stats/configured</string>
+		<key>MarketCacheHealth</key>
+		<string>/market/cache/health</string>
 		<key>Strategies</key>
 		<string>/strategies</string>
 		<key>Users</key>
@@ -64,6 +70,8 @@
 		<string>/alert_defaults</string>
 		<key>Operators</key>
 		<string>/operators</string>
+		<key>Exchanges</key>
+		<string>/exchanges</string>
 	</dict>
 </dict>
 </plist>

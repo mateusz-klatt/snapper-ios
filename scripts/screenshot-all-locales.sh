@@ -36,10 +36,10 @@ case "$MODE" in
 esac
 
 URL="${SNAPPER_UITEST_BACKEND_URL:-}"
-if [ -z "$URL" ] && [ -r "$ROOT/.local-backend-url" ]; then
+if [[ -z "$URL" && -r "$ROOT/.local-backend-url" ]]; then
   URL="$(tr -d '[:space:]' < "$ROOT/.local-backend-url")"
 fi
-if [ -z "$URL" ]; then
+if [[ -z "$URL" ]]; then
   cat >&2 <<EOF
 error: no backend URL configured.
   Set SNAPPER_UITEST_BACKEND_URL, e.g.
@@ -56,14 +56,14 @@ DEFAULT_DESK_PUBLIC_ID="$DEFAULT_DESK_SENTINEL"
 SECONDARY_DESK_PUBLIC_ID="$SECONDARY_DESK_SENTINEL"
 FIXTURE_MARKER="$FIXTURE_MARKER_SENTINEL"
 
-if [ "$MODE" = "viewer-uat" ]; then
-  if [ "${SNAPPER_UITEST_ALLOW_FIXTURE_WRITES:-}" != "1" ]; then
+if [[ "$MODE" = "viewer-uat" ]]; then
+  if [[ "${SNAPPER_UITEST_ALLOW_FIXTURE_WRITES:-}" != "1" ]]; then
     echo "error: viewer-uat mutates its disposable fixture; set SNAPPER_UITEST_ALLOW_FIXTURE_WRITES=1 explicitly" >&2
     exit 1
   fi
   FIXTURE_URL="${SNAPPER_UITEST_FIXTURE_URL:-}"
   FIXTURE_RECORD="$ROOT/.desk-uat-fixture.json"
-  if [ -z "$FIXTURE_URL" ] || [ ! -r "$FIXTURE_RECORD" ]; then
+  if [[ -z "$FIXTURE_URL" || ! -r "$FIXTURE_RECORD" ]]; then
     echo "error: viewer-uat requires SNAPPER_UITEST_FIXTURE_URL and $FIXTURE_RECORD" >&2
     exit 1
   fi
@@ -146,7 +146,7 @@ echo
 cd "$ROOT"
 
 # Regenerate Xcode project so the SnapperUITests target is wired.
-if ! [ -d "Snapper.xcodeproj" ]; then
+if [[ ! -d "Snapper.xcodeproj" ]]; then
   command -v xcodegen >/dev/null 2>&1 || { echo "xcodegen not installed; run: brew install xcodegen" >&2; exit 1; }
   xcodegen generate
 fi
@@ -199,10 +199,10 @@ for sentinel, current in zip(values[0::2], values[1::2]):
 open(path, 'w').write(text)
 PY
 
-if [ "$MODE" = "showcase" ]; then
+if [[ "$MODE" = "showcase" ]]; then
   echo "==> Uninstalling Snapper from booted simulator (showcase needs clean state)"
   DEVICE_UDID=$(xcrun simctl list devices "iPhone 17 Pro" | grep -E "iOS 26.2|(26.2)" -A1 | grep "iPhone 17 Pro (" | grep -v Max | grep -oE "[A-F0-9]{8}-[A-F0-9]{4}-[A-F0-9]{4}-[A-F0-9]{4}-[A-F0-9]{12}" | head -1)
-  if [ -n "$DEVICE_UDID" ]; then
+  if [[ -n "$DEVICE_UDID" ]]; then
     xcrun simctl boot "$DEVICE_UDID" 2>/dev/null || true
     xcrun simctl uninstall "$DEVICE_UDID" com.example.snapper 2>/dev/null || true
   fi
@@ -222,7 +222,7 @@ else
   xcodebuild "${XCODEBUILD_ARGS[@]}"
 fi
 
-if [ ! -d "$XCRESULT/Data" ]; then
+if [[ ! -d "$XCRESULT/Data" ]]; then
   echo "error: xcresult not produced at $XCRESULT" >&2
   exit 1
 fi

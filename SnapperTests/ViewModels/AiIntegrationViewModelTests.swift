@@ -37,7 +37,12 @@ final class AiIntegrationViewModelTests: XCTestCase {
             createdByUserPublicId: "user-1",
             createdAt: Self.baseTimestamp,
             isActive: isActive,
-            caps: DelegateCapsBody(maxOpenOrders: 5, maxDailyNotionalUsd: 10_000)
+            caps: DelegateCapsBody(
+                maxOrderQuantityPerInstrument: nil,
+                maxOpenOrders: 5,
+                maxDailyNotionalUsd: 10_000,
+                maxCancelsPerMinute: nil
+            )
         )
     }
 

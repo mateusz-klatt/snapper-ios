@@ -27,7 +27,11 @@ extension OrderEventData {
             reason: nil,
             walletPublicId: nil,
             operatorPublicId: nil,
-            userPublicId: nil
+            userPublicId: nil,
+            pairedGroupId: nil,
+            pairedGroupSize: nil,
+            pairedGroupIndex: nil,
+            pairedGroupPolicy: nil
         )
     }
 }

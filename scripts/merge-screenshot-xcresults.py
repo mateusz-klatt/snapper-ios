@@ -81,14 +81,13 @@ def main() -> int:
     out_root = Path(sys.argv[1]).resolve()
     xcresults = [Path(p).resolve() for p in sys.argv[2:]]
 
-    for x in xcresults:
-        if not x.is_dir():
-            print(f"error: not a directory: {x}", file=sys.stderr)
-            return 1
+    invalid_xcresult = next((xcresult for xcresult in xcresults if not xcresult.is_dir()), None)
+    if invalid_xcresult is not None:
+        print(f"error: not a directory: {invalid_xcresult}", file=sys.stderr)
+        return 1
 
     scratch_root = out_root.parent / ".xcresult-scratch"
-    if scratch_root.exists():
-        shutil.rmtree(scratch_root)
+    shutil.rmtree(scratch_root, ignore_errors=not scratch_root.exists())
     scratch_root.mkdir(parents=True)
 
     out_root.mkdir(parents=True, exist_ok=True)

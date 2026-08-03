@@ -187,6 +187,46 @@ final class DeviceRegistrationServiceTests: XCTestCase {
         )
     }
 
+    /// The app-scoped registration identifier is stable while local
+    /// storage remains present and rotates when that storage is reset.
+    func testDeviceIdentifierFollowsInstallationStorageLifetime() async throws {
+        let suiteName = "DeviceRegistrationServiceTests.\(UUID().uuidString)"
+        let userDefaults = try XCTUnwrap(UserDefaults(suiteName: suiteName))
+        userDefaults.removePersistentDomain(forName: suiteName)
+        defer { userDefaults.removePersistentDomain(forName: suiteName) }
+
+        var capturedIdentifiers: [String] = []
+        MockURLProtocol.requestHandler = { request in
+            let data = try XCTUnwrap(Self.readBody(from: request))
+            let json = try XCTUnwrap(JSONSerialization.jsonObject(with: data) as? [String: Any])
+            let payload = try XCTUnwrap(json["payload"] as? [String: Any])
+            capturedIdentifiers.append(try XCTUnwrap(payload["device_id"] as? String))
+            return MockURLProtocol.jsonResponse(statusCode: 200, json: _deviceResponseJSON)
+        }
+
+        let firstService = DeviceRegistrationService(apiClient: apiClient, userDefaultsSuiteName: suiteName)
+        await firstService.onLogin()
+        await firstService.onTokenReceived(Data([0x01]))
+
+        let secondService = DeviceRegistrationService(apiClient: apiClient, userDefaultsSuiteName: suiteName)
+        await secondService.onLogin()
+        await secondService.onTokenReceived(Data([0x02]))
+
+        userDefaults.removePersistentDomain(forName: suiteName)
+        let resetService = DeviceRegistrationService(apiClient: apiClient, userDefaultsSuiteName: suiteName)
+        await resetService.onLogin()
+        await resetService.onTokenReceived(Data([0x03]))
+
+        XCTAssertEqual(capturedIdentifiers.count, 3)
+        let firstIdentifier = try XCTUnwrap(capturedIdentifiers.first)
+        let secondIdentifier = try XCTUnwrap(capturedIdentifiers.dropFirst().first)
+        let resetIdentifier = try XCTUnwrap(capturedIdentifiers.dropFirst(2).first)
+        XCTAssertEqual(firstIdentifier, secondIdentifier)
+        XCTAssertNotEqual(secondIdentifier, resetIdentifier)
+        XCTAssertNotNil(UUID(uuidString: firstIdentifier))
+        XCTAssertNotNil(UUID(uuidString: resetIdentifier))
+    }
+
     /// Logout clears both the login flag AND the pending token.
     func testLogoutClearsState() async {
         let service = DeviceRegistrationService(apiClient: apiClient)
@@ -403,6 +443,25 @@ final class DeviceRegistrationServiceTests: XCTestCase {
         XCTAssertEqual(attempts, 1)
         let status = await service.currentStatus()
         XCTAssertEqual(status, .idle)
+    }
+
+    private static func readBody(from request: URLRequest) -> Data? {
+        if let body = request.httpBody {
+            return body
+        }
+        guard let stream = request.httpBodyStream else { return nil }
+        stream.open()
+        defer { stream.close() }
+        var data = Data()
+        let bufferSize = 4096
+        let buffer = UnsafeMutablePointer<UInt8>.allocate(capacity: bufferSize)
+        defer { buffer.deallocate() }
+        while stream.hasBytesAvailable {
+            let read = stream.read(buffer, maxLength: bufferSize)
+            if read <= 0 { break }
+            data.append(buffer, count: read)
+        }
+        return data
     }
 }
 

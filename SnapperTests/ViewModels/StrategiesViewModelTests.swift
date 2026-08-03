@@ -31,14 +31,20 @@ final class StrategiesViewModelTests: XCTestCase {
         enabled: Bool = true
     ) -> StrategyProcess {
         return StrategyProcess(
+            type: nil,
             sequenceId: 1,
             publicId: publicId,
             timestamp: Self.baseTimestamp,
             sessionId: "session-test",
+            topic: nil,
             name: name,
             running: running,
             enabled: enabled,
-            mode: "paper"
+            mode: "paper",
+            strategyClass: nil,
+            coordinator: nil,
+            coordinatorLabel: nil,
+            managedRemotely: nil
         )
     }
 
@@ -135,6 +141,7 @@ final class StrategiesViewModelTests: XCTestCase {
             publicId: "sle-1",
             timestamp: Self.baseTimestamp,
             sessionId: "session-test",
+            topic: nil,
             strategyClasses: ["MacdStrategy"],
             snapshotAt: Self.baseTimestamp
         )

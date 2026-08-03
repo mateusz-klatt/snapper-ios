@@ -35,7 +35,11 @@ final class ProtocolAndBridgeTests: XCTestCase {
             walletPublicId: nil,
             operatorPublicId: nil,
             userPublicId: nil,
-            planPublicId: nil
+            planPublicId: nil,
+            pairedGroupId: nil,
+            pairedGroupSize: nil,
+            pairedGroupIndex: nil,
+            pairedGroupPolicy: nil
         )
         let position = PositionData(
             type: nil,
@@ -52,6 +56,9 @@ final class ProtocolAndBridgeTests: XCTestCase {
             averagePrice: 10.0,
             unrealizedPnl: 0.0,
             realizedPnl: 0.0,
+            markPrice: nil,
+            markedAt: nil,
+            sourceVenueEventId: nil,
             positionCyclePublicId: nil,
             walletPublicId: nil
         )
@@ -74,7 +81,15 @@ final class ProtocolAndBridgeTests: XCTestCase {
             operatorPublicId: nil,
             userPublicId: nil,
             aiReviewPublicId: nil,
-            aiReviewDispatchVersion: nil
+            aiReviewDispatchVersion: nil,
+            pairedGroupId: nil,
+            pairedGroupSize: nil,
+            pairedGroupIndex: nil,
+            pairedGroupPolicy: nil,
+            pairedGroupKey: nil,
+            origin: nil,
+            replayWindowStart: nil,
+            replayWindowEnd: nil
         )
         let execution = ExecutionData(
             type: nil,
@@ -100,7 +115,11 @@ final class ProtocolAndBridgeTests: XCTestCase {
             walletPublicId: nil,
             operatorPublicId: nil,
             userPublicId: nil,
-            liquidityRole: nil
+            liquidityRole: nil,
+            pairedGroupId: nil,
+            pairedGroupSize: nil,
+            pairedGroupIndex: nil,
+            pairedGroupPolicy: nil
         )
         let candle = CandleData(
             type: "candle",
@@ -119,7 +138,11 @@ final class ProtocolAndBridgeTests: XCTestCase {
             close: 10.5,
             volume: 2.0,
             vwap: nil,
-            trades: nil
+            trades: nil,
+            complete: nil,
+            origin: nil,
+            replayWindowStart: nil,
+            replayWindowEnd: nil
         )
 
         XCTAssertEqual(order.id, "order-1")

@@ -206,7 +206,7 @@ struct SettingsView: View {
             }
         }
         .alert(LocalizedStringKey("settings.logout.confirmTitle"), isPresented: $showingLogoutAlert) {
-            Button(LocalizedStringKey("backend.url.cancel"), role: .cancel, action: dismissLogoutAlert)
+            Button(LocalizedStringKey("backend.url.cancel"), role: .cancel) { showingLogoutAlert = false }
             Button(LocalizedStringKey("settings.logout.button"), role: .destructive) {
                 logout()
             }
@@ -214,7 +214,7 @@ struct SettingsView: View {
             Text(LocalizedStringKey("settings.logout.confirmMessage"))
         }
         .alert(LocalizedStringKey("settings.connection.changeBackendTitle"), isPresented: $showingBackendChangeAlert) {
-            Button(LocalizedStringKey("backend.url.cancel"), role: .cancel, action: dismissBackendChangeAlert)
+            Button(LocalizedStringKey("backend.url.cancel"), role: .cancel) { showingBackendChangeAlert = false }
             Button(LocalizedStringKey("common.continue")) {
                 backendDraft = ""
                 showingBackendEditor = true
@@ -312,22 +312,6 @@ struct SettingsView: View {
             displayedBackendURL = AppConfig.baseURL
         }
     }
-
-    /// No-op handler for the logout alert's ``Cancel`` button.
-    ///
-    /// SwiftUI dismisses the alert automatically for cancel-role
-    /// buttons; naming the no-op keeps the call site free of inline
-    /// empty closures and block comments.
-    private func dismissLogoutAlert() {}
-
-    /// No-op handler for the backend-change alert's ``Cancel`` button.
-    ///
-    /// SwiftUI ``alert(_:isPresented:actions:)`` requires a closure
-    /// for every button; the Cancel role automatically dismisses the
-    /// alert without further state change. Naming the no-op keeps the
-    /// call site free of empty closures so the no-comments rule and
-    /// Sonar's empty-closure rule (``swift:S1186``) are both satisfied.
-    private func dismissBackendChangeAlert() {}
 
     private var notificationStatusView: some View {
         HStack(spacing: 6) {

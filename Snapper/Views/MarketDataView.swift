@@ -35,8 +35,7 @@ struct MarketDataView: View {
     }
 
     @ViewBuilder
-    private func content(vm: MarketDataViewModel) -> some View {
-        @Bindable var bindableVM = vm
+    private func content(@Bindable vm: MarketDataViewModel) -> some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 16) {
                 MarketSelectorBar(vm: vm)
@@ -90,7 +89,7 @@ struct MarketDataView: View {
             .padding(16)
         }
         .background(Color.bgBase)
-        .sheet(isPresented: $bindableVM.showInstrumentPicker) {
+        .sheet(isPresented: $vm.showInstrumentPicker) {
             InstrumentPickerSheet(
                 instruments: vm.instruments,
                 onSelect: { instrument in

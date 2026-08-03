@@ -44,10 +44,12 @@ final class SignalsViewModelTests: XCTestCase {
         exchange: String = "kraken"
     ) -> TradingSignal {
         return SignalData(
+            type: nil,
             sequenceId: 1,
             publicId: publicId,
             timestamp: Self.baseTimestamp,
             sessionId: "session-test",
+            topic: nil,
             instrument: instrument,
             exchange: exchange,
             side: side,
@@ -56,7 +58,19 @@ final class SignalsViewModelTests: XCTestCase {
             price: price,
             strategyName: strategyName,
             firedAt: Self.baseTimestamp,
-            walletPublicId: walletPublicId
+            walletPublicId: walletPublicId,
+            operatorPublicId: nil,
+            userPublicId: nil,
+            aiReviewPublicId: nil,
+            aiReviewDispatchVersion: nil,
+            pairedGroupId: nil,
+            pairedGroupSize: nil,
+            pairedGroupIndex: nil,
+            pairedGroupPolicy: nil,
+            pairedGroupKey: nil,
+            origin: nil,
+            replayWindowStart: nil,
+            replayWindowEnd: nil
         )
     }
 

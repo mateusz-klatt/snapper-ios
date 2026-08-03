@@ -58,20 +58,32 @@ final class ProcessesViewTests: XCTestCase {
         running: Bool = true
     ) -> ConfiguredProcess {
         return ConfiguredProcess(
+            type: nil,
             sequenceId: 1,
             publicId: "cfg-1",
             timestamp: Date(timeIntervalSince1970: 0),
             sessionId: "s",
+            topic: nil,
             name: "p",
             enabled: enabled,
             running: running,
             mode: "process",
             classPath: "snapper.X",
             method: "run",
+            parameters: nil,
+            note: nil,
             lifecycle: "long_running",
             role: role,
+            tags: nil,
+            parametersSchema: nil,
             isOneShot: false,
+            activePublicId: nil,
             kind: kind,
+            walletPublicId: nil,
+            parentTemplate: nil,
+            template: nil,
+            coordinator: nil,
+            coordinatorLabel: nil,
             managedRemotely: managedRemotely
         )
     }

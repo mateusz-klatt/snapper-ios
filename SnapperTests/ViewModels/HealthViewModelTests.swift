@@ -31,15 +31,19 @@ final class HealthViewModelTests: XCTestCase {
         version: String = "0.1.0"
     ) -> HealthCheckResponse {
         return HealthCheckResponse(
+            type: nil,
             sequenceId: 1,
             publicId: "resp-1",
             timestamp: Self.baseTimestamp,
             sessionId: "session-test",
+            topic: nil,
             payload: HealthCheckData(
+                type: nil,
                 sequenceId: 1,
                 publicId: "health-1",
                 timestamp: Self.baseTimestamp,
                 sessionId: "session-test",
+                topic: nil,
                 status: status,
                 version: version,
                 connections: ConnectionStats(

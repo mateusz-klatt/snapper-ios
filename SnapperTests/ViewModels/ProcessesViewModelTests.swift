@@ -37,17 +37,23 @@ final class ProcessesViewModelTests: XCTestCase {
             enabled: true,
             role: "core",
             lifecycle: "long_running",
+            activePublicId: nil,
             rssBytes: 12_345_678,
-            cpuPercent: 3.5
+            cpuPercent: 3.5,
+            owned: nil
         )
     }
 
     private func makeSummary(processes: [ProcessSummaryItem] = []) -> ProcessSummaryData {
         return ProcessSummaryData(
+            type: nil,
             sequenceId: 1,
             publicId: "psum-1",
             timestamp: Self.baseTimestamp,
             sessionId: "session-test",
+            topic: nil,
+            coordinator: nil,
+            coordinatorLabel: nil,
             feeds: ProcessCategoryCount(running: 1, total: 1),
             strategies: ProcessCategoryCount(running: 2, total: 3),
             executors: ProcessCategoryCount(running: 1, total: 1),
@@ -66,20 +72,31 @@ final class ProcessesViewModelTests: XCTestCase {
         coordinatorLabel: String? = nil
     ) -> ConfiguredProcess {
         return ConfiguredProcess(
+            type: nil,
             sequenceId: 1,
             publicId: "cfg-1",
             timestamp: Self.baseTimestamp,
             sessionId: "session-test",
+            topic: nil,
             name: name,
             enabled: enabled,
             running: running,
             mode: "process",
             classPath: "snapper.X",
             method: "run",
+            parameters: nil,
+            note: nil,
             lifecycle: "long_running",
             role: role,
+            tags: nil,
+            parametersSchema: nil,
             isOneShot: false,
+            activePublicId: nil,
             kind: kind,
+            walletPublicId: nil,
+            parentTemplate: nil,
+            template: nil,
+            coordinator: nil,
             coordinatorLabel: coordinatorLabel,
             managedRemotely: managedRemotely
         )
@@ -87,22 +104,27 @@ final class ProcessesViewModelTests: XCTestCase {
 
     private func makeStartData(status: String = "success", message: String? = nil) -> ProcessStartData {
         return ProcessStartData(
+            type: nil,
             sequenceId: 1,
             publicId: "start-1",
             timestamp: Self.baseTimestamp,
             sessionId: "session-test",
+            topic: nil,
             status: status,
             name: "p",
+            processPublicId: nil,
             message: message
         )
     }
 
     private func makeStopData(status: String = "success", message: String? = nil) -> ProcessStopData {
         return ProcessStopData(
+            type: nil,
             sequenceId: 1,
             publicId: "stop-1",
             timestamp: Self.baseTimestamp,
             sessionId: "session-test",
+            topic: nil,
             status: status,
             name: "p",
             message: message
@@ -111,14 +133,18 @@ final class ProcessesViewModelTests: XCTestCase {
 
     private func makeDesiredData(action: String) -> ProcessDesiredStateData {
         return ProcessDesiredStateData(
+            type: nil,
             sequenceId: 1,
             publicId: "desired-1",
             timestamp: Self.baseTimestamp,
             sessionId: "session-test",
+            topic: nil,
             status: "success",
             name: "p",
             action: action,
-            managedRemotely: true
+            coordinator: nil,
+            managedRemotely: true,
+            message: nil
         )
     }
 
@@ -255,6 +281,7 @@ final class ProcessesViewModelTests: XCTestCase {
             publicId: "pce-1",
             timestamp: Self.baseTimestamp,
             sessionId: "session-test",
+            topic: nil,
             processNames: ["strategy_macd"],
             snapshotAt: Self.baseTimestamp
         )

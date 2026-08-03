@@ -29,16 +29,23 @@ final class DeskViewModelTests: XCTestCase {
         primaryOperatorPublicId: String? = nil
     ) -> UserProfile {
         return UserProfile(
+            type: nil,
             sequenceId: 1,
             publicId: "user-1",
             timestamp: Self.timestamp,
             sessionId: "session-1",
+            topic: nil,
             username: "signed-in-user",
+            email: nil,
             role: role,
+            isActive: nil,
             createdAt: Self.timestamp,
             operatorPublicIds: primaryOperatorPublicId.map { [$0] },
             primaryOperatorPublicId: primaryOperatorPublicId,
-            effectivePermissions: permissions
+            activeWalletPublicId: nil,
+            defaultLanguage: nil,
+            effectivePermissions: permissions,
+            delegatePublicId: nil
         )
     }
 
@@ -48,10 +55,12 @@ final class DeskViewModelTests: XCTestCase {
         description: String? = nil
     ) -> OperatorInfo {
         return OperatorInfo(
+            type: nil,
             sequenceId: 1,
             publicId: publicId,
             timestamp: Self.timestamp,
             sessionId: "session-1",
+            topic: nil,
             label: label,
             description: description
         )

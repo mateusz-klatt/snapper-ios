@@ -77,7 +77,11 @@ final class OrdersViewModelTests: XCTestCase {
             walletPublicId: walletPublicId,
             operatorPublicId: nil,
             userPublicId: nil,
-            planPublicId: planPublicId
+            planPublicId: planPublicId,
+            pairedGroupId: nil,
+            pairedGroupSize: nil,
+            pairedGroupIndex: nil,
+            pairedGroupPolicy: nil
         )
     }
 
@@ -112,7 +116,11 @@ final class OrdersViewModelTests: XCTestCase {
             walletPublicId: walletPublicId,
             operatorPublicId: nil,
             userPublicId: nil,
-            liquidityRole: nil
+            liquidityRole: nil,
+            pairedGroupId: nil,
+            pairedGroupSize: nil,
+            pairedGroupIndex: nil,
+            pairedGroupPolicy: nil
         )
     }
 

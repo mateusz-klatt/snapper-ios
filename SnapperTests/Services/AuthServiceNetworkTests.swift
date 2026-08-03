@@ -422,15 +422,23 @@ final class AuthServiceNetworkTests: XCTestCase {
         let walletId = "01961234-5678-7000-8000-000000000099"
         let captured = CapturedBody()
         authService.currentUser = UserProfile(
+            type: nil,
             sequenceId: 1,
             publicId: "01961234-5678-7000-8000-000000000101",
             timestamp: Date(timeIntervalSince1970: 0),
             sessionId: "session-wallet",
+            topic: nil,
             username: "viewer",
+            email: nil,
             role: .viewer,
             isActive: true,
             createdAt: Date(timeIntervalSince1970: 0),
-            effectivePermissions: [.readBacktests]
+            operatorPublicIds: nil,
+            primaryOperatorPublicId: nil,
+            activeWalletPublicId: nil,
+            defaultLanguage: nil,
+            effectivePermissions: [.readBacktests],
+            delegatePublicId: nil
         )
         MockURLProtocol.requestHandler = { request in
             captured.set(Self.readBody(from: request) ?? Data())
@@ -620,15 +628,23 @@ final class AuthServiceNetworkTests: XCTestCase {
             "01961234-5678-7000-8000-000000000612"
         ]
         authService.currentUser = UserProfile(
+            type: nil,
             sequenceId: 1,
             publicId: "01961234-5678-7000-8000-000000000601",
             timestamp: Date(timeIntervalSince1970: 0),
             sessionId: "session-wallet-race",
+            topic: nil,
             username: "viewer",
+            email: nil,
             role: .viewer,
             isActive: true,
             createdAt: Date(timeIntervalSince1970: 0),
-            effectivePermissions: [.readBacktests]
+            operatorPublicIds: nil,
+            primaryOperatorPublicId: nil,
+            activeWalletPublicId: nil,
+            defaultLanguage: nil,
+            effectivePermissions: [.readBacktests],
+            delegatePublicId: nil
         )
 
         MockURLProtocol.requestHandler = { request in
@@ -708,15 +724,23 @@ final class AuthServiceNetworkTests: XCTestCase {
         let logoutCounter = HandlerCallCounter()
         let walletId = "01961234-5678-7000-8000-000000000699"
         authService.currentUser = UserProfile(
+            type: nil,
             sequenceId: 1,
             publicId: "01961234-5678-7000-8000-000000000602",
             timestamp: Date(timeIntervalSince1970: 0),
             sessionId: "session-r3",
+            topic: nil,
             username: "alice",
+            email: nil,
             role: .viewer,
             isActive: true,
             createdAt: Date(timeIntervalSince1970: 0),
-            effectivePermissions: [.readBacktests]
+            operatorPublicIds: nil,
+            primaryOperatorPublicId: nil,
+            activeWalletPublicId: nil,
+            defaultLanguage: nil,
+            effectivePermissions: [.readBacktests],
+            delegatePublicId: nil
         )
         authService.isAuthenticated = true
 
@@ -939,14 +963,23 @@ final class AuthServiceNetworkTests: XCTestCase {
 
     private static func refreshTestUser(sessionId: String) -> UserProfile {
         UserProfile(
+            type: nil,
             sequenceId: 1,
             publicId: "01961234-5678-7000-8000-000000000090",
             timestamp: Date(timeIntervalSince1970: 0),
             sessionId: sessionId,
+            topic: nil,
             username: "alice",
+            email: nil,
             role: .viewer,
             isActive: true,
-            createdAt: Date(timeIntervalSince1970: 0)
+            createdAt: Date(timeIntervalSince1970: 0),
+            operatorPublicIds: nil,
+            primaryOperatorPublicId: nil,
+            activeWalletPublicId: nil,
+            defaultLanguage: nil,
+            effectivePermissions: nil,
+            delegatePublicId: nil
         )
     }
 
