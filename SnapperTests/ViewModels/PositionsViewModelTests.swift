@@ -55,6 +55,9 @@ final class PositionsViewModelTests: XCTestCase {
             averagePrice: averagePrice,
             unrealizedPnl: unrealizedPnl,
             realizedPnl: 0,
+            markPrice: nil,
+            markedAt: nil,
+            sourceVenueEventId: nil,
             positionCyclePublicId: positionCyclePublicId,
             walletPublicId: walletPublicId
         )

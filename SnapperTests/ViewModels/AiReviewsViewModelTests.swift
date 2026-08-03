@@ -73,7 +73,8 @@ final class AiReviewsViewModelTests: XCTestCase {
             dispatchVersion: 1,
             createdAt: Self.baseTimestamp,
             resolvedAt: Self.baseTimestamp,
-            deadline: Self.baseTimestamp
+            deadline: Self.baseTimestamp,
+            signalEnvelope: nil
         )
     }
 

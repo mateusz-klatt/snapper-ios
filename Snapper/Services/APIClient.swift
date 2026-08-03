@@ -644,7 +644,7 @@ final class APIClient: Sendable, APIClientProtocol {
     /// venue treats as market-data-only (TradFi mirrors).
     func fetchInstruments(exchange: String) async throws -> [InstrumentDetailData] {
         let envelope: InstrumentDetailListResponse = try await request(
-            endpoint: "/exchanges/\(Self.encodePathSegment(exchange))/instruments/detail"
+            endpoint: "\(AppConfig.Endpoints.exchanges)/\(Self.encodePathSegment(exchange))/instruments/detail"
         )
         return envelope.payload
     }
@@ -656,7 +656,7 @@ final class APIClient: Sendable, APIClientProtocol {
     /// ``/exchanges/{exchange}/instruments/detail`` path segment
     /// accepts.
     func fetchExchanges() async throws -> [String] {
-        let envelope: ExchangeListResponse = try await request(endpoint: "/exchanges")
+        let envelope: ExchangeListResponse = try await request(endpoint: AppConfig.Endpoints.exchanges)
         return envelope.payload
     }
 
@@ -689,7 +689,7 @@ final class APIClient: Sendable, APIClientProtocol {
     /// stats row to render cointegration chips for every pair the
     /// operator has configured.
     func fetchAllConfiguredPairStats() async throws -> ListedCachedStatsResponse {
-        return try await request(endpoint: "/market/cache/stats/configured")
+        return try await request(endpoint: AppConfig.Endpoints.configuredPairStats)
     }
 
     /// Fetch the cache-warming health snapshot via
@@ -698,7 +698,7 @@ final class APIClient: Sendable, APIClientProtocol {
     /// ``APIClientProtocol`` mirrors every backend cache endpoint
     /// for future operator-facing health dashboards.
     func fetchCacheHealth() async throws -> CacheHealthResponse {
-        return try await request(endpoint: "/market/cache/health")
+        return try await request(endpoint: AppConfig.Endpoints.marketCacheHealth)
     }
 
     /// Fetch the related-instruments catalog for a given venue-scoped
@@ -750,7 +750,7 @@ final class APIClient: Sendable, APIClientProtocol {
             payload: UpdateAuthMeBody(defaultLanguage: language)
         )
         let _: UserResponse = try await request(
-            endpoint: "/auth/me/update",
+            endpoint: AppConfig.Endpoints.updateMe,
             method: "POST",
             body: envelope
         )

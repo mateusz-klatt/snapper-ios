@@ -14,6 +14,7 @@ final class EnvironmentTests: XCTestCase {
             "Logout": "/logout",
             "Refresh": "/refresh",
             "Me": "/me",
+            "UpdateMe": "/me/update",
             "Orders": "/orders",
             "Portfolio": "/portfolio",
             "Positions": "/positions",
@@ -35,7 +36,10 @@ final class EnvironmentTests: XCTestCase {
             "AlertDefaults": "/alert-defaults",
             "Operators": "/operators",
             "ExecutionPlans": "/execution-plans",
-            "TrailingStops": "/trailing-stops"
+            "TrailingStops": "/trailing-stops",
+            "Exchanges": "/exchanges",
+            "ConfiguredPairStats": "/market/cache/stats/configured",
+            "MarketCacheHealth": "/market/cache/health"
         ]
     ]
 
@@ -80,6 +84,7 @@ final class EnvironmentTests: XCTestCase {
         XCTAssertEqual(AppConfig.Endpoints.login, "/auth/login")
         XCTAssertEqual(AppConfig.Endpoints.logout, "/auth/logout")
         XCTAssertEqual(AppConfig.Endpoints.me, "/auth/me")
+        XCTAssertEqual(AppConfig.Endpoints.updateMe, "/auth/me/update")
         XCTAssertEqual(AppConfig.Endpoints.orders, "/orders")
         XCTAssertEqual(AppConfig.Endpoints.positions, "/positions")
         XCTAssertEqual(AppConfig.Endpoints.accounts, "/portfolio/accounts")
@@ -103,6 +108,9 @@ final class EnvironmentTests: XCTestCase {
         XCTAssertEqual(AppConfig.Endpoints.operators, "/operators")
         XCTAssertEqual(AppConfig.Endpoints.executionPlans, "/execution-plans")
         XCTAssertEqual(AppConfig.Endpoints.trailingStops, "/trailing-stops")
+        XCTAssertEqual(AppConfig.Endpoints.exchanges, "/exchanges")
+        XCTAssertEqual(AppConfig.Endpoints.configuredPairStats, "/market/cache/stats/configured")
+        XCTAssertEqual(AppConfig.Endpoints.marketCacheHealth, "/market/cache/health")
         XCTAssertEqual(AppConfig.HTTPHeader.authorization, "Authorization")
         XCTAssertEqual(AppConfig.ContentType.formURLEncoded, "application/x-www-form-urlencoded")
     }
@@ -117,6 +125,7 @@ final class EnvironmentTests: XCTestCase {
         XCTAssertEqual(parsed.endpoints.logout, "/logout")
         XCTAssertEqual(parsed.endpoints.refresh, "/refresh")
         XCTAssertEqual(parsed.endpoints.me, "/me")
+        XCTAssertEqual(parsed.endpoints.updateMe, "/me/update")
         XCTAssertEqual(parsed.endpoints.orders, "/orders")
         XCTAssertEqual(parsed.endpoints.portfolio, "/portfolio")
         XCTAssertEqual(parsed.endpoints.positions, "/positions")
@@ -139,6 +148,9 @@ final class EnvironmentTests: XCTestCase {
         XCTAssertEqual(parsed.endpoints.operators, "/operators")
         XCTAssertEqual(parsed.endpoints.executionPlans, "/execution-plans")
         XCTAssertEqual(parsed.endpoints.trailingStops, "/trailing-stops")
+        XCTAssertEqual(parsed.endpoints.exchanges, "/exchanges")
+        XCTAssertEqual(parsed.endpoints.configuredPairStats, "/market/cache/stats/configured")
+        XCTAssertEqual(parsed.endpoints.marketCacheHealth, "/market/cache/health")
     }
 
     func testConfigurationParsingDefaultsMissingFields() {
@@ -161,6 +173,10 @@ final class EnvironmentTests: XCTestCase {
         XCTAssertEqual(parsed.endpoints.logout, "")
         XCTAssertEqual(parsed.endpoints.processes, "")
         XCTAssertEqual(parsed.endpoints.trailingStops, "")
+        XCTAssertEqual(parsed.endpoints.updateMe, "")
+        XCTAssertEqual(parsed.endpoints.exchanges, "")
+        XCTAssertEqual(parsed.endpoints.configuredPairStats, "")
+        XCTAssertEqual(parsed.endpoints.marketCacheHealth, "")
     }
 
     func testConfigurationParsingDefaultsMissingEndpointsBlock() {
@@ -178,6 +194,10 @@ final class EnvironmentTests: XCTestCase {
         XCTAssertEqual(parsed.endpoints.portfolio, "")
         XCTAssertEqual(parsed.endpoints.processes, "")
         XCTAssertEqual(parsed.endpoints.trailingStops, "")
+        XCTAssertEqual(parsed.endpoints.updateMe, "")
+        XCTAssertEqual(parsed.endpoints.exchanges, "")
+        XCTAssertEqual(parsed.endpoints.configuredPairStats, "")
+        XCTAssertEqual(parsed.endpoints.marketCacheHealth, "")
     }
 
     func testConfigurationParsingAcceptsSingleMissingCriticalFieldWhenAssertionsDisabled() {
@@ -255,6 +275,7 @@ final class EnvironmentTests: XCTestCase {
         XCTAssertEqual(empty.endpoints.logout, "")
         XCTAssertEqual(empty.endpoints.refresh, "")
         XCTAssertEqual(empty.endpoints.me, "")
+        XCTAssertEqual(empty.endpoints.updateMe, "")
         XCTAssertEqual(empty.endpoints.orders, "")
         XCTAssertEqual(empty.endpoints.positions, "")
         XCTAssertEqual(empty.endpoints.signals, "")
@@ -276,5 +297,8 @@ final class EnvironmentTests: XCTestCase {
         XCTAssertEqual(empty.endpoints.operators, "")
         XCTAssertEqual(empty.endpoints.executionPlans, "")
         XCTAssertEqual(empty.endpoints.trailingStops, "")
+        XCTAssertEqual(empty.endpoints.exchanges, "")
+        XCTAssertEqual(empty.endpoints.configuredPairStats, "")
+        XCTAssertEqual(empty.endpoints.marketCacheHealth, "")
     }
 }

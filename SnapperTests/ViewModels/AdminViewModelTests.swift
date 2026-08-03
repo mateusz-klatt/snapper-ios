@@ -31,15 +31,23 @@ final class AdminViewModelTests: XCTestCase {
         isActive: Bool? = true
     ) -> UserProfile {
         return UserProfile(
+            type: nil,
             sequenceId: 1,
             publicId: publicId,
             timestamp: Self.baseTimestamp,
             sessionId: "session-test",
+            topic: nil,
             username: username,
             email: "user@example.com",
             role: role,
             isActive: isActive,
-            createdAt: Self.baseTimestamp
+            createdAt: Self.baseTimestamp,
+            operatorPublicIds: nil,
+            primaryOperatorPublicId: nil,
+            activeWalletPublicId: nil,
+            defaultLanguage: nil,
+            effectivePermissions: nil,
+            delegatePublicId: nil
         )
     }
 

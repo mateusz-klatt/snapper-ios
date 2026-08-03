@@ -22,7 +22,7 @@ ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 PATTERNS="$ROOT/scripts/check_i18n_patterns.txt"
 ALLOWLIST="$ROOT/scripts/check_i18n_strict_allowlist.txt"
 
-if [ ! -f "$PATTERNS" ]; then
+if [[ ! -f "$PATTERNS" ]]; then
     echo "i18n-check: patterns file missing: $PATTERNS" >&2
     exit 2
 fi
@@ -35,24 +35,24 @@ SCAN_DIRS=(
 
 EXISTING_DIRS=""
 for DIR in "${SCAN_DIRS[@]}"; do
-    if [ -d "$DIR" ]; then
+    if [[ -d "$DIR" ]]; then
         EXISTING_DIRS="$EXISTING_DIRS $DIR"
     fi
 done
 
-if [ -z "$EXISTING_DIRS" ]; then
+if [[ -z "$EXISTING_DIRS" ]]; then
     echo "i18n-check: no scan directories exist under $ROOT/Snapper/" >&2
     exit 2
 fi
 
 ALLOWED=""
-if [ -f "$ALLOWLIST" ]; then
+if [[ -f "$ALLOWLIST" ]]; then
     while IFS= read -r ENTRY; do
-        case "$ENTRY" in
-            ""|\#*) continue ;;
-        esac
+        if [[ -z "$ENTRY" || "$ENTRY" == \#* ]]; then
+            continue
+        fi
         PREFIX_PATH=$(echo "$ENTRY" | sed -nE 's/^([^:]+):([0-9]+):.+$/\1:\2/p')
-        if [ -n "$PREFIX_PATH" ]; then
+        if [[ -n "$PREFIX_PATH" ]]; then
             ALLOWED="$ALLOWED
 $PREFIX_PATH"
         fi
@@ -63,25 +63,25 @@ FAILED=0
 HIT_COUNT=0
 
 while IFS= read -r PATTERN; do
-    case "$PATTERN" in
-        ""|\#*) continue ;;
-    esac
+    if [[ -z "$PATTERN" || "$PATTERN" == \#* ]]; then
+        continue
+    fi
 
     while IFS= read -r HIT; do
-        if [ -z "$HIT" ]; then continue; fi
+        if [[ -z "$HIT" ]]; then continue; fi
         FILE_PATH=$(echo "$HIT" | sed -nE 's|^([^:]+):([0-9]+):.*$|\1|p')
         LINE_NUM=$(echo "$HIT" | sed -nE 's|^([^:]+):([0-9]+):.*$|\2|p')
-        if [ -z "$FILE_PATH" ] || [ -z "$LINE_NUM" ]; then continue; fi
+        if [[ -z "$FILE_PATH" || -z "$LINE_NUM" ]]; then continue; fi
         REL_PATH=$(echo "$FILE_PATH" | sed -E "s|^$ROOT/||")
 
         IS_ALLOWED=0
-        if [ -n "$ALLOWED" ]; then
+        if [[ -n "$ALLOWED" ]]; then
             case "$ALLOWED" in
                 *"$REL_PATH:$LINE_NUM"*) IS_ALLOWED=1 ;;
             esac
         fi
 
-        if [ "$IS_ALLOWED" -eq 0 ]; then
+        if [[ "$IS_ALLOWED" -eq 0 ]]; then
             HIT_COUNT=$((HIT_COUNT + 1))
             echo "i18n-check: $REL_PATH:$LINE_NUM matches pattern $PATTERN"
             FAILED=1
@@ -90,7 +90,7 @@ while IFS= read -r PATTERN; do
 
 done < "$PATTERNS"
 
-if [ "$FAILED" -ne 0 ]; then
+if [[ "$FAILED" -ne 0 ]]; then
     echo ""
     echo "i18n-check: $HIT_COUNT unallowlisted hit(s) found."
     echo "Route the string through the catalog (Text(LocalizedStringKey(...)) /"

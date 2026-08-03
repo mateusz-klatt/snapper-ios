@@ -101,7 +101,11 @@ final class HomeViewTests: XCTestCase {
             walletPublicId: walletPublicId,
             operatorPublicId: nil,
             userPublicId: nil,
-            planPublicId: nil
+            planPublicId: nil,
+            pairedGroupId: nil,
+            pairedGroupSize: nil,
+            pairedGroupIndex: nil,
+            pairedGroupPolicy: nil
         )
     }
 
@@ -200,7 +204,11 @@ final class HomeViewTests: XCTestCase {
             walletPublicId: walletPublicId,
             operatorPublicId: nil,
             userPublicId: nil,
-            planPublicId: nil
+            planPublicId: nil,
+            pairedGroupId: nil,
+            pairedGroupSize: nil,
+            pairedGroupIndex: nil,
+            pairedGroupPolicy: nil
         )
     }
 

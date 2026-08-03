@@ -29,12 +29,15 @@ final class BacktestsViewModelTests: XCTestCase {
         status: String = "completed"
     ) -> BacktestRunData {
         return BacktestRunData(
+            type: nil,
             sequenceId: 1,
             publicId: publicId,
             timestamp: Self.baseTimestamp,
             sessionId: "session-test",
+            topic: nil,
             walletPublicId: "wallet-1",
             strategyName: "momentum",
+            strategyParams: nil,
             instrumentPublicId: "inst-1",
             instrument: "BTC-USD",
             exchange: "kraken",
@@ -42,7 +45,16 @@ final class BacktestsViewModelTests: XCTestCase {
             startDate: Self.baseTimestamp,
             endDate: Self.baseTimestamp,
             initialCash: 10_000,
-            status: status
+            status: status,
+            executionMode: nil,
+            fillModel: nil,
+            slippageBps: nil,
+            commissionBps: nil,
+            configHash: nil,
+            targetExecutionExchange: nil,
+            startedAt: nil,
+            completedAt: nil,
+            error: nil
         )
     }
 

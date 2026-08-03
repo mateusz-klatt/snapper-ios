@@ -90,6 +90,10 @@ enum AppConfig {
             return configuration.endpoints.me
         }
 
+        static var updateMe: String {
+            return configuration.endpoints.updateMe
+        }
+
         static var orders: String {
             return configuration.endpoints.orders
         }
@@ -190,6 +194,18 @@ enum AppConfig {
             return configuration.endpoints.trailingStops
         }
 
+        static var exchanges: String {
+            return configuration.endpoints.exchanges
+        }
+
+        static var configuredPairStats: String {
+            return configuration.endpoints.configuredPairStats
+        }
+
+        static var marketCacheHealth: String {
+            return configuration.endpoints.marketCacheHealth
+        }
+
         /// Root of the processes REST family. Full wire paths resolve to
         /// ``/api/processes`` (per-name lifecycle mutations) and
         /// ``/api/processes/configured``.
@@ -218,6 +234,7 @@ enum AppConfig {
             let logout: String
             let refresh: String
             let me: String
+            let updateMe: String
             let orders: String
             let portfolio: String
             let positions: String
@@ -240,6 +257,9 @@ enum AppConfig {
             let operators: String
             let executionPlans: String
             let trailingStops: String
+            let exchanges: String
+            let configuredPairStats: String
+            let marketCacheHealth: String
         }
 
         static func load(
@@ -277,6 +297,7 @@ enum AppConfig {
                     logout: endpoints["Logout"] as? String ?? "",
                     refresh: endpoints["Refresh"] as? String ?? "",
                     me: endpoints["Me"] as? String ?? "",
+                    updateMe: endpoints["UpdateMe"] as? String ?? "",
                     orders: endpoints["Orders"] as? String ?? "",
                     portfolio: endpoints["Portfolio"] as? String ?? "",
                     positions: endpoints["Positions"] as? String ?? "",
@@ -298,7 +319,10 @@ enum AppConfig {
                     alertDefaults: endpoints["AlertDefaults"] as? String ?? "",
                     operators: endpoints["Operators"] as? String ?? "",
                     executionPlans: endpoints["ExecutionPlans"] as? String ?? "",
-                    trailingStops: endpoints["TrailingStops"] as? String ?? ""
+                    trailingStops: endpoints["TrailingStops"] as? String ?? "",
+                    exchanges: endpoints["Exchanges"] as? String ?? "",
+                    configuredPairStats: endpoints["ConfiguredPairStats"] as? String ?? "",
+                    marketCacheHealth: endpoints["MarketCacheHealth"] as? String ?? ""
                 )
             )
 
@@ -323,6 +347,7 @@ enum AppConfig {
                     logout: "",
                     refresh: "",
                     me: "",
+                    updateMe: "",
                     orders: "",
                     portfolio: "",
                     positions: "",
@@ -344,7 +369,10 @@ enum AppConfig {
                     alertDefaults: "",
                     operators: "",
                     executionPlans: "",
-                    trailingStops: ""
+                    trailingStops: "",
+                    exchanges: "",
+                    configuredPairStats: "",
+                    marketCacheHealth: ""
                 )
             )
         }

@@ -124,35 +124,3 @@ struct BackendURLEditor: View {
         return LocaleStrings.localized("backend.url.help", in: language)
     }
 }
-
-struct BackendURLEditor_Previews: PreviewProvider {
-    /// Container reads-and-renders the static layout only.
-    ///
-    /// All three callbacks are no-ops because the SwiftUI Preview
-    /// never invokes the action paths. Naming each handler avoids
-    /// inline empty closures so the no-comments rule and Sonar's
-    /// empty-closure rule (``swift:S1186``) are both satisfied;
-    /// production wiring lives in ``LoginView`` and ``SettingsView``.
-    private struct Container: View {
-        @State private var draft: String = ""
-
-        var body: some View {
-            BackendURLEditor(
-                draft: $draft,
-                onSave: previewSave,
-                onReset: previewReset,
-                onCancel: previewCancel
-            )
-            .padding()
-        }
-
-        private func previewSave(_: URL) {}
-        private func previewReset() {}
-        private func previewCancel() {}
-    }
-
-    static var previews: some View {
-        Container()
-            .environment(AppState.shared)
-    }
-}

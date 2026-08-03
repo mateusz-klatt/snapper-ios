@@ -38,7 +38,11 @@ extension ExecutionData {
             walletPublicId: nil,
             operatorPublicId: nil,
             userPublicId: nil,
-            liquidityRole: nil
+            liquidityRole: nil,
+            pairedGroupId: nil,
+            pairedGroupSize: nil,
+            pairedGroupIndex: nil,
+            pairedGroupPolicy: nil
         )
     }
 }
