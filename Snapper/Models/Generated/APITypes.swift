@@ -471,26 +471,6 @@ struct AccountBalanceEntry: Codable, Sendable {
     let usedDecimal: String?
     let numericProvenance: String?
 
-    init(
-        currency: String,
-        total: Double,
-        free: Double? = nil,
-        used: Double? = nil,
-        totalDecimal: String? = nil,
-        freeDecimal: String? = nil,
-        usedDecimal: String? = nil,
-        numericProvenance: String? = nil
-    ) {
-        self.currency = currency
-        self.total = total
-        self.free = free
-        self.used = used
-        self.totalDecimal = totalDecimal
-        self.freeDecimal = freeDecimal
-        self.usedDecimal = usedDecimal
-        self.numericProvenance = numericProvenance
-    }
-
     enum CodingKeys: String, CodingKey {
         case currency
         case total
@@ -512,26 +492,6 @@ struct AccountPositionEntry: Codable, Sendable {
     let unrealizedPnl: Double
     let unrealizedFunding: Double
     let timestamp: Date
-
-    init(
-        symbol: String,
-        side: String,
-        size: Double,
-        entryPrice: Double,
-        markPrice: Double,
-        unrealizedPnl: Double,
-        unrealizedFunding: Double,
-        timestamp: Date
-    ) {
-        self.symbol = symbol
-        self.side = side
-        self.size = size
-        self.entryPrice = entryPrice
-        self.markPrice = markPrice
-        self.unrealizedPnl = unrealizedPnl
-        self.unrealizedFunding = unrealizedFunding
-        self.timestamp = timestamp
-    }
 
     enum CodingKeys: String, CodingKey {
         case symbol
@@ -564,44 +524,6 @@ struct AdminAiReviewItem: Codable, Sendable {
     let deadline: Date
     let signalEnvelope: JsonObject?
 
-    init(
-        reviewPublicId: String,
-        strategyPublicId: String,
-        userPublicId: String,
-        operatorPublicId: String,
-        walletPublicId: String,
-        instrumentPublicId: String,
-        selectedDelegatePublicId: String,
-        respondingDelegatePublicId: String?,
-        status: String,
-        decision: String?,
-        rationale: String?,
-        resolutionMode: String?,
-        dispatchVersion: Int,
-        createdAt: Date,
-        resolvedAt: Date?,
-        deadline: Date,
-        signalEnvelope: JsonObject? = nil
-    ) {
-        self.reviewPublicId = reviewPublicId
-        self.strategyPublicId = strategyPublicId
-        self.userPublicId = userPublicId
-        self.operatorPublicId = operatorPublicId
-        self.walletPublicId = walletPublicId
-        self.instrumentPublicId = instrumentPublicId
-        self.selectedDelegatePublicId = selectedDelegatePublicId
-        self.respondingDelegatePublicId = respondingDelegatePublicId
-        self.status = status
-        self.decision = decision
-        self.rationale = rationale
-        self.resolutionMode = resolutionMode
-        self.dispatchVersion = dispatchVersion
-        self.createdAt = createdAt
-        self.resolvedAt = resolvedAt
-        self.deadline = deadline
-        self.signalEnvelope = signalEnvelope
-    }
-
     enum CodingKeys: String, CodingKey {
         case reviewPublicId = "review_public_id"
         case strategyPublicId = "strategy_public_id"
@@ -626,14 +548,6 @@ struct AdminAiReviewItem: Codable, Sendable {
 struct AdminAiReviewListResponse: Codable, Sendable {
     let items: [AdminAiReviewItem]
     let count: Int
-
-    init(
-        items: [AdminAiReviewItem],
-        count: Int
-    ) {
-        self.items = items
-        self.count = count
-    }
 }
 
 struct AiReviewAftermathExecution: Codable, Sendable {
@@ -666,68 +580,6 @@ struct AiReviewAftermathExecution: Codable, Sendable {
     let feeDecimal: String?
     let counterAmountDecimal: String?
     let numericProvenance: String?
-
-    init(
-        publicId: String,
-        timestamp: Date,
-        sessionId: String,
-        sequenceId: Int,
-        tradeId: String?,
-        execId: String?,
-        orderPublicId: String,
-        instrumentPublicId: String,
-        exchangeOrderId: String?,
-        clientOrderId: String?,
-        instrument: String,
-        exchange: String,
-        mode: String,
-        scopeSequence: Int,
-        side: String,
-        size: Double,
-        price: Double,
-        fee: Double,
-        feeAsset: String,
-        status: String,
-        executedAt: Date,
-        walletPublicId: String?,
-        operatorPublicId: String?,
-        liquidityRole: String,
-        priceDecimal: String?,
-        sizeDecimal: String?,
-        feeDecimal: String?,
-        counterAmountDecimal: String?,
-        numericProvenance: String?
-    ) {
-        self.publicId = publicId
-        self.timestamp = timestamp
-        self.sessionId = sessionId
-        self.sequenceId = sequenceId
-        self.tradeId = tradeId
-        self.execId = execId
-        self.orderPublicId = orderPublicId
-        self.instrumentPublicId = instrumentPublicId
-        self.exchangeOrderId = exchangeOrderId
-        self.clientOrderId = clientOrderId
-        self.instrument = instrument
-        self.exchange = exchange
-        self.mode = mode
-        self.scopeSequence = scopeSequence
-        self.side = side
-        self.size = size
-        self.price = price
-        self.fee = fee
-        self.feeAsset = feeAsset
-        self.status = status
-        self.executedAt = executedAt
-        self.walletPublicId = walletPublicId
-        self.operatorPublicId = operatorPublicId
-        self.liquidityRole = liquidityRole
-        self.priceDecimal = priceDecimal
-        self.sizeDecimal = sizeDecimal
-        self.feeDecimal = feeDecimal
-        self.counterAmountDecimal = counterAmountDecimal
-        self.numericProvenance = numericProvenance
-    }
 
     enum CodingKeys: String, CodingKey {
         case publicId = "public_id"
@@ -789,60 +641,6 @@ struct AiReviewAftermathOrder: Codable, Sendable {
     let operatorPublicId: String?
     let planPublicId: String?
 
-    init(
-        publicId: String,
-        timestamp: Date,
-        sessionId: String,
-        sequenceId: Int,
-        instrument: String,
-        exchange: String,
-        mode: String,
-        clientOrderId: String,
-        exchangeOrderId: String?,
-        createdAt: Date,
-        updatedAt: Date?,
-        side: String,
-        orderType: String,
-        price: Double?,
-        size: Double,
-        filledSize: Double,
-        averagePrice: Double?,
-        status: String,
-        timeInForce: String?,
-        error: String?,
-        leverage: Int?,
-        reduceOnly: Bool,
-        walletPublicId: String?,
-        operatorPublicId: String?,
-        planPublicId: String?
-    ) {
-        self.publicId = publicId
-        self.timestamp = timestamp
-        self.sessionId = sessionId
-        self.sequenceId = sequenceId
-        self.instrument = instrument
-        self.exchange = exchange
-        self.mode = mode
-        self.clientOrderId = clientOrderId
-        self.exchangeOrderId = exchangeOrderId
-        self.createdAt = createdAt
-        self.updatedAt = updatedAt
-        self.side = side
-        self.orderType = orderType
-        self.price = price
-        self.size = size
-        self.filledSize = filledSize
-        self.averagePrice = averagePrice
-        self.status = status
-        self.timeInForce = timeInForce
-        self.error = error
-        self.leverage = leverage
-        self.reduceOnly = reduceOnly
-        self.walletPublicId = walletPublicId
-        self.operatorPublicId = operatorPublicId
-        self.planPublicId = planPublicId
-    }
-
     enum CodingKeys: String, CodingKey {
         case publicId = "public_id"
         case timestamp
@@ -891,44 +689,6 @@ struct AiReviewAftermathPosition: Codable, Sendable {
     let positionCyclePublicId: String?
     let walletPublicId: String
 
-    init(
-        publicId: String,
-        timestamp: Date,
-        sessionId: String,
-        sequenceId: Int,
-        instrument: String,
-        instrumentPublicId: String,
-        exchange: String,
-        mode: String,
-        quantity: Double,
-        averagePrice: Double?,
-        unrealizedPnl: Double?,
-        realizedPnl: Double?,
-        markPrice: Double?,
-        markedAt: Date?,
-        sourceVenueEventId: Int?,
-        positionCyclePublicId: String?,
-        walletPublicId: String
-    ) {
-        self.publicId = publicId
-        self.timestamp = timestamp
-        self.sessionId = sessionId
-        self.sequenceId = sequenceId
-        self.instrument = instrument
-        self.instrumentPublicId = instrumentPublicId
-        self.exchange = exchange
-        self.mode = mode
-        self.quantity = quantity
-        self.averagePrice = averagePrice
-        self.unrealizedPnl = unrealizedPnl
-        self.realizedPnl = realizedPnl
-        self.markPrice = markPrice
-        self.markedAt = markedAt
-        self.sourceVenueEventId = sourceVenueEventId
-        self.positionCyclePublicId = positionCyclePublicId
-        self.walletPublicId = walletPublicId
-    }
-
     enum CodingKeys: String, CodingKey {
         case publicId = "public_id"
         case timestamp
@@ -966,38 +726,6 @@ struct AiReviewAftermathPositionCycleTransition: Codable, Sendable {
     let openingCommandPublicId: String?
     let closingCommandPublicId: String?
 
-    init(
-        cyclePublicId: String,
-        transition: String,
-        occurredAt: Date,
-        instrumentPublicId: String,
-        exchange: String,
-        mode: String,
-        shardKey: String,
-        walletPublicId: String,
-        operatorPublicId: String?,
-        direction: String,
-        maxQty: Double,
-        statusAtAsOf: String,
-        openingCommandPublicId: String?,
-        closingCommandPublicId: String?
-    ) {
-        self.cyclePublicId = cyclePublicId
-        self.transition = transition
-        self.occurredAt = occurredAt
-        self.instrumentPublicId = instrumentPublicId
-        self.exchange = exchange
-        self.mode = mode
-        self.shardKey = shardKey
-        self.walletPublicId = walletPublicId
-        self.operatorPublicId = operatorPublicId
-        self.direction = direction
-        self.maxQty = maxQty
-        self.statusAtAsOf = statusAtAsOf
-        self.openingCommandPublicId = openingCommandPublicId
-        self.closingCommandPublicId = closingCommandPublicId
-    }
-
     enum CodingKeys: String, CodingKey {
         case cyclePublicId = "cycle_public_id"
         case transition
@@ -1024,24 +752,6 @@ struct AiReviewAftermathResponse: Codable, Sendable {
     let executions: [AiReviewAftermathExecution]
     let positionCycleTransitions: [AiReviewAftermathPositionCycleTransition]
     let currentPositions: [AiReviewAftermathPosition]
-
-    init(
-        review: AiReviewAftermathReview,
-        windowStartedAt: Date,
-        asOf: Date,
-        orders: [AiReviewAftermathOrder],
-        executions: [AiReviewAftermathExecution],
-        positionCycleTransitions: [AiReviewAftermathPositionCycleTransition],
-        currentPositions: [AiReviewAftermathPosition]
-    ) {
-        self.review = review
-        self.windowStartedAt = windowStartedAt
-        self.asOf = asOf
-        self.orders = orders
-        self.executions = executions
-        self.positionCycleTransitions = positionCycleTransitions
-        self.currentPositions = currentPositions
-    }
 
     enum CodingKeys: String, CodingKey {
         case review
@@ -1080,58 +790,6 @@ struct AiReviewAftermathReview: Codable, Sendable {
     let updatedAt: Date
     let resolvedAt: Date?
 
-    init(
-        publicId: String,
-        sessionId: String,
-        sequenceId: Int,
-        userPublicId: String,
-        operatorPublicId: String,
-        walletPublicId: String,
-        instrumentPublicId: String,
-        strategyPublicId: String,
-        selectedDelegatePublicId: String,
-        respondingDelegatePublicId: String?,
-        resolutionMode: String?,
-        status: String,
-        signalEnvelope: JsonObject,
-        signalSnapshotHash: String,
-        instrumentMetadata: JsonObject,
-        deadline: Date,
-        fanoutAfter: Date,
-        decision: String?,
-        rationale: String?,
-        dispatchVersion: Int,
-        counterDecrementedAt: Date?,
-        createdAt: Date,
-        updatedAt: Date,
-        resolvedAt: Date?
-    ) {
-        self.publicId = publicId
-        self.sessionId = sessionId
-        self.sequenceId = sequenceId
-        self.userPublicId = userPublicId
-        self.operatorPublicId = operatorPublicId
-        self.walletPublicId = walletPublicId
-        self.instrumentPublicId = instrumentPublicId
-        self.strategyPublicId = strategyPublicId
-        self.selectedDelegatePublicId = selectedDelegatePublicId
-        self.respondingDelegatePublicId = respondingDelegatePublicId
-        self.resolutionMode = resolutionMode
-        self.status = status
-        self.signalEnvelope = signalEnvelope
-        self.signalSnapshotHash = signalSnapshotHash
-        self.instrumentMetadata = instrumentMetadata
-        self.deadline = deadline
-        self.fanoutAfter = fanoutAfter
-        self.decision = decision
-        self.rationale = rationale
-        self.dispatchVersion = dispatchVersion
-        self.counterDecrementedAt = counterDecrementedAt
-        self.createdAt = createdAt
-        self.updatedAt = updatedAt
-        self.resolvedAt = resolvedAt
-    }
-
     enum CodingKeys: String, CodingKey {
         case publicId = "public_id"
         case sessionId = "session_id"
@@ -1166,18 +824,6 @@ struct AiReviewDecisionResponse: Codable, Sendable {
     let message: String
     let details: JsonObject
 
-    init(
-        success: Bool,
-        errorCode: String?,
-        message: String,
-        details: JsonObject
-    ) {
-        self.success = success
-        self.errorCode = errorCode
-        self.message = message
-        self.details = details
-    }
-
     enum CodingKeys: String, CodingKey {
         case success
         case errorCode = "error_code"
@@ -1209,54 +855,6 @@ struct AlertEventInfo: Codable, Sendable {
     let dedupKey: String?
     let threadKey: String?
     let sourceTopic: String?
-
-    init(
-        type: String? = nil,
-        sequenceId: Int,
-        publicId: String,
-        timestamp: Date,
-        sessionId: String,
-        topic: String? = nil,
-        userPublicId: String,
-        operatorPublicId: String? = nil,
-        walletPublicId: String? = nil,
-        alertType: String,
-        priority: String,
-        isSafetyCritical: Bool,
-        title: String,
-        body: String,
-        payload: JsonObject? = nil,
-        titleLocKey: String? = nil,
-        titleLocArgs: [String]? = nil,
-        bodyLocKey: String? = nil,
-        bodyLocArgs: [String]? = nil,
-        dedupKey: String? = nil,
-        threadKey: String? = nil,
-        sourceTopic: String? = nil
-    ) {
-        self.type = type
-        self.sequenceId = sequenceId
-        self.publicId = publicId
-        self.timestamp = timestamp
-        self.sessionId = sessionId
-        self.topic = topic
-        self.userPublicId = userPublicId
-        self.operatorPublicId = operatorPublicId
-        self.walletPublicId = walletPublicId
-        self.alertType = alertType
-        self.priority = priority
-        self.isSafetyCritical = isSafetyCritical
-        self.title = title
-        self.body = body
-        self.payload = payload
-        self.titleLocKey = titleLocKey
-        self.titleLocArgs = titleLocArgs
-        self.bodyLocKey = bodyLocKey
-        self.bodyLocArgs = bodyLocArgs
-        self.dedupKey = dedupKey
-        self.threadKey = threadKey
-        self.sourceTopic = sourceTopic
-    }
 
     enum CodingKeys: String, CodingKey {
         case type
@@ -1293,24 +891,6 @@ struct AlertEventResponse: Codable, Sendable {
     let topic: String?
     let payload: AlertEventInfo
 
-    init(
-        type: String? = nil,
-        sequenceId: Int,
-        publicId: String,
-        timestamp: Date,
-        sessionId: String,
-        topic: String? = nil,
-        payload: AlertEventInfo
-    ) {
-        self.type = type
-        self.sequenceId = sequenceId
-        self.publicId = publicId
-        self.timestamp = timestamp
-        self.sessionId = sessionId
-        self.topic = topic
-        self.payload = payload
-    }
-
     enum CodingKeys: String, CodingKey {
         case type
         case sequenceId = "sequence_id"
@@ -1333,28 +913,6 @@ struct AlertHistoryResponse: Codable, Sendable {
     let count: Int
     let nextCursor: String?
 
-    init(
-        type: String? = nil,
-        sequenceId: Int,
-        publicId: String,
-        timestamp: Date,
-        sessionId: String,
-        topic: String? = nil,
-        payload: [AlertEventInfo],
-        count: Int,
-        nextCursor: String? = nil
-    ) {
-        self.type = type
-        self.sequenceId = sequenceId
-        self.publicId = publicId
-        self.timestamp = timestamp
-        self.sessionId = sessionId
-        self.topic = topic
-        self.payload = payload
-        self.count = count
-        self.nextCursor = nextCursor
-    }
-
     enum CodingKeys: String, CodingKey {
         case type
         case sequenceId = "sequence_id"
@@ -1371,14 +929,6 @@ struct AlertHistoryResponse: Codable, Sendable {
 struct AsyncioMetrics: Codable, Sendable {
     let activeTasks: Int
     let pendingTasks: Int
-
-    init(
-        activeTasks: Int,
-        pendingTasks: Int
-    ) {
-        self.activeTasks = activeTasks
-        self.pendingTasks = pendingTasks
-    }
 
     enum CodingKeys: String, CodingKey {
         case activeTasks = "active_tasks"
@@ -1401,38 +951,6 @@ struct AvailableProcess: Codable, Sendable {
     let role: String
     let tags: [String]?
     let parametersSchema: JsonObject?
-
-    init(
-        type: String? = nil,
-        sequenceId: Int,
-        publicId: String,
-        timestamp: Date,
-        sessionId: String,
-        topic: String? = nil,
-        name: String,
-        classPath: String,
-        method: String,
-        description: String,
-        lifecycle: String,
-        role: String,
-        tags: [String]? = nil,
-        parametersSchema: JsonObject? = nil
-    ) {
-        self.type = type
-        self.sequenceId = sequenceId
-        self.publicId = publicId
-        self.timestamp = timestamp
-        self.sessionId = sessionId
-        self.topic = topic
-        self.name = name
-        self.classPath = classPath
-        self.method = method
-        self.description = description
-        self.lifecycle = lifecycle
-        self.role = role
-        self.tags = tags
-        self.parametersSchema = parametersSchema
-    }
 
     enum CodingKeys: String, CodingKey {
         case type
@@ -1462,26 +980,6 @@ struct AvailableProcessesResponse: Codable, Sendable {
     let payload: [AvailableProcess]
     let count: Int
 
-    init(
-        type: String? = nil,
-        sequenceId: Int,
-        publicId: String,
-        timestamp: Date,
-        sessionId: String,
-        topic: String? = nil,
-        payload: [AvailableProcess],
-        count: Int
-    ) {
-        self.type = type
-        self.sequenceId = sequenceId
-        self.publicId = publicId
-        self.timestamp = timestamp
-        self.sessionId = sessionId
-        self.topic = topic
-        self.payload = payload
-        self.count = count
-    }
-
     enum CodingKeys: String, CodingKey {
         case type
         case sequenceId = "sequence_id"
@@ -1508,34 +1006,6 @@ struct BacktestComparisonData: Codable, Sendable {
     let pairingMode: String
     let anchorRunPublicId: String?
 
-    init(
-        type: String? = nil,
-        sequenceId: Int,
-        publicId: String,
-        timestamp: Date,
-        sessionId: String,
-        topic: String? = nil,
-        walletPublicId: String,
-        runAPublicId: String,
-        runBPublicId: String,
-        configHash: String? = nil,
-        pairingMode: String,
-        anchorRunPublicId: String? = nil
-    ) {
-        self.type = type
-        self.sequenceId = sequenceId
-        self.publicId = publicId
-        self.timestamp = timestamp
-        self.sessionId = sessionId
-        self.topic = topic
-        self.walletPublicId = walletPublicId
-        self.runAPublicId = runAPublicId
-        self.runBPublicId = runBPublicId
-        self.configHash = configHash
-        self.pairingMode = pairingMode
-        self.anchorRunPublicId = anchorRunPublicId
-    }
-
     enum CodingKeys: String, CodingKey {
         case type
         case sequenceId = "sequence_id"
@@ -1560,24 +1030,6 @@ struct BacktestComparisonDetailResponse: Codable, Sendable {
     let sessionId: String
     let topic: String?
     let payload: BacktestComparisonDetailResponseData
-
-    init(
-        type: String? = nil,
-        sequenceId: Int,
-        publicId: String,
-        timestamp: Date,
-        sessionId: String,
-        topic: String? = nil,
-        payload: BacktestComparisonDetailResponseData
-    ) {
-        self.type = type
-        self.sequenceId = sequenceId
-        self.publicId = publicId
-        self.timestamp = timestamp
-        self.sessionId = sessionId
-        self.topic = topic
-        self.payload = payload
-    }
 
     enum CodingKeys: String, CodingKey {
         case type
@@ -1604,36 +1056,6 @@ struct BacktestComparisonDetailResponseData: Codable, Sendable {
     let equityOverlay: [EquityOverlayPoint]
     let tradesDiff: [TradeDiffEntry]
     let signalsDiff: [SignalDiffEntry]
-
-    init(
-        type: String? = nil,
-        sequenceId: Int,
-        publicId: String,
-        timestamp: Date,
-        sessionId: String,
-        topic: String? = nil,
-        comparison: BacktestComparisonData,
-        runA: BacktestRunData,
-        runB: BacktestRunData,
-        metricsDiff: [MetricDiffRow],
-        equityOverlay: [EquityOverlayPoint],
-        tradesDiff: [TradeDiffEntry],
-        signalsDiff: [SignalDiffEntry]
-    ) {
-        self.type = type
-        self.sequenceId = sequenceId
-        self.publicId = publicId
-        self.timestamp = timestamp
-        self.sessionId = sessionId
-        self.topic = topic
-        self.comparison = comparison
-        self.runA = runA
-        self.runB = runB
-        self.metricsDiff = metricsDiff
-        self.equityOverlay = equityOverlay
-        self.tradesDiff = tradesDiff
-        self.signalsDiff = signalsDiff
-    }
 
     enum CodingKeys: String, CodingKey {
         case type
@@ -1662,26 +1084,6 @@ struct BacktestComparisonListResponse: Codable, Sendable {
     let payload: [BacktestComparisonData]
     let count: Int
 
-    init(
-        type: String? = nil,
-        sequenceId: Int,
-        publicId: String,
-        timestamp: Date,
-        sessionId: String,
-        topic: String? = nil,
-        payload: [BacktestComparisonData],
-        count: Int
-    ) {
-        self.type = type
-        self.sequenceId = sequenceId
-        self.publicId = publicId
-        self.timestamp = timestamp
-        self.sessionId = sessionId
-        self.topic = topic
-        self.payload = payload
-        self.count = count
-    }
-
     enum CodingKeys: String, CodingKey {
         case type
         case sequenceId = "sequence_id"
@@ -1703,24 +1105,6 @@ struct BacktestComparisonResponse: Codable, Sendable {
     let topic: String?
     let payload: BacktestComparisonData
 
-    init(
-        type: String? = nil,
-        sequenceId: Int,
-        publicId: String,
-        timestamp: Date,
-        sessionId: String,
-        topic: String? = nil,
-        payload: BacktestComparisonData
-    ) {
-        self.type = type
-        self.sequenceId = sequenceId
-        self.publicId = publicId
-        self.timestamp = timestamp
-        self.sessionId = sessionId
-        self.topic = topic
-        self.payload = payload
-    }
-
     enum CodingKeys: String, CodingKey {
         case type
         case sequenceId = "sequence_id"
@@ -1738,20 +1122,6 @@ struct BacktestEquityPointInline: Codable, Sendable {
     let cash: Double
     let positionValue: Double?
     let drawdown: Double?
-
-    init(
-        pointTime: Date,
-        equity: Double,
-        cash: Double,
-        positionValue: Double? = nil,
-        drawdown: Double? = nil
-    ) {
-        self.pointTime = pointTime
-        self.equity = equity
-        self.cash = cash
-        self.positionValue = positionValue
-        self.drawdown = drawdown
-    }
 
     enum CodingKeys: String, CodingKey {
         case pointTime = "point_time"
@@ -1771,26 +1141,6 @@ struct BacktestEquityPointListResponse: Codable, Sendable {
     let topic: String?
     let payload: [BacktestEquityPointInline]
     let count: Int
-
-    init(
-        type: String? = nil,
-        sequenceId: Int,
-        publicId: String,
-        timestamp: Date,
-        sessionId: String,
-        topic: String? = nil,
-        payload: [BacktestEquityPointInline],
-        count: Int
-    ) {
-        self.type = type
-        self.sequenceId = sequenceId
-        self.publicId = publicId
-        self.timestamp = timestamp
-        self.sessionId = sessionId
-        self.topic = topic
-        self.payload = payload
-        self.count = count
-    }
 
     enum CodingKeys: String, CodingKey {
         case type
@@ -1815,28 +1165,6 @@ struct BacktestEventData: Codable, Sendable {
     let eventType: String
     let detail: [String: AnyCodable]?
 
-    init(
-        type: String? = nil,
-        sequenceId: Int,
-        publicId: String,
-        timestamp: Date,
-        sessionId: String,
-        topic: String? = nil,
-        runPublicId: String,
-        eventType: String,
-        detail: [String: AnyCodable]? = nil
-    ) {
-        self.type = type
-        self.sequenceId = sequenceId
-        self.publicId = publicId
-        self.timestamp = timestamp
-        self.sessionId = sessionId
-        self.topic = topic
-        self.runPublicId = runPublicId
-        self.eventType = eventType
-        self.detail = detail
-    }
-
     enum CodingKeys: String, CodingKey {
         case type
         case sequenceId = "sequence_id"
@@ -1859,26 +1187,6 @@ struct BacktestEventListResponse: Codable, Sendable {
     let topic: String?
     let payload: [BacktestEventData]
     let count: Int
-
-    init(
-        type: String? = nil,
-        sequenceId: Int,
-        publicId: String,
-        timestamp: Date,
-        sessionId: String,
-        topic: String? = nil,
-        payload: [BacktestEventData],
-        count: Int
-    ) {
-        self.type = type
-        self.sequenceId = sequenceId
-        self.publicId = publicId
-        self.timestamp = timestamp
-        self.sessionId = sessionId
-        self.topic = topic
-        self.payload = payload
-        self.count = count
-    }
 
     enum CodingKeys: String, CodingKey {
         case type
@@ -1912,48 +1220,6 @@ struct BacktestResultInline: Codable, Sendable {
     let exposureRatio: Double?
     let turnoverRatio: Double?
     let extraMetrics: JsonObject?
-
-    init(
-        totalTrades: Int,
-        winningTrades: Int,
-        losingTrades: Int,
-        totalPnl: Double,
-        maxDrawdown: Double,
-        sharpeRatio: Double? = nil,
-        winRate: Double? = nil,
-        profitFactor: Double? = nil,
-        finalEquity: Double,
-        maxEquity: Double,
-        sortinoRatio: Double? = nil,
-        cagr: Double? = nil,
-        calmarRatio: Double? = nil,
-        expectancy: Double? = nil,
-        avgTradePnl: Double? = nil,
-        maxDrawdownDurationSeconds: Double? = nil,
-        exposureRatio: Double? = nil,
-        turnoverRatio: Double? = nil,
-        extraMetrics: JsonObject? = nil
-    ) {
-        self.totalTrades = totalTrades
-        self.winningTrades = winningTrades
-        self.losingTrades = losingTrades
-        self.totalPnl = totalPnl
-        self.maxDrawdown = maxDrawdown
-        self.sharpeRatio = sharpeRatio
-        self.winRate = winRate
-        self.profitFactor = profitFactor
-        self.finalEquity = finalEquity
-        self.maxEquity = maxEquity
-        self.sortinoRatio = sortinoRatio
-        self.cagr = cagr
-        self.calmarRatio = calmarRatio
-        self.expectancy = expectancy
-        self.avgTradePnl = avgTradePnl
-        self.maxDrawdownDurationSeconds = maxDrawdownDurationSeconds
-        self.exposureRatio = exposureRatio
-        self.turnoverRatio = turnoverRatio
-        self.extraMetrics = extraMetrics
-    }
 
     enum CodingKeys: String, CodingKey {
         case totalTrades = "total_trades"
@@ -2005,62 +1271,6 @@ struct BacktestRunData: Codable, Sendable {
     let startedAt: Date?
     let completedAt: Date?
     let error: String?
-
-    init(
-        type: String? = nil,
-        sequenceId: Int,
-        publicId: String,
-        timestamp: Date,
-        sessionId: String,
-        topic: String? = nil,
-        walletPublicId: String,
-        strategyName: String,
-        strategyParams: JsonObject? = nil,
-        instrumentPublicId: String,
-        instrument: String? = nil,
-        exchange: String,
-        timeframe: String,
-        startDate: Date,
-        endDate: Date,
-        initialCash: Double,
-        status: String,
-        executionMode: String? = nil,
-        fillModel: String? = nil,
-        slippageBps: Double? = nil,
-        commissionBps: Double? = nil,
-        configHash: String? = nil,
-        targetExecutionExchange: String? = nil,
-        startedAt: Date? = nil,
-        completedAt: Date? = nil,
-        error: String? = nil
-    ) {
-        self.type = type
-        self.sequenceId = sequenceId
-        self.publicId = publicId
-        self.timestamp = timestamp
-        self.sessionId = sessionId
-        self.topic = topic
-        self.walletPublicId = walletPublicId
-        self.strategyName = strategyName
-        self.strategyParams = strategyParams
-        self.instrumentPublicId = instrumentPublicId
-        self.instrument = instrument
-        self.exchange = exchange
-        self.timeframe = timeframe
-        self.startDate = startDate
-        self.endDate = endDate
-        self.initialCash = initialCash
-        self.status = status
-        self.executionMode = executionMode
-        self.fillModel = fillModel
-        self.slippageBps = slippageBps
-        self.commissionBps = commissionBps
-        self.configHash = configHash
-        self.targetExecutionExchange = targetExecutionExchange
-        self.startedAt = startedAt
-        self.completedAt = completedAt
-        self.error = error
-    }
 
     enum CodingKeys: String, CodingKey {
         case type
@@ -2121,64 +1331,6 @@ struct BacktestRunDetailData: Codable, Sendable {
     let error: String?
     let result: BacktestResultInline?
 
-    init(
-        type: String? = nil,
-        sequenceId: Int,
-        publicId: String,
-        timestamp: Date,
-        sessionId: String,
-        topic: String? = nil,
-        walletPublicId: String,
-        strategyName: String,
-        strategyParams: JsonObject? = nil,
-        instrumentPublicId: String,
-        instrument: String? = nil,
-        exchange: String,
-        timeframe: String,
-        startDate: Date,
-        endDate: Date,
-        initialCash: Double,
-        status: String,
-        executionMode: String? = nil,
-        fillModel: String? = nil,
-        slippageBps: Double? = nil,
-        commissionBps: Double? = nil,
-        configHash: String? = nil,
-        targetExecutionExchange: String? = nil,
-        startedAt: Date? = nil,
-        completedAt: Date? = nil,
-        error: String? = nil,
-        result: BacktestResultInline? = nil
-    ) {
-        self.type = type
-        self.sequenceId = sequenceId
-        self.publicId = publicId
-        self.timestamp = timestamp
-        self.sessionId = sessionId
-        self.topic = topic
-        self.walletPublicId = walletPublicId
-        self.strategyName = strategyName
-        self.strategyParams = strategyParams
-        self.instrumentPublicId = instrumentPublicId
-        self.instrument = instrument
-        self.exchange = exchange
-        self.timeframe = timeframe
-        self.startDate = startDate
-        self.endDate = endDate
-        self.initialCash = initialCash
-        self.status = status
-        self.executionMode = executionMode
-        self.fillModel = fillModel
-        self.slippageBps = slippageBps
-        self.commissionBps = commissionBps
-        self.configHash = configHash
-        self.targetExecutionExchange = targetExecutionExchange
-        self.startedAt = startedAt
-        self.completedAt = completedAt
-        self.error = error
-        self.result = result
-    }
-
     enum CodingKeys: String, CodingKey {
         case type
         case sequenceId = "sequence_id"
@@ -2219,24 +1371,6 @@ struct BacktestRunDetailResponse: Codable, Sendable {
     let topic: String?
     let payload: BacktestRunDetailData
 
-    init(
-        type: String? = nil,
-        sequenceId: Int,
-        publicId: String,
-        timestamp: Date,
-        sessionId: String,
-        topic: String? = nil,
-        payload: BacktestRunDetailData
-    ) {
-        self.type = type
-        self.sequenceId = sequenceId
-        self.publicId = publicId
-        self.timestamp = timestamp
-        self.sessionId = sessionId
-        self.topic = topic
-        self.payload = payload
-    }
-
     enum CodingKeys: String, CodingKey {
         case type
         case sequenceId = "sequence_id"
@@ -2258,26 +1392,6 @@ struct BacktestRunListResponse: Codable, Sendable {
     let payload: [BacktestRunData]
     let count: Int
 
-    init(
-        type: String? = nil,
-        sequenceId: Int,
-        publicId: String,
-        timestamp: Date,
-        sessionId: String,
-        topic: String? = nil,
-        payload: [BacktestRunData],
-        count: Int
-    ) {
-        self.type = type
-        self.sequenceId = sequenceId
-        self.publicId = publicId
-        self.timestamp = timestamp
-        self.sessionId = sessionId
-        self.topic = topic
-        self.payload = payload
-        self.count = count
-    }
-
     enum CodingKeys: String, CodingKey {
         case type
         case sequenceId = "sequence_id"
@@ -2298,24 +1412,6 @@ struct BacktestRunResponse: Codable, Sendable {
     let sessionId: String
     let topic: String?
     let payload: BacktestRunData
-
-    init(
-        type: String? = nil,
-        sequenceId: Int,
-        publicId: String,
-        timestamp: Date,
-        sessionId: String,
-        topic: String? = nil,
-        payload: BacktestRunData
-    ) {
-        self.type = type
-        self.sequenceId = sequenceId
-        self.publicId = publicId
-        self.timestamp = timestamp
-        self.sessionId = sessionId
-        self.topic = topic
-        self.payload = payload
-    }
 
     enum CodingKeys: String, CodingKey {
         case type
@@ -2341,34 +1437,6 @@ struct BacktestSignalData: Codable, Sendable {
     let instrument: String
     let price: Double
     let indicators: [String: AnyCodable]?
-
-    init(
-        type: String? = nil,
-        sequenceId: Int,
-        publicId: String,
-        timestamp: Date,
-        sessionId: String,
-        topic: String? = nil,
-        runPublicId: String,
-        signalTime: Date,
-        signalType: String,
-        instrument: String,
-        price: Double,
-        indicators: [String: AnyCodable]? = nil
-    ) {
-        self.type = type
-        self.sequenceId = sequenceId
-        self.publicId = publicId
-        self.timestamp = timestamp
-        self.sessionId = sessionId
-        self.topic = topic
-        self.runPublicId = runPublicId
-        self.signalTime = signalTime
-        self.signalType = signalType
-        self.instrument = instrument
-        self.price = price
-        self.indicators = indicators
-    }
 
     enum CodingKeys: String, CodingKey {
         case type
@@ -2396,26 +1464,6 @@ struct BacktestSignalListResponse: Codable, Sendable {
     let payload: [BacktestSignalData]
     let count: Int
 
-    init(
-        type: String? = nil,
-        sequenceId: Int,
-        publicId: String,
-        timestamp: Date,
-        sessionId: String,
-        topic: String? = nil,
-        payload: [BacktestSignalData],
-        count: Int
-    ) {
-        self.type = type
-        self.sequenceId = sequenceId
-        self.publicId = publicId
-        self.timestamp = timestamp
-        self.sessionId = sessionId
-        self.topic = topic
-        self.payload = payload
-        self.count = count
-    }
-
     enum CodingKeys: String, CodingKey {
         case type
         case sequenceId = "sequence_id"
@@ -2437,26 +1485,6 @@ struct BacktestStrategyClassListResponse: Codable, Sendable {
     let topic: String?
     let payload: [String]
     let count: Int
-
-    init(
-        type: String? = nil,
-        sequenceId: Int,
-        publicId: String,
-        timestamp: Date,
-        sessionId: String,
-        topic: String? = nil,
-        payload: [String],
-        count: Int
-    ) {
-        self.type = type
-        self.sequenceId = sequenceId
-        self.publicId = publicId
-        self.timestamp = timestamp
-        self.sessionId = sessionId
-        self.topic = topic
-        self.payload = payload
-        self.count = count
-    }
 
     enum CodingKeys: String, CodingKey {
         case type
@@ -2488,42 +1516,6 @@ struct BacktestTradeData: Codable, Sendable {
     let positionAfter: Double?
     let signalPublicId: String?
 
-    init(
-        type: String? = nil,
-        sequenceId: Int,
-        publicId: String,
-        timestamp: Date,
-        sessionId: String,
-        topic: String? = nil,
-        runPublicId: String,
-        executedAt: Date,
-        instrument: String,
-        side: String,
-        quantity: Double,
-        price: Double,
-        fee: Double,
-        pnl: Double? = nil,
-        positionAfter: Double? = nil,
-        signalPublicId: String? = nil
-    ) {
-        self.type = type
-        self.sequenceId = sequenceId
-        self.publicId = publicId
-        self.timestamp = timestamp
-        self.sessionId = sessionId
-        self.topic = topic
-        self.runPublicId = runPublicId
-        self.executedAt = executedAt
-        self.instrument = instrument
-        self.side = side
-        self.quantity = quantity
-        self.price = price
-        self.fee = fee
-        self.pnl = pnl
-        self.positionAfter = positionAfter
-        self.signalPublicId = signalPublicId
-    }
-
     enum CodingKeys: String, CodingKey {
         case type
         case sequenceId = "sequence_id"
@@ -2554,26 +1546,6 @@ struct BacktestTradeListResponse: Codable, Sendable {
     let payload: [BacktestTradeData]
     let count: Int
 
-    init(
-        type: String? = nil,
-        sequenceId: Int,
-        publicId: String,
-        timestamp: Date,
-        sessionId: String,
-        topic: String? = nil,
-        payload: [BacktestTradeData],
-        count: Int
-    ) {
-        self.type = type
-        self.sequenceId = sequenceId
-        self.publicId = publicId
-        self.timestamp = timestamp
-        self.sessionId = sessionId
-        self.topic = topic
-        self.payload = payload
-        self.count = count
-    }
-
     enum CodingKeys: String, CodingKey {
         case type
         case sequenceId = "sequence_id"
@@ -2591,16 +1563,6 @@ struct CacheHealthPayload: Codable, Sendable {
     let pairsCached: Int
     let persistUniverseSize: Int
 
-    init(
-        instrumentsCached: Int,
-        pairsCached: Int,
-        persistUniverseSize: Int
-    ) {
-        self.instrumentsCached = instrumentsCached
-        self.pairsCached = pairsCached
-        self.persistUniverseSize = persistUniverseSize
-    }
-
     enum CodingKeys: String, CodingKey {
         case instrumentsCached = "instruments_cached"
         case pairsCached = "pairs_cached"
@@ -2616,24 +1578,6 @@ struct CacheHealthResponse: Codable, Sendable {
     let sessionId: String
     let topic: String?
     let payload: CacheHealthPayload
-
-    init(
-        type: String? = nil,
-        sequenceId: Int,
-        publicId: String,
-        timestamp: Date,
-        sessionId: String,
-        topic: String? = nil,
-        payload: CacheHealthPayload
-    ) {
-        self.type = type
-        self.sequenceId = sequenceId
-        self.publicId = publicId
-        self.timestamp = timestamp
-        self.sessionId = sessionId
-        self.topic = topic
-        self.payload = payload
-    }
 
     enum CodingKeys: String, CodingKey {
         case type
@@ -2655,24 +1599,6 @@ struct CachedCandle: Codable, Sendable {
     let close: Double
     let volume: Double
 
-    init(
-        openAtMs: Int,
-        timeframe: String,
-        open: Double,
-        high: Double,
-        low: Double,
-        close: Double,
-        volume: Double
-    ) {
-        self.openAtMs = openAtMs
-        self.timeframe = timeframe
-        self.open = open
-        self.high = high
-        self.low = low
-        self.close = close
-        self.volume = volume
-    }
-
     enum CodingKeys: String, CodingKey {
         case openAtMs = "open_at_ms"
         case timeframe
@@ -2690,18 +1616,6 @@ struct CachedCandlesPayload: Codable, Sendable {
     let isWarm: Bool
     let source: String
 
-    init(
-        candles: [CachedCandle],
-        sampleCount: Int,
-        isWarm: Bool,
-        source: String
-    ) {
-        self.candles = candles
-        self.sampleCount = sampleCount
-        self.isWarm = isWarm
-        self.source = source
-    }
-
     enum CodingKeys: String, CodingKey {
         case candles
         case sampleCount = "sample_count"
@@ -2718,24 +1632,6 @@ struct CachedCandlesResponse: Codable, Sendable {
     let sessionId: String
     let topic: String?
     let payload: CachedCandlesPayload
-
-    init(
-        type: String? = nil,
-        sequenceId: Int,
-        publicId: String,
-        timestamp: Date,
-        sessionId: String,
-        topic: String? = nil,
-        payload: CachedCandlesPayload
-    ) {
-        self.type = type
-        self.sequenceId = sequenceId
-        self.publicId = publicId
-        self.timestamp = timestamp
-        self.sessionId = sessionId
-        self.topic = topic
-        self.payload = payload
-    }
 
     enum CodingKeys: String, CodingKey {
         case type
@@ -2760,30 +1656,6 @@ struct CachedStatsPayload: Codable, Sendable {
     let sampleCount: Int
     let isWarm: Bool
 
-    init(
-        left: String,
-        right: String,
-        pearsonR: Double?,
-        pearsonN: Int,
-        cointT: Double?,
-        cointPvalue: Double?,
-        cointCriticalValues: [AnyCodable]?,
-        computedAt: Date?,
-        sampleCount: Int,
-        isWarm: Bool
-    ) {
-        self.left = left
-        self.right = right
-        self.pearsonR = pearsonR
-        self.pearsonN = pearsonN
-        self.cointT = cointT
-        self.cointPvalue = cointPvalue
-        self.cointCriticalValues = cointCriticalValues
-        self.computedAt = computedAt
-        self.sampleCount = sampleCount
-        self.isWarm = isWarm
-    }
-
     enum CodingKeys: String, CodingKey {
         case left
         case right
@@ -2806,24 +1678,6 @@ struct CachedStatsResponse: Codable, Sendable {
     let sessionId: String
     let topic: String?
     let payload: CachedStatsPayload
-
-    init(
-        type: String? = nil,
-        sequenceId: Int,
-        publicId: String,
-        timestamp: Date,
-        sessionId: String,
-        topic: String? = nil,
-        payload: CachedStatsPayload
-    ) {
-        self.type = type
-        self.sequenceId = sequenceId
-        self.publicId = publicId
-        self.timestamp = timestamp
-        self.sessionId = sessionId
-        self.topic = topic
-        self.payload = payload
-    }
 
     enum CodingKeys: String, CodingKey {
         case type
@@ -2859,52 +1713,6 @@ struct CandleData: Codable, Sendable {
     let replayWindowStart: Date?
     let replayWindowEnd: Date?
 
-    init(
-        type: String? = nil,
-        sequenceId: Int,
-        publicId: String,
-        timestamp: Date,
-        sessionId: String,
-        topic: String? = nil,
-        instrument: String,
-        exchange: String,
-        timeframe: String,
-        openAt: Date,
-        open: Double,
-        high: Double,
-        low: Double,
-        close: Double,
-        volume: Double,
-        vwap: Double? = nil,
-        trades: Int? = nil,
-        complete: Bool? = nil,
-        origin: String? = nil,
-        replayWindowStart: Date? = nil,
-        replayWindowEnd: Date? = nil
-    ) {
-        self.type = type
-        self.sequenceId = sequenceId
-        self.publicId = publicId
-        self.timestamp = timestamp
-        self.sessionId = sessionId
-        self.topic = topic
-        self.instrument = instrument
-        self.exchange = exchange
-        self.timeframe = timeframe
-        self.openAt = openAt
-        self.open = open
-        self.high = high
-        self.low = low
-        self.close = close
-        self.volume = volume
-        self.vwap = vwap
-        self.trades = trades
-        self.complete = complete
-        self.origin = origin
-        self.replayWindowStart = replayWindowStart
-        self.replayWindowEnd = replayWindowEnd
-    }
-
     enum CodingKeys: String, CodingKey {
         case type
         case sequenceId = "sequence_id"
@@ -2939,26 +1747,6 @@ struct CandleListResponse: Codable, Sendable {
     let topic: String?
     let payload: [CandleData]
     let count: Int
-
-    init(
-        type: String? = nil,
-        sequenceId: Int,
-        publicId: String,
-        timestamp: Date,
-        sessionId: String,
-        topic: String? = nil,
-        payload: [CandleData],
-        count: Int
-    ) {
-        self.type = type
-        self.sequenceId = sequenceId
-        self.publicId = publicId
-        self.timestamp = timestamp
-        self.sessionId = sessionId
-        self.topic = topic
-        self.payload = payload
-        self.count = count
-    }
 
     enum CodingKeys: String, CodingKey {
         case type
@@ -3001,64 +1789,6 @@ struct ConfiguredProcess: Codable, Sendable {
     let coordinatorLabel: String?
     let managedRemotely: Bool?
 
-    init(
-        type: String? = nil,
-        sequenceId: Int,
-        publicId: String,
-        timestamp: Date,
-        sessionId: String,
-        topic: String? = nil,
-        name: String,
-        enabled: Bool,
-        running: Bool,
-        mode: String,
-        classPath: String,
-        method: String,
-        parameters: JsonObject? = nil,
-        note: String? = nil,
-        lifecycle: String,
-        role: String,
-        tags: [String]? = nil,
-        parametersSchema: JsonObject? = nil,
-        isOneShot: Bool,
-        activePublicId: String? = nil,
-        kind: String,
-        walletPublicId: String? = nil,
-        parentTemplate: String? = nil,
-        template: String? = nil,
-        coordinator: String? = nil,
-        coordinatorLabel: String? = nil,
-        managedRemotely: Bool? = nil
-    ) {
-        self.type = type
-        self.sequenceId = sequenceId
-        self.publicId = publicId
-        self.timestamp = timestamp
-        self.sessionId = sessionId
-        self.topic = topic
-        self.name = name
-        self.enabled = enabled
-        self.running = running
-        self.mode = mode
-        self.classPath = classPath
-        self.method = method
-        self.parameters = parameters
-        self.note = note
-        self.lifecycle = lifecycle
-        self.role = role
-        self.tags = tags
-        self.parametersSchema = parametersSchema
-        self.isOneShot = isOneShot
-        self.activePublicId = activePublicId
-        self.kind = kind
-        self.walletPublicId = walletPublicId
-        self.parentTemplate = parentTemplate
-        self.template = template
-        self.coordinator = coordinator
-        self.coordinatorLabel = coordinatorLabel
-        self.managedRemotely = managedRemotely
-    }
-
     enum CodingKeys: String, CodingKey {
         case type
         case sequenceId = "sequence_id"
@@ -3100,26 +1830,6 @@ struct ConfiguredProcessesResponse: Codable, Sendable {
     let payload: [ConfiguredProcess]
     let count: Int
 
-    init(
-        type: String? = nil,
-        sequenceId: Int,
-        publicId: String,
-        timestamp: Date,
-        sessionId: String,
-        topic: String? = nil,
-        payload: [ConfiguredProcess],
-        count: Int
-    ) {
-        self.type = type
-        self.sequenceId = sequenceId
-        self.publicId = publicId
-        self.timestamp = timestamp
-        self.sessionId = sessionId
-        self.topic = topic
-        self.payload = payload
-        self.count = count
-    }
-
     enum CodingKeys: String, CodingKey {
         case type
         case sequenceId = "sequence_id"
@@ -3138,20 +1848,6 @@ struct ConnectionStats: Codable, Sendable {
     let subscriberTasks: Int?
     let activeTopics: Int?
     let activeClients: Int?
-
-    init(
-        activeConnections: Int? = nil,
-        zmqSubscribers: Int? = nil,
-        subscriberTasks: Int? = nil,
-        activeTopics: Int? = nil,
-        activeClients: Int? = nil
-    ) {
-        self.activeConnections = activeConnections
-        self.zmqSubscribers = zmqSubscribers
-        self.subscriberTasks = subscriberTasks
-        self.activeTopics = activeTopics
-        self.activeClients = activeClients
-    }
 
     enum CodingKeys: String, CodingKey {
         case activeConnections = "active_connections"
@@ -3180,44 +1876,6 @@ struct ContinuousCandleData: Codable, Sendable {
     let trades: Int?
     let sourceContract: String
     let adjustmentFactor: Double?
-
-    init(
-        type: String? = nil,
-        sequenceId: Int,
-        publicId: String,
-        timestamp: Date,
-        sessionId: String,
-        topic: String? = nil,
-        openAt: Date,
-        timeframe: String,
-        open: Double,
-        high: Double,
-        low: Double,
-        close: Double,
-        volume: Double,
-        vwap: Double?,
-        trades: Int?,
-        sourceContract: String,
-        adjustmentFactor: Double?
-    ) {
-        self.type = type
-        self.sequenceId = sequenceId
-        self.publicId = publicId
-        self.timestamp = timestamp
-        self.sessionId = sessionId
-        self.topic = topic
-        self.openAt = openAt
-        self.timeframe = timeframe
-        self.open = open
-        self.high = high
-        self.low = low
-        self.close = close
-        self.volume = volume
-        self.vwap = vwap
-        self.trades = trades
-        self.sourceContract = sourceContract
-        self.adjustmentFactor = adjustmentFactor
-    }
 
     enum CodingKeys: String, CodingKey {
         case type
@@ -3250,26 +1908,6 @@ struct ContinuousCandleListResponse: Codable, Sendable {
     let payload: [ContinuousCandleData]
     let count: Int
 
-    init(
-        type: String? = nil,
-        sequenceId: Int,
-        publicId: String,
-        timestamp: Date,
-        sessionId: String,
-        topic: String? = nil,
-        payload: [ContinuousCandleData],
-        count: Int
-    ) {
-        self.type = type
-        self.sequenceId = sequenceId
-        self.publicId = publicId
-        self.timestamp = timestamp
-        self.sessionId = sessionId
-        self.topic = topic
-        self.payload = payload
-        self.count = count
-    }
-
     enum CodingKeys: String, CodingKey {
         case type
         case sequenceId = "sequence_id"
@@ -3293,30 +1931,6 @@ struct ContinuousSeriesPartialResponse: Codable, Sendable {
     let count: Int
     let failedRoll: RollPointDetail
     let message: String
-
-    init(
-        type: String? = nil,
-        sequenceId: Int,
-        publicId: String,
-        timestamp: Date,
-        sessionId: String,
-        topic: String? = nil,
-        payload: [ContinuousCandleData],
-        count: Int,
-        failedRoll: RollPointDetail,
-        message: String
-    ) {
-        self.type = type
-        self.sequenceId = sequenceId
-        self.publicId = publicId
-        self.timestamp = timestamp
-        self.sessionId = sessionId
-        self.topic = topic
-        self.payload = payload
-        self.count = count
-        self.failedRoll = failedRoll
-        self.message = message
-    }
 
     enum CodingKeys: String, CodingKey {
         case type
@@ -3348,38 +1962,6 @@ struct ContractData: Codable, Sendable {
     let contractFamily: String?
     let isFrontMonth: Bool
 
-    init(
-        type: String? = nil,
-        sequenceId: Int,
-        publicId: String,
-        timestamp: Date,
-        sessionId: String,
-        topic: String? = nil,
-        instrumentPublicId: String,
-        nativeSymbol: String,
-        exchange: String,
-        expiryAt: Date?,
-        instrumentKind: String?,
-        relationshipType: String,
-        contractFamily: String?,
-        isFrontMonth: Bool
-    ) {
-        self.type = type
-        self.sequenceId = sequenceId
-        self.publicId = publicId
-        self.timestamp = timestamp
-        self.sessionId = sessionId
-        self.topic = topic
-        self.instrumentPublicId = instrumentPublicId
-        self.nativeSymbol = nativeSymbol
-        self.exchange = exchange
-        self.expiryAt = expiryAt
-        self.instrumentKind = instrumentKind
-        self.relationshipType = relationshipType
-        self.contractFamily = contractFamily
-        self.isFrontMonth = isFrontMonth
-    }
-
     enum CodingKeys: String, CodingKey {
         case type
         case sequenceId = "sequence_id"
@@ -3408,26 +1990,6 @@ struct ContractListResponse: Codable, Sendable {
     let payload: [ContractData]
     let count: Int
 
-    init(
-        type: String? = nil,
-        sequenceId: Int,
-        publicId: String,
-        timestamp: Date,
-        sessionId: String,
-        topic: String? = nil,
-        payload: [ContractData],
-        count: Int
-    ) {
-        self.type = type
-        self.sequenceId = sequenceId
-        self.publicId = publicId
-        self.timestamp = timestamp
-        self.sessionId = sessionId
-        self.topic = topic
-        self.payload = payload
-        self.count = count
-    }
-
     enum CodingKeys: String, CodingKey {
         case type
         case sequenceId = "sequence_id"
@@ -3447,20 +2009,6 @@ struct CpuMetrics: Codable, Sendable {
     let cgroupQuotaMicroseconds: Int?
     let cgroupThrottledCount: Int?
 
-    init(
-        processPercent: Double,
-        userTimeSeconds: Double,
-        systemTimeSeconds: Double,
-        cgroupQuotaMicroseconds: Int?,
-        cgroupThrottledCount: Int?
-    ) {
-        self.processPercent = processPercent
-        self.userTimeSeconds = userTimeSeconds
-        self.systemTimeSeconds = systemTimeSeconds
-        self.cgroupQuotaMicroseconds = cgroupQuotaMicroseconds
-        self.cgroupThrottledCount = cgroupThrottledCount
-    }
-
     enum CodingKeys: String, CodingKey {
         case processPercent = "process_percent"
         case userTimeSeconds = "user_time_seconds"
@@ -3479,26 +2027,6 @@ struct CredentialListResponse: Codable, Sendable {
     let topic: String?
     let payload: [CredentialSummary]
     let count: Int
-
-    init(
-        type: String? = nil,
-        sequenceId: Int,
-        publicId: String,
-        timestamp: Date,
-        sessionId: String,
-        topic: String? = nil,
-        payload: [CredentialSummary],
-        count: Int
-    ) {
-        self.type = type
-        self.sequenceId = sequenceId
-        self.publicId = publicId
-        self.timestamp = timestamp
-        self.sessionId = sessionId
-        self.topic = topic
-        self.payload = payload
-        self.count = count
-    }
 
     enum CodingKeys: String, CodingKey {
         case type
@@ -3524,30 +2052,6 @@ struct CredentialReconciliationMethodInfo: Codable, Sendable {
     let mode: String
     let method: RealPortfolioReconciliationMethod
 
-    init(
-        type: String? = nil,
-        sequenceId: Int,
-        publicId: String,
-        timestamp: Date,
-        sessionId: String,
-        topic: String? = nil,
-        walletPublicId: String,
-        exchange: String,
-        mode: String,
-        method: RealPortfolioReconciliationMethod
-    ) {
-        self.type = type
-        self.sequenceId = sequenceId
-        self.publicId = publicId
-        self.timestamp = timestamp
-        self.sessionId = sessionId
-        self.topic = topic
-        self.walletPublicId = walletPublicId
-        self.exchange = exchange
-        self.mode = mode
-        self.method = method
-    }
-
     enum CodingKeys: String, CodingKey {
         case type
         case sequenceId = "sequence_id"
@@ -3571,24 +2075,6 @@ struct CredentialReconciliationMethodResponse: Codable, Sendable {
     let topic: String?
     let payload: CredentialReconciliationMethodInfo
 
-    init(
-        type: String? = nil,
-        sequenceId: Int,
-        publicId: String,
-        timestamp: Date,
-        sessionId: String,
-        topic: String? = nil,
-        payload: CredentialReconciliationMethodInfo
-    ) {
-        self.type = type
-        self.sequenceId = sequenceId
-        self.publicId = publicId
-        self.timestamp = timestamp
-        self.sessionId = sessionId
-        self.topic = topic
-        self.payload = payload
-    }
-
     enum CodingKeys: String, CodingKey {
         case type
         case sequenceId = "sequence_id"
@@ -3608,24 +2094,6 @@ struct CredentialResponse: Codable, Sendable {
     let sessionId: String
     let topic: String?
     let payload: CredentialSummary
-
-    init(
-        type: String? = nil,
-        sequenceId: Int,
-        publicId: String,
-        timestamp: Date,
-        sessionId: String,
-        topic: String? = nil,
-        payload: CredentialSummary
-    ) {
-        self.type = type
-        self.sequenceId = sequenceId
-        self.publicId = publicId
-        self.timestamp = timestamp
-        self.sessionId = sessionId
-        self.topic = topic
-        self.payload = payload
-    }
 
     enum CodingKeys: String, CodingKey {
         case type
@@ -3650,30 +2118,6 @@ struct CredentialSummary: Codable, Sendable {
     let credentialType: String
     let label: String?
 
-    init(
-        type: String? = nil,
-        sequenceId: Int,
-        publicId: String,
-        timestamp: Date,
-        sessionId: String,
-        topic: String? = nil,
-        walletPublicId: String,
-        exchange: String,
-        credentialType: String,
-        label: String? = nil
-    ) {
-        self.type = type
-        self.sequenceId = sequenceId
-        self.publicId = publicId
-        self.timestamp = timestamp
-        self.sessionId = sessionId
-        self.topic = topic
-        self.walletPublicId = walletPublicId
-        self.exchange = exchange
-        self.credentialType = credentialType
-        self.label = label
-    }
-
     enum CodingKeys: String, CodingKey {
         case type
         case sequenceId = "sequence_id"
@@ -3693,16 +2137,6 @@ struct DbInternalMetrics: Codable, Sendable {
     let poolSize: Int?
     let poolCheckedOut: Int?
 
-    init(
-        aiosqliteLiveConnections: Int,
-        poolSize: Int?,
-        poolCheckedOut: Int?
-    ) {
-        self.aiosqliteLiveConnections = aiosqliteLiveConnections
-        self.poolSize = poolSize
-        self.poolCheckedOut = poolCheckedOut
-    }
-
     enum CodingKeys: String, CodingKey {
         case aiosqliteLiveConnections = "aiosqlite_live_connections"
         case poolSize = "pool_size"
@@ -3721,30 +2155,6 @@ struct DbStatsData: Codable, Sendable {
     let snapshotCompletedAt: Date
     let intervalSeconds: Int
     let tables: [TableStatsItem]
-
-    init(
-        type: String? = nil,
-        sequenceId: Int,
-        publicId: String,
-        timestamp: Date,
-        sessionId: String,
-        topic: String? = nil,
-        snapshotStartedAt: Date,
-        snapshotCompletedAt: Date,
-        intervalSeconds: Int,
-        tables: [TableStatsItem]
-    ) {
-        self.type = type
-        self.sequenceId = sequenceId
-        self.publicId = publicId
-        self.timestamp = timestamp
-        self.sessionId = sessionId
-        self.topic = topic
-        self.snapshotStartedAt = snapshotStartedAt
-        self.snapshotCompletedAt = snapshotCompletedAt
-        self.intervalSeconds = intervalSeconds
-        self.tables = tables
-    }
 
     enum CodingKeys: String, CodingKey {
         case type
@@ -3769,24 +2179,6 @@ struct DbStatsResponse: Codable, Sendable {
     let topic: String?
     let payload: DbStatsData
 
-    init(
-        type: String? = nil,
-        sequenceId: Int,
-        publicId: String,
-        timestamp: Date,
-        sessionId: String,
-        topic: String? = nil,
-        payload: DbStatsData
-    ) {
-        self.type = type
-        self.sequenceId = sequenceId
-        self.publicId = publicId
-        self.timestamp = timestamp
-        self.sessionId = sessionId
-        self.topic = topic
-        self.payload = payload
-    }
-
     enum CodingKeys: String, CodingKey {
         case type
         case sequenceId = "sequence_id"
@@ -3804,18 +2196,6 @@ struct DelegateCapsBody: Codable, Sendable {
     let maxDailyNotionalUsd: Double?
     let maxCancelsPerMinute: Int?
 
-    init(
-        maxOrderQuantityPerInstrument: JsonObject? = nil,
-        maxOpenOrders: Int? = nil,
-        maxDailyNotionalUsd: Double? = nil,
-        maxCancelsPerMinute: Int? = nil
-    ) {
-        self.maxOrderQuantityPerInstrument = maxOrderQuantityPerInstrument
-        self.maxOpenOrders = maxOpenOrders
-        self.maxDailyNotionalUsd = maxDailyNotionalUsd
-        self.maxCancelsPerMinute = maxCancelsPerMinute
-    }
-
     enum CodingKeys: String, CodingKey {
         case maxOrderQuantityPerInstrument = "max_order_quantity_per_instrument"
         case maxOpenOrders = "max_open_orders"
@@ -3828,16 +2208,6 @@ struct DelegateCreatedPayload: Codable, Sendable {
     let delegate: DelegateRead
     let accessToken: String
     let expiresIn: Int
-
-    init(
-        delegate: DelegateRead,
-        accessToken: String,
-        expiresIn: Int
-    ) {
-        self.delegate = delegate
-        self.accessToken = accessToken
-        self.expiresIn = expiresIn
-    }
 
     enum CodingKeys: String, CodingKey {
         case delegate
@@ -3854,24 +2224,6 @@ struct DelegateCreatedResponse: Codable, Sendable {
     let sessionId: String
     let topic: String?
     let payload: DelegateCreatedPayload
-
-    init(
-        type: String? = nil,
-        sequenceId: Int,
-        publicId: String,
-        timestamp: Date,
-        sessionId: String,
-        topic: String? = nil,
-        payload: DelegateCreatedPayload
-    ) {
-        self.type = type
-        self.sequenceId = sequenceId
-        self.publicId = publicId
-        self.timestamp = timestamp
-        self.sessionId = sessionId
-        self.topic = topic
-        self.payload = payload
-    }
 
     enum CodingKeys: String, CodingKey {
         case type
@@ -3894,26 +2246,6 @@ struct DelegateListResponse: Codable, Sendable {
     let payload: [DelegateRead]
     let count: Int
 
-    init(
-        type: String? = nil,
-        sequenceId: Int,
-        publicId: String,
-        timestamp: Date,
-        sessionId: String,
-        topic: String? = nil,
-        payload: [DelegateRead],
-        count: Int
-    ) {
-        self.type = type
-        self.sequenceId = sequenceId
-        self.publicId = publicId
-        self.timestamp = timestamp
-        self.sessionId = sessionId
-        self.topic = topic
-        self.payload = payload
-        self.count = count
-    }
-
     enum CodingKeys: String, CodingKey {
         case type
         case sequenceId = "sequence_id"
@@ -3935,24 +2267,6 @@ struct DelegateRead: Codable, Sendable {
     let isActive: Bool
     let caps: DelegateCapsBody
 
-    init(
-        publicId: String,
-        username: String,
-        label: String,
-        createdByUserPublicId: String,
-        createdAt: Date,
-        isActive: Bool,
-        caps: DelegateCapsBody
-    ) {
-        self.publicId = publicId
-        self.username = username
-        self.label = label
-        self.createdByUserPublicId = createdByUserPublicId
-        self.createdAt = createdAt
-        self.isActive = isActive
-        self.caps = caps
-    }
-
     enum CodingKeys: String, CodingKey {
         case publicId = "public_id"
         case username
@@ -3972,24 +2286,6 @@ struct DelegateResponse: Codable, Sendable {
     let sessionId: String
     let topic: String?
     let payload: DelegateRead
-
-    init(
-        type: String? = nil,
-        sequenceId: Int,
-        publicId: String,
-        timestamp: Date,
-        sessionId: String,
-        topic: String? = nil,
-        payload: DelegateRead
-    ) {
-        self.type = type
-        self.sequenceId = sequenceId
-        self.publicId = publicId
-        self.timestamp = timestamp
-        self.sessionId = sessionId
-        self.topic = topic
-        self.payload = payload
-    }
 
     enum CodingKeys: String, CodingKey {
         case type
@@ -4019,42 +2315,6 @@ struct DeviceAlertPrefInfo: Codable, Sendable {
     let quietHoursEndMin: Int?
     let muteUntil: Date?
     let timezone: String
-
-    init(
-        type: String? = nil,
-        sequenceId: Int,
-        publicId: String,
-        timestamp: Date,
-        sessionId: String,
-        topic: String? = nil,
-        devicePublicId: String,
-        alertType: String,
-        operatorPublicId: String? = nil,
-        walletPublicId: String? = nil,
-        enabled: Bool,
-        minPriority: String,
-        quietHoursStartMin: Int? = nil,
-        quietHoursEndMin: Int? = nil,
-        muteUntil: Date? = nil,
-        timezone: String
-    ) {
-        self.type = type
-        self.sequenceId = sequenceId
-        self.publicId = publicId
-        self.timestamp = timestamp
-        self.sessionId = sessionId
-        self.topic = topic
-        self.devicePublicId = devicePublicId
-        self.alertType = alertType
-        self.operatorPublicId = operatorPublicId
-        self.walletPublicId = walletPublicId
-        self.enabled = enabled
-        self.minPriority = minPriority
-        self.quietHoursStartMin = quietHoursStartMin
-        self.quietHoursEndMin = quietHoursEndMin
-        self.muteUntil = muteUntil
-        self.timezone = timezone
-    }
 
     enum CodingKeys: String, CodingKey {
         case type
@@ -4086,26 +2346,6 @@ struct DeviceAlertPrefListResponse: Codable, Sendable {
     let payload: [DeviceAlertPrefInfo]
     let count: Int
 
-    init(
-        type: String? = nil,
-        sequenceId: Int,
-        publicId: String,
-        timestamp: Date,
-        sessionId: String,
-        topic: String? = nil,
-        payload: [DeviceAlertPrefInfo],
-        count: Int
-    ) {
-        self.type = type
-        self.sequenceId = sequenceId
-        self.publicId = publicId
-        self.timestamp = timestamp
-        self.sessionId = sessionId
-        self.topic = topic
-        self.payload = payload
-        self.count = count
-    }
-
     enum CodingKeys: String, CodingKey {
         case type
         case sequenceId = "sequence_id"
@@ -4126,24 +2366,6 @@ struct DeviceAlertPrefResponse: Codable, Sendable {
     let sessionId: String
     let topic: String?
     let payload: DeviceAlertPrefInfo
-
-    init(
-        type: String? = nil,
-        sequenceId: Int,
-        publicId: String,
-        timestamp: Date,
-        sessionId: String,
-        topic: String? = nil,
-        payload: DeviceAlertPrefInfo
-    ) {
-        self.type = type
-        self.sequenceId = sequenceId
-        self.publicId = publicId
-        self.timestamp = timestamp
-        self.sessionId = sessionId
-        self.topic = topic
-        self.payload = payload
-    }
 
     enum CodingKeys: String, CodingKey {
         case type
@@ -4166,26 +2388,6 @@ struct DiskMetrics: Codable, Sendable {
     let diskCritical: Bool
     let status: String
 
-    init(
-        mountPath: String,
-        totalBytes: Int?,
-        usedBytes: Int?,
-        freeBytes: Int?,
-        percentUsed: Double?,
-        diskLow: Bool,
-        diskCritical: Bool,
-        status: String
-    ) {
-        self.mountPath = mountPath
-        self.totalBytes = totalBytes
-        self.usedBytes = usedBytes
-        self.freeBytes = freeBytes
-        self.percentUsed = percentUsed
-        self.diskLow = diskLow
-        self.diskCritical = diskCritical
-        self.status = status
-    }
-
     enum CodingKeys: String, CodingKey {
         case mountPath = "mount_path"
         case totalBytes = "total_bytes"
@@ -4203,16 +2405,6 @@ struct EgressActiveReservationSnapshot: Codable, Sendable {
     let trafficClass: String
     let container: String?
 
-    init(
-        exchange: String,
-        trafficClass: String,
-        container: String? = nil
-    ) {
-        self.exchange = exchange
-        self.trafficClass = trafficClass
-        self.container = container
-    }
-
     enum CodingKeys: String, CodingKey {
         case exchange
         case trafficClass = "traffic_class"
@@ -4228,24 +2420,6 @@ struct EgressConnectionSnapshot: Codable, Sendable {
     let container: String?
     let count: Int
     let lastSeenAt: Date?
-
-    init(
-        host: String,
-        kind: String,
-        exchange: String,
-        trafficClass: String,
-        container: String? = nil,
-        count: Int,
-        lastSeenAt: Date? = nil
-    ) {
-        self.host = host
-        self.kind = kind
-        self.exchange = exchange
-        self.trafficClass = trafficClass
-        self.container = container
-        self.count = count
-        self.lastSeenAt = lastSeenAt
-    }
 
     enum CodingKeys: String, CodingKey {
         case host
@@ -4263,18 +2437,6 @@ struct EgressContainerSummary: Codable, Sendable {
     let lastSeenAgeSeconds: Double
     let stale: Bool
     let routeCount: Int
-
-    init(
-        container: String,
-        lastSeenAgeSeconds: Double,
-        stale: Bool,
-        routeCount: Int
-    ) {
-        self.container = container
-        self.lastSeenAgeSeconds = lastSeenAgeSeconds
-        self.stale = stale
-        self.routeCount = routeCount
-    }
 
     enum CodingKeys: String, CodingKey {
         case container
@@ -4297,34 +2459,6 @@ struct EgressHealthData: Codable, Sendable {
     let privateOnFallback: Bool?
     let containers: [EgressContainerSummary]?
     let routes: [EgressRouteStatusSnapshot]?
-
-    init(
-        type: String? = nil,
-        sequenceId: Int,
-        publicId: String,
-        timestamp: Date,
-        sessionId: String,
-        topic: String? = nil,
-        enabled: Bool,
-        onAllQuarantined: String? = nil,
-        privateFallbackRouteId: String? = nil,
-        privateOnFallback: Bool? = nil,
-        containers: [EgressContainerSummary]? = nil,
-        routes: [EgressRouteStatusSnapshot]? = nil
-    ) {
-        self.type = type
-        self.sequenceId = sequenceId
-        self.publicId = publicId
-        self.timestamp = timestamp
-        self.sessionId = sessionId
-        self.topic = topic
-        self.enabled = enabled
-        self.onAllQuarantined = onAllQuarantined
-        self.privateFallbackRouteId = privateFallbackRouteId
-        self.privateOnFallback = privateOnFallback
-        self.containers = containers
-        self.routes = routes
-    }
 
     enum CodingKeys: String, CodingKey {
         case type
@@ -4350,24 +2484,6 @@ struct EgressHealthResponse: Codable, Sendable {
     let sessionId: String
     let topic: String?
     let payload: EgressHealthData
-
-    init(
-        type: String? = nil,
-        sequenceId: Int,
-        publicId: String,
-        timestamp: Date,
-        sessionId: String,
-        topic: String? = nil,
-        payload: EgressHealthData
-    ) {
-        self.type = type
-        self.sequenceId = sequenceId
-        self.publicId = publicId
-        self.timestamp = timestamp
-        self.sessionId = sessionId
-        self.topic = topic
-        self.payload = payload
-    }
 
     enum CodingKeys: String, CodingKey {
         case type
@@ -4396,40 +2512,6 @@ struct EgressRouteStatusSnapshot: Codable, Sendable {
     let activeReservations: [EgressActiveReservationSnapshot]?
     let connections: [EgressConnectionSnapshot]?
     let transfer: EgressTransferSnapshot?
-
-    init(
-        id: String,
-        kind: String,
-        proxyUrl: String? = nil,
-        region: String? = nil,
-        exitIp: String? = nil,
-        provider: String? = nil,
-        priority: Int,
-        allowedExchanges: [String]? = nil,
-        enabled: Bool,
-        quarantined: Bool,
-        quarantineSecondsRemaining: Double?,
-        inUseCount: Int,
-        activeReservations: [EgressActiveReservationSnapshot]? = nil,
-        connections: [EgressConnectionSnapshot]? = nil,
-        transfer: EgressTransferSnapshot? = nil
-    ) {
-        self.id = id
-        self.kind = kind
-        self.proxyUrl = proxyUrl
-        self.region = region
-        self.exitIp = exitIp
-        self.provider = provider
-        self.priority = priority
-        self.allowedExchanges = allowedExchanges
-        self.enabled = enabled
-        self.quarantined = quarantined
-        self.quarantineSecondsRemaining = quarantineSecondsRemaining
-        self.inUseCount = inUseCount
-        self.activeReservations = activeReservations
-        self.connections = connections
-        self.transfer = transfer
-    }
 
     enum CodingKeys: String, CodingKey {
         case id
@@ -4463,32 +2545,6 @@ struct EgressTransferSnapshot: Codable, Sendable {
     let sampleAgeSeconds: Double
     let stale: Bool
 
-    init(
-        interface: String,
-        socks5ListenPort: Int,
-        rxBytes: Int,
-        txBytes: Int,
-        rxRateBytesPerSecond: Double? = nil,
-        txRateBytesPerSecond: Double? = nil,
-        latestHandshakeAt: Date? = nil,
-        counterReset: Bool,
-        sampledAt: Date,
-        sampleAgeSeconds: Double,
-        stale: Bool
-    ) {
-        self.interface = interface
-        self.socks5ListenPort = socks5ListenPort
-        self.rxBytes = rxBytes
-        self.txBytes = txBytes
-        self.rxRateBytesPerSecond = rxRateBytesPerSecond
-        self.txRateBytesPerSecond = txRateBytesPerSecond
-        self.latestHandshakeAt = latestHandshakeAt
-        self.counterReset = counterReset
-        self.sampledAt = sampledAt
-        self.sampleAgeSeconds = sampleAgeSeconds
-        self.stale = stale
-    }
-
     enum CodingKeys: String, CodingKey {
         case interface
         case socks5ListenPort = "socks5_listen_port"
@@ -4509,16 +2565,6 @@ struct EquityOverlayPoint: Codable, Sendable {
     let equityA: Double?
     let equityB: Double?
 
-    init(
-        pointTime: Date,
-        equityA: Double? = nil,
-        equityB: Double? = nil
-    ) {
-        self.pointTime = pointTime
-        self.equityA = equityA
-        self.equityB = equityB
-    }
-
     enum CodingKeys: String, CodingKey {
         case pointTime = "point_time"
         case equityA = "equity_a"
@@ -4535,26 +2581,6 @@ struct ExchangeListResponse: Codable, Sendable {
     let topic: String?
     let payload: [String]
     let count: Int
-
-    init(
-        type: String? = nil,
-        sequenceId: Int,
-        publicId: String,
-        timestamp: Date,
-        sessionId: String,
-        topic: String? = nil,
-        payload: [String],
-        count: Int
-    ) {
-        self.type = type
-        self.sequenceId = sequenceId
-        self.publicId = publicId
-        self.timestamp = timestamp
-        self.sessionId = sessionId
-        self.topic = topic
-        self.payload = payload
-        self.count = count
-    }
 
     enum CodingKeys: String, CodingKey {
         case type
@@ -4598,66 +2624,6 @@ struct ExecutionData: Codable, Sendable {
     let pairedGroupIndex: Int?
     let pairedGroupPolicy: String?
 
-    init(
-        type: String? = nil,
-        sequenceId: Int,
-        publicId: String,
-        timestamp: Date,
-        sessionId: String,
-        topic: String? = nil,
-        tradeId: String? = nil,
-        exchangeOrderId: String? = nil,
-        clientOrderId: String,
-        instrument: String,
-        exchange: String,
-        side: String,
-        size: Double,
-        price: Double,
-        lastSize: Double,
-        lastPrice: Double,
-        fee: Double,
-        feeAsset: String,
-        status: String,
-        executedAt: Date,
-        walletPublicId: String? = nil,
-        operatorPublicId: String? = nil,
-        userPublicId: String? = nil,
-        liquidityRole: String? = nil,
-        pairedGroupId: String? = nil,
-        pairedGroupSize: Int? = nil,
-        pairedGroupIndex: Int? = nil,
-        pairedGroupPolicy: String? = nil
-    ) {
-        self.type = type
-        self.sequenceId = sequenceId
-        self.publicId = publicId
-        self.timestamp = timestamp
-        self.sessionId = sessionId
-        self.topic = topic
-        self.tradeId = tradeId
-        self.exchangeOrderId = exchangeOrderId
-        self.clientOrderId = clientOrderId
-        self.instrument = instrument
-        self.exchange = exchange
-        self.side = side
-        self.size = size
-        self.price = price
-        self.lastSize = lastSize
-        self.lastPrice = lastPrice
-        self.fee = fee
-        self.feeAsset = feeAsset
-        self.status = status
-        self.executedAt = executedAt
-        self.walletPublicId = walletPublicId
-        self.operatorPublicId = operatorPublicId
-        self.userPublicId = userPublicId
-        self.liquidityRole = liquidityRole
-        self.pairedGroupId = pairedGroupId
-        self.pairedGroupSize = pairedGroupSize
-        self.pairedGroupIndex = pairedGroupIndex
-        self.pairedGroupPolicy = pairedGroupPolicy
-    }
-
     enum CodingKeys: String, CodingKey {
         case type
         case sequenceId = "sequence_id"
@@ -4700,26 +2666,6 @@ struct ExecutionListResponse: Codable, Sendable {
     let payload: [ExecutionData]
     let count: Int
 
-    init(
-        type: String? = nil,
-        sequenceId: Int,
-        publicId: String,
-        timestamp: Date,
-        sessionId: String,
-        topic: String? = nil,
-        payload: [ExecutionData],
-        count: Int
-    ) {
-        self.type = type
-        self.sequenceId = sequenceId
-        self.publicId = publicId
-        self.timestamp = timestamp
-        self.sessionId = sessionId
-        self.topic = topic
-        self.payload = payload
-        self.count = count
-    }
-
     enum CodingKeys: String, CodingKey {
         case type
         case sequenceId = "sequence_id"
@@ -4756,56 +2702,6 @@ struct ExecutionPlanData: Codable, Sendable {
     let parentPlanPublicId: String?
     let lastError: String?
     let idempotencyKey: String?
-
-    init(
-        type: String? = nil,
-        sequenceId: Int,
-        publicId: String,
-        timestamp: Date,
-        sessionId: String,
-        topic: String? = nil,
-        planType: String,
-        status: String,
-        instrumentPublicId: String,
-        exchange: String,
-        mode: String,
-        side: String,
-        totalQuantity: Double,
-        filledQuantity: Double,
-        createdAt: Date,
-        createdVia: String,
-        walletPublicId: String,
-        operatorPublicId: String?,
-        params: [String: AnyCodable],
-        positionCyclePublicId: String?,
-        parentPlanPublicId: String?,
-        lastError: String?,
-        idempotencyKey: String?
-    ) {
-        self.type = type
-        self.sequenceId = sequenceId
-        self.publicId = publicId
-        self.timestamp = timestamp
-        self.sessionId = sessionId
-        self.topic = topic
-        self.planType = planType
-        self.status = status
-        self.instrumentPublicId = instrumentPublicId
-        self.exchange = exchange
-        self.mode = mode
-        self.side = side
-        self.totalQuantity = totalQuantity
-        self.filledQuantity = filledQuantity
-        self.createdAt = createdAt
-        self.createdVia = createdVia
-        self.walletPublicId = walletPublicId
-        self.operatorPublicId = operatorPublicId
-        self.params = params
-        self.positionCyclePublicId = positionCyclePublicId
-        self.parentPlanPublicId = parentPlanPublicId
-        self.lastError = lastError
-        self.idempotencyKey = idempotencyKey
-    }
 
     enum CodingKeys: String, CodingKey {
         case type
@@ -4852,42 +2748,6 @@ struct ExecutionPlanDecisionData: Codable, Sendable {
     let decisionImportance: String
     let sourceSurface: String
 
-    init(
-        type: String? = nil,
-        sequenceId: Int,
-        publicId: String,
-        timestamp: Date,
-        sessionId: String,
-        topic: String? = nil,
-        planPublicId: String,
-        decisionType: String,
-        decidedAt: Date,
-        triggerType: String,
-        evidence: JsonObject? = nil,
-        emittedCommandPublicId: String? = nil,
-        newStatus: String? = nil,
-        reason: String,
-        decisionImportance: String,
-        sourceSurface: String
-    ) {
-        self.type = type
-        self.sequenceId = sequenceId
-        self.publicId = publicId
-        self.timestamp = timestamp
-        self.sessionId = sessionId
-        self.topic = topic
-        self.planPublicId = planPublicId
-        self.decisionType = decisionType
-        self.decidedAt = decidedAt
-        self.triggerType = triggerType
-        self.evidence = evidence
-        self.emittedCommandPublicId = emittedCommandPublicId
-        self.newStatus = newStatus
-        self.reason = reason
-        self.decisionImportance = decisionImportance
-        self.sourceSurface = sourceSurface
-    }
-
     enum CodingKeys: String, CodingKey {
         case type
         case sequenceId = "sequence_id"
@@ -4918,26 +2778,6 @@ struct ExecutionPlanDecisionListResponse: Codable, Sendable {
     let payload: [ExecutionPlanDecisionData]
     let count: Int
 
-    init(
-        type: String? = nil,
-        sequenceId: Int,
-        publicId: String,
-        timestamp: Date,
-        sessionId: String,
-        topic: String? = nil,
-        payload: [ExecutionPlanDecisionData],
-        count: Int
-    ) {
-        self.type = type
-        self.sequenceId = sequenceId
-        self.publicId = publicId
-        self.timestamp = timestamp
-        self.sessionId = sessionId
-        self.topic = topic
-        self.payload = payload
-        self.count = count
-    }
-
     enum CodingKeys: String, CodingKey {
         case type
         case sequenceId = "sequence_id"
@@ -4959,24 +2799,6 @@ struct ExecutionPlanResponse: Codable, Sendable {
     let topic: String?
     let payload: ExecutionPlanData
 
-    init(
-        type: String? = nil,
-        sequenceId: Int,
-        publicId: String,
-        timestamp: Date,
-        sessionId: String,
-        topic: String? = nil,
-        payload: ExecutionPlanData
-    ) {
-        self.type = type
-        self.sequenceId = sequenceId
-        self.publicId = publicId
-        self.timestamp = timestamp
-        self.sessionId = sessionId
-        self.topic = topic
-        self.payload = payload
-    }
-
     enum CodingKeys: String, CodingKey {
         case type
         case sequenceId = "sequence_id"
@@ -4991,12 +2813,6 @@ struct ExecutionPlanResponse: Codable, Sendable {
 struct FeatureFlagsPayload: Codable, Sendable {
     let aiIntegrationEnabled: Bool
 
-    init(
-        aiIntegrationEnabled: Bool
-    ) {
-        self.aiIntegrationEnabled = aiIntegrationEnabled
-    }
-
     enum CodingKeys: String, CodingKey {
         case aiIntegrationEnabled = "ai_integration_enabled"
     }
@@ -5010,24 +2826,6 @@ struct FeatureFlagsResponse: Codable, Sendable {
     let sessionId: String
     let topic: String?
     let payload: FeatureFlagsPayload
-
-    init(
-        type: String? = nil,
-        sequenceId: Int,
-        publicId: String,
-        timestamp: Date,
-        sessionId: String,
-        topic: String? = nil,
-        payload: FeatureFlagsPayload
-    ) {
-        self.type = type
-        self.sequenceId = sequenceId
-        self.publicId = publicId
-        self.timestamp = timestamp
-        self.sessionId = sessionId
-        self.topic = topic
-        self.payload = payload
-    }
 
     enum CodingKeys: String, CodingKey {
         case type
@@ -5054,34 +2852,6 @@ struct FrontMonthData: Codable, Sendable {
     let relationshipType: String
     let contractFamily: String?
 
-    init(
-        type: String? = nil,
-        sequenceId: Int,
-        publicId: String,
-        timestamp: Date,
-        sessionId: String,
-        topic: String? = nil,
-        instrumentPublicId: String,
-        nativeSymbol: String,
-        exchange: String,
-        expiryAt: Date,
-        relationshipType: String,
-        contractFamily: String?
-    ) {
-        self.type = type
-        self.sequenceId = sequenceId
-        self.publicId = publicId
-        self.timestamp = timestamp
-        self.sessionId = sessionId
-        self.topic = topic
-        self.instrumentPublicId = instrumentPublicId
-        self.nativeSymbol = nativeSymbol
-        self.exchange = exchange
-        self.expiryAt = expiryAt
-        self.relationshipType = relationshipType
-        self.contractFamily = contractFamily
-    }
-
     enum CodingKeys: String, CodingKey {
         case type
         case sequenceId = "sequence_id"
@@ -5107,24 +2877,6 @@ struct FrontMonthResponse: Codable, Sendable {
     let topic: String?
     let payload: FrontMonthData
 
-    init(
-        type: String? = nil,
-        sequenceId: Int,
-        publicId: String,
-        timestamp: Date,
-        sessionId: String,
-        topic: String? = nil,
-        payload: FrontMonthData
-    ) {
-        self.type = type
-        self.sequenceId = sequenceId
-        self.publicId = publicId
-        self.timestamp = timestamp
-        self.sessionId = sessionId
-        self.topic = topic
-        self.payload = payload
-    }
-
     enum CodingKeys: String, CodingKey {
         case type
         case sequenceId = "sequence_id"
@@ -5145,24 +2897,6 @@ struct FxShadowPinMetrics: Codable, Sendable {
     let failure: Int
     let dropped: Int
 
-    init(
-        creation: Int,
-        reuse: Int,
-        conflict: Int,
-        upgradeRequired: Int,
-        mismatch: Int,
-        failure: Int,
-        dropped: Int
-    ) {
-        self.creation = creation
-        self.reuse = reuse
-        self.conflict = conflict
-        self.upgradeRequired = upgradeRequired
-        self.mismatch = mismatch
-        self.failure = failure
-        self.dropped = dropped
-    }
-
     enum CodingKeys: String, CodingKey {
         case creation
         case reuse
@@ -5178,14 +2912,6 @@ struct GapDetectionStats: Codable, Sendable {
     let bridge: GapStats
     let restClients: [String: GapStats]?
 
-    init(
-        bridge: GapStats,
-        restClients: [String: GapStats]? = nil
-    ) {
-        self.bridge = bridge
-        self.restClients = restClients
-    }
-
     enum CodingKeys: String, CodingKey {
         case bridge
         case restClients = "rest_clients"
@@ -5198,20 +2924,6 @@ struct GapStats: Codable, Sendable {
     let duplicates: Int?
     let midStreamJoins: Int?
     let rejectedUnstamped: Int?
-
-    init(
-        gapsDetected: Int? = nil,
-        sessionResets: Int? = nil,
-        duplicates: Int? = nil,
-        midStreamJoins: Int? = nil,
-        rejectedUnstamped: Int? = nil
-    ) {
-        self.gapsDetected = gapsDetected
-        self.sessionResets = sessionResets
-        self.duplicates = duplicates
-        self.midStreamJoins = midStreamJoins
-        self.rejectedUnstamped = rejectedUnstamped
-    }
 
     enum CodingKeys: String, CodingKey {
         case gapsDetected = "gaps_detected"
@@ -5229,20 +2941,6 @@ struct GcMetrics: Codable, Sendable {
     let uncollectable: Int
     let currentObjects: Int
 
-    init(
-        collectionsGen0: Int,
-        collectionsGen1: Int,
-        collectionsGen2: Int,
-        uncollectable: Int,
-        currentObjects: Int
-    ) {
-        self.collectionsGen0 = collectionsGen0
-        self.collectionsGen1 = collectionsGen1
-        self.collectionsGen2 = collectionsGen2
-        self.uncollectable = uncollectable
-        self.currentObjects = currentObjects
-    }
-
     enum CodingKeys: String, CodingKey {
         case collectionsGen0 = "collections_gen0"
         case collectionsGen1 = "collections_gen1"
@@ -5254,12 +2952,6 @@ struct GcMetrics: Codable, Sendable {
 
 struct HTTPValidationError: Codable, Sendable {
     let detail: [ValidationError]?
-
-    init(
-        detail: [ValidationError]? = nil
-    ) {
-        self.detail = detail
-    }
 }
 
 struct HandoverScopeGrantResponse: Codable, Sendable {
@@ -5270,24 +2962,6 @@ struct HandoverScopeGrantResponse: Codable, Sendable {
     let sessionId: String
     let topic: String?
     let payload: HandoverScopeGrantResult
-
-    init(
-        type: String? = nil,
-        sequenceId: Int,
-        publicId: String,
-        timestamp: Date,
-        sessionId: String,
-        topic: String? = nil,
-        payload: HandoverScopeGrantResult
-    ) {
-        self.type = type
-        self.sequenceId = sequenceId
-        self.publicId = publicId
-        self.timestamp = timestamp
-        self.sessionId = sessionId
-        self.topic = topic
-        self.payload = payload
-    }
 
     enum CodingKeys: String, CodingKey {
         case type
@@ -5303,14 +2977,6 @@ struct HandoverScopeGrantResponse: Codable, Sendable {
 struct HandoverScopeGrantResult: Codable, Sendable {
     let closedGrant: ScopeGrantInfo
     let newGrant: ScopeGrantInfo
-
-    init(
-        closedGrant: ScopeGrantInfo,
-        newGrant: ScopeGrantInfo
-    ) {
-        self.closedGrant = closedGrant
-        self.newGrant = newGrant
-    }
 
     enum CodingKeys: String, CodingKey {
         case closedGrant = "closed_grant"
@@ -5330,32 +2996,6 @@ struct HealthCheckData: Codable, Sendable {
     let connections: ConnectionStats
     let topics: HealthTopics
     let gapDetection: GapDetectionStats
-
-    init(
-        type: String? = nil,
-        sequenceId: Int,
-        publicId: String,
-        timestamp: Date,
-        sessionId: String,
-        topic: String? = nil,
-        status: String,
-        version: String,
-        connections: ConnectionStats,
-        topics: HealthTopics,
-        gapDetection: GapDetectionStats
-    ) {
-        self.type = type
-        self.sequenceId = sequenceId
-        self.publicId = publicId
-        self.timestamp = timestamp
-        self.sessionId = sessionId
-        self.topic = topic
-        self.status = status
-        self.version = version
-        self.connections = connections
-        self.topics = topics
-        self.gapDetection = gapDetection
-    }
 
     enum CodingKeys: String, CodingKey {
         case type
@@ -5381,24 +3021,6 @@ struct HealthCheckResponse: Codable, Sendable {
     let topic: String?
     let payload: HealthCheckData
 
-    init(
-        type: String? = nil,
-        sequenceId: Int,
-        publicId: String,
-        timestamp: Date,
-        sessionId: String,
-        topic: String? = nil,
-        payload: HealthCheckData
-    ) {
-        self.type = type
-        self.sequenceId = sequenceId
-        self.publicId = publicId
-        self.timestamp = timestamp
-        self.sessionId = sessionId
-        self.topic = topic
-        self.payload = payload
-    }
-
     enum CodingKeys: String, CodingKey {
         case type
         case sequenceId = "sequence_id"
@@ -5412,12 +3034,6 @@ struct HealthCheckResponse: Codable, Sendable {
 
 struct HealthTopics: Codable, Sendable {
     let active: Int
-
-    init(
-        active: Int
-    ) {
-        self.active = active
-    }
 }
 
 struct InstrumentCapabilityData: Codable, Sendable {
@@ -5444,56 +3060,6 @@ struct InstrumentCapabilityData: Codable, Sendable {
     let minNotional: Double?
     let maxOrderSize: Double?
     let topOfBookQuality: String
-
-    init(
-        type: String? = nil,
-        sequenceId: Int,
-        publicId: String,
-        timestamp: Date,
-        sessionId: String,
-        topic: String? = nil,
-        instrumentPublicId: String,
-        exchange: String,
-        supportedOrderTypes: [String],
-        supportsPostOnly: Bool,
-        supportsReduceOnly: Bool,
-        supportsAmendInPlace: Bool,
-        supportsNativeStopLoss: Bool,
-        supportsNativeTakeProfit: Bool,
-        supportsTrailingStopClientSide: Bool,
-        supportsMarketMaking: Bool,
-        supportsShortSelling: Bool,
-        supportsLeverage: Bool,
-        maxLeverageLong: Double,
-        maxLeverageShort: Double,
-        minNotional: Double?,
-        maxOrderSize: Double?,
-        topOfBookQuality: String
-    ) {
-        self.type = type
-        self.sequenceId = sequenceId
-        self.publicId = publicId
-        self.timestamp = timestamp
-        self.sessionId = sessionId
-        self.topic = topic
-        self.instrumentPublicId = instrumentPublicId
-        self.exchange = exchange
-        self.supportedOrderTypes = supportedOrderTypes
-        self.supportsPostOnly = supportsPostOnly
-        self.supportsReduceOnly = supportsReduceOnly
-        self.supportsAmendInPlace = supportsAmendInPlace
-        self.supportsNativeStopLoss = supportsNativeStopLoss
-        self.supportsNativeTakeProfit = supportsNativeTakeProfit
-        self.supportsTrailingStopClientSide = supportsTrailingStopClientSide
-        self.supportsMarketMaking = supportsMarketMaking
-        self.supportsShortSelling = supportsShortSelling
-        self.supportsLeverage = supportsLeverage
-        self.maxLeverageLong = maxLeverageLong
-        self.maxLeverageShort = maxLeverageShort
-        self.minNotional = minNotional
-        self.maxOrderSize = maxOrderSize
-        self.topOfBookQuality = topOfBookQuality
-    }
 
     enum CodingKeys: String, CodingKey {
         case type
@@ -5532,26 +3098,6 @@ struct InstrumentCapabilityListResponse: Codable, Sendable {
     let payload: [InstrumentCapabilityData]
     let count: Int
 
-    init(
-        type: String? = nil,
-        sequenceId: Int,
-        publicId: String,
-        timestamp: Date,
-        sessionId: String,
-        topic: String? = nil,
-        payload: [InstrumentCapabilityData],
-        count: Int
-    ) {
-        self.type = type
-        self.sequenceId = sequenceId
-        self.publicId = publicId
-        self.timestamp = timestamp
-        self.sessionId = sessionId
-        self.topic = topic
-        self.payload = payload
-        self.count = count
-    }
-
     enum CodingKeys: String, CodingKey {
         case type
         case sequenceId = "sequence_id"
@@ -5580,40 +3126,6 @@ struct InstrumentDetailData: Codable, Sendable {
     let instrumentResolved: Bool
     let instrumentKind: String?
     let expiryAt: Date?
-
-    init(
-        type: String? = nil,
-        sequenceId: Int,
-        publicId: String,
-        timestamp: Date,
-        sessionId: String,
-        topic: String? = nil,
-        instrumentPublicId: String,
-        symbolPublicId: String,
-        symbol: String,
-        exchange: String,
-        canTrade: Bool,
-        canMarketData: Bool,
-        instrumentResolved: Bool,
-        instrumentKind: String?,
-        expiryAt: Date?
-    ) {
-        self.type = type
-        self.sequenceId = sequenceId
-        self.publicId = publicId
-        self.timestamp = timestamp
-        self.sessionId = sessionId
-        self.topic = topic
-        self.instrumentPublicId = instrumentPublicId
-        self.symbolPublicId = symbolPublicId
-        self.symbol = symbol
-        self.exchange = exchange
-        self.canTrade = canTrade
-        self.canMarketData = canMarketData
-        self.instrumentResolved = instrumentResolved
-        self.instrumentKind = instrumentKind
-        self.expiryAt = expiryAt
-    }
 
     enum CodingKeys: String, CodingKey {
         case type
@@ -5644,26 +3156,6 @@ struct InstrumentDetailListResponse: Codable, Sendable {
     let payload: [InstrumentDetailData]
     let count: Int
 
-    init(
-        type: String? = nil,
-        sequenceId: Int,
-        publicId: String,
-        timestamp: Date,
-        sessionId: String,
-        topic: String? = nil,
-        payload: [InstrumentDetailData],
-        count: Int
-    ) {
-        self.type = type
-        self.sequenceId = sequenceId
-        self.publicId = publicId
-        self.timestamp = timestamp
-        self.sessionId = sessionId
-        self.topic = topic
-        self.payload = payload
-        self.count = count
-    }
-
     enum CodingKeys: String, CodingKey {
         case type
         case sequenceId = "sequence_id"
@@ -5688,32 +3180,6 @@ struct InstrumentFeedHealthRowSchema: Codable, Sendable {
     let lastError: String?
     let retryCount: Int
     let snapshotAt: Date
-
-    init(
-        coordinator: String,
-        exchange: String,
-        channel: String,
-        symbol: String,
-        status: String,
-        requestedAt: Date,
-        confirmedAt: Date?,
-        lastSeenDataAt: Date?,
-        lastError: String?,
-        retryCount: Int,
-        snapshotAt: Date
-    ) {
-        self.coordinator = coordinator
-        self.exchange = exchange
-        self.channel = channel
-        self.symbol = symbol
-        self.status = status
-        self.requestedAt = requestedAt
-        self.confirmedAt = confirmedAt
-        self.lastSeenDataAt = lastSeenDataAt
-        self.lastError = lastError
-        self.retryCount = retryCount
-        self.snapshotAt = snapshotAt
-    }
 
     enum CodingKeys: String, CodingKey {
         case coordinator
@@ -5740,26 +3206,6 @@ struct InstrumentListResponse: Codable, Sendable {
     let payload: [String]
     let count: Int
 
-    init(
-        type: String? = nil,
-        sequenceId: Int,
-        publicId: String,
-        timestamp: Date,
-        sessionId: String,
-        topic: String? = nil,
-        payload: [String],
-        count: Int
-    ) {
-        self.type = type
-        self.sequenceId = sequenceId
-        self.publicId = publicId
-        self.timestamp = timestamp
-        self.sessionId = sessionId
-        self.topic = topic
-        self.payload = payload
-        self.count = count
-    }
-
     enum CodingKeys: String, CodingKey {
         case type
         case sequenceId = "sequence_id"
@@ -5773,26 +3219,12 @@ struct InstrumentListResponse: Codable, Sendable {
 }
 
 struct JsonObject: Codable, Sendable {
-
-    init(
-    ) {
-    }
 }
 
 struct LimitsMetrics: Codable, Sendable {
     let rlimitNproc: Int
     let rlimitNofile: Int
     let rlimitAsBytes: Int
-
-    init(
-        rlimitNproc: Int,
-        rlimitNofile: Int,
-        rlimitAsBytes: Int
-    ) {
-        self.rlimitNproc = rlimitNproc
-        self.rlimitNofile = rlimitNofile
-        self.rlimitAsBytes = rlimitAsBytes
-    }
 
     enum CodingKeys: String, CodingKey {
         case rlimitNproc = "rlimit_nproc"
@@ -5804,14 +3236,6 @@ struct LimitsMetrics: Codable, Sendable {
 struct ListedCachedStatsPayload: Codable, Sendable {
     let count: Int
     let pairs: [CachedStatsPayload]
-
-    init(
-        count: Int,
-        pairs: [CachedStatsPayload]
-    ) {
-        self.count = count
-        self.pairs = pairs
-    }
 }
 
 struct ListedCachedStatsResponse: Codable, Sendable {
@@ -5822,24 +3246,6 @@ struct ListedCachedStatsResponse: Codable, Sendable {
     let sessionId: String
     let topic: String?
     let payload: ListedCachedStatsPayload
-
-    init(
-        type: String? = nil,
-        sequenceId: Int,
-        publicId: String,
-        timestamp: Date,
-        sessionId: String,
-        topic: String? = nil,
-        payload: ListedCachedStatsPayload
-    ) {
-        self.type = type
-        self.sequenceId = sequenceId
-        self.publicId = publicId
-        self.timestamp = timestamp
-        self.sessionId = sessionId
-        self.topic = topic
-        self.payload = payload
-    }
 
     enum CodingKeys: String, CodingKey {
         case type
@@ -5865,32 +3271,6 @@ struct LoginData: Codable, Sendable {
     let accessToken: String?
     let refreshToken: String?
 
-    init(
-        type: String? = nil,
-        sequenceId: Int,
-        publicId: String,
-        timestamp: Date,
-        sessionId: String,
-        topic: String? = nil,
-        message: String,
-        expiresIn: Int,
-        user: UserProfile,
-        accessToken: String? = nil,
-        refreshToken: String? = nil
-    ) {
-        self.type = type
-        self.sequenceId = sequenceId
-        self.publicId = publicId
-        self.timestamp = timestamp
-        self.sessionId = sessionId
-        self.topic = topic
-        self.message = message
-        self.expiresIn = expiresIn
-        self.user = user
-        self.accessToken = accessToken
-        self.refreshToken = refreshToken
-    }
-
     enum CodingKeys: String, CodingKey {
         case type
         case sequenceId = "sequence_id"
@@ -5915,24 +3295,6 @@ struct LoginResponse: Codable, Sendable {
     let topic: String?
     let payload: LoginData
 
-    init(
-        type: String? = nil,
-        sequenceId: Int,
-        publicId: String,
-        timestamp: Date,
-        sessionId: String,
-        topic: String? = nil,
-        payload: LoginData
-    ) {
-        self.type = type
-        self.sequenceId = sequenceId
-        self.publicId = publicId
-        self.timestamp = timestamp
-        self.sessionId = sessionId
-        self.topic = topic
-        self.payload = payload
-    }
-
     enum CodingKeys: String, CodingKey {
         case type
         case sequenceId = "sequence_id"
@@ -5952,22 +3314,6 @@ struct MarketDataCoverageExchange: Codable, Sendable {
     let gatedOff: Int
     let dark: Int
 
-    init(
-        exchange: String,
-        instruments: Int,
-        freshTicks: Int,
-        freshCandles: Int,
-        gatedOff: Int,
-        dark: Int
-    ) {
-        self.exchange = exchange
-        self.instruments = instruments
-        self.freshTicks = freshTicks
-        self.freshCandles = freshCandles
-        self.gatedOff = gatedOff
-        self.dark = dark
-    }
-
     enum CodingKeys: String, CodingKey {
         case exchange
         case instruments
@@ -5982,16 +3328,6 @@ struct MarketDataCoveragePayload: Codable, Sendable {
     let exchanges: [MarketDataCoverageExchange]
     let tickWindowSeconds: Int
     let candleWindowSeconds: Int
-
-    init(
-        exchanges: [MarketDataCoverageExchange],
-        tickWindowSeconds: Int,
-        candleWindowSeconds: Int
-    ) {
-        self.exchanges = exchanges
-        self.tickWindowSeconds = tickWindowSeconds
-        self.candleWindowSeconds = candleWindowSeconds
-    }
 
     enum CodingKeys: String, CodingKey {
         case exchanges
@@ -6009,24 +3345,6 @@ struct MarketDataCoverageResponse: Codable, Sendable {
     let topic: String?
     let payload: MarketDataCoveragePayload
 
-    init(
-        type: String? = nil,
-        sequenceId: Int,
-        publicId: String,
-        timestamp: Date,
-        sessionId: String,
-        topic: String? = nil,
-        payload: MarketDataCoveragePayload
-    ) {
-        self.type = type
-        self.sequenceId = sequenceId
-        self.publicId = publicId
-        self.timestamp = timestamp
-        self.sessionId = sessionId
-        self.topic = topic
-        self.payload = payload
-    }
-
     enum CodingKeys: String, CodingKey {
         case type
         case sequenceId = "sequence_id"
@@ -6043,16 +3361,6 @@ struct MarketFeedHealthPayload: Codable, Sendable {
     let exchange: String?
     let freshWithinSeconds: Int?
 
-    init(
-        rows: [InstrumentFeedHealthRowSchema],
-        exchange: String?,
-        freshWithinSeconds: Int?
-    ) {
-        self.rows = rows
-        self.exchange = exchange
-        self.freshWithinSeconds = freshWithinSeconds
-    }
-
     enum CodingKeys: String, CodingKey {
         case rows
         case exchange
@@ -6068,24 +3376,6 @@ struct MarketFeedHealthResponse: Codable, Sendable {
     let sessionId: String
     let topic: String?
     let payload: MarketFeedHealthPayload
-
-    init(
-        type: String? = nil,
-        sequenceId: Int,
-        publicId: String,
-        timestamp: Date,
-        sessionId: String,
-        topic: String? = nil,
-        payload: MarketFeedHealthPayload
-    ) {
-        self.type = type
-        self.sequenceId = sequenceId
-        self.publicId = publicId
-        self.timestamp = timestamp
-        self.sessionId = sessionId
-        self.topic = topic
-        self.payload = payload
-    }
 
     enum CodingKeys: String, CodingKey {
         case type
@@ -6108,26 +3398,6 @@ struct MemoryMetrics: Codable, Sendable {
     let cgroupCurrentBytes: Int?
     let saturationPct: Double?
 
-    init(
-        rssBytes: Int,
-        rssPeakBytes: Int,
-        vmsBytes: Int,
-        pythonTracedBytes: Int?,
-        nativeBytes: Int?,
-        cgroupLimitBytes: Int?,
-        cgroupCurrentBytes: Int?,
-        saturationPct: Double?
-    ) {
-        self.rssBytes = rssBytes
-        self.rssPeakBytes = rssPeakBytes
-        self.vmsBytes = vmsBytes
-        self.pythonTracedBytes = pythonTracedBytes
-        self.nativeBytes = nativeBytes
-        self.cgroupLimitBytes = cgroupLimitBytes
-        self.cgroupCurrentBytes = cgroupCurrentBytes
-        self.saturationPct = saturationPct
-    }
-
     enum CodingKeys: String, CodingKey {
         case rssBytes = "rss_bytes"
         case rssPeakBytes = "rss_peak_bytes"
@@ -6149,24 +3419,6 @@ struct MessageResponse: Codable, Sendable {
     let topic: String?
     let payload: String
 
-    init(
-        type: String? = nil,
-        sequenceId: Int,
-        publicId: String,
-        timestamp: Date,
-        sessionId: String,
-        topic: String? = nil,
-        payload: String
-    ) {
-        self.type = type
-        self.sequenceId = sequenceId
-        self.publicId = publicId
-        self.timestamp = timestamp
-        self.sessionId = sessionId
-        self.topic = topic
-        self.payload = payload
-    }
-
     enum CodingKeys: String, CodingKey {
         case type
         case sequenceId = "sequence_id"
@@ -6184,20 +3436,6 @@ struct MetricDiffRow: Codable, Sendable {
     let runB: Double?
     let delta: Double?
     let pct: Double?
-
-    init(
-        name: String,
-        runA: Double? = nil,
-        runB: Double? = nil,
-        delta: Double? = nil,
-        pct: Double? = nil
-    ) {
-        self.name = name
-        self.runA = runA
-        self.runB = runB
-        self.delta = delta
-        self.pct = pct
-    }
 
     enum CodingKeys: String, CodingKey {
         case name
@@ -6224,40 +3462,6 @@ struct NotificationDeviceInfo: Codable, Sendable {
     let previewsMode: String
     let registeredAt: Date
     let lastSeenAt: Date?
-
-    init(
-        type: String? = nil,
-        sequenceId: Int,
-        publicId: String,
-        timestamp: Date,
-        sessionId: String,
-        topic: String? = nil,
-        userPublicId: String,
-        deviceToken: String,
-        deviceId: String,
-        platform: String,
-        env: String,
-        appVersion: String? = nil,
-        previewsMode: String,
-        registeredAt: Date,
-        lastSeenAt: Date? = nil
-    ) {
-        self.type = type
-        self.sequenceId = sequenceId
-        self.publicId = publicId
-        self.timestamp = timestamp
-        self.sessionId = sessionId
-        self.topic = topic
-        self.userPublicId = userPublicId
-        self.deviceToken = deviceToken
-        self.deviceId = deviceId
-        self.platform = platform
-        self.env = env
-        self.appVersion = appVersion
-        self.previewsMode = previewsMode
-        self.registeredAt = registeredAt
-        self.lastSeenAt = lastSeenAt
-    }
 
     enum CodingKeys: String, CodingKey {
         case type
@@ -6288,26 +3492,6 @@ struct NotificationDeviceListResponse: Codable, Sendable {
     let payload: [NotificationDeviceInfo]
     let count: Int
 
-    init(
-        type: String? = nil,
-        sequenceId: Int,
-        publicId: String,
-        timestamp: Date,
-        sessionId: String,
-        topic: String? = nil,
-        payload: [NotificationDeviceInfo],
-        count: Int
-    ) {
-        self.type = type
-        self.sequenceId = sequenceId
-        self.publicId = publicId
-        self.timestamp = timestamp
-        self.sessionId = sessionId
-        self.topic = topic
-        self.payload = payload
-        self.count = count
-    }
-
     enum CodingKeys: String, CodingKey {
         case type
         case sequenceId = "sequence_id"
@@ -6328,24 +3512,6 @@ struct NotificationDeviceResponse: Codable, Sendable {
     let sessionId: String
     let topic: String?
     let payload: NotificationDeviceInfo
-
-    init(
-        type: String? = nil,
-        sequenceId: Int,
-        publicId: String,
-        timestamp: Date,
-        sessionId: String,
-        topic: String? = nil,
-        payload: NotificationDeviceInfo
-    ) {
-        self.type = type
-        self.sequenceId = sequenceId
-        self.publicId = publicId
-        self.timestamp = timestamp
-        self.sessionId = sessionId
-        self.topic = topic
-        self.payload = payload
-    }
 
     enum CodingKeys: String, CodingKey {
         case type
@@ -6371,32 +3537,6 @@ struct NotificationMetricsData: Codable, Sendable {
     let deliveryCancelledScopeTotal: Int
     let outboxQueuedDepth: Int
 
-    init(
-        type: String? = nil,
-        sequenceId: Int,
-        publicId: String,
-        timestamp: Date,
-        sessionId: String,
-        topic: String? = nil,
-        deliverySuccessTotal: Int,
-        deliveryFailedTotal: Int,
-        delivery410UnregisteredTotal: Int,
-        deliveryCancelledScopeTotal: Int,
-        outboxQueuedDepth: Int
-    ) {
-        self.type = type
-        self.sequenceId = sequenceId
-        self.publicId = publicId
-        self.timestamp = timestamp
-        self.sessionId = sessionId
-        self.topic = topic
-        self.deliverySuccessTotal = deliverySuccessTotal
-        self.deliveryFailedTotal = deliveryFailedTotal
-        self.delivery410UnregisteredTotal = delivery410UnregisteredTotal
-        self.deliveryCancelledScopeTotal = deliveryCancelledScopeTotal
-        self.outboxQueuedDepth = outboxQueuedDepth
-    }
-
     enum CodingKeys: String, CodingKey {
         case type
         case sequenceId = "sequence_id"
@@ -6421,24 +3561,6 @@ struct NotificationMetricsResponse: Codable, Sendable {
     let topic: String?
     let payload: NotificationMetricsData
 
-    init(
-        type: String? = nil,
-        sequenceId: Int,
-        publicId: String,
-        timestamp: Date,
-        sessionId: String,
-        topic: String? = nil,
-        payload: NotificationMetricsData
-    ) {
-        self.type = type
-        self.sequenceId = sequenceId
-        self.publicId = publicId
-        self.timestamp = timestamp
-        self.sessionId = sessionId
-        self.topic = topic
-        self.payload = payload
-    }
-
     enum CodingKeys: String, CodingKey {
         case type
         case sequenceId = "sequence_id"
@@ -6459,26 +3581,6 @@ struct OperatorInfo: Codable, Sendable {
     let topic: String?
     let label: String
     let description: String?
-
-    init(
-        type: String? = nil,
-        sequenceId: Int,
-        publicId: String,
-        timestamp: Date,
-        sessionId: String,
-        topic: String? = nil,
-        label: String,
-        description: String? = nil
-    ) {
-        self.type = type
-        self.sequenceId = sequenceId
-        self.publicId = publicId
-        self.timestamp = timestamp
-        self.sessionId = sessionId
-        self.topic = topic
-        self.label = label
-        self.description = description
-    }
 
     enum CodingKeys: String, CodingKey {
         case type
@@ -6502,26 +3604,6 @@ struct OperatorListResponse: Codable, Sendable {
     let payload: [OperatorInfo]
     let count: Int
 
-    init(
-        type: String? = nil,
-        sequenceId: Int,
-        publicId: String,
-        timestamp: Date,
-        sessionId: String,
-        topic: String? = nil,
-        payload: [OperatorInfo],
-        count: Int
-    ) {
-        self.type = type
-        self.sequenceId = sequenceId
-        self.publicId = publicId
-        self.timestamp = timestamp
-        self.sessionId = sessionId
-        self.topic = topic
-        self.payload = payload
-        self.count = count
-    }
-
     enum CodingKeys: String, CodingKey {
         case type
         case sequenceId = "sequence_id"
@@ -6542,24 +3624,6 @@ struct OperatorResponse: Codable, Sendable {
     let sessionId: String
     let topic: String?
     let payload: OperatorInfo
-
-    init(
-        type: String? = nil,
-        sequenceId: Int,
-        publicId: String,
-        timestamp: Date,
-        sessionId: String,
-        topic: String? = nil,
-        payload: OperatorInfo
-    ) {
-        self.type = type
-        self.sequenceId = sequenceId
-        self.publicId = publicId
-        self.timestamp = timestamp
-        self.sessionId = sessionId
-        self.topic = topic
-        self.payload = payload
-    }
 
     enum CodingKeys: String, CodingKey {
         case type
@@ -6606,76 +3670,6 @@ struct OrderData: Codable, Sendable {
     let pairedGroupSize: Int?
     let pairedGroupIndex: Int?
     let pairedGroupPolicy: String?
-
-    init(
-        type: String? = nil,
-        sequenceId: Int,
-        publicId: String,
-        timestamp: Date,
-        sessionId: String,
-        topic: String? = nil,
-        exchangeOrderId: String? = nil,
-        clientOrderId: String,
-        instrument: String,
-        exchange: String,
-        mode: String? = nil,
-        side: String,
-        status: String,
-        orderType: String,
-        size: Double,
-        filledSize: Double,
-        price: Double? = nil,
-        averagePrice: Double? = nil,
-        reason: String? = nil,
-        timeInForce: String? = nil,
-        error: String? = nil,
-        createdAt: Date,
-        updatedAt: Date? = nil,
-        leverage: Int? = nil,
-        reduceOnly: Bool? = nil,
-        walletPublicId: String? = nil,
-        operatorPublicId: String? = nil,
-        userPublicId: String? = nil,
-        planPublicId: String? = nil,
-        pairedGroupId: String? = nil,
-        pairedGroupSize: Int? = nil,
-        pairedGroupIndex: Int? = nil,
-        pairedGroupPolicy: String? = nil
-    ) {
-        self.type = type
-        self.sequenceId = sequenceId
-        self.publicId = publicId
-        self.timestamp = timestamp
-        self.sessionId = sessionId
-        self.topic = topic
-        self.exchangeOrderId = exchangeOrderId
-        self.clientOrderId = clientOrderId
-        self.instrument = instrument
-        self.exchange = exchange
-        self.mode = mode
-        self.side = side
-        self.status = status
-        self.orderType = orderType
-        self.size = size
-        self.filledSize = filledSize
-        self.price = price
-        self.averagePrice = averagePrice
-        self.reason = reason
-        self.timeInForce = timeInForce
-        self.error = error
-        self.createdAt = createdAt
-        self.updatedAt = updatedAt
-        self.leverage = leverage
-        self.reduceOnly = reduceOnly
-        self.walletPublicId = walletPublicId
-        self.operatorPublicId = operatorPublicId
-        self.userPublicId = userPublicId
-        self.planPublicId = planPublicId
-        self.pairedGroupId = pairedGroupId
-        self.pairedGroupSize = pairedGroupSize
-        self.pairedGroupIndex = pairedGroupIndex
-        self.pairedGroupPolicy = pairedGroupPolicy
-    }
 
     enum CodingKeys: String, CodingKey {
         case type
@@ -6724,26 +3718,6 @@ struct OrderListResponse: Codable, Sendable {
     let payload: [OrderData]
     let count: Int
 
-    init(
-        type: String? = nil,
-        sequenceId: Int,
-        publicId: String,
-        timestamp: Date,
-        sessionId: String,
-        topic: String? = nil,
-        payload: [OrderData],
-        count: Int
-    ) {
-        self.type = type
-        self.sequenceId = sequenceId
-        self.publicId = publicId
-        self.timestamp = timestamp
-        self.sessionId = sessionId
-        self.topic = topic
-        self.payload = payload
-        self.count = count
-    }
-
     enum CodingKeys: String, CodingKey {
         case type
         case sequenceId = "sequence_id"
@@ -6765,24 +3739,6 @@ struct OrphanSweepResponse: Codable, Sendable {
     let topic: String?
     let payload: OrphanSweepResultData
 
-    init(
-        type: String? = nil,
-        sequenceId: Int,
-        publicId: String,
-        timestamp: Date,
-        sessionId: String,
-        topic: String? = nil,
-        payload: OrphanSweepResultData
-    ) {
-        self.type = type
-        self.sequenceId = sequenceId
-        self.publicId = publicId
-        self.timestamp = timestamp
-        self.sessionId = sessionId
-        self.topic = topic
-        self.payload = payload
-    }
-
     enum CodingKeys: String, CodingKey {
         case type
         case sequenceId = "sequence_id"
@@ -6803,26 +3759,6 @@ struct OrphanSweepResultData: Codable, Sendable {
     let topic: String?
     let closedCount: Int
     let closedCycleIds: [String]
-
-    init(
-        type: String? = nil,
-        sequenceId: Int,
-        publicId: String,
-        timestamp: Date,
-        sessionId: String,
-        topic: String? = nil,
-        closedCount: Int,
-        closedCycleIds: [String]
-    ) {
-        self.type = type
-        self.sequenceId = sequenceId
-        self.publicId = publicId
-        self.timestamp = timestamp
-        self.sessionId = sessionId
-        self.topic = topic
-        self.closedCount = closedCount
-        self.closedCycleIds = closedCycleIds
-    }
 
     enum CodingKeys: String, CodingKey {
         case type
@@ -6850,34 +3786,6 @@ struct PairedExecutionIncident: Codable, Sendable {
     let haltMissing: Bool
     let groups: [PairedGroupIncident]
 
-    init(
-        type: String? = nil,
-        sequenceId: Int,
-        publicId: String,
-        timestamp: Date,
-        sessionId: String,
-        topic: String? = nil,
-        walletPublicId: String,
-        strategyId: String,
-        groupKey: String,
-        halt: PairedHaltInfo?,
-        haltMissing: Bool,
-        groups: [PairedGroupIncident]
-    ) {
-        self.type = type
-        self.sequenceId = sequenceId
-        self.publicId = publicId
-        self.timestamp = timestamp
-        self.sessionId = sessionId
-        self.topic = topic
-        self.walletPublicId = walletPublicId
-        self.strategyId = strategyId
-        self.groupKey = groupKey
-        self.halt = halt
-        self.haltMissing = haltMissing
-        self.groups = groups
-    }
-
     enum CodingKeys: String, CodingKey {
         case type
         case sequenceId = "sequence_id"
@@ -6903,26 +3811,6 @@ struct PairedExecutionIncidentListResponse: Codable, Sendable {
     let topic: String?
     let payload: [PairedExecutionIncident]
     let count: Int
-
-    init(
-        type: String? = nil,
-        sequenceId: Int,
-        publicId: String,
-        timestamp: Date,
-        sessionId: String,
-        topic: String? = nil,
-        payload: [PairedExecutionIncident],
-        count: Int
-    ) {
-        self.type = type
-        self.sequenceId = sequenceId
-        self.publicId = publicId
-        self.timestamp = timestamp
-        self.sessionId = sessionId
-        self.topic = topic
-        self.payload = payload
-        self.count = count
-    }
 
     enum CodingKeys: String, CodingKey {
         case type
@@ -6951,36 +3839,6 @@ struct PairedGroupIncident: Codable, Sendable {
     let createdAt: Date
     let legs: [PairedLegExposure]
 
-    init(
-        type: String? = nil,
-        sequenceId: Int,
-        publicId: String,
-        timestamp: Date,
-        sessionId: String,
-        topic: String? = nil,
-        groupPublicId: String,
-        status: String,
-        policy: String,
-        failureReason: String?,
-        haltedAt: Date?,
-        createdAt: Date,
-        legs: [PairedLegExposure]
-    ) {
-        self.type = type
-        self.sequenceId = sequenceId
-        self.publicId = publicId
-        self.timestamp = timestamp
-        self.sessionId = sessionId
-        self.topic = topic
-        self.groupPublicId = groupPublicId
-        self.status = status
-        self.policy = policy
-        self.failureReason = failureReason
-        self.haltedAt = haltedAt
-        self.createdAt = createdAt
-        self.legs = legs
-    }
-
     enum CodingKeys: String, CodingKey {
         case type
         case sequenceId = "sequence_id"
@@ -7007,24 +3865,6 @@ struct PairedGroupTerminalizeResponse: Codable, Sendable {
     let topic: String?
     let payload: PairedGroupIncident
 
-    init(
-        type: String? = nil,
-        sequenceId: Int,
-        publicId: String,
-        timestamp: Date,
-        sessionId: String,
-        topic: String? = nil,
-        payload: PairedGroupIncident
-    ) {
-        self.type = type
-        self.sequenceId = sequenceId
-        self.publicId = publicId
-        self.timestamp = timestamp
-        self.sessionId = sessionId
-        self.topic = topic
-        self.payload = payload
-    }
-
     enum CodingKeys: String, CodingKey {
         case type
         case sequenceId = "sequence_id"
@@ -7047,30 +3887,6 @@ struct PairedHaltInfo: Codable, Sendable {
     let reason: String
     let groupPublicId: String
     let createdAt: Date
-
-    init(
-        type: String? = nil,
-        sequenceId: Int,
-        publicId: String,
-        timestamp: Date,
-        sessionId: String,
-        topic: String? = nil,
-        haltPublicId: String,
-        reason: String,
-        groupPublicId: String,
-        createdAt: Date
-    ) {
-        self.type = type
-        self.sequenceId = sequenceId
-        self.publicId = publicId
-        self.timestamp = timestamp
-        self.sessionId = sessionId
-        self.topic = topic
-        self.haltPublicId = haltPublicId
-        self.reason = reason
-        self.groupPublicId = groupPublicId
-        self.createdAt = createdAt
-    }
 
     enum CodingKeys: String, CodingKey {
         case type
@@ -7106,46 +3922,6 @@ struct PairedLegExposure: Codable, Sendable {
     let openQty: Double
     let compensationSeq: Int
 
-    init(
-        type: String? = nil,
-        sequenceId: Int,
-        publicId: String,
-        timestamp: Date,
-        sessionId: String,
-        topic: String? = nil,
-        legPublicId: String,
-        legIndex: Int,
-        exchange: String,
-        instrument: String,
-        mode: String,
-        shardKey: String,
-        side: String,
-        status: String,
-        filledSignedQty: Double,
-        compensatedSignedQty: Double,
-        openQty: Double,
-        compensationSeq: Int
-    ) {
-        self.type = type
-        self.sequenceId = sequenceId
-        self.publicId = publicId
-        self.timestamp = timestamp
-        self.sessionId = sessionId
-        self.topic = topic
-        self.legPublicId = legPublicId
-        self.legIndex = legIndex
-        self.exchange = exchange
-        self.instrument = instrument
-        self.mode = mode
-        self.shardKey = shardKey
-        self.side = side
-        self.status = status
-        self.filledSignedQty = filledSignedQty
-        self.compensatedSignedQty = compensatedSignedQty
-        self.openQty = openQty
-        self.compensationSeq = compensationSeq
-    }
-
     enum CodingKeys: String, CodingKey {
         case type
         case sequenceId = "sequence_id"
@@ -7171,14 +3947,6 @@ struct PairedLegExposure: Codable, Sendable {
 struct PendingReviewListResponse: Codable, Sendable {
     let items: [PendingReviewSummaryItem]
     let count: Int
-
-    init(
-        items: [PendingReviewSummaryItem],
-        count: Int
-    ) {
-        self.items = items
-        self.count = count
-    }
 }
 
 struct PendingReviewSummaryItem: Codable, Sendable {
@@ -7191,28 +3959,6 @@ struct PendingReviewSummaryItem: Codable, Sendable {
     let fanoutAfter: Date
     let instrument: String?
     let signalEnvelope: JsonObject?
-
-    init(
-        reviewPublicId: String,
-        selectedDelegatePublicId: String,
-        walletPublicId: String,
-        dispatchVersion: Int,
-        status: String,
-        deadline: Date,
-        fanoutAfter: Date,
-        instrument: String? = nil,
-        signalEnvelope: JsonObject? = nil
-    ) {
-        self.reviewPublicId = reviewPublicId
-        self.selectedDelegatePublicId = selectedDelegatePublicId
-        self.walletPublicId = walletPublicId
-        self.dispatchVersion = dispatchVersion
-        self.status = status
-        self.deadline = deadline
-        self.fanoutAfter = fanoutAfter
-        self.instrument = instrument
-        self.signalEnvelope = signalEnvelope
-    }
 
     enum CodingKeys: String, CodingKey {
         case reviewPublicId = "review_public_id"
@@ -7239,30 +3985,6 @@ struct PnlAiDecisionMarkerData: Codable, Sendable {
     let outcome: PnlMarkerOutcome
     let status: String
 
-    init(
-        kind: String? = nil,
-        markerTime: Date,
-        instrumentPublicId: String,
-        strategyPublicId: String,
-        reviewPublicId: String,
-        eventPublicId: String,
-        decision: String?,
-        rationale: String?,
-        outcome: PnlMarkerOutcome,
-        status: String
-    ) {
-        self.kind = kind
-        self.markerTime = markerTime
-        self.instrumentPublicId = instrumentPublicId
-        self.strategyPublicId = strategyPublicId
-        self.reviewPublicId = reviewPublicId
-        self.eventPublicId = eventPublicId
-        self.decision = decision
-        self.rationale = rationale
-        self.outcome = outcome
-        self.status = status
-    }
-
     enum CodingKeys: String, CodingKey {
         case kind
         case markerTime = "marker_time"
@@ -7284,22 +4006,6 @@ struct PnlAttributionContributionData: Codable, Sendable {
     let feePnl: Double?
     let accrualPnl: Double?
     let unrealizedPnl: Double?
-
-    init(
-        origin: PnlAttributionOrigin,
-        strategyName: String?,
-        realizedPnl: Double?,
-        feePnl: Double?,
-        accrualPnl: Double?,
-        unrealizedPnl: Double?
-    ) {
-        self.origin = origin
-        self.strategyName = strategyName
-        self.realizedPnl = realizedPnl
-        self.feePnl = feePnl
-        self.accrualPnl = accrualPnl
-        self.unrealizedPnl = unrealizedPnl
-    }
 
     enum CodingKeys: String, CodingKey {
         case origin
@@ -7325,34 +4031,6 @@ struct PnlEquityCoverageData: Codable, Sendable {
     let conversionWithheldMinutes: Int
     let drawdownWithheldReason: String?
 
-    init(
-        sampled: Bool,
-        venueScope: String?,
-        externalFlowsAdjusted: Bool?,
-        completeMinutes: Int,
-        firstMinute: Date?,
-        lastMinute: Date?,
-        sampleCalcVersion: String?,
-        valuationBasis: String?,
-        convertedFrom: String?,
-        conversionRateSource: String?,
-        conversionWithheldMinutes: Int,
-        drawdownWithheldReason: String?
-    ) {
-        self.sampled = sampled
-        self.venueScope = venueScope
-        self.externalFlowsAdjusted = externalFlowsAdjusted
-        self.completeMinutes = completeMinutes
-        self.firstMinute = firstMinute
-        self.lastMinute = lastMinute
-        self.sampleCalcVersion = sampleCalcVersion
-        self.valuationBasis = valuationBasis
-        self.convertedFrom = convertedFrom
-        self.conversionRateSource = conversionRateSource
-        self.conversionWithheldMinutes = conversionWithheldMinutes
-        self.drawdownWithheldReason = drawdownWithheldReason
-    }
-
     enum CodingKeys: String, CodingKey {
         case sampled
         case venueScope = "venue_scope"
@@ -7377,22 +4055,6 @@ struct PnlExecutionCorrectionData: Codable, Sendable {
     let reason: PnlExecutionCorrectionReason
     let correctionTime: Date
 
-    init(
-        correctionPublicId: String,
-        targetExecutionPublicId: String,
-        exchange: String,
-        scopeSequence: Int,
-        reason: PnlExecutionCorrectionReason,
-        correctionTime: Date
-    ) {
-        self.correctionPublicId = correctionPublicId
-        self.targetExecutionPublicId = targetExecutionPublicId
-        self.exchange = exchange
-        self.scopeSequence = scopeSequence
-        self.reason = reason
-        self.correctionTime = correctionTime
-    }
-
     enum CodingKeys: String, CodingKey {
         case correctionPublicId = "correction_public_id"
         case targetExecutionPublicId = "target_execution_public_id"
@@ -7406,14 +4068,6 @@ struct PnlExecutionCorrectionData: Codable, Sendable {
 struct PnlExecutionHistoryData: Codable, Sendable {
     let status: PnlExecutionHistoryStatus
     let corrections: [PnlExecutionCorrectionData]
-
-    init(
-        status: PnlExecutionHistoryStatus,
-        corrections: [PnlExecutionCorrectionData]
-    ) {
-        self.status = status
-        self.corrections = corrections
-    }
 }
 
 struct PnlFillMarkerData: Codable, Sendable {
@@ -7427,30 +4081,6 @@ struct PnlFillMarkerData: Codable, Sendable {
     let orderPublicId: String
     let outcome: String?
     let status: String
-
-    init(
-        kind: String? = nil,
-        markerTime: Date,
-        instrumentPublicId: String,
-        side: String,
-        size: Double,
-        price: Double?,
-        executionPublicId: String,
-        orderPublicId: String,
-        outcome: String? = nil,
-        status: String
-    ) {
-        self.kind = kind
-        self.markerTime = markerTime
-        self.instrumentPublicId = instrumentPublicId
-        self.side = side
-        self.size = size
-        self.price = price
-        self.executionPublicId = executionPublicId
-        self.orderPublicId = orderPublicId
-        self.outcome = outcome
-        self.status = status
-    }
 
     enum CodingKeys: String, CodingKey {
         case kind
@@ -7473,20 +4103,6 @@ struct PnlFxRateSourceData: Codable, Sendable {
     let quoteCurrency: String
     let exchange: String
 
-    init(
-        sourceCurrency: String,
-        valuationCurrency: String,
-        baseCurrency: String,
-        quoteCurrency: String,
-        exchange: String
-    ) {
-        self.sourceCurrency = sourceCurrency
-        self.valuationCurrency = valuationCurrency
-        self.baseCurrency = baseCurrency
-        self.quoteCurrency = quoteCurrency
-        self.exchange = exchange
-    }
-
     enum CodingKeys: String, CodingKey {
         case sourceCurrency = "source_currency"
         case valuationCurrency = "valuation_currency"
@@ -7501,18 +4117,6 @@ struct PnlIncompletenessReasonData: Codable, Sendable {
     let withholdingTier: PnlWithholdingTier
     let withholdingScope: PnlWithholdingScope
     let triggerInstrumentPublicId: String?
-
-    init(
-        reason: PnlIncompletenessReason,
-        withholdingTier: PnlWithholdingTier,
-        withholdingScope: PnlWithholdingScope,
-        triggerInstrumentPublicId: String?
-    ) {
-        self.reason = reason
-        self.withholdingTier = withholdingTier
-        self.withholdingScope = withholdingScope
-        self.triggerInstrumentPublicId = triggerInstrumentPublicId
-    }
 
     enum CodingKeys: String, CodingKey {
         case reason
@@ -7530,24 +4134,6 @@ struct PnlInstrumentContributionData: Codable, Sendable {
     let feePnl: Double?
     let accrualPnl: Double?
     let unrealizedPnl: Double?
-
-    init(
-        instrumentPublicId: String,
-        nativeSymbol: String?,
-        exchange: String?,
-        realizedPnl: Double?,
-        feePnl: Double?,
-        accrualPnl: Double?,
-        unrealizedPnl: Double?
-    ) {
-        self.instrumentPublicId = instrumentPublicId
-        self.nativeSymbol = nativeSymbol
-        self.exchange = exchange
-        self.realizedPnl = realizedPnl
-        self.feePnl = feePnl
-        self.accrualPnl = accrualPnl
-        self.unrealizedPnl = unrealizedPnl
-    }
 
     enum CodingKeys: String, CodingKey {
         case instrumentPublicId = "instrument_public_id"
@@ -7581,48 +4167,6 @@ struct PnlSeriesData: Codable, Sendable {
     let executionHistory: PnlExecutionHistoryData
     let points: [PnlTimelinePointData]
 
-    init(
-        type: String? = nil,
-        sequenceId: Int,
-        publicId: String,
-        timestamp: Date,
-        sessionId: String,
-        topic: String? = nil,
-        walletPublicId: String,
-        mode: String,
-        granularity: String,
-        valuationCcy: String,
-        fromTime: Date,
-        toTime: Date,
-        asOf: Date,
-        markSource: String,
-        rateSources: [PnlFxRateSourceData],
-        calcVersion: String,
-        equityCoverage: PnlEquityCoverageData,
-        executionHistory: PnlExecutionHistoryData,
-        points: [PnlTimelinePointData]
-    ) {
-        self.type = type
-        self.sequenceId = sequenceId
-        self.publicId = publicId
-        self.timestamp = timestamp
-        self.sessionId = sessionId
-        self.topic = topic
-        self.walletPublicId = walletPublicId
-        self.mode = mode
-        self.granularity = granularity
-        self.valuationCcy = valuationCcy
-        self.fromTime = fromTime
-        self.toTime = toTime
-        self.asOf = asOf
-        self.markSource = markSource
-        self.rateSources = rateSources
-        self.calcVersion = calcVersion
-        self.equityCoverage = equityCoverage
-        self.executionHistory = executionHistory
-        self.points = points
-    }
-
     enum CodingKeys: String, CodingKey {
         case type
         case sequenceId = "sequence_id"
@@ -7655,24 +4199,6 @@ struct PnlSeriesResponse: Codable, Sendable {
     let topic: String?
     let payload: PnlSeriesData
 
-    init(
-        type: String? = nil,
-        sequenceId: Int,
-        publicId: String,
-        timestamp: Date,
-        sessionId: String,
-        topic: String? = nil,
-        payload: PnlSeriesData
-    ) {
-        self.type = type
-        self.sequenceId = sequenceId
-        self.publicId = publicId
-        self.timestamp = timestamp
-        self.sessionId = sessionId
-        self.topic = topic
-        self.payload = payload
-    }
-
     enum CodingKeys: String, CodingKey {
         case type
         case sequenceId = "sequence_id"
@@ -7696,32 +4222,6 @@ struct PnlSignalMarkerData: Codable, Sendable {
     let signalPublicId: String
     let outcome: String
     let status: String
-
-    init(
-        kind: String? = nil,
-        markerTime: Date,
-        instrumentPublicId: String,
-        side: String,
-        strategyName: String?,
-        strength: Double,
-        reason: String,
-        price: Double?,
-        signalPublicId: String,
-        outcome: String,
-        status: String
-    ) {
-        self.kind = kind
-        self.markerTime = markerTime
-        self.instrumentPublicId = instrumentPublicId
-        self.side = side
-        self.strategyName = strategyName
-        self.strength = strength
-        self.reason = reason
-        self.price = price
-        self.signalPublicId = signalPublicId
-        self.outcome = outcome
-        self.status = status
-    }
 
     enum CodingKeys: String, CodingKey {
         case kind
@@ -7761,54 +4261,6 @@ struct PnlTimelineData: Codable, Sendable {
     let markerLimit: Int
     let markersTruncated: Bool
     let markers: [AnyCodable]
-
-    init(
-        type: String? = nil,
-        sequenceId: Int,
-        publicId: String,
-        timestamp: Date,
-        sessionId: String,
-        topic: String? = nil,
-        walletPublicId: String,
-        mode: String,
-        granularity: String,
-        valuationCcy: String,
-        fromTime: Date,
-        toTime: Date,
-        asOf: Date,
-        markSource: String,
-        rateSources: [PnlFxRateSourceData],
-        calcVersion: String,
-        equityCoverage: PnlEquityCoverageData,
-        executionHistory: PnlExecutionHistoryData,
-        points: [PnlTimelinePointData],
-        markerLimit: Int,
-        markersTruncated: Bool,
-        markers: [AnyCodable]
-    ) {
-        self.type = type
-        self.sequenceId = sequenceId
-        self.publicId = publicId
-        self.timestamp = timestamp
-        self.sessionId = sessionId
-        self.topic = topic
-        self.walletPublicId = walletPublicId
-        self.mode = mode
-        self.granularity = granularity
-        self.valuationCcy = valuationCcy
-        self.fromTime = fromTime
-        self.toTime = toTime
-        self.asOf = asOf
-        self.markSource = markSource
-        self.rateSources = rateSources
-        self.calcVersion = calcVersion
-        self.equityCoverage = equityCoverage
-        self.executionHistory = executionHistory
-        self.points = points
-        self.markerLimit = markerLimit
-        self.markersTruncated = markersTruncated
-        self.markers = markers
-    }
 
     enum CodingKeys: String, CodingKey {
         case type
@@ -7852,38 +4304,6 @@ struct PnlTimelinePointData: Codable, Sendable {
     let perInstrument: [PnlInstrumentContributionData]
     let attribution: [PnlAttributionContributionData]
 
-    init(
-        pointTime: Date,
-        realizedPnl: Double?,
-        feePnl: Double?,
-        accrualPnl: Double?,
-        unrealizedPnl: Double?,
-        netPnl: Double?,
-        equity: Double?,
-        cash: Double?,
-        positionValue: Double?,
-        drawdown: Double?,
-        valuationStatus: PnlValuationStatus,
-        incompletenessReasons: [PnlIncompletenessReasonData],
-        perInstrument: [PnlInstrumentContributionData],
-        attribution: [PnlAttributionContributionData]
-    ) {
-        self.pointTime = pointTime
-        self.realizedPnl = realizedPnl
-        self.feePnl = feePnl
-        self.accrualPnl = accrualPnl
-        self.unrealizedPnl = unrealizedPnl
-        self.netPnl = netPnl
-        self.equity = equity
-        self.cash = cash
-        self.positionValue = positionValue
-        self.drawdown = drawdown
-        self.valuationStatus = valuationStatus
-        self.incompletenessReasons = incompletenessReasons
-        self.perInstrument = perInstrument
-        self.attribution = attribution
-    }
-
     enum CodingKeys: String, CodingKey {
         case pointTime = "point_time"
         case realizedPnl = "realized_pnl"
@@ -7910,24 +4330,6 @@ struct PnlTimelineResponse: Codable, Sendable {
     let sessionId: String
     let topic: String?
     let payload: PnlTimelineData
-
-    init(
-        type: String? = nil,
-        sequenceId: Int,
-        publicId: String,
-        timestamp: Date,
-        sessionId: String,
-        topic: String? = nil,
-        payload: PnlTimelineData
-    ) {
-        self.type = type
-        self.sequenceId = sequenceId
-        self.publicId = publicId
-        self.timestamp = timestamp
-        self.sessionId = sessionId
-        self.topic = topic
-        self.payload = payload
-    }
 
     enum CodingKeys: String, CodingKey {
         case type
@@ -7966,60 +4368,6 @@ struct PortfolioAccountState: Codable, Sendable {
     let positionPayloadSourceObservationId: Int?
     let error: String?
     let reconciliation: PortfolioReconciliationView
-
-    init(
-        type: String? = nil,
-        sequenceId: Int,
-        publicId: String,
-        timestamp: Date,
-        sessionId: String,
-        topic: String? = nil,
-        walletPublicId: String? = nil,
-        exchange: String,
-        mode: String? = nil,
-        syncStatus: String,
-        effectiveStatus: String,
-        isAuthoritative: Bool,
-        balanceStatus: String,
-        positionStatus: String,
-        valuationStatus: String,
-        balances: [AccountBalanceEntry]? = nil,
-        openPositions: [AccountPositionEntry]? = nil,
-        balanceObservedAt: Date? = nil,
-        positionObservedAt: Date? = nil,
-        authoritativeUntil: Date? = nil,
-        currentAttemptObservationId: Int? = nil,
-        balancePayloadSourceObservationId: Int? = nil,
-        positionPayloadSourceObservationId: Int? = nil,
-        error: String? = nil,
-        reconciliation: PortfolioReconciliationView
-    ) {
-        self.type = type
-        self.sequenceId = sequenceId
-        self.publicId = publicId
-        self.timestamp = timestamp
-        self.sessionId = sessionId
-        self.topic = topic
-        self.walletPublicId = walletPublicId
-        self.exchange = exchange
-        self.mode = mode
-        self.syncStatus = syncStatus
-        self.effectiveStatus = effectiveStatus
-        self.isAuthoritative = isAuthoritative
-        self.balanceStatus = balanceStatus
-        self.positionStatus = positionStatus
-        self.valuationStatus = valuationStatus
-        self.balances = balances
-        self.openPositions = openPositions
-        self.balanceObservedAt = balanceObservedAt
-        self.positionObservedAt = positionObservedAt
-        self.authoritativeUntil = authoritativeUntil
-        self.currentAttemptObservationId = currentAttemptObservationId
-        self.balancePayloadSourceObservationId = balancePayloadSourceObservationId
-        self.positionPayloadSourceObservationId = positionPayloadSourceObservationId
-        self.error = error
-        self.reconciliation = reconciliation
-    }
 
     enum CodingKeys: String, CodingKey {
         case type
@@ -8060,26 +4408,6 @@ struct PortfolioAccountStateListResponse: Codable, Sendable {
     let payload: [PortfolioAccountState]
     let count: Int
 
-    init(
-        type: String? = nil,
-        sequenceId: Int,
-        publicId: String,
-        timestamp: Date,
-        sessionId: String,
-        topic: String? = nil,
-        payload: [PortfolioAccountState],
-        count: Int
-    ) {
-        self.type = type
-        self.sequenceId = sequenceId
-        self.publicId = publicId
-        self.timestamp = timestamp
-        self.sessionId = sessionId
-        self.topic = topic
-        self.payload = payload
-        self.count = count
-    }
-
     enum CodingKeys: String, CodingKey {
         case type
         case sequenceId = "sequence_id"
@@ -8100,24 +4428,6 @@ struct PortfolioReconciliationDriftEpisode: Codable, Sendable {
     let lastObservationId: Int
     let detailsSourceObservationId: Int
     let latestFullMismatchCount: Int
-
-    init(
-        publicId: String,
-        status: String,
-        openedAt: Date,
-        triggerObservationId: Int,
-        lastObservationId: Int,
-        detailsSourceObservationId: Int,
-        latestFullMismatchCount: Int
-    ) {
-        self.publicId = publicId
-        self.status = status
-        self.openedAt = openedAt
-        self.triggerObservationId = triggerObservationId
-        self.lastObservationId = lastObservationId
-        self.detailsSourceObservationId = detailsSourceObservationId
-        self.latestFullMismatchCount = latestFullMismatchCount
-    }
 
     enum CodingKeys: String, CodingKey {
         case publicId = "public_id"
@@ -8154,56 +4464,6 @@ struct PortfolioReconciliationView: Codable, Sendable {
     let authoritativeUntil: Date?
     let error: String?
     let openDriftEpisode: PortfolioReconciliationDriftEpisode?
-
-    init(
-        method: PortfolioReconciliationMethod?,
-        evaluationStatus: PortfolioReconciliationEvaluationStatus?,
-        effectiveStatus: PortfolioReconciliationEffectiveStatus,
-        isAuthoritative: Bool,
-        evaluatedAt: Date?,
-        currentObservationId: Int?,
-        lastFullObservationId: Int?,
-        detailSourceObservationId: Int?,
-        lastFullOutcome: String?,
-        consecutiveFullMismatches: Int,
-        anchorPublicId: String?,
-        venueAccountStatePublicId: String?,
-        venueAccountObservationId: Int?,
-        sourceWatermarkKind: String?,
-        sourceWatermark: Int?,
-        expected: JsonObject?,
-        actual: JsonObject?,
-        difference: JsonObject?,
-        tolerance: JsonObject?,
-        reconciledAt: Date?,
-        authoritativeUntil: Date?,
-        error: String?,
-        openDriftEpisode: PortfolioReconciliationDriftEpisode?
-    ) {
-        self.method = method
-        self.evaluationStatus = evaluationStatus
-        self.effectiveStatus = effectiveStatus
-        self.isAuthoritative = isAuthoritative
-        self.evaluatedAt = evaluatedAt
-        self.currentObservationId = currentObservationId
-        self.lastFullObservationId = lastFullObservationId
-        self.detailSourceObservationId = detailSourceObservationId
-        self.lastFullOutcome = lastFullOutcome
-        self.consecutiveFullMismatches = consecutiveFullMismatches
-        self.anchorPublicId = anchorPublicId
-        self.venueAccountStatePublicId = venueAccountStatePublicId
-        self.venueAccountObservationId = venueAccountObservationId
-        self.sourceWatermarkKind = sourceWatermarkKind
-        self.sourceWatermark = sourceWatermark
-        self.expected = expected
-        self.actual = actual
-        self.difference = difference
-        self.tolerance = tolerance
-        self.reconciledAt = reconciledAt
-        self.authoritativeUntil = authoritativeUntil
-        self.error = error
-        self.openDriftEpisode = openDriftEpisode
-    }
 
     enum CodingKeys: String, CodingKey {
         case method
@@ -8251,44 +4511,6 @@ struct PositionCycleData: Codable, Sendable {
     let openedAt: String
     let ageHours: Double
 
-    init(
-        type: String? = nil,
-        sequenceId: Int,
-        publicId: String,
-        timestamp: Date,
-        sessionId: String,
-        topic: String? = nil,
-        cyclePublicId: String,
-        shardKey: String,
-        instrumentPublicId: String,
-        exchange: String,
-        mode: String,
-        walletPublicId: String,
-        operatorPublicId: String?,
-        direction: String,
-        maxQty: Double,
-        openedAt: String,
-        ageHours: Double
-    ) {
-        self.type = type
-        self.sequenceId = sequenceId
-        self.publicId = publicId
-        self.timestamp = timestamp
-        self.sessionId = sessionId
-        self.topic = topic
-        self.cyclePublicId = cyclePublicId
-        self.shardKey = shardKey
-        self.instrumentPublicId = instrumentPublicId
-        self.exchange = exchange
-        self.mode = mode
-        self.walletPublicId = walletPublicId
-        self.operatorPublicId = operatorPublicId
-        self.direction = direction
-        self.maxQty = maxQty
-        self.openedAt = openedAt
-        self.ageHours = ageHours
-    }
-
     enum CodingKeys: String, CodingKey {
         case type
         case sequenceId = "sequence_id"
@@ -8319,26 +4541,6 @@ struct PositionCycleListResponse: Codable, Sendable {
     let topic: String?
     let payload: [PositionCycleData]
     let count: Int
-
-    init(
-        type: String? = nil,
-        sequenceId: Int,
-        publicId: String,
-        timestamp: Date,
-        sessionId: String,
-        topic: String? = nil,
-        payload: [PositionCycleData],
-        count: Int
-    ) {
-        self.type = type
-        self.sequenceId = sequenceId
-        self.publicId = publicId
-        self.timestamp = timestamp
-        self.sessionId = sessionId
-        self.topic = topic
-        self.payload = payload
-        self.count = count
-    }
 
     enum CodingKeys: String, CodingKey {
         case type
@@ -8373,48 +4575,6 @@ struct PositionData: Codable, Sendable {
     let positionCyclePublicId: String?
     let walletPublicId: String?
 
-    init(
-        type: String? = nil,
-        sequenceId: Int,
-        publicId: String,
-        timestamp: Date,
-        sessionId: String,
-        topic: String? = nil,
-        instrument: String,
-        instrumentPublicId: String? = nil,
-        exchange: String,
-        mode: String? = nil,
-        quantity: Double,
-        averagePrice: Double? = nil,
-        unrealizedPnl: Double? = nil,
-        realizedPnl: Double,
-        markPrice: Double? = nil,
-        markedAt: Date? = nil,
-        sourceVenueEventId: Int? = nil,
-        positionCyclePublicId: String? = nil,
-        walletPublicId: String? = nil
-    ) {
-        self.type = type
-        self.sequenceId = sequenceId
-        self.publicId = publicId
-        self.timestamp = timestamp
-        self.sessionId = sessionId
-        self.topic = topic
-        self.instrument = instrument
-        self.instrumentPublicId = instrumentPublicId
-        self.exchange = exchange
-        self.mode = mode
-        self.quantity = quantity
-        self.averagePrice = averagePrice
-        self.unrealizedPnl = unrealizedPnl
-        self.realizedPnl = realizedPnl
-        self.markPrice = markPrice
-        self.markedAt = markedAt
-        self.sourceVenueEventId = sourceVenueEventId
-        self.positionCyclePublicId = positionCyclePublicId
-        self.walletPublicId = walletPublicId
-    }
-
     enum CodingKeys: String, CodingKey {
         case type
         case sequenceId = "sequence_id"
@@ -8448,26 +4608,6 @@ struct PositionListResponse: Codable, Sendable {
     let payload: [PositionData]
     let count: Int
 
-    init(
-        type: String? = nil,
-        sequenceId: Int,
-        publicId: String,
-        timestamp: Date,
-        sessionId: String,
-        topic: String? = nil,
-        payload: [PositionData],
-        count: Int
-    ) {
-        self.type = type
-        self.sequenceId = sequenceId
-        self.publicId = publicId
-        self.timestamp = timestamp
-        self.sessionId = sessionId
-        self.topic = topic
-        self.payload = payload
-        self.count = count
-    }
-
     enum CodingKeys: String, CodingKey {
         case type
         case sequenceId = "sequence_id"
@@ -8483,14 +4623,6 @@ struct PositionListResponse: Codable, Sendable {
 struct ProcessCategoryCount: Codable, Sendable {
     let running: Int
     let total: Int
-
-    init(
-        running: Int,
-        total: Int
-    ) {
-        self.running = running
-        self.total = total
-    }
 }
 
 struct ProcessConfigScopeData: Codable, Sendable {
@@ -8504,30 +4636,6 @@ struct ProcessConfigScopeData: Codable, Sendable {
     let name: String
     let parameters: JsonObject
     let restartRequired: Bool?
-
-    init(
-        type: String? = nil,
-        sequenceId: Int,
-        publicId: String,
-        timestamp: Date,
-        sessionId: String,
-        topic: String? = nil,
-        status: String? = nil,
-        name: String,
-        parameters: JsonObject,
-        restartRequired: Bool? = nil
-    ) {
-        self.type = type
-        self.sequenceId = sequenceId
-        self.publicId = publicId
-        self.timestamp = timestamp
-        self.sessionId = sessionId
-        self.topic = topic
-        self.status = status
-        self.name = name
-        self.parameters = parameters
-        self.restartRequired = restartRequired
-    }
 
     enum CodingKeys: String, CodingKey {
         case type
@@ -8552,24 +4660,6 @@ struct ProcessConfigScopeResponse: Codable, Sendable {
     let topic: String?
     let payload: ProcessConfigScopeData
 
-    init(
-        type: String? = nil,
-        sequenceId: Int,
-        publicId: String,
-        timestamp: Date,
-        sessionId: String,
-        topic: String? = nil,
-        payload: ProcessConfigScopeData
-    ) {
-        self.type = type
-        self.sequenceId = sequenceId
-        self.publicId = publicId
-        self.timestamp = timestamp
-        self.sessionId = sessionId
-        self.topic = topic
-        self.payload = payload
-    }
-
     enum CodingKeys: String, CodingKey {
         case type
         case sequenceId = "sequence_id"
@@ -8590,26 +4680,6 @@ struct ProcessCreateData: Codable, Sendable {
     let topic: String?
     let status: String
     let process: ProcessCreatedInfo
-
-    init(
-        type: String? = nil,
-        sequenceId: Int,
-        publicId: String,
-        timestamp: Date,
-        sessionId: String,
-        topic: String? = nil,
-        status: String,
-        process: ProcessCreatedInfo
-    ) {
-        self.type = type
-        self.sequenceId = sequenceId
-        self.publicId = publicId
-        self.timestamp = timestamp
-        self.sessionId = sessionId
-        self.topic = topic
-        self.status = status
-        self.process = process
-    }
 
     enum CodingKeys: String, CodingKey {
         case type
@@ -8632,24 +4702,6 @@ struct ProcessCreateResponse: Codable, Sendable {
     let topic: String?
     let payload: ProcessCreateData
 
-    init(
-        type: String? = nil,
-        sequenceId: Int,
-        publicId: String,
-        timestamp: Date,
-        sessionId: String,
-        topic: String? = nil,
-        payload: ProcessCreateData
-    ) {
-        self.type = type
-        self.sequenceId = sequenceId
-        self.publicId = publicId
-        self.timestamp = timestamp
-        self.sessionId = sessionId
-        self.topic = topic
-        self.payload = payload
-    }
-
     enum CodingKeys: String, CodingKey {
         case type
         case sequenceId = "sequence_id"
@@ -8664,14 +4716,6 @@ struct ProcessCreateResponse: Codable, Sendable {
 struct ProcessCreatedInfo: Codable, Sendable {
     let name: String
     let template: String
-
-    init(
-        name: String,
-        template: String
-    ) {
-        self.name = name
-        self.template = template
-    }
 }
 
 struct ProcessDesiredStateData: Codable, Sendable {
@@ -8687,34 +4731,6 @@ struct ProcessDesiredStateData: Codable, Sendable {
     let coordinator: String?
     let managedRemotely: Bool
     let message: String?
-
-    init(
-        type: String? = nil,
-        sequenceId: Int,
-        publicId: String,
-        timestamp: Date,
-        sessionId: String,
-        topic: String? = nil,
-        status: String? = nil,
-        name: String,
-        action: String,
-        coordinator: String? = nil,
-        managedRemotely: Bool,
-        message: String? = nil
-    ) {
-        self.type = type
-        self.sequenceId = sequenceId
-        self.publicId = publicId
-        self.timestamp = timestamp
-        self.sessionId = sessionId
-        self.topic = topic
-        self.status = status
-        self.name = name
-        self.action = action
-        self.coordinator = coordinator
-        self.managedRemotely = managedRemotely
-        self.message = message
-    }
 
     enum CodingKeys: String, CodingKey {
         case type
@@ -8741,24 +4757,6 @@ struct ProcessDesiredStateResponse: Codable, Sendable {
     let topic: String?
     let payload: ProcessDesiredStateData
 
-    init(
-        type: String? = nil,
-        sequenceId: Int,
-        publicId: String,
-        timestamp: Date,
-        sessionId: String,
-        topic: String? = nil,
-        payload: ProcessDesiredStateData
-    ) {
-        self.type = type
-        self.sequenceId = sequenceId
-        self.publicId = publicId
-        self.timestamp = timestamp
-        self.sessionId = sessionId
-        self.topic = topic
-        self.payload = payload
-    }
-
     enum CodingKeys: String, CodingKey {
         case type
         case sequenceId = "sequence_id"
@@ -8777,22 +4775,6 @@ struct ProcessMetrics: Codable, Sendable {
     let numThreads: Int
     let numFds: Int
     let numConnections: Int
-
-    init(
-        pid: Int,
-        uptimeSeconds: Double,
-        status: String,
-        numThreads: Int,
-        numFds: Int,
-        numConnections: Int
-    ) {
-        self.pid = pid
-        self.uptimeSeconds = uptimeSeconds
-        self.status = status
-        self.numThreads = numThreads
-        self.numFds = numFds
-        self.numConnections = numConnections
-    }
 
     enum CodingKeys: String, CodingKey {
         case pid
@@ -8821,42 +4803,6 @@ struct ProcessRun: Codable, Sendable {
     let tags: [String]?
     let startedAt: String
     let completedAt: String?
-
-    init(
-        type: String? = nil,
-        sequenceId: Int,
-        publicId: String,
-        timestamp: Date,
-        sessionId: String,
-        topic: String? = nil,
-        processName: String,
-        status: String,
-        role: String,
-        lifecycle: String,
-        parameters: JsonObject? = nil,
-        result: JsonObject? = nil,
-        error: String? = nil,
-        tags: [String]? = nil,
-        startedAt: String,
-        completedAt: String? = nil
-    ) {
-        self.type = type
-        self.sequenceId = sequenceId
-        self.publicId = publicId
-        self.timestamp = timestamp
-        self.sessionId = sessionId
-        self.topic = topic
-        self.processName = processName
-        self.status = status
-        self.role = role
-        self.lifecycle = lifecycle
-        self.parameters = parameters
-        self.result = result
-        self.error = error
-        self.tags = tags
-        self.startedAt = startedAt
-        self.completedAt = completedAt
-    }
 
     enum CodingKeys: String, CodingKey {
         case type
@@ -8888,26 +4834,6 @@ struct ProcessRunsResponse: Codable, Sendable {
     let payload: [ProcessRun]
     let count: Int
 
-    init(
-        type: String? = nil,
-        sequenceId: Int,
-        publicId: String,
-        timestamp: Date,
-        sessionId: String,
-        topic: String? = nil,
-        payload: [ProcessRun],
-        count: Int
-    ) {
-        self.type = type
-        self.sequenceId = sequenceId
-        self.publicId = publicId
-        self.timestamp = timestamp
-        self.sessionId = sessionId
-        self.topic = topic
-        self.payload = payload
-        self.count = count
-    }
-
     enum CodingKeys: String, CodingKey {
         case type
         case sequenceId = "sequence_id"
@@ -8938,42 +4864,6 @@ struct ProcessSchemaData: Codable, Sendable {
     let seededIdentityParams: [String]?
     let lifecycle: String
 
-    init(
-        type: String? = nil,
-        sequenceId: Int,
-        publicId: String,
-        timestamp: Date,
-        sessionId: String,
-        topic: String? = nil,
-        name: String,
-        description: String,
-        classPath: String,
-        method: String,
-        defaultEnabled: Bool,
-        defaultMode: String,
-        defaultParameters: JsonObject? = nil,
-        referenceIdentityParams: [String: String]? = nil,
-        seededIdentityParams: [String]? = nil,
-        lifecycle: String
-    ) {
-        self.type = type
-        self.sequenceId = sequenceId
-        self.publicId = publicId
-        self.timestamp = timestamp
-        self.sessionId = sessionId
-        self.topic = topic
-        self.name = name
-        self.description = description
-        self.classPath = classPath
-        self.method = method
-        self.defaultEnabled = defaultEnabled
-        self.defaultMode = defaultMode
-        self.defaultParameters = defaultParameters
-        self.referenceIdentityParams = referenceIdentityParams
-        self.seededIdentityParams = seededIdentityParams
-        self.lifecycle = lifecycle
-    }
-
     enum CodingKeys: String, CodingKey {
         case type
         case sequenceId = "sequence_id"
@@ -9003,24 +4893,6 @@ struct ProcessSchemaResponse: Codable, Sendable {
     let topic: String?
     let payload: ProcessSchemaData
 
-    init(
-        type: String? = nil,
-        sequenceId: Int,
-        publicId: String,
-        timestamp: Date,
-        sessionId: String,
-        topic: String? = nil,
-        payload: ProcessSchemaData
-    ) {
-        self.type = type
-        self.sequenceId = sequenceId
-        self.publicId = publicId
-        self.timestamp = timestamp
-        self.sessionId = sessionId
-        self.topic = topic
-        self.payload = payload
-    }
-
     enum CodingKeys: String, CodingKey {
         case type
         case sequenceId = "sequence_id"
@@ -9043,30 +4915,6 @@ struct ProcessStartData: Codable, Sendable {
     let name: String
     let processPublicId: String?
     let message: String?
-
-    init(
-        type: String? = nil,
-        sequenceId: Int,
-        publicId: String,
-        timestamp: Date,
-        sessionId: String,
-        topic: String? = nil,
-        status: String,
-        name: String,
-        processPublicId: String? = nil,
-        message: String? = nil
-    ) {
-        self.type = type
-        self.sequenceId = sequenceId
-        self.publicId = publicId
-        self.timestamp = timestamp
-        self.sessionId = sessionId
-        self.topic = topic
-        self.status = status
-        self.name = name
-        self.processPublicId = processPublicId
-        self.message = message
-    }
 
     enum CodingKeys: String, CodingKey {
         case type
@@ -9091,24 +4939,6 @@ struct ProcessStartResponse: Codable, Sendable {
     let topic: String?
     let payload: ProcessStartData
 
-    init(
-        type: String? = nil,
-        sequenceId: Int,
-        publicId: String,
-        timestamp: Date,
-        sessionId: String,
-        topic: String? = nil,
-        payload: ProcessStartData
-    ) {
-        self.type = type
-        self.sequenceId = sequenceId
-        self.publicId = publicId
-        self.timestamp = timestamp
-        self.sessionId = sessionId
-        self.topic = topic
-        self.payload = payload
-    }
-
     enum CodingKeys: String, CodingKey {
         case type
         case sequenceId = "sequence_id"
@@ -9127,22 +4957,6 @@ struct ProcessStatus: Codable, Sendable {
     let command: String?
     let exitCode: Int?
     let error: String?
-
-    init(
-        status: String,
-        pid: Int? = nil,
-        startedAt: String? = nil,
-        command: String? = nil,
-        exitCode: Int? = nil,
-        error: String? = nil
-    ) {
-        self.status = status
-        self.pid = pid
-        self.startedAt = startedAt
-        self.command = command
-        self.exitCode = exitCode
-        self.error = error
-    }
 
     enum CodingKeys: String, CodingKey {
         case status
@@ -9165,28 +4979,6 @@ struct ProcessStopData: Codable, Sendable {
     let name: String
     let message: String?
 
-    init(
-        type: String? = nil,
-        sequenceId: Int,
-        publicId: String,
-        timestamp: Date,
-        sessionId: String,
-        topic: String? = nil,
-        status: String,
-        name: String,
-        message: String? = nil
-    ) {
-        self.type = type
-        self.sequenceId = sequenceId
-        self.publicId = publicId
-        self.timestamp = timestamp
-        self.sessionId = sessionId
-        self.topic = topic
-        self.status = status
-        self.name = name
-        self.message = message
-    }
-
     enum CodingKeys: String, CodingKey {
         case type
         case sequenceId = "sequence_id"
@@ -9208,24 +5000,6 @@ struct ProcessStopResponse: Codable, Sendable {
     let sessionId: String
     let topic: String?
     let payload: ProcessStopData
-
-    init(
-        type: String? = nil,
-        sequenceId: Int,
-        publicId: String,
-        timestamp: Date,
-        sessionId: String,
-        topic: String? = nil,
-        payload: ProcessStopData
-    ) {
-        self.type = type
-        self.sequenceId = sequenceId
-        self.publicId = publicId
-        self.timestamp = timestamp
-        self.sessionId = sessionId
-        self.topic = topic
-        self.payload = payload
-    }
 
     enum CodingKeys: String, CodingKey {
         case type
@@ -9252,36 +5026,6 @@ struct ProcessSummaryData: Codable, Sendable {
     let executors: ProcessCategoryCount
     let brokers: ProcessCategoryCount
     let processes: [ProcessSummaryItem]?
-
-    init(
-        type: String? = nil,
-        sequenceId: Int,
-        publicId: String,
-        timestamp: Date,
-        sessionId: String,
-        topic: String? = nil,
-        coordinator: String? = nil,
-        coordinatorLabel: String? = nil,
-        feeds: ProcessCategoryCount,
-        strategies: ProcessCategoryCount,
-        executors: ProcessCategoryCount,
-        brokers: ProcessCategoryCount,
-        processes: [ProcessSummaryItem]? = nil
-    ) {
-        self.type = type
-        self.sequenceId = sequenceId
-        self.publicId = publicId
-        self.timestamp = timestamp
-        self.sessionId = sessionId
-        self.topic = topic
-        self.coordinator = coordinator
-        self.coordinatorLabel = coordinatorLabel
-        self.feeds = feeds
-        self.strategies = strategies
-        self.executors = executors
-        self.brokers = brokers
-        self.processes = processes
-    }
 
     enum CodingKeys: String, CodingKey {
         case type
@@ -9311,28 +5055,6 @@ struct ProcessSummaryItem: Codable, Sendable {
     let cpuPercent: Double?
     let owned: Bool?
 
-    init(
-        name: String,
-        running: Bool,
-        enabled: Bool,
-        role: String,
-        lifecycle: String,
-        activePublicId: String? = nil,
-        rssBytes: Int? = nil,
-        cpuPercent: Double? = nil,
-        owned: Bool? = nil
-    ) {
-        self.name = name
-        self.running = running
-        self.enabled = enabled
-        self.role = role
-        self.lifecycle = lifecycle
-        self.activePublicId = activePublicId
-        self.rssBytes = rssBytes
-        self.cpuPercent = cpuPercent
-        self.owned = owned
-    }
-
     enum CodingKeys: String, CodingKey {
         case name
         case running
@@ -9355,24 +5077,6 @@ struct ProcessSummaryResponse: Codable, Sendable {
     let topic: String?
     let payload: ProcessSummaryData
 
-    init(
-        type: String? = nil,
-        sequenceId: Int,
-        publicId: String,
-        timestamp: Date,
-        sessionId: String,
-        topic: String? = nil,
-        payload: ProcessSummaryData
-    ) {
-        self.type = type
-        self.sequenceId = sequenceId
-        self.publicId = publicId
-        self.timestamp = timestamp
-        self.sessionId = sessionId
-        self.topic = topic
-        self.payload = payload
-    }
-
     enum CodingKeys: String, CodingKey {
         case type
         case sequenceId = "sequence_id"
@@ -9394,26 +5098,6 @@ struct PushBetaConfigRead: Codable, Sendable {
     let enabled: Bool
     let userPublicIds: [String]
 
-    init(
-        type: String? = nil,
-        sequenceId: Int,
-        publicId: String,
-        timestamp: Date,
-        sessionId: String,
-        topic: String? = nil,
-        enabled: Bool,
-        userPublicIds: [String]
-    ) {
-        self.type = type
-        self.sequenceId = sequenceId
-        self.publicId = publicId
-        self.timestamp = timestamp
-        self.sessionId = sessionId
-        self.topic = topic
-        self.enabled = enabled
-        self.userPublicIds = userPublicIds
-    }
-
     enum CodingKeys: String, CodingKey {
         case type
         case sequenceId = "sequence_id"
@@ -9434,24 +5118,6 @@ struct PushBetaConfigResponse: Codable, Sendable {
     let sessionId: String
     let topic: String?
     let payload: PushBetaConfigRead
-
-    init(
-        type: String? = nil,
-        sequenceId: Int,
-        publicId: String,
-        timestamp: Date,
-        sessionId: String,
-        topic: String? = nil,
-        payload: PushBetaConfigRead
-    ) {
-        self.type = type
-        self.sequenceId = sequenceId
-        self.publicId = publicId
-        self.timestamp = timestamp
-        self.sessionId = sessionId
-        self.topic = topic
-        self.payload = payload
-    }
 
     enum CodingKeys: String, CodingKey {
         case type
@@ -9479,36 +5145,6 @@ struct RefreshData: Codable, Sendable {
     let accessToken: String?
     let refreshToken: String?
 
-    init(
-        type: String? = nil,
-        sequenceId: Int,
-        publicId: String,
-        timestamp: Date,
-        sessionId: String,
-        topic: String? = nil,
-        message: String,
-        wsToken: String,
-        wsTokenExp: Date,
-        csrfToken: String,
-        user: UserProfile,
-        accessToken: String? = nil,
-        refreshToken: String? = nil
-    ) {
-        self.type = type
-        self.sequenceId = sequenceId
-        self.publicId = publicId
-        self.timestamp = timestamp
-        self.sessionId = sessionId
-        self.topic = topic
-        self.message = message
-        self.wsToken = wsToken
-        self.wsTokenExp = wsTokenExp
-        self.csrfToken = csrfToken
-        self.user = user
-        self.accessToken = accessToken
-        self.refreshToken = refreshToken
-    }
-
     enum CodingKeys: String, CodingKey {
         case type
         case sequenceId = "sequence_id"
@@ -9534,24 +5170,6 @@ struct RefreshResponse: Codable, Sendable {
     let sessionId: String
     let topic: String?
     let payload: RefreshData
-
-    init(
-        type: String? = nil,
-        sequenceId: Int,
-        publicId: String,
-        timestamp: Date,
-        sessionId: String,
-        topic: String? = nil,
-        payload: RefreshData
-    ) {
-        self.type = type
-        self.sequenceId = sequenceId
-        self.publicId = publicId
-        self.timestamp = timestamp
-        self.sessionId = sessionId
-        self.topic = topic
-        self.payload = payload
-    }
 
     enum CodingKeys: String, CodingKey {
         case type
@@ -9579,36 +5197,6 @@ struct RelatedInstrumentData: Codable, Sendable {
     let contractFamily: String?
     let isSelected: Bool
 
-    init(
-        type: String? = nil,
-        sequenceId: Int,
-        publicId: String,
-        timestamp: Date,
-        sessionId: String,
-        topic: String? = nil,
-        instrumentPublicId: String,
-        nativeSymbol: String,
-        exchange: String,
-        assetType: String,
-        relationshipType: String,
-        contractFamily: String?,
-        isSelected: Bool
-    ) {
-        self.type = type
-        self.sequenceId = sequenceId
-        self.publicId = publicId
-        self.timestamp = timestamp
-        self.sessionId = sessionId
-        self.topic = topic
-        self.instrumentPublicId = instrumentPublicId
-        self.nativeSymbol = nativeSymbol
-        self.exchange = exchange
-        self.assetType = assetType
-        self.relationshipType = relationshipType
-        self.contractFamily = contractFamily
-        self.isSelected = isSelected
-    }
-
     enum CodingKeys: String, CodingKey {
         case type
         case sequenceId = "sequence_id"
@@ -9631,16 +5219,6 @@ struct RelatedInstrumentsGroup: Codable, Sendable {
     let label: String
     let items: [RelatedInstrumentData]
 
-    init(
-        relationshipType: String,
-        label: String,
-        items: [RelatedInstrumentData]
-    ) {
-        self.relationshipType = relationshipType
-        self.label = label
-        self.items = items
-    }
-
     enum CodingKeys: String, CodingKey {
         case relationshipType = "relationship_type"
         case label
@@ -9652,16 +5230,6 @@ struct RelatedInstrumentsPayloadData: Codable, Sendable {
     let selected: RelatedInstrumentsSelected
     let underlying: RelatedInstrumentsUnderlying?
     let groups: [RelatedInstrumentsGroup]
-
-    init(
-        selected: RelatedInstrumentsSelected,
-        underlying: RelatedInstrumentsUnderlying?,
-        groups: [RelatedInstrumentsGroup]
-    ) {
-        self.selected = selected
-        self.underlying = underlying
-        self.groups = groups
-    }
 }
 
 struct RelatedInstrumentsResponse: Codable, Sendable {
@@ -9672,24 +5240,6 @@ struct RelatedInstrumentsResponse: Codable, Sendable {
     let sessionId: String
     let topic: String?
     let payload: RelatedInstrumentsPayloadData
-
-    init(
-        type: String? = nil,
-        sequenceId: Int,
-        publicId: String,
-        timestamp: Date,
-        sessionId: String,
-        topic: String? = nil,
-        payload: RelatedInstrumentsPayloadData
-    ) {
-        self.type = type
-        self.sequenceId = sequenceId
-        self.publicId = publicId
-        self.timestamp = timestamp
-        self.sessionId = sessionId
-        self.topic = topic
-        self.payload = payload
-    }
 
     enum CodingKeys: String, CodingKey {
         case type
@@ -9706,14 +5256,6 @@ struct RelatedInstrumentsSelected: Codable, Sendable {
     let exchange: String
     let nativeSymbol: String
 
-    init(
-        exchange: String,
-        nativeSymbol: String
-    ) {
-        self.exchange = exchange
-        self.nativeSymbol = nativeSymbol
-    }
-
     enum CodingKeys: String, CodingKey {
         case exchange
         case nativeSymbol = "native_symbol"
@@ -9727,22 +5269,6 @@ struct RelatedInstrumentsUnderlying: Codable, Sendable {
     let assetClass: String
     let sector: String?
     let description: String?
-
-    init(
-        publicId: String,
-        ticker: String,
-        name: String,
-        assetClass: String,
-        sector: String?,
-        description: String?
-    ) {
-        self.publicId = publicId
-        self.ticker = ticker
-        self.name = name
-        self.assetClass = assetClass
-        self.sector = sector
-        self.description = description
-    }
 
     enum CodingKeys: String, CodingKey {
         case publicId = "public_id"
@@ -9759,16 +5285,6 @@ struct ResearcherCreatedPayload: Codable, Sendable {
     let accessToken: String
     let expiresIn: Int
 
-    init(
-        researcher: ResearcherRead,
-        accessToken: String,
-        expiresIn: Int
-    ) {
-        self.researcher = researcher
-        self.accessToken = accessToken
-        self.expiresIn = expiresIn
-    }
-
     enum CodingKeys: String, CodingKey {
         case researcher
         case accessToken = "access_token"
@@ -9784,24 +5300,6 @@ struct ResearcherCreatedResponse: Codable, Sendable {
     let sessionId: String
     let topic: String?
     let payload: ResearcherCreatedPayload
-
-    init(
-        type: String? = nil,
-        sequenceId: Int,
-        publicId: String,
-        timestamp: Date,
-        sessionId: String,
-        topic: String? = nil,
-        payload: ResearcherCreatedPayload
-    ) {
-        self.type = type
-        self.sequenceId = sequenceId
-        self.publicId = publicId
-        self.timestamp = timestamp
-        self.sessionId = sessionId
-        self.topic = topic
-        self.payload = payload
-    }
 
     enum CodingKeys: String, CodingKey {
         case type
@@ -9822,22 +5320,6 @@ struct ResearcherRead: Codable, Sendable {
     let createdAt: Date
     let isActive: Bool
 
-    init(
-        publicId: String,
-        username: String,
-        label: String,
-        createdByUserPublicId: String,
-        createdAt: Date,
-        isActive: Bool
-    ) {
-        self.publicId = publicId
-        self.username = username
-        self.label = label
-        self.createdByUserPublicId = createdByUserPublicId
-        self.createdAt = createdAt
-        self.isActive = isActive
-    }
-
     enum CodingKeys: String, CodingKey {
         case publicId = "public_id"
         case username
@@ -9857,24 +5339,6 @@ struct RestRateData: Codable, Sendable {
     let topic: String?
     let exchanges: [String: RestRateExchangeStats]
 
-    init(
-        type: String? = nil,
-        sequenceId: Int,
-        publicId: String,
-        timestamp: Date,
-        sessionId: String,
-        topic: String? = nil,
-        exchanges: [String: RestRateExchangeStats]
-    ) {
-        self.type = type
-        self.sequenceId = sequenceId
-        self.publicId = publicId
-        self.timestamp = timestamp
-        self.sessionId = sessionId
-        self.topic = topic
-        self.exchanges = exchanges
-    }
-
     enum CodingKeys: String, CodingKey {
         case type
         case sequenceId = "sequence_id"
@@ -9893,20 +5357,6 @@ struct RestRateExchangeStats: Codable, Sendable {
     let limitRps: Double?
     let utilization: Double?
 
-    init(
-        rps1S: Double,
-        rps10S: Double,
-        rps60S: Double,
-        limitRps: Double? = nil,
-        utilization: Double? = nil
-    ) {
-        self.rps1S = rps1S
-        self.rps10S = rps10S
-        self.rps60S = rps60S
-        self.limitRps = limitRps
-        self.utilization = utilization
-    }
-
     enum CodingKeys: String, CodingKey {
         case rps1S = "rps_1s"
         case rps10S = "rps_10s"
@@ -9924,24 +5374,6 @@ struct RestRateResponse: Codable, Sendable {
     let sessionId: String
     let topic: String?
     let payload: RestRateData
-
-    init(
-        type: String? = nil,
-        sequenceId: Int,
-        publicId: String,
-        timestamp: Date,
-        sessionId: String,
-        topic: String? = nil,
-        payload: RestRateData
-    ) {
-        self.type = type
-        self.sequenceId = sequenceId
-        self.publicId = publicId
-        self.timestamp = timestamp
-        self.sessionId = sessionId
-        self.topic = topic
-        self.payload = payload
-    }
 
     enum CodingKeys: String, CodingKey {
         case type
@@ -9964,28 +5396,6 @@ struct RetentionPolicyResult: Codable, Sendable {
     let purgedRows: Int
     let filesWritten: Int
     let error: String?
-
-    init(
-        table: String,
-        retainDays: Int,
-        backlogLookbackDays: Int,
-        dayStart: String?,
-        dayEnd: String?,
-        archivedRows: Int,
-        purgedRows: Int,
-        filesWritten: Int,
-        error: String?
-    ) {
-        self.table = table
-        self.retainDays = retainDays
-        self.backlogLookbackDays = backlogLookbackDays
-        self.dayStart = dayStart
-        self.dayEnd = dayEnd
-        self.archivedRows = archivedRows
-        self.purgedRows = purgedRows
-        self.filesWritten = filesWritten
-        self.error = error
-    }
 
     enum CodingKeys: String, CodingKey {
         case table
@@ -10012,30 +5422,6 @@ struct RetentionRunData: Codable, Sendable {
     let dryRun: Bool
     let results: [RetentionPolicyResult]
 
-    init(
-        type: String? = nil,
-        sequenceId: Int,
-        publicId: String,
-        timestamp: Date,
-        sessionId: String,
-        topic: String? = nil,
-        runStartedAt: Date,
-        runCompletedAt: Date,
-        dryRun: Bool,
-        results: [RetentionPolicyResult]
-    ) {
-        self.type = type
-        self.sequenceId = sequenceId
-        self.publicId = publicId
-        self.timestamp = timestamp
-        self.sessionId = sessionId
-        self.topic = topic
-        self.runStartedAt = runStartedAt
-        self.runCompletedAt = runCompletedAt
-        self.dryRun = dryRun
-        self.results = results
-    }
-
     enum CodingKeys: String, CodingKey {
         case type
         case sequenceId = "sequence_id"
@@ -10059,24 +5445,6 @@ struct RetentionRunResponse: Codable, Sendable {
     let topic: String?
     let payload: RetentionRunData
 
-    init(
-        type: String? = nil,
-        sequenceId: Int,
-        publicId: String,
-        timestamp: Date,
-        sessionId: String,
-        topic: String? = nil,
-        payload: RetentionRunData
-    ) {
-        self.type = type
-        self.sequenceId = sequenceId
-        self.publicId = publicId
-        self.timestamp = timestamp
-        self.sessionId = sessionId
-        self.topic = topic
-        self.payload = payload
-    }
-
     enum CodingKeys: String, CodingKey {
         case type
         case sequenceId = "sequence_id"
@@ -10096,24 +5464,6 @@ struct RevokeDevicePrefResponse: Codable, Sendable {
     let sessionId: String
     let topic: String?
     let payload: DeviceAlertPrefInfo
-
-    init(
-        type: String? = nil,
-        sequenceId: Int,
-        publicId: String,
-        timestamp: Date,
-        sessionId: String,
-        topic: String? = nil,
-        payload: DeviceAlertPrefInfo
-    ) {
-        self.type = type
-        self.sequenceId = sequenceId
-        self.publicId = publicId
-        self.timestamp = timestamp
-        self.sessionId = sessionId
-        self.topic = topic
-        self.payload = payload
-    }
 
     enum CodingKeys: String, CodingKey {
         case type
@@ -10135,24 +5485,6 @@ struct RevokeScopeGrantResponse: Codable, Sendable {
     let topic: String?
     let payload: ScopeGrantInfo
 
-    init(
-        type: String? = nil,
-        sequenceId: Int,
-        publicId: String,
-        timestamp: Date,
-        sessionId: String,
-        topic: String? = nil,
-        payload: ScopeGrantInfo
-    ) {
-        self.type = type
-        self.sequenceId = sequenceId
-        self.publicId = publicId
-        self.timestamp = timestamp
-        self.sessionId = sessionId
-        self.topic = topic
-        self.payload = payload
-    }
-
     enum CodingKeys: String, CodingKey {
         case type
         case sequenceId = "sequence_id"
@@ -10169,16 +5501,6 @@ struct RollPointDetail: Codable, Sendable {
     let toContract: String
     let rollAt: String
 
-    init(
-        fromContract: String,
-        toContract: String,
-        rollAt: String
-    ) {
-        self.fromContract = fromContract
-        self.toContract = toContract
-        self.rollAt = rollAt
-    }
-
     enum CodingKeys: String, CodingKey {
         case fromContract = "from_contract"
         case toContract = "to_contract"
@@ -10189,14 +5511,6 @@ struct RollPointDetail: Codable, Sendable {
 struct SaturationMetrics: Codable, Sendable {
     let threadsPct: Double?
     let fdsPct: Double?
-
-    init(
-        threadsPct: Double?,
-        fdsPct: Double?
-    ) {
-        self.threadsPct = threadsPct
-        self.fdsPct = fdsPct
-    }
 
     enum CodingKeys: String, CodingKey {
         case threadsPct = "threads_pct"
@@ -10219,38 +5533,6 @@ struct ScopeGrantInfo: Codable, Sendable {
     let instrumentPublicId: String?
     let note: String?
     let knownTo: Date
-
-    init(
-        type: String? = nil,
-        sequenceId: Int,
-        publicId: String,
-        timestamp: Date,
-        sessionId: String,
-        topic: String? = nil,
-        operatorPublicId: String,
-        walletPublicId: String,
-        grantedByUserPublicId: String,
-        scopeKind: String,
-        underlyingPublicId: String? = nil,
-        instrumentPublicId: String? = nil,
-        note: String? = nil,
-        knownTo: Date
-    ) {
-        self.type = type
-        self.sequenceId = sequenceId
-        self.publicId = publicId
-        self.timestamp = timestamp
-        self.sessionId = sessionId
-        self.topic = topic
-        self.operatorPublicId = operatorPublicId
-        self.walletPublicId = walletPublicId
-        self.grantedByUserPublicId = grantedByUserPublicId
-        self.scopeKind = scopeKind
-        self.underlyingPublicId = underlyingPublicId
-        self.instrumentPublicId = instrumentPublicId
-        self.note = note
-        self.knownTo = knownTo
-    }
 
     enum CodingKeys: String, CodingKey {
         case type
@@ -10280,26 +5562,6 @@ struct ScopeGrantListResponse: Codable, Sendable {
     let payload: [ScopeGrantInfo]
     let count: Int
 
-    init(
-        type: String? = nil,
-        sequenceId: Int,
-        publicId: String,
-        timestamp: Date,
-        sessionId: String,
-        topic: String? = nil,
-        payload: [ScopeGrantInfo],
-        count: Int
-    ) {
-        self.type = type
-        self.sequenceId = sequenceId
-        self.publicId = publicId
-        self.timestamp = timestamp
-        self.sessionId = sessionId
-        self.topic = topic
-        self.payload = payload
-        self.count = count
-    }
-
     enum CodingKeys: String, CodingKey {
         case type
         case sequenceId = "sequence_id"
@@ -10320,24 +5582,6 @@ struct ScopeGrantResponse: Codable, Sendable {
     let sessionId: String
     let topic: String?
     let payload: ScopeGrantInfo
-
-    init(
-        type: String? = nil,
-        sequenceId: Int,
-        publicId: String,
-        timestamp: Date,
-        sessionId: String,
-        topic: String? = nil,
-        payload: ScopeGrantInfo
-    ) {
-        self.type = type
-        self.sequenceId = sequenceId
-        self.publicId = publicId
-        self.timestamp = timestamp
-        self.sessionId = sessionId
-        self.topic = topic
-        self.payload = payload
-    }
 
     enum CodingKeys: String, CodingKey {
         case type
@@ -10360,26 +5604,6 @@ struct SettingCategoriesResponse: Codable, Sendable {
     let payload: [String]
     let count: Int
 
-    init(
-        type: String? = nil,
-        sequenceId: Int,
-        publicId: String,
-        timestamp: Date,
-        sessionId: String,
-        topic: String? = nil,
-        payload: [String],
-        count: Int
-    ) {
-        self.type = type
-        self.sequenceId = sequenceId
-        self.publicId = publicId
-        self.timestamp = timestamp
-        self.sessionId = sessionId
-        self.topic = topic
-        self.payload = payload
-        self.count = count
-    }
-
     enum CodingKeys: String, CodingKey {
         case type
         case sequenceId = "sequence_id"
@@ -10401,26 +5625,6 @@ struct SettingListResponse: Codable, Sendable {
     let topic: String?
     let payload: [SettingRead]
     let count: Int
-
-    init(
-        type: String? = nil,
-        sequenceId: Int,
-        publicId: String,
-        timestamp: Date,
-        sessionId: String,
-        topic: String? = nil,
-        payload: [SettingRead],
-        count: Int
-    ) {
-        self.type = type
-        self.sequenceId = sequenceId
-        self.publicId = publicId
-        self.timestamp = timestamp
-        self.sessionId = sessionId
-        self.topic = topic
-        self.payload = payload
-        self.count = count
-    }
 
     enum CodingKeys: String, CodingKey {
         case type
@@ -10448,34 +5652,6 @@ struct SettingRead: Codable, Sendable {
     let updatedAt: Date
     let updatedBy: String?
 
-    init(
-        type: String? = nil,
-        sequenceId: Int,
-        publicId: String,
-        timestamp: Date,
-        sessionId: String,
-        topic: String? = nil,
-        key: String,
-        value: String,
-        category: String,
-        description: String? = nil,
-        updatedAt: Date,
-        updatedBy: String? = nil
-    ) {
-        self.type = type
-        self.sequenceId = sequenceId
-        self.publicId = publicId
-        self.timestamp = timestamp
-        self.sessionId = sessionId
-        self.topic = topic
-        self.key = key
-        self.value = value
-        self.category = category
-        self.description = description
-        self.updatedAt = updatedAt
-        self.updatedBy = updatedBy
-    }
-
     enum CodingKeys: String, CodingKey {
         case type
         case sequenceId = "sequence_id"
@@ -10500,24 +5676,6 @@ struct SettingResponse: Codable, Sendable {
     let sessionId: String
     let topic: String?
     let payload: SettingRead
-
-    init(
-        type: String? = nil,
-        sequenceId: Int,
-        publicId: String,
-        timestamp: Date,
-        sessionId: String,
-        topic: String? = nil,
-        payload: SettingRead
-    ) {
-        self.type = type
-        self.sequenceId = sequenceId
-        self.publicId = publicId
-        self.timestamp = timestamp
-        self.sessionId = sessionId
-        self.topic = topic
-        self.payload = payload
-    }
 
     enum CodingKeys: String, CodingKey {
         case type
@@ -10559,64 +5717,6 @@ struct SignalData: Codable, Sendable {
     let replayWindowStart: Date?
     let replayWindowEnd: Date?
 
-    init(
-        type: String? = nil,
-        sequenceId: Int,
-        publicId: String,
-        timestamp: Date,
-        sessionId: String,
-        topic: String? = nil,
-        instrument: String,
-        exchange: String,
-        side: String,
-        strength: Double,
-        reason: String,
-        price: Double? = nil,
-        strategyName: String? = nil,
-        firedAt: Date,
-        walletPublicId: String? = nil,
-        operatorPublicId: String? = nil,
-        userPublicId: String? = nil,
-        aiReviewPublicId: String? = nil,
-        aiReviewDispatchVersion: Int? = nil,
-        pairedGroupId: String? = nil,
-        pairedGroupSize: Int? = nil,
-        pairedGroupIndex: Int? = nil,
-        pairedGroupPolicy: String? = nil,
-        pairedGroupKey: String? = nil,
-        origin: String? = nil,
-        replayWindowStart: Date? = nil,
-        replayWindowEnd: Date? = nil
-    ) {
-        self.type = type
-        self.sequenceId = sequenceId
-        self.publicId = publicId
-        self.timestamp = timestamp
-        self.sessionId = sessionId
-        self.topic = topic
-        self.instrument = instrument
-        self.exchange = exchange
-        self.side = side
-        self.strength = strength
-        self.reason = reason
-        self.price = price
-        self.strategyName = strategyName
-        self.firedAt = firedAt
-        self.walletPublicId = walletPublicId
-        self.operatorPublicId = operatorPublicId
-        self.userPublicId = userPublicId
-        self.aiReviewPublicId = aiReviewPublicId
-        self.aiReviewDispatchVersion = aiReviewDispatchVersion
-        self.pairedGroupId = pairedGroupId
-        self.pairedGroupSize = pairedGroupSize
-        self.pairedGroupIndex = pairedGroupIndex
-        self.pairedGroupPolicy = pairedGroupPolicy
-        self.pairedGroupKey = pairedGroupKey
-        self.origin = origin
-        self.replayWindowStart = replayWindowStart
-        self.replayWindowEnd = replayWindowEnd
-    }
-
     enum CodingKeys: String, CodingKey {
         case type
         case sequenceId = "sequence_id"
@@ -10654,18 +5754,6 @@ struct SignalDiffEntry: Codable, Sendable {
     let signalType: String
     let leg: String
 
-    init(
-        instrument: String,
-        signalTime: Date,
-        signalType: String,
-        leg: String
-    ) {
-        self.instrument = instrument
-        self.signalTime = signalTime
-        self.signalType = signalType
-        self.leg = leg
-    }
-
     enum CodingKeys: String, CodingKey {
         case instrument
         case signalTime = "signal_time"
@@ -10683,26 +5771,6 @@ struct SignalListResponse: Codable, Sendable {
     let topic: String?
     let payload: [SignalData]
     let count: Int
-
-    init(
-        type: String? = nil,
-        sequenceId: Int,
-        publicId: String,
-        timestamp: Date,
-        sessionId: String,
-        topic: String? = nil,
-        payload: [SignalData],
-        count: Int
-    ) {
-        self.type = type
-        self.sequenceId = sequenceId
-        self.publicId = publicId
-        self.timestamp = timestamp
-        self.sessionId = sessionId
-        self.topic = topic
-        self.payload = payload
-        self.count = count
-    }
 
     enum CodingKeys: String, CodingKey {
         case type
@@ -10725,26 +5793,6 @@ struct StrategyListResponse: Codable, Sendable {
     let topic: String?
     let payload: [StrategyProcess]
     let count: Int
-
-    init(
-        type: String? = nil,
-        sequenceId: Int,
-        publicId: String,
-        timestamp: Date,
-        sessionId: String,
-        topic: String? = nil,
-        payload: [StrategyProcess],
-        count: Int
-    ) {
-        self.type = type
-        self.sequenceId = sequenceId
-        self.publicId = publicId
-        self.timestamp = timestamp
-        self.sessionId = sessionId
-        self.topic = topic
-        self.payload = payload
-        self.count = count
-    }
 
     enum CodingKeys: String, CodingKey {
         case type
@@ -10773,38 +5821,6 @@ struct StrategyProcess: Codable, Sendable {
     let coordinator: String?
     let coordinatorLabel: String?
     let managedRemotely: Bool?
-
-    init(
-        type: String? = nil,
-        sequenceId: Int,
-        publicId: String,
-        timestamp: Date,
-        sessionId: String,
-        topic: String? = nil,
-        name: String,
-        running: Bool,
-        enabled: Bool,
-        mode: String,
-        strategyClass: String? = nil,
-        coordinator: String? = nil,
-        coordinatorLabel: String? = nil,
-        managedRemotely: Bool? = nil
-    ) {
-        self.type = type
-        self.sequenceId = sequenceId
-        self.publicId = publicId
-        self.timestamp = timestamp
-        self.sessionId = sessionId
-        self.topic = topic
-        self.name = name
-        self.running = running
-        self.enabled = enabled
-        self.mode = mode
-        self.strategyClass = strategyClass
-        self.coordinator = coordinator
-        self.coordinatorLabel = coordinatorLabel
-        self.managedRemotely = managedRemotely
-    }
 
     enum CodingKeys: String, CodingKey {
         case type
@@ -10836,30 +5852,6 @@ struct StrategyStatusPayload: Codable, Sendable {
     let pid: Int?
     let uptime: String?
 
-    init(
-        strategyName: String,
-        status: String,
-        details: JsonObject? = nil,
-        signalsGenerated: Int? = nil,
-        tradesExecuted: Int? = nil,
-        lastSignal: String? = nil,
-        lastSignalTime: String? = nil,
-        pnl: Double? = nil,
-        pid: Int? = nil,
-        uptime: String? = nil
-    ) {
-        self.strategyName = strategyName
-        self.status = status
-        self.details = details
-        self.signalsGenerated = signalsGenerated
-        self.tradesExecuted = tradesExecuted
-        self.lastSignal = lastSignal
-        self.lastSignalTime = lastSignalTime
-        self.pnl = pnl
-        self.pid = pid
-        self.uptime = uptime
-    }
-
     enum CodingKeys: String, CodingKey {
         case strategyName = "strategy_name"
         case status
@@ -10877,14 +5869,6 @@ struct StrategyStatusPayload: Codable, Sendable {
 struct SubscriptionsStats: Codable, Sendable {
     let perTopic: [String: Int]
     let perClient: [String: [String]]
-
-    init(
-        perTopic: [String: Int],
-        perClient: [String: [String]]
-    ) {
-        self.perTopic = perTopic
-        self.perClient = perClient
-    }
 
     enum CodingKeys: String, CodingKey {
         case perTopic = "per_topic"
@@ -10912,48 +5896,6 @@ struct SystemMetricsData: Codable, Sendable {
     let fxShadowPins: FxShadowPinMetrics
     let tracemallocActive: Bool
     let cgroupVersion: String?
-
-    init(
-        type: String? = nil,
-        sequenceId: Int,
-        publicId: String,
-        timestamp: Date,
-        sessionId: String,
-        topic: String? = nil,
-        busTime: Date,
-        process: ProcessMetrics,
-        cpu: CpuMetrics,
-        memory: MemoryMetrics,
-        asyncio: AsyncioMetrics,
-        gc: GcMetrics,
-        limits: LimitsMetrics,
-        saturation: SaturationMetrics,
-        dbInternal: DbInternalMetrics,
-        disk: DiskMetrics,
-        fxShadowPins: FxShadowPinMetrics,
-        tracemallocActive: Bool,
-        cgroupVersion: String?
-    ) {
-        self.type = type
-        self.sequenceId = sequenceId
-        self.publicId = publicId
-        self.timestamp = timestamp
-        self.sessionId = sessionId
-        self.topic = topic
-        self.busTime = busTime
-        self.process = process
-        self.cpu = cpu
-        self.memory = memory
-        self.asyncio = asyncio
-        self.gc = gc
-        self.limits = limits
-        self.saturation = saturation
-        self.dbInternal = dbInternal
-        self.disk = disk
-        self.fxShadowPins = fxShadowPins
-        self.tracemallocActive = tracemallocActive
-        self.cgroupVersion = cgroupVersion
-    }
 
     enum CodingKeys: String, CodingKey {
         case type
@@ -10999,48 +5941,6 @@ struct SystemMetricsHistoryItem: Codable, Sendable {
     let tracemallocActive: Bool
     let cgroupVersion: String?
 
-    init(
-        type: String? = nil,
-        sequenceId: Int,
-        publicId: String,
-        timestamp: Date,
-        sessionId: String,
-        topic: String? = nil,
-        busTime: Date,
-        process: ProcessMetrics,
-        cpu: CpuMetrics,
-        memory: MemoryMetrics,
-        asyncio: AsyncioMetrics,
-        gc: GcMetrics,
-        limits: LimitsMetrics,
-        saturation: SaturationMetrics,
-        dbInternal: DbInternalMetrics,
-        disk: DiskMetrics,
-        fxShadowPins: FxShadowPinMetrics,
-        tracemallocActive: Bool,
-        cgroupVersion: String?
-    ) {
-        self.type = type
-        self.sequenceId = sequenceId
-        self.publicId = publicId
-        self.timestamp = timestamp
-        self.sessionId = sessionId
-        self.topic = topic
-        self.busTime = busTime
-        self.process = process
-        self.cpu = cpu
-        self.memory = memory
-        self.asyncio = asyncio
-        self.gc = gc
-        self.limits = limits
-        self.saturation = saturation
-        self.dbInternal = dbInternal
-        self.disk = disk
-        self.fxShadowPins = fxShadowPins
-        self.tracemallocActive = tracemallocActive
-        self.cgroupVersion = cgroupVersion
-    }
-
     enum CodingKeys: String, CodingKey {
         case type
         case sequenceId = "sequence_id"
@@ -11074,26 +5974,6 @@ struct SystemMetricsHistoryResponse: Codable, Sendable {
     let payload: [SystemMetricsHistoryItem]
     let count: Int
 
-    init(
-        type: String? = nil,
-        sequenceId: Int,
-        publicId: String,
-        timestamp: Date,
-        sessionId: String,
-        topic: String? = nil,
-        payload: [SystemMetricsHistoryItem],
-        count: Int
-    ) {
-        self.type = type
-        self.sequenceId = sequenceId
-        self.publicId = publicId
-        self.timestamp = timestamp
-        self.sessionId = sessionId
-        self.topic = topic
-        self.payload = payload
-        self.count = count
-    }
-
     enum CodingKeys: String, CodingKey {
         case type
         case sequenceId = "sequence_id"
@@ -11114,24 +5994,6 @@ struct SystemMetricsResponse: Codable, Sendable {
     let sessionId: String
     let topic: String?
     let payload: SystemMetricsData
-
-    init(
-        type: String? = nil,
-        sequenceId: Int,
-        publicId: String,
-        timestamp: Date,
-        sessionId: String,
-        topic: String? = nil,
-        payload: SystemMetricsData
-    ) {
-        self.type = type
-        self.sequenceId = sequenceId
-        self.publicId = publicId
-        self.timestamp = timestamp
-        self.sessionId = sessionId
-        self.topic = topic
-        self.payload = payload
-    }
 
     enum CodingKeys: String, CodingKey {
         case type
@@ -11155,28 +6017,6 @@ struct SystemStatusData: Codable, Sendable {
     let backtests: [String: ProcessStatus]
     let strategies: [StrategyStatusPayload]?
 
-    init(
-        type: String? = nil,
-        sequenceId: Int,
-        publicId: String,
-        timestamp: Date,
-        sessionId: String,
-        topic: String? = nil,
-        trader: ProcessStatus,
-        backtests: [String: ProcessStatus],
-        strategies: [StrategyStatusPayload]? = nil
-    ) {
-        self.type = type
-        self.sequenceId = sequenceId
-        self.publicId = publicId
-        self.timestamp = timestamp
-        self.sessionId = sessionId
-        self.topic = topic
-        self.trader = trader
-        self.backtests = backtests
-        self.strategies = strategies
-    }
-
     enum CodingKeys: String, CodingKey {
         case type
         case sequenceId = "sequence_id"
@@ -11199,24 +6039,6 @@ struct SystemStatusResponse: Codable, Sendable {
     let topic: String?
     let payload: SystemStatusData
 
-    init(
-        type: String? = nil,
-        sequenceId: Int,
-        publicId: String,
-        timestamp: Date,
-        sessionId: String,
-        topic: String? = nil,
-        payload: SystemStatusData
-    ) {
-        self.type = type
-        self.sequenceId = sequenceId
-        self.publicId = publicId
-        self.timestamp = timestamp
-        self.sessionId = sessionId
-        self.topic = topic
-        self.payload = payload
-    }
-
     enum CodingKeys: String, CodingKey {
         case type
         case sequenceId = "sequence_id"
@@ -11237,26 +6059,6 @@ struct TableStatsItem: Codable, Sendable {
     let archivable: Int?
     let isStale: Bool
     let lastSampledAt: Date
-
-    init(
-        table: String,
-        tableKind: String,
-        total: Int?,
-        current: Int?,
-        closed: Int?,
-        archivable: Int?,
-        isStale: Bool,
-        lastSampledAt: Date
-    ) {
-        self.table = table
-        self.tableKind = tableKind
-        self.total = total
-        self.current = current
-        self.closed = closed
-        self.archivable = archivable
-        self.isStale = isStale
-        self.lastSampledAt = lastSampledAt
-    }
 
     enum CodingKeys: String, CodingKey {
         case table
@@ -11283,32 +6085,6 @@ struct TopicMetricSnapshot: Codable, Sendable {
     let throttleMs: Int?
     let pattern: String?
 
-    init(
-        activeSubscribers: Int? = nil,
-        received: Int? = nil,
-        forwarded: Int? = nil,
-        throttled: Int? = nil,
-        dropped: Int? = nil,
-        timeout: Int? = nil,
-        errors: Int? = nil,
-        invalidMessages: Int? = nil,
-        lastMessageTs: Double? = nil,
-        throttleMs: Int? = nil,
-        pattern: String? = nil
-    ) {
-        self.activeSubscribers = activeSubscribers
-        self.received = received
-        self.forwarded = forwarded
-        self.throttled = throttled
-        self.dropped = dropped
-        self.timeout = timeout
-        self.errors = errors
-        self.invalidMessages = invalidMessages
-        self.lastMessageTs = lastMessageTs
-        self.throttleMs = throttleMs
-        self.pattern = pattern
-    }
-
     enum CodingKeys: String, CodingKey {
         case activeSubscribers = "active_subscribers"
         case received
@@ -11328,14 +6104,6 @@ struct TracemallocState: Codable, Sendable {
     let active: Bool
     let requestedDurationSeconds: Double?
 
-    init(
-        active: Bool,
-        requestedDurationSeconds: Double?
-    ) {
-        self.active = active
-        self.requestedDurationSeconds = requestedDurationSeconds
-    }
-
     enum CodingKeys: String, CodingKey {
         case active
         case requestedDurationSeconds = "requested_duration_seconds"
@@ -11350,24 +6118,6 @@ struct TracemallocStateResponse: Codable, Sendable {
     let sessionId: String
     let topic: String?
     let payload: TracemallocState
-
-    init(
-        type: String? = nil,
-        sequenceId: Int,
-        publicId: String,
-        timestamp: Date,
-        sessionId: String,
-        topic: String? = nil,
-        payload: TracemallocState
-    ) {
-        self.type = type
-        self.sequenceId = sequenceId
-        self.publicId = publicId
-        self.timestamp = timestamp
-        self.sessionId = sessionId
-        self.topic = topic
-        self.payload = payload
-    }
 
     enum CodingKeys: String, CodingKey {
         case type
@@ -11390,28 +6140,6 @@ struct TradeDiffEntry: Codable, Sendable {
     let pnlA: Double?
     let pnlB: Double?
     let pnlDelta: Double?
-
-    init(
-        instrument: String,
-        executedAt: Date,
-        side: String,
-        quantity: Double,
-        price: Double,
-        leg: String,
-        pnlA: Double? = nil,
-        pnlB: Double? = nil,
-        pnlDelta: Double? = nil
-    ) {
-        self.instrument = instrument
-        self.executedAt = executedAt
-        self.side = side
-        self.quantity = quantity
-        self.price = price
-        self.leg = leg
-        self.pnlA = pnlA
-        self.pnlB = pnlB
-        self.pnlDelta = pnlDelta
-    }
 
     enum CodingKeys: String, CodingKey {
         case instrument
@@ -11442,38 +6170,6 @@ struct TrailingStopStateData: Codable, Sendable {
     let currentStop: Double
     let side: String
 
-    init(
-        type: String? = nil,
-        sequenceId: Int,
-        publicId: String,
-        timestamp: Date,
-        sessionId: String,
-        topic: String? = nil,
-        planPublicId: String,
-        status: String,
-        trailingPct: Double,
-        minLockPct: Double,
-        entryPrice: Double,
-        peakPrice: Double,
-        currentStop: Double,
-        side: String
-    ) {
-        self.type = type
-        self.sequenceId = sequenceId
-        self.publicId = publicId
-        self.timestamp = timestamp
-        self.sessionId = sessionId
-        self.topic = topic
-        self.planPublicId = planPublicId
-        self.status = status
-        self.trailingPct = trailingPct
-        self.minLockPct = minLockPct
-        self.entryPrice = entryPrice
-        self.peakPrice = peakPrice
-        self.currentStop = currentStop
-        self.side = side
-    }
-
     enum CodingKeys: String, CodingKey {
         case type
         case sequenceId = "sequence_id"
@@ -11501,24 +6197,6 @@ struct TrailingStopStateResponse: Codable, Sendable {
     let topic: String?
     let payload: TrailingStopStateData
 
-    init(
-        type: String? = nil,
-        sequenceId: Int,
-        publicId: String,
-        timestamp: Date,
-        sessionId: String,
-        topic: String? = nil,
-        payload: TrailingStopStateData
-    ) {
-        self.type = type
-        self.sequenceId = sequenceId
-        self.publicId = publicId
-        self.timestamp = timestamp
-        self.sessionId = sessionId
-        self.topic = topic
-        self.payload = payload
-    }
-
     enum CodingKeys: String, CodingKey {
         case type
         case sequenceId = "sequence_id"
@@ -11543,34 +6221,6 @@ struct UnderlyingAssetData: Codable, Sendable {
     let sector: String?
     let description: String?
     let instrumentCount: Int
-
-    init(
-        type: String? = nil,
-        sequenceId: Int,
-        publicId: String,
-        timestamp: Date,
-        sessionId: String,
-        topic: String? = nil,
-        ticker: String,
-        name: String,
-        assetClass: String,
-        sector: String?,
-        description: String?,
-        instrumentCount: Int
-    ) {
-        self.type = type
-        self.sequenceId = sequenceId
-        self.publicId = publicId
-        self.timestamp = timestamp
-        self.sessionId = sessionId
-        self.topic = topic
-        self.ticker = ticker
-        self.name = name
-        self.assetClass = assetClass
-        self.sector = sector
-        self.description = description
-        self.instrumentCount = instrumentCount
-    }
 
     enum CodingKeys: String, CodingKey {
         case type
@@ -11598,26 +6248,6 @@ struct UnderlyingAssetListResponse: Codable, Sendable {
     let payload: [UnderlyingAssetData]
     let count: Int
 
-    init(
-        type: String? = nil,
-        sequenceId: Int,
-        publicId: String,
-        timestamp: Date,
-        sessionId: String,
-        topic: String? = nil,
-        payload: [UnderlyingAssetData],
-        count: Int
-    ) {
-        self.type = type
-        self.sequenceId = sequenceId
-        self.publicId = publicId
-        self.timestamp = timestamp
-        self.sessionId = sessionId
-        self.topic = topic
-        self.payload = payload
-        self.count = count
-    }
-
     enum CodingKeys: String, CodingKey {
         case type
         case sequenceId = "sequence_id"
@@ -11643,34 +6273,6 @@ struct UnderlyingInstrumentData: Codable, Sendable {
     let assetType: String
     let relationshipType: String
     let contractFamily: String?
-
-    init(
-        type: String? = nil,
-        sequenceId: Int,
-        publicId: String,
-        timestamp: Date,
-        sessionId: String,
-        topic: String? = nil,
-        instrumentPublicId: String,
-        nativeSymbol: String,
-        exchange: String,
-        assetType: String,
-        relationshipType: String,
-        contractFamily: String?
-    ) {
-        self.type = type
-        self.sequenceId = sequenceId
-        self.publicId = publicId
-        self.timestamp = timestamp
-        self.sessionId = sessionId
-        self.topic = topic
-        self.instrumentPublicId = instrumentPublicId
-        self.nativeSymbol = nativeSymbol
-        self.exchange = exchange
-        self.assetType = assetType
-        self.relationshipType = relationshipType
-        self.contractFamily = contractFamily
-    }
 
     enum CodingKeys: String, CodingKey {
         case type
@@ -11698,26 +6300,6 @@ struct UnderlyingInstrumentListResponse: Codable, Sendable {
     let payload: [UnderlyingInstrumentData]
     let count: Int
 
-    init(
-        type: String? = nil,
-        sequenceId: Int,
-        publicId: String,
-        timestamp: Date,
-        sessionId: String,
-        topic: String? = nil,
-        payload: [UnderlyingInstrumentData],
-        count: Int
-    ) {
-        self.type = type
-        self.sequenceId = sequenceId
-        self.publicId = publicId
-        self.timestamp = timestamp
-        self.sessionId = sessionId
-        self.topic = topic
-        self.payload = payload
-        self.count = count
-    }
-
     enum CodingKeys: String, CodingKey {
         case type
         case sequenceId = "sequence_id"
@@ -11741,30 +6323,6 @@ struct UserAlertDefaultInfo: Codable, Sendable {
     let alertType: String
     let enabled: Bool
     let minPriority: String
-
-    init(
-        type: String? = nil,
-        sequenceId: Int,
-        publicId: String,
-        timestamp: Date,
-        sessionId: String,
-        topic: String? = nil,
-        userPublicId: String,
-        alertType: String,
-        enabled: Bool,
-        minPriority: String
-    ) {
-        self.type = type
-        self.sequenceId = sequenceId
-        self.publicId = publicId
-        self.timestamp = timestamp
-        self.sessionId = sessionId
-        self.topic = topic
-        self.userPublicId = userPublicId
-        self.alertType = alertType
-        self.enabled = enabled
-        self.minPriority = minPriority
-    }
 
     enum CodingKeys: String, CodingKey {
         case type
@@ -11790,26 +6348,6 @@ struct UserAlertDefaultListResponse: Codable, Sendable {
     let payload: [UserAlertDefaultInfo]
     let count: Int
 
-    init(
-        type: String? = nil,
-        sequenceId: Int,
-        publicId: String,
-        timestamp: Date,
-        sessionId: String,
-        topic: String? = nil,
-        payload: [UserAlertDefaultInfo],
-        count: Int
-    ) {
-        self.type = type
-        self.sequenceId = sequenceId
-        self.publicId = publicId
-        self.timestamp = timestamp
-        self.sessionId = sessionId
-        self.topic = topic
-        self.payload = payload
-        self.count = count
-    }
-
     enum CodingKeys: String, CodingKey {
         case type
         case sequenceId = "sequence_id"
@@ -11831,24 +6369,6 @@ struct UserAlertDefaultResponse: Codable, Sendable {
     let topic: String?
     let payload: UserAlertDefaultInfo
 
-    init(
-        type: String? = nil,
-        sequenceId: Int,
-        publicId: String,
-        timestamp: Date,
-        sessionId: String,
-        topic: String? = nil,
-        payload: UserAlertDefaultInfo
-    ) {
-        self.type = type
-        self.sequenceId = sequenceId
-        self.publicId = publicId
-        self.timestamp = timestamp
-        self.sessionId = sessionId
-        self.topic = topic
-        self.payload = payload
-    }
-
     enum CodingKeys: String, CodingKey {
         case type
         case sequenceId = "sequence_id"
@@ -11869,26 +6389,6 @@ struct UserListResponse: Codable, Sendable {
     let topic: String?
     let payload: [UserProfile]
     let count: Int
-
-    init(
-        type: String? = nil,
-        sequenceId: Int,
-        publicId: String,
-        timestamp: Date,
-        sessionId: String,
-        topic: String? = nil,
-        payload: [UserProfile],
-        count: Int
-    ) {
-        self.type = type
-        self.sequenceId = sequenceId
-        self.publicId = publicId
-        self.timestamp = timestamp
-        self.sessionId = sessionId
-        self.topic = topic
-        self.payload = payload
-        self.count = count
-    }
 
     enum CodingKeys: String, CodingKey {
         case type
@@ -11921,44 +6421,6 @@ struct UserProfile: Codable, Sendable {
     let effectivePermissions: [Permission]?
     let delegatePublicId: String?
 
-    init(
-        type: String? = nil,
-        sequenceId: Int,
-        publicId: String,
-        timestamp: Date,
-        sessionId: String,
-        topic: String? = nil,
-        username: String,
-        email: String? = nil,
-        role: UserRole,
-        isActive: Bool? = nil,
-        createdAt: Date,
-        operatorPublicIds: [String]? = nil,
-        primaryOperatorPublicId: String? = nil,
-        activeWalletPublicId: String? = nil,
-        defaultLanguage: String? = nil,
-        effectivePermissions: [Permission]? = nil,
-        delegatePublicId: String? = nil
-    ) {
-        self.type = type
-        self.sequenceId = sequenceId
-        self.publicId = publicId
-        self.timestamp = timestamp
-        self.sessionId = sessionId
-        self.topic = topic
-        self.username = username
-        self.email = email
-        self.role = role
-        self.isActive = isActive
-        self.createdAt = createdAt
-        self.operatorPublicIds = operatorPublicIds
-        self.primaryOperatorPublicId = primaryOperatorPublicId
-        self.activeWalletPublicId = activeWalletPublicId
-        self.defaultLanguage = defaultLanguage
-        self.effectivePermissions = effectivePermissions
-        self.delegatePublicId = delegatePublicId
-    }
-
     enum CodingKeys: String, CodingKey {
         case type
         case sequenceId = "sequence_id"
@@ -11989,24 +6451,6 @@ struct UserResponse: Codable, Sendable {
     let topic: String?
     let payload: UserProfile
 
-    init(
-        type: String? = nil,
-        sequenceId: Int,
-        publicId: String,
-        timestamp: Date,
-        sessionId: String,
-        topic: String? = nil,
-        payload: UserProfile
-    ) {
-        self.type = type
-        self.sequenceId = sequenceId
-        self.publicId = publicId
-        self.timestamp = timestamp
-        self.sessionId = sessionId
-        self.topic = topic
-        self.payload = payload
-    }
-
     enum CodingKeys: String, CodingKey {
         case type
         case sequenceId = "sequence_id"
@@ -12024,20 +6468,6 @@ struct ValidationError: Codable, Sendable {
     let type: String
     let input: AnyCodable?
     let ctx: [String: AnyCodable]?
-
-    init(
-        loc: [AnyCodable?],
-        msg: String,
-        type: String,
-        input: AnyCodable? = nil,
-        ctx: [String: AnyCodable]? = nil
-    ) {
-        self.loc = loc
-        self.msg = msg
-        self.type = type
-        self.input = input
-        self.ctx = ctx
-    }
 }
 
 struct VenueFeeScheduleData: Codable, Sendable {
@@ -12054,36 +6484,6 @@ struct VenueFeeScheduleData: Codable, Sendable {
     let takerBps: Double
     let minVolume30D: Double?
     let currency: String
-
-    init(
-        type: String? = nil,
-        sequenceId: Int,
-        publicId: String,
-        timestamp: Date,
-        sessionId: String,
-        topic: String? = nil,
-        exchange: String,
-        instrumentPublicId: String?,
-        feeTier: String,
-        makerBps: Double,
-        takerBps: Double,
-        minVolume30D: Double?,
-        currency: String
-    ) {
-        self.type = type
-        self.sequenceId = sequenceId
-        self.publicId = publicId
-        self.timestamp = timestamp
-        self.sessionId = sessionId
-        self.topic = topic
-        self.exchange = exchange
-        self.instrumentPublicId = instrumentPublicId
-        self.feeTier = feeTier
-        self.makerBps = makerBps
-        self.takerBps = takerBps
-        self.minVolume30D = minVolume30D
-        self.currency = currency
-    }
 
     enum CodingKeys: String, CodingKey {
         case type
@@ -12112,26 +6512,6 @@ struct VenueFeeScheduleListResponse: Codable, Sendable {
     let payload: [VenueFeeScheduleData]
     let count: Int
 
-    init(
-        type: String? = nil,
-        sequenceId: Int,
-        publicId: String,
-        timestamp: Date,
-        sessionId: String,
-        topic: String? = nil,
-        payload: [VenueFeeScheduleData],
-        count: Int
-    ) {
-        self.type = type
-        self.sequenceId = sequenceId
-        self.publicId = publicId
-        self.timestamp = timestamp
-        self.sessionId = sessionId
-        self.topic = topic
-        self.payload = payload
-        self.count = count
-    }
-
     enum CodingKeys: String, CodingKey {
         case type
         case sequenceId = "sequence_id"
@@ -12154,28 +6534,6 @@ struct WalletInfo: Codable, Sendable {
     let label: String
     let description: String?
     let isPaper: Bool
-
-    init(
-        type: String? = nil,
-        sequenceId: Int,
-        publicId: String,
-        timestamp: Date,
-        sessionId: String,
-        topic: String? = nil,
-        label: String,
-        description: String? = nil,
-        isPaper: Bool
-    ) {
-        self.type = type
-        self.sequenceId = sequenceId
-        self.publicId = publicId
-        self.timestamp = timestamp
-        self.sessionId = sessionId
-        self.topic = topic
-        self.label = label
-        self.description = description
-        self.isPaper = isPaper
-    }
 
     enum CodingKeys: String, CodingKey {
         case type
@@ -12200,26 +6558,6 @@ struct WalletListResponse: Codable, Sendable {
     let payload: [WalletInfo]
     let count: Int
 
-    init(
-        type: String? = nil,
-        sequenceId: Int,
-        publicId: String,
-        timestamp: Date,
-        sessionId: String,
-        topic: String? = nil,
-        payload: [WalletInfo],
-        count: Int
-    ) {
-        self.type = type
-        self.sequenceId = sequenceId
-        self.publicId = publicId
-        self.timestamp = timestamp
-        self.sessionId = sessionId
-        self.topic = topic
-        self.payload = payload
-        self.count = count
-    }
-
     enum CodingKeys: String, CodingKey {
         case type
         case sequenceId = "sequence_id"
@@ -12241,24 +6579,6 @@ struct WalletResponse: Codable, Sendable {
     let topic: String?
     let payload: WalletInfo
 
-    init(
-        type: String? = nil,
-        sequenceId: Int,
-        publicId: String,
-        timestamp: Date,
-        sessionId: String,
-        topic: String? = nil,
-        payload: WalletInfo
-    ) {
-        self.type = type
-        self.sequenceId = sequenceId
-        self.publicId = publicId
-        self.timestamp = timestamp
-        self.sessionId = sessionId
-        self.topic = topic
-        self.payload = payload
-    }
-
     enum CodingKeys: String, CodingKey {
         case type
         case sequenceId = "sequence_id"
@@ -12275,16 +6595,6 @@ struct WebSocketStats: Codable, Sendable {
     let topicSubscribers: [String: Int]
     let clientCount: Int
 
-    init(
-        activeConnections: Int,
-        topicSubscribers: [String: Int],
-        clientCount: Int
-    ) {
-        self.activeConnections = activeConnections
-        self.topicSubscribers = topicSubscribers
-        self.clientCount = clientCount
-    }
-
     enum CodingKeys: String, CodingKey {
         case activeConnections = "active_connections"
         case topicSubscribers = "topic_subscribers"
@@ -12295,14 +6605,6 @@ struct WebSocketStats: Codable, Sendable {
 struct WsStatsConfig: Codable, Sendable {
     let brokerXpub: String
     let heartbeatIntervalMs: Int
-
-    init(
-        brokerXpub: String,
-        heartbeatIntervalMs: Int
-    ) {
-        self.brokerXpub = brokerXpub
-        self.heartbeatIntervalMs = heartbeatIntervalMs
-    }
 
     enum CodingKeys: String, CodingKey {
         case brokerXpub = "broker_xpub"
@@ -12323,34 +6625,6 @@ struct WsStatsData: Codable, Sendable {
     let topics: [String: TopicMetricSnapshot]
     let subscriptions: SubscriptionsStats
     let config: WsStatsConfig
-
-    init(
-        type: String? = nil,
-        sequenceId: Int,
-        publicId: String,
-        timestamp: Date,
-        sessionId: String,
-        topic: String? = nil,
-        websocket: WebSocketStats,
-        zmqBridge: ZmqBridgeStats,
-        connections: ConnectionStats,
-        topics: [String: TopicMetricSnapshot],
-        subscriptions: SubscriptionsStats,
-        config: WsStatsConfig
-    ) {
-        self.type = type
-        self.sequenceId = sequenceId
-        self.publicId = publicId
-        self.timestamp = timestamp
-        self.sessionId = sessionId
-        self.topic = topic
-        self.websocket = websocket
-        self.zmqBridge = zmqBridge
-        self.connections = connections
-        self.topics = topics
-        self.subscriptions = subscriptions
-        self.config = config
-    }
 
     enum CodingKeys: String, CodingKey {
         case type
@@ -12377,24 +6651,6 @@ struct WsStatsResponse: Codable, Sendable {
     let topic: String?
     let payload: WsStatsData
 
-    init(
-        type: String? = nil,
-        sequenceId: Int,
-        publicId: String,
-        timestamp: Date,
-        sessionId: String,
-        topic: String? = nil,
-        payload: WsStatsData
-    ) {
-        self.type = type
-        self.sequenceId = sequenceId
-        self.publicId = publicId
-        self.timestamp = timestamp
-        self.sessionId = sessionId
-        self.topic = topic
-        self.payload = payload
-    }
-
     enum CodingKeys: String, CodingKey {
         case type
         case sequenceId = "sequence_id"
@@ -12417,30 +6673,6 @@ struct WsTokenData: Codable, Sendable {
     let wsToken: String
     let wsTokenExp: Date
     let expiresIn: Int
-
-    init(
-        type: String? = nil,
-        sequenceId: Int,
-        publicId: String,
-        timestamp: Date,
-        sessionId: String,
-        topic: String? = nil,
-        message: String,
-        wsToken: String,
-        wsTokenExp: Date,
-        expiresIn: Int
-    ) {
-        self.type = type
-        self.sequenceId = sequenceId
-        self.publicId = publicId
-        self.timestamp = timestamp
-        self.sessionId = sessionId
-        self.topic = topic
-        self.message = message
-        self.wsToken = wsToken
-        self.wsTokenExp = wsTokenExp
-        self.expiresIn = expiresIn
-    }
 
     enum CodingKeys: String, CodingKey {
         case type
@@ -12465,24 +6697,6 @@ struct WsTokenResponse: Codable, Sendable {
     let topic: String?
     let payload: WsTokenData
 
-    init(
-        type: String? = nil,
-        sequenceId: Int,
-        publicId: String,
-        timestamp: Date,
-        sessionId: String,
-        topic: String? = nil,
-        payload: WsTokenData
-    ) {
-        self.type = type
-        self.sequenceId = sequenceId
-        self.publicId = publicId
-        self.timestamp = timestamp
-        self.sessionId = sessionId
-        self.topic = topic
-        self.payload = payload
-    }
-
     enum CodingKeys: String, CodingKey {
         case type
         case sequenceId = "sequence_id"
@@ -12499,16 +6713,6 @@ struct ZmqBridgeStats: Codable, Sendable {
     let subscriberTasks: Int
     let availableTopics: [String]
 
-    init(
-        activeTopics: Int,
-        subscriberTasks: Int,
-        availableTopics: [String]
-    ) {
-        self.activeTopics = activeTopics
-        self.subscriberTasks = subscriberTasks
-        self.availableTopics = availableTopics
-    }
-
     enum CodingKeys: String, CodingKey {
         case activeTopics = "active_topics"
         case subscriberTasks = "subscriber_tasks"
@@ -12521,16 +6725,6 @@ struct ZmqComponents: Codable, Sendable {
     let websocketManager: String
     let activeConnections: Int
 
-    init(
-        zmqContext: String,
-        websocketManager: String,
-        activeConnections: Int
-    ) {
-        self.zmqContext = zmqContext
-        self.websocketManager = websocketManager
-        self.activeConnections = activeConnections
-    }
-
     enum CodingKeys: String, CodingKey {
         case zmqContext = "zmq_context"
         case websocketManager = "websocket_manager"
@@ -12540,12 +6734,6 @@ struct ZmqComponents: Codable, Sendable {
 
 struct ZmqConfig: Codable, Sendable {
     let availableTopics: [String]
-
-    init(
-        availableTopics: [String]
-    ) {
-        self.availableTopics = availableTopics
-    }
 
     enum CodingKeys: String, CodingKey {
         case availableTopics = "available_topics"
@@ -12565,34 +6753,6 @@ struct ZmqHealthData: Codable, Sendable {
     let connections: ConnectionStats
     let messageStats: [String: TopicMetricSnapshot]
     let errors: [String]?
-
-    init(
-        type: String? = nil,
-        sequenceId: Int,
-        publicId: String,
-        timestamp: Date,
-        sessionId: String,
-        topic: String? = nil,
-        status: String,
-        components: ZmqComponents,
-        config: ZmqConfig,
-        connections: ConnectionStats,
-        messageStats: [String: TopicMetricSnapshot],
-        errors: [String]? = nil
-    ) {
-        self.type = type
-        self.sequenceId = sequenceId
-        self.publicId = publicId
-        self.timestamp = timestamp
-        self.sessionId = sessionId
-        self.topic = topic
-        self.status = status
-        self.components = components
-        self.config = config
-        self.connections = connections
-        self.messageStats = messageStats
-        self.errors = errors
-    }
 
     enum CodingKeys: String, CodingKey {
         case type
@@ -12619,24 +6779,6 @@ struct ZmqHealthResponse: Codable, Sendable {
     let topic: String?
     let payload: ZmqHealthData
 
-    init(
-        type: String? = nil,
-        sequenceId: Int,
-        publicId: String,
-        timestamp: Date,
-        sessionId: String,
-        topic: String? = nil,
-        payload: ZmqHealthData
-    ) {
-        self.type = type
-        self.sequenceId = sequenceId
-        self.publicId = publicId
-        self.timestamp = timestamp
-        self.sessionId = sessionId
-        self.topic = topic
-        self.payload = payload
-    }
-
     enum CodingKeys: String, CodingKey {
         case type
         case sequenceId = "sequence_id"
@@ -12657,24 +6799,6 @@ struct LoginRequest: Codable, Sendable {
     let topic: String?
     let payload: LoginBody
 
-    init(
-        type: String? = nil,
-        sequenceId: Int,
-        publicId: String,
-        timestamp: Date,
-        sessionId: String,
-        topic: String? = nil,
-        payload: LoginBody
-    ) {
-        self.type = type
-        self.sequenceId = sequenceId
-        self.publicId = publicId
-        self.timestamp = timestamp
-        self.sessionId = sessionId
-        self.topic = topic
-        self.payload = payload
-    }
-
     enum CodingKeys: String, CodingKey {
         case type
         case sequenceId = "sequence_id"
@@ -12691,18 +6815,6 @@ struct LoginBody: Codable, Sendable {
     let password: String
     let rememberMe: Bool?
     let permissions: [Permission]?
-
-    init(
-        username: String,
-        password: String,
-        rememberMe: Bool? = nil,
-        permissions: [Permission]? = nil
-    ) {
-        self.username = username
-        self.password = password
-        self.rememberMe = rememberMe
-        self.permissions = permissions
-    }
 
     enum CodingKeys: String, CodingKey {
         case username
@@ -12721,24 +6833,6 @@ struct RefreshTokenRequest: Codable, Sendable {
     let topic: String?
     let payload: RefreshTokenPayload
 
-    init(
-        type: String? = nil,
-        sequenceId: Int,
-        publicId: String,
-        timestamp: Date,
-        sessionId: String,
-        topic: String? = nil,
-        payload: RefreshTokenPayload
-    ) {
-        self.type = type
-        self.sequenceId = sequenceId
-        self.publicId = publicId
-        self.timestamp = timestamp
-        self.sessionId = sessionId
-        self.topic = topic
-        self.payload = payload
-    }
-
     enum CodingKeys: String, CodingKey {
         case type
         case sequenceId = "sequence_id"
@@ -12753,14 +6847,6 @@ struct RefreshTokenRequest: Codable, Sendable {
 struct RefreshTokenPayload: Codable, Sendable {
     let activeWalletPublicId: String?
     let clearActiveWallet: Bool?
-
-    init(
-        activeWalletPublicId: String? = nil,
-        clearActiveWallet: Bool? = nil
-    ) {
-        self.activeWalletPublicId = activeWalletPublicId
-        self.clearActiveWallet = clearActiveWallet
-    }
 
     enum CodingKeys: String, CodingKey {
         case activeWalletPublicId = "active_wallet_public_id"
@@ -12777,24 +6863,6 @@ struct UpdateAuthMeRequest: Codable, Sendable {
     let topic: String?
     let payload: UpdateAuthMeBody
 
-    init(
-        type: String? = nil,
-        sequenceId: Int,
-        publicId: String,
-        timestamp: Date,
-        sessionId: String,
-        topic: String? = nil,
-        payload: UpdateAuthMeBody
-    ) {
-        self.type = type
-        self.sequenceId = sequenceId
-        self.publicId = publicId
-        self.timestamp = timestamp
-        self.sessionId = sessionId
-        self.topic = topic
-        self.payload = payload
-    }
-
     enum CodingKeys: String, CodingKey {
         case type
         case sequenceId = "sequence_id"
@@ -12809,12 +6877,6 @@ struct UpdateAuthMeRequest: Codable, Sendable {
 struct UpdateAuthMeBody: Codable, Sendable {
     let defaultLanguage: String?
 
-    init(
-        defaultLanguage: String? = nil
-    ) {
-        self.defaultLanguage = defaultLanguage
-    }
-
     enum CodingKeys: String, CodingKey {
         case defaultLanguage = "default_language"
     }
@@ -12828,24 +6890,6 @@ struct CreateUserRequest: Codable, Sendable {
     let sessionId: String
     let topic: String?
     let payload: CreateUserBody
-
-    init(
-        type: String? = nil,
-        sequenceId: Int,
-        publicId: String,
-        timestamp: Date,
-        sessionId: String,
-        topic: String? = nil,
-        payload: CreateUserBody
-    ) {
-        self.type = type
-        self.sequenceId = sequenceId
-        self.publicId = publicId
-        self.timestamp = timestamp
-        self.sessionId = sessionId
-        self.topic = topic
-        self.payload = payload
-    }
 
     enum CodingKeys: String, CodingKey {
         case type
@@ -12865,20 +6909,6 @@ struct CreateUserBody: Codable, Sendable {
     let role: UserRole
     let isActive: Bool?
 
-    init(
-        username: String,
-        email: String? = nil,
-        password: String,
-        role: UserRole,
-        isActive: Bool? = nil
-    ) {
-        self.username = username
-        self.email = email
-        self.password = password
-        self.role = role
-        self.isActive = isActive
-    }
-
     enum CodingKeys: String, CodingKey {
         case username
         case email
@@ -12897,24 +6927,6 @@ struct UpdateUserRequest: Codable, Sendable {
     let topic: String?
     let payload: UpdateUserBody
 
-    init(
-        type: String? = nil,
-        sequenceId: Int,
-        publicId: String,
-        timestamp: Date,
-        sessionId: String,
-        topic: String? = nil,
-        payload: UpdateUserBody
-    ) {
-        self.type = type
-        self.sequenceId = sequenceId
-        self.publicId = publicId
-        self.timestamp = timestamp
-        self.sessionId = sessionId
-        self.topic = topic
-        self.payload = payload
-    }
-
     enum CodingKeys: String, CodingKey {
         case type
         case sequenceId = "sequence_id"
@@ -12930,16 +6942,6 @@ struct UpdateUserBody: Codable, Sendable {
     let email: String?
     let role: UserRole?
     let isActive: Bool?
-
-    init(
-        email: String? = nil,
-        role: UserRole? = nil,
-        isActive: Bool? = nil
-    ) {
-        self.email = email
-        self.role = role
-        self.isActive = isActive
-    }
 
     enum CodingKeys: String, CodingKey {
         case email
@@ -12957,24 +6959,6 @@ struct DeactivateUserRequest: Codable, Sendable {
     let topic: String?
     let payload: DeactivateUserBody
 
-    init(
-        type: String? = nil,
-        sequenceId: Int,
-        publicId: String,
-        timestamp: Date,
-        sessionId: String,
-        topic: String? = nil,
-        payload: DeactivateUserBody
-    ) {
-        self.type = type
-        self.sequenceId = sequenceId
-        self.publicId = publicId
-        self.timestamp = timestamp
-        self.sessionId = sessionId
-        self.topic = topic
-        self.payload = payload
-    }
-
     enum CodingKeys: String, CodingKey {
         case type
         case sequenceId = "sequence_id"
@@ -12988,12 +6972,6 @@ struct DeactivateUserRequest: Codable, Sendable {
 
 struct DeactivateUserBody: Codable, Sendable {
     let reason: String?
-
-    init(
-        reason: String? = nil
-    ) {
-        self.reason = reason
-    }
 }
 
 struct ChangePasswordRequest: Codable, Sendable {
@@ -13004,24 +6982,6 @@ struct ChangePasswordRequest: Codable, Sendable {
     let sessionId: String
     let topic: String?
     let payload: ChangePasswordBody
-
-    init(
-        type: String? = nil,
-        sequenceId: Int,
-        publicId: String,
-        timestamp: Date,
-        sessionId: String,
-        topic: String? = nil,
-        payload: ChangePasswordBody
-    ) {
-        self.type = type
-        self.sequenceId = sequenceId
-        self.publicId = publicId
-        self.timestamp = timestamp
-        self.sessionId = sessionId
-        self.topic = topic
-        self.payload = payload
-    }
 
     enum CodingKeys: String, CodingKey {
         case type
@@ -13038,14 +6998,6 @@ struct ChangePasswordBody: Codable, Sendable {
     let currentPassword: String
     let newPassword: String
 
-    init(
-        currentPassword: String,
-        newPassword: String
-    ) {
-        self.currentPassword = currentPassword
-        self.newPassword = newPassword
-    }
-
     enum CodingKeys: String, CodingKey {
         case currentPassword = "current_password"
         case newPassword = "new_password"
@@ -13061,24 +7013,6 @@ struct AdminResetPasswordRequest: Codable, Sendable {
     let topic: String?
     let payload: AdminResetPasswordBody
 
-    init(
-        type: String? = nil,
-        sequenceId: Int,
-        publicId: String,
-        timestamp: Date,
-        sessionId: String,
-        topic: String? = nil,
-        payload: AdminResetPasswordBody
-    ) {
-        self.type = type
-        self.sequenceId = sequenceId
-        self.publicId = publicId
-        self.timestamp = timestamp
-        self.sessionId = sessionId
-        self.topic = topic
-        self.payload = payload
-    }
-
     enum CodingKeys: String, CodingKey {
         case type
         case sequenceId = "sequence_id"
@@ -13093,12 +7027,6 @@ struct AdminResetPasswordRequest: Codable, Sendable {
 struct AdminResetPasswordBody: Codable, Sendable {
     let newPassword: String
 
-    init(
-        newPassword: String
-    ) {
-        self.newPassword = newPassword
-    }
-
     enum CodingKeys: String, CodingKey {
         case newPassword = "new_password"
     }
@@ -13112,24 +7040,6 @@ struct SettingUpdate: Codable, Sendable {
     let sessionId: String
     let topic: String?
     let payload: SettingUpdateBody
-
-    init(
-        type: String? = nil,
-        sequenceId: Int,
-        publicId: String,
-        timestamp: Date,
-        sessionId: String,
-        topic: String? = nil,
-        payload: SettingUpdateBody
-    ) {
-        self.type = type
-        self.sequenceId = sequenceId
-        self.publicId = publicId
-        self.timestamp = timestamp
-        self.sessionId = sessionId
-        self.topic = topic
-        self.payload = payload
-    }
 
     enum CodingKeys: String, CodingKey {
         case type
@@ -13146,16 +7056,6 @@ struct SettingUpdateBody: Codable, Sendable {
     let value: String
     let category: String?
     let description: String?
-
-    init(
-        value: String,
-        category: String? = nil,
-        description: String? = nil
-    ) {
-        self.value = value
-        self.category = category
-        self.description = description
-    }
 }
 
 struct UpdatePushBetaUsersCommand: Codable, Sendable {
@@ -13166,24 +7066,6 @@ struct UpdatePushBetaUsersCommand: Codable, Sendable {
     let sessionId: String
     let topic: String?
     let payload: PushBetaUsersBody
-
-    init(
-        type: String? = nil,
-        sequenceId: Int,
-        publicId: String,
-        timestamp: Date,
-        sessionId: String,
-        topic: String? = nil,
-        payload: PushBetaUsersBody
-    ) {
-        self.type = type
-        self.sequenceId = sequenceId
-        self.publicId = publicId
-        self.timestamp = timestamp
-        self.sessionId = sessionId
-        self.topic = topic
-        self.payload = payload
-    }
 
     enum CodingKeys: String, CodingKey {
         case type
@@ -13200,14 +7082,6 @@ struct PushBetaUsersBody: Codable, Sendable {
     let enabled: Bool
     let userPublicIds: [String]?
 
-    init(
-        enabled: Bool,
-        userPublicIds: [String]? = nil
-    ) {
-        self.enabled = enabled
-        self.userPublicIds = userPublicIds
-    }
-
     enum CodingKeys: String, CodingKey {
         case enabled
         case userPublicIds = "user_public_ids"
@@ -13223,24 +7097,6 @@ struct RemoveSettingRequest: Codable, Sendable {
     let topic: String?
     let payload: RemoveSettingBody
 
-    init(
-        type: String? = nil,
-        sequenceId: Int,
-        publicId: String,
-        timestamp: Date,
-        sessionId: String,
-        topic: String? = nil,
-        payload: RemoveSettingBody
-    ) {
-        self.type = type
-        self.sequenceId = sequenceId
-        self.publicId = publicId
-        self.timestamp = timestamp
-        self.sessionId = sessionId
-        self.topic = topic
-        self.payload = payload
-    }
-
     enum CodingKeys: String, CodingKey {
         case type
         case sequenceId = "sequence_id"
@@ -13253,10 +7109,6 @@ struct RemoveSettingRequest: Codable, Sendable {
 }
 
 struct RemoveSettingBody: Codable, Sendable {
-
-    init(
-    ) {
-    }
 }
 
 struct DelegateCreateRequest: Codable, Sendable {
@@ -13267,24 +7119,6 @@ struct DelegateCreateRequest: Codable, Sendable {
     let sessionId: String
     let topic: String?
     let payload: DelegateCreateBody
-
-    init(
-        type: String? = nil,
-        sequenceId: Int,
-        publicId: String,
-        timestamp: Date,
-        sessionId: String,
-        topic: String? = nil,
-        payload: DelegateCreateBody
-    ) {
-        self.type = type
-        self.sequenceId = sequenceId
-        self.publicId = publicId
-        self.timestamp = timestamp
-        self.sessionId = sessionId
-        self.topic = topic
-        self.payload = payload
-    }
 
     enum CodingKeys: String, CodingKey {
         case type
@@ -13303,18 +7137,6 @@ struct DelegateCreateBody: Codable, Sendable {
     let operatorPublicId: String?
     let permissions: [Permission]?
 
-    init(
-        label: String,
-        caps: DelegateCapsBody? = nil,
-        operatorPublicId: String? = nil,
-        permissions: [Permission]? = nil
-    ) {
-        self.label = label
-        self.caps = caps
-        self.operatorPublicId = operatorPublicId
-        self.permissions = permissions
-    }
-
     enum CodingKeys: String, CodingKey {
         case label
         case caps
@@ -13332,24 +7154,6 @@ struct DelegateCapsUpdateRequest: Codable, Sendable {
     let topic: String?
     let payload: DelegateCapsUpdateBody
 
-    init(
-        type: String? = nil,
-        sequenceId: Int,
-        publicId: String,
-        timestamp: Date,
-        sessionId: String,
-        topic: String? = nil,
-        payload: DelegateCapsUpdateBody
-    ) {
-        self.type = type
-        self.sequenceId = sequenceId
-        self.publicId = publicId
-        self.timestamp = timestamp
-        self.sessionId = sessionId
-        self.topic = topic
-        self.payload = payload
-    }
-
     enum CodingKeys: String, CodingKey {
         case type
         case sequenceId = "sequence_id"
@@ -13363,12 +7167,6 @@ struct DelegateCapsUpdateRequest: Codable, Sendable {
 
 struct DelegateCapsUpdateBody: Codable, Sendable {
     let caps: DelegateCapsBody
-
-    init(
-        caps: DelegateCapsBody
-    ) {
-        self.caps = caps
-    }
 }
 
 struct DelegateDeactivateRequest: Codable, Sendable {
@@ -13379,24 +7177,6 @@ struct DelegateDeactivateRequest: Codable, Sendable {
     let sessionId: String
     let topic: String?
     let payload: DelegateDeactivateBody
-
-    init(
-        type: String? = nil,
-        sequenceId: Int,
-        publicId: String,
-        timestamp: Date,
-        sessionId: String,
-        topic: String? = nil,
-        payload: DelegateDeactivateBody
-    ) {
-        self.type = type
-        self.sequenceId = sequenceId
-        self.publicId = publicId
-        self.timestamp = timestamp
-        self.sessionId = sessionId
-        self.topic = topic
-        self.payload = payload
-    }
 
     enum CodingKeys: String, CodingKey {
         case type
@@ -13411,12 +7191,6 @@ struct DelegateDeactivateRequest: Codable, Sendable {
 
 struct DelegateDeactivateBody: Codable, Sendable {
     let reason: String?
-
-    init(
-        reason: String? = nil
-    ) {
-        self.reason = reason
-    }
 }
 
 struct ResearcherCreateRequest: Codable, Sendable {
@@ -13427,24 +7201,6 @@ struct ResearcherCreateRequest: Codable, Sendable {
     let sessionId: String
     let topic: String?
     let payload: ResearcherCreateBody
-
-    init(
-        type: String? = nil,
-        sequenceId: Int,
-        publicId: String,
-        timestamp: Date,
-        sessionId: String,
-        topic: String? = nil,
-        payload: ResearcherCreateBody
-    ) {
-        self.type = type
-        self.sequenceId = sequenceId
-        self.publicId = publicId
-        self.timestamp = timestamp
-        self.sessionId = sessionId
-        self.topic = topic
-        self.payload = payload
-    }
 
     enum CodingKeys: String, CodingKey {
         case type
@@ -13460,14 +7216,6 @@ struct ResearcherCreateRequest: Codable, Sendable {
 struct ResearcherCreateBody: Codable, Sendable {
     let label: String
     let permissions: [Permission]?
-
-    init(
-        label: String,
-        permissions: [Permission]? = nil
-    ) {
-        self.label = label
-        self.permissions = permissions
-    }
 }
 
 struct AiReviewDecisionCommand: Codable, Sendable {
@@ -13478,24 +7226,6 @@ struct AiReviewDecisionCommand: Codable, Sendable {
     let sessionId: String
     let topic: String?
     let payload: AiReviewDecisionRequest
-
-    init(
-        type: String? = nil,
-        sequenceId: Int,
-        publicId: String,
-        timestamp: Date,
-        sessionId: String,
-        topic: String? = nil,
-        payload: AiReviewDecisionRequest
-    ) {
-        self.type = type
-        self.sequenceId = sequenceId
-        self.publicId = publicId
-        self.timestamp = timestamp
-        self.sessionId = sessionId
-        self.topic = topic
-        self.payload = payload
-    }
 
     enum CodingKeys: String, CodingKey {
         case type
@@ -13511,14 +7241,6 @@ struct AiReviewDecisionCommand: Codable, Sendable {
 struct AiReviewDecisionRequest: Codable, Sendable {
     let decision: String
     let rationale: String?
-
-    init(
-        decision: String,
-        rationale: String? = nil
-    ) {
-        self.decision = decision
-        self.rationale = rationale
-    }
 }
 
 struct UpdateUserAlertDefaultCommand: Codable, Sendable {
@@ -13529,24 +7251,6 @@ struct UpdateUserAlertDefaultCommand: Codable, Sendable {
     let sessionId: String
     let topic: String?
     let payload: UserAlertDefaultBody
-
-    init(
-        type: String? = nil,
-        sequenceId: Int,
-        publicId: String,
-        timestamp: Date,
-        sessionId: String,
-        topic: String? = nil,
-        payload: UserAlertDefaultBody
-    ) {
-        self.type = type
-        self.sequenceId = sequenceId
-        self.publicId = publicId
-        self.timestamp = timestamp
-        self.sessionId = sessionId
-        self.topic = topic
-        self.payload = payload
-    }
 
     enum CodingKeys: String, CodingKey {
         case type
@@ -13564,16 +7268,6 @@ struct UserAlertDefaultBody: Codable, Sendable {
     let enabled: Bool?
     let minPriority: String?
 
-    init(
-        alertType: String,
-        enabled: Bool? = nil,
-        minPriority: String? = nil
-    ) {
-        self.alertType = alertType
-        self.enabled = enabled
-        self.minPriority = minPriority
-    }
-
     enum CodingKeys: String, CodingKey {
         case alertType = "alert_type"
         case enabled
@@ -13589,24 +7283,6 @@ struct BacktestCreateCommand: Codable, Sendable {
     let sessionId: String
     let topic: String?
     let payload: BacktestCreateBody
-
-    init(
-        type: String? = nil,
-        sequenceId: Int,
-        publicId: String,
-        timestamp: Date,
-        sessionId: String,
-        topic: String? = nil,
-        payload: BacktestCreateBody
-    ) {
-        self.type = type
-        self.sequenceId = sequenceId
-        self.publicId = publicId
-        self.timestamp = timestamp
-        self.sessionId = sessionId
-        self.topic = topic
-        self.payload = payload
-    }
 
     enum CodingKeys: String, CodingKey {
         case type
@@ -13634,36 +7310,6 @@ struct BacktestCreateBody: Codable, Sendable {
     let commissionBps: Double?
     let targetExecutionExchange: String?
 
-    init(
-        strategyClass: String,
-        instrumentPublicId: String,
-        exchange: String,
-        timeframe: String? = nil,
-        startDate: Date,
-        endDate: Date,
-        initialCash: Double? = nil,
-        strategyParams: JsonObject? = nil,
-        executionMode: String? = nil,
-        fillModel: String? = nil,
-        slippageBps: Double? = nil,
-        commissionBps: Double? = nil,
-        targetExecutionExchange: String? = nil
-    ) {
-        self.strategyClass = strategyClass
-        self.instrumentPublicId = instrumentPublicId
-        self.exchange = exchange
-        self.timeframe = timeframe
-        self.startDate = startDate
-        self.endDate = endDate
-        self.initialCash = initialCash
-        self.strategyParams = strategyParams
-        self.executionMode = executionMode
-        self.fillModel = fillModel
-        self.slippageBps = slippageBps
-        self.commissionBps = commissionBps
-        self.targetExecutionExchange = targetExecutionExchange
-    }
-
     enum CodingKeys: String, CodingKey {
         case strategyClass = "strategy_class"
         case instrumentPublicId = "instrument_public_id"
@@ -13690,24 +7336,6 @@ struct BacktestCompareRequest: Codable, Sendable {
     let topic: String?
     let payload: BacktestCompareBody
 
-    init(
-        type: String? = nil,
-        sequenceId: Int,
-        publicId: String,
-        timestamp: Date,
-        sessionId: String,
-        topic: String? = nil,
-        payload: BacktestCompareBody
-    ) {
-        self.type = type
-        self.sequenceId = sequenceId
-        self.publicId = publicId
-        self.timestamp = timestamp
-        self.sessionId = sessionId
-        self.topic = topic
-        self.payload = payload
-    }
-
     enum CodingKeys: String, CodingKey {
         case type
         case sequenceId = "sequence_id"
@@ -13725,20 +7353,6 @@ struct BacktestCompareBody: Codable, Sendable {
     let runBPublicId: String?
     let configHash: String?
     let anchorRunPublicId: String?
-
-    init(
-        mode: String,
-        runAPublicId: String? = nil,
-        runBPublicId: String? = nil,
-        configHash: String? = nil,
-        anchorRunPublicId: String? = nil
-    ) {
-        self.mode = mode
-        self.runAPublicId = runAPublicId
-        self.runBPublicId = runBPublicId
-        self.configHash = configHash
-        self.anchorRunPublicId = anchorRunPublicId
-    }
 
     enum CodingKeys: String, CodingKey {
         case mode
@@ -13758,24 +7372,6 @@ struct BacktestCancelCommand: Codable, Sendable {
     let topic: String?
     let payload: BacktestCancelBody
 
-    init(
-        type: String? = nil,
-        sequenceId: Int,
-        publicId: String,
-        timestamp: Date,
-        sessionId: String,
-        topic: String? = nil,
-        payload: BacktestCancelBody
-    ) {
-        self.type = type
-        self.sequenceId = sequenceId
-        self.publicId = publicId
-        self.timestamp = timestamp
-        self.sessionId = sessionId
-        self.topic = topic
-        self.payload = payload
-    }
-
     enum CodingKeys: String, CodingKey {
         case type
         case sequenceId = "sequence_id"
@@ -13789,12 +7385,6 @@ struct BacktestCancelCommand: Codable, Sendable {
 
 struct BacktestCancelBody: Codable, Sendable {
     let reason: String?
-
-    init(
-        reason: String? = nil
-    ) {
-        self.reason = reason
-    }
 }
 
 struct CreateCredentialCommand: Codable, Sendable {
@@ -13805,24 +7395,6 @@ struct CreateCredentialCommand: Codable, Sendable {
     let sessionId: String
     let topic: String?
     let payload: CreateCredentialBody
-
-    init(
-        type: String? = nil,
-        sequenceId: Int,
-        publicId: String,
-        timestamp: Date,
-        sessionId: String,
-        topic: String? = nil,
-        payload: CreateCredentialBody
-    ) {
-        self.type = type
-        self.sequenceId = sequenceId
-        self.publicId = publicId
-        self.timestamp = timestamp
-        self.sessionId = sessionId
-        self.topic = topic
-        self.payload = payload
-    }
 
     enum CodingKeys: String, CodingKey {
         case type
@@ -13842,20 +7414,6 @@ struct CreateCredentialBody: Codable, Sendable {
     let credentialPayload: [String: String]
     let label: String?
 
-    init(
-        exchange: String,
-        credentialType: String,
-        reconciliationMethod: PortfolioReconciliationMethod,
-        credentialPayload: [String: String],
-        label: String? = nil
-    ) {
-        self.exchange = exchange
-        self.credentialType = credentialType
-        self.reconciliationMethod = reconciliationMethod
-        self.credentialPayload = credentialPayload
-        self.label = label
-    }
-
     enum CodingKeys: String, CodingKey {
         case exchange
         case credentialType = "credential_type"
@@ -13874,24 +7432,6 @@ struct SetCredentialReconciliationMethodCommand: Codable, Sendable {
     let topic: String?
     let payload: SetCredentialReconciliationMethodBody
 
-    init(
-        type: String? = nil,
-        sequenceId: Int,
-        publicId: String,
-        timestamp: Date,
-        sessionId: String,
-        topic: String? = nil,
-        payload: SetCredentialReconciliationMethodBody
-    ) {
-        self.type = type
-        self.sequenceId = sequenceId
-        self.publicId = publicId
-        self.timestamp = timestamp
-        self.sessionId = sessionId
-        self.topic = topic
-        self.payload = payload
-    }
-
     enum CodingKeys: String, CodingKey {
         case type
         case sequenceId = "sequence_id"
@@ -13906,12 +7446,6 @@ struct SetCredentialReconciliationMethodCommand: Codable, Sendable {
 struct SetCredentialReconciliationMethodBody: Codable, Sendable {
     let reconciliationMethod: RealPortfolioReconciliationMethod
 
-    init(
-        reconciliationMethod: RealPortfolioReconciliationMethod
-    ) {
-        self.reconciliationMethod = reconciliationMethod
-    }
-
     enum CodingKeys: String, CodingKey {
         case reconciliationMethod = "reconciliation_method"
     }
@@ -13925,24 +7459,6 @@ struct RotateCredentialCommand: Codable, Sendable {
     let sessionId: String
     let topic: String?
     let payload: RotateCredentialBody
-
-    init(
-        type: String? = nil,
-        sequenceId: Int,
-        publicId: String,
-        timestamp: Date,
-        sessionId: String,
-        topic: String? = nil,
-        payload: RotateCredentialBody
-    ) {
-        self.type = type
-        self.sequenceId = sequenceId
-        self.publicId = publicId
-        self.timestamp = timestamp
-        self.sessionId = sessionId
-        self.topic = topic
-        self.payload = payload
-    }
 
     enum CodingKeys: String, CodingKey {
         case type
@@ -13959,14 +7475,6 @@ struct RotateCredentialBody: Codable, Sendable {
     let credentialPayload: [String: String]
     let label: String?
 
-    init(
-        credentialPayload: [String: String],
-        label: String? = nil
-    ) {
-        self.credentialPayload = credentialPayload
-        self.label = label
-    }
-
     enum CodingKeys: String, CodingKey {
         case credentialPayload = "credential_payload"
         case label
@@ -13981,24 +7489,6 @@ struct RegisterDeviceCommand: Codable, Sendable {
     let sessionId: String
     let topic: String?
     let payload: RegisterDeviceBody
-
-    init(
-        type: String? = nil,
-        sequenceId: Int,
-        publicId: String,
-        timestamp: Date,
-        sessionId: String,
-        topic: String? = nil,
-        payload: RegisterDeviceBody
-    ) {
-        self.type = type
-        self.sequenceId = sequenceId
-        self.publicId = publicId
-        self.timestamp = timestamp
-        self.sessionId = sessionId
-        self.topic = topic
-        self.payload = payload
-    }
 
     enum CodingKeys: String, CodingKey {
         case type
@@ -14018,20 +7508,6 @@ struct RegisterDeviceBody: Codable, Sendable {
     let appVersion: String?
     let previewsMode: String?
 
-    init(
-        deviceToken: String,
-        deviceId: String,
-        env: String,
-        appVersion: String? = nil,
-        previewsMode: String? = nil
-    ) {
-        self.deviceToken = deviceToken
-        self.deviceId = deviceId
-        self.env = env
-        self.appVersion = appVersion
-        self.previewsMode = previewsMode
-    }
-
     enum CodingKeys: String, CodingKey {
         case deviceToken = "device_token"
         case deviceId = "device_id"
@@ -14049,24 +7525,6 @@ struct UpdateDevicePrefCommand: Codable, Sendable {
     let sessionId: String
     let topic: String?
     let payload: DeviceAlertPrefBody
-
-    init(
-        type: String? = nil,
-        sequenceId: Int,
-        publicId: String,
-        timestamp: Date,
-        sessionId: String,
-        topic: String? = nil,
-        payload: DeviceAlertPrefBody
-    ) {
-        self.type = type
-        self.sequenceId = sequenceId
-        self.publicId = publicId
-        self.timestamp = timestamp
-        self.sessionId = sessionId
-        self.topic = topic
-        self.payload = payload
-    }
 
     enum CodingKeys: String, CodingKey {
         case type
@@ -14090,28 +7548,6 @@ struct DeviceAlertPrefBody: Codable, Sendable {
     let muteUntil: Date?
     let timezone: String?
 
-    init(
-        alertType: String,
-        operatorPublicId: String? = nil,
-        walletPublicId: String? = nil,
-        enabled: Bool? = nil,
-        minPriority: String? = nil,
-        quietHoursStartMin: Int? = nil,
-        quietHoursEndMin: Int? = nil,
-        muteUntil: Date? = nil,
-        timezone: String? = nil
-    ) {
-        self.alertType = alertType
-        self.operatorPublicId = operatorPublicId
-        self.walletPublicId = walletPublicId
-        self.enabled = enabled
-        self.minPriority = minPriority
-        self.quietHoursStartMin = quietHoursStartMin
-        self.quietHoursEndMin = quietHoursEndMin
-        self.muteUntil = muteUntil
-        self.timezone = timezone
-    }
-
     enum CodingKeys: String, CodingKey {
         case alertType = "alert_type"
         case operatorPublicId = "operator_public_id"
@@ -14134,24 +7570,6 @@ struct RevokeDevicePrefCommand: Codable, Sendable {
     let topic: String?
     let payload: RevokeDevicePrefBody
 
-    init(
-        type: String? = nil,
-        sequenceId: Int,
-        publicId: String,
-        timestamp: Date,
-        sessionId: String,
-        topic: String? = nil,
-        payload: RevokeDevicePrefBody
-    ) {
-        self.type = type
-        self.sequenceId = sequenceId
-        self.publicId = publicId
-        self.timestamp = timestamp
-        self.sessionId = sessionId
-        self.topic = topic
-        self.payload = payload
-    }
-
     enum CodingKeys: String, CodingKey {
         case type
         case sequenceId = "sequence_id"
@@ -14165,12 +7583,6 @@ struct RevokeDevicePrefCommand: Codable, Sendable {
 
 struct RevokeDevicePrefBody: Codable, Sendable {
     let reason: String?
-
-    init(
-        reason: String? = nil
-    ) {
-        self.reason = reason
-    }
 }
 
 struct BracketCreateCommand: Codable, Sendable {
@@ -14181,24 +7593,6 @@ struct BracketCreateCommand: Codable, Sendable {
     let sessionId: String
     let topic: String?
     let payload: BracketCreateBody
-
-    init(
-        type: String? = nil,
-        sequenceId: Int,
-        publicId: String,
-        timestamp: Date,
-        sessionId: String,
-        topic: String? = nil,
-        payload: BracketCreateBody
-    ) {
-        self.type = type
-        self.sequenceId = sequenceId
-        self.publicId = publicId
-        self.timestamp = timestamp
-        self.sessionId = sessionId
-        self.topic = topic
-        self.payload = payload
-    }
 
     enum CodingKeys: String, CodingKey {
         case type
@@ -14217,18 +7611,6 @@ struct BracketCreateBody: Codable, Sendable {
     let tpPrice: Double?
     let idempotencyKey: String?
 
-    init(
-        positionCyclePublicId: String,
-        slPrice: Double? = nil,
-        tpPrice: Double? = nil,
-        idempotencyKey: String? = nil
-    ) {
-        self.positionCyclePublicId = positionCyclePublicId
-        self.slPrice = slPrice
-        self.tpPrice = tpPrice
-        self.idempotencyKey = idempotencyKey
-    }
-
     enum CodingKeys: String, CodingKey {
         case positionCyclePublicId = "position_cycle_public_id"
         case slPrice = "sl_price"
@@ -14246,24 +7628,6 @@ struct BracketCancelCommand: Codable, Sendable {
     let topic: String?
     let payload: BracketCancelBody
 
-    init(
-        type: String? = nil,
-        sequenceId: Int,
-        publicId: String,
-        timestamp: Date,
-        sessionId: String,
-        topic: String? = nil,
-        payload: BracketCancelBody
-    ) {
-        self.type = type
-        self.sequenceId = sequenceId
-        self.publicId = publicId
-        self.timestamp = timestamp
-        self.sessionId = sessionId
-        self.topic = topic
-        self.payload = payload
-    }
-
     enum CodingKeys: String, CodingKey {
         case type
         case sequenceId = "sequence_id"
@@ -14277,12 +7641,6 @@ struct BracketCancelCommand: Codable, Sendable {
 
 struct BracketCancelBody: Codable, Sendable {
     let reason: String?
-
-    init(
-        reason: String? = nil
-    ) {
-        self.reason = reason
-    }
 }
 
 struct CreateOperatorCommand: Codable, Sendable {
@@ -14293,24 +7651,6 @@ struct CreateOperatorCommand: Codable, Sendable {
     let sessionId: String
     let topic: String?
     let payload: CreateOperatorBody
-
-    init(
-        type: String? = nil,
-        sequenceId: Int,
-        publicId: String,
-        timestamp: Date,
-        sessionId: String,
-        topic: String? = nil,
-        payload: CreateOperatorBody
-    ) {
-        self.type = type
-        self.sequenceId = sequenceId
-        self.publicId = publicId
-        self.timestamp = timestamp
-        self.sessionId = sessionId
-        self.topic = topic
-        self.payload = payload
-    }
 
     enum CodingKeys: String, CodingKey {
         case type
@@ -14326,14 +7666,6 @@ struct CreateOperatorCommand: Codable, Sendable {
 struct CreateOperatorBody: Codable, Sendable {
     let label: String
     let description: String?
-
-    init(
-        label: String,
-        description: String? = nil
-    ) {
-        self.label = label
-        self.description = description
-    }
 }
 
 struct CreateOrderCommand: Codable, Sendable {
@@ -14344,24 +7676,6 @@ struct CreateOrderCommand: Codable, Sendable {
     let sessionId: String
     let topic: String?
     let payload: CreateOrderBody
-
-    init(
-        type: String? = nil,
-        sequenceId: Int,
-        publicId: String,
-        timestamp: Date,
-        sessionId: String,
-        topic: String? = nil,
-        payload: CreateOrderBody
-    ) {
-        self.type = type
-        self.sequenceId = sequenceId
-        self.publicId = publicId
-        self.timestamp = timestamp
-        self.sessionId = sessionId
-        self.topic = topic
-        self.payload = payload
-    }
 
     enum CodingKeys: String, CodingKey {
         case type
@@ -14393,44 +7707,6 @@ struct CreateOrderBody: Codable, Sendable {
     let idempotencyKey: String?
     let aiReviewPublicId: String?
 
-    init(
-        instrument: String,
-        instrumentPublicId: String,
-        exchange: String,
-        mode: String? = nil,
-        side: String,
-        orderType: String,
-        quantity: Double,
-        price: Double? = nil,
-        stopPrice: Double? = nil,
-        timeInForce: String? = nil,
-        postOnly: Bool? = nil,
-        leverage: Int? = nil,
-        reduceOnly: Bool? = nil,
-        walletPublicId: String? = nil,
-        operatorPublicId: String? = nil,
-        idempotencyKey: String? = nil,
-        aiReviewPublicId: String? = nil
-    ) {
-        self.instrument = instrument
-        self.instrumentPublicId = instrumentPublicId
-        self.exchange = exchange
-        self.mode = mode
-        self.side = side
-        self.orderType = orderType
-        self.quantity = quantity
-        self.price = price
-        self.stopPrice = stopPrice
-        self.timeInForce = timeInForce
-        self.postOnly = postOnly
-        self.leverage = leverage
-        self.reduceOnly = reduceOnly
-        self.walletPublicId = walletPublicId
-        self.operatorPublicId = operatorPublicId
-        self.idempotencyKey = idempotencyKey
-        self.aiReviewPublicId = aiReviewPublicId
-    }
-
     enum CodingKeys: String, CodingKey {
         case instrument
         case instrumentPublicId = "instrument_public_id"
@@ -14461,24 +7737,6 @@ struct CancelOrderCommand: Codable, Sendable {
     let topic: String?
     let payload: CancelOrderBody
 
-    init(
-        type: String? = nil,
-        sequenceId: Int,
-        publicId: String,
-        timestamp: Date,
-        sessionId: String,
-        topic: String? = nil,
-        payload: CancelOrderBody
-    ) {
-        self.type = type
-        self.sequenceId = sequenceId
-        self.publicId = publicId
-        self.timestamp = timestamp
-        self.sessionId = sessionId
-        self.topic = topic
-        self.payload = payload
-    }
-
     enum CodingKeys: String, CodingKey {
         case type
         case sequenceId = "sequence_id"
@@ -14492,12 +7750,6 @@ struct CancelOrderCommand: Codable, Sendable {
 
 struct CancelOrderBody: Codable, Sendable {
     let reason: String?
-
-    init(
-        reason: String? = nil
-    ) {
-        self.reason = reason
-    }
 }
 
 struct ProcessCreateRequest: Codable, Sendable {
@@ -14508,24 +7760,6 @@ struct ProcessCreateRequest: Codable, Sendable {
     let sessionId: String
     let topic: String?
     let payload: ProcessCreateBody
-
-    init(
-        type: String? = nil,
-        sequenceId: Int,
-        publicId: String,
-        timestamp: Date,
-        sessionId: String,
-        topic: String? = nil,
-        payload: ProcessCreateBody
-    ) {
-        self.type = type
-        self.sequenceId = sequenceId
-        self.publicId = publicId
-        self.timestamp = timestamp
-        self.sessionId = sessionId
-        self.topic = topic
-        self.payload = payload
-    }
 
     enum CodingKeys: String, CodingKey {
         case type
@@ -14545,22 +7779,6 @@ struct ProcessCreateBody: Codable, Sendable {
     let mode: String?
     let parameters: JsonObject?
     let note: String?
-
-    init(
-        name: String,
-        template: String,
-        enabled: Bool? = nil,
-        mode: String? = nil,
-        parameters: JsonObject? = nil,
-        note: String? = nil
-    ) {
-        self.name = name
-        self.template = template
-        self.enabled = enabled
-        self.mode = mode
-        self.parameters = parameters
-        self.note = note
-    }
 }
 
 struct ProcessStartRequest: Codable, Sendable {
@@ -14571,24 +7789,6 @@ struct ProcessStartRequest: Codable, Sendable {
     let sessionId: String
     let topic: String?
     let payload: ProcessStartBody
-
-    init(
-        type: String? = nil,
-        sequenceId: Int,
-        publicId: String,
-        timestamp: Date,
-        sessionId: String,
-        topic: String? = nil,
-        payload: ProcessStartBody
-    ) {
-        self.type = type
-        self.sequenceId = sequenceId
-        self.publicId = publicId
-        self.timestamp = timestamp
-        self.sessionId = sessionId
-        self.topic = topic
-        self.payload = payload
-    }
 
     enum CodingKeys: String, CodingKey {
         case type
@@ -14604,14 +7804,6 @@ struct ProcessStartRequest: Codable, Sendable {
 struct ProcessStartBody: Codable, Sendable {
     let mode: String?
     let parameters: JsonObject?
-
-    init(
-        mode: String? = nil,
-        parameters: JsonObject? = nil
-    ) {
-        self.mode = mode
-        self.parameters = parameters
-    }
 }
 
 struct ProcessDesiredStateRequest: Codable, Sendable {
@@ -14622,24 +7814,6 @@ struct ProcessDesiredStateRequest: Codable, Sendable {
     let sessionId: String
     let topic: String?
     let payload: ProcessDesiredStateBody
-
-    init(
-        type: String? = nil,
-        sequenceId: Int,
-        publicId: String,
-        timestamp: Date,
-        sessionId: String,
-        topic: String? = nil,
-        payload: ProcessDesiredStateBody
-    ) {
-        self.type = type
-        self.sequenceId = sequenceId
-        self.publicId = publicId
-        self.timestamp = timestamp
-        self.sessionId = sessionId
-        self.topic = topic
-        self.payload = payload
-    }
 
     enum CodingKeys: String, CodingKey {
         case type
@@ -14656,14 +7830,6 @@ struct ProcessDesiredStateBody: Codable, Sendable {
     let action: String
     let restartNonce: String?
 
-    init(
-        action: String,
-        restartNonce: String? = nil
-    ) {
-        self.action = action
-        self.restartNonce = restartNonce
-    }
-
     enum CodingKeys: String, CodingKey {
         case action
         case restartNonce = "restart_nonce"
@@ -14678,24 +7844,6 @@ struct ProcessConfigScopeRequest: Codable, Sendable {
     let sessionId: String
     let topic: String?
     let payload: ProcessConfigScopeBody
-
-    init(
-        type: String? = nil,
-        sequenceId: Int,
-        publicId: String,
-        timestamp: Date,
-        sessionId: String,
-        topic: String? = nil,
-        payload: ProcessConfigScopeBody
-    ) {
-        self.type = type
-        self.sequenceId = sequenceId
-        self.publicId = publicId
-        self.timestamp = timestamp
-        self.sessionId = sessionId
-        self.topic = topic
-        self.payload = payload
-    }
 
     enum CodingKeys: String, CodingKey {
         case type
@@ -14713,16 +7861,6 @@ struct ProcessConfigScopeBody: Codable, Sendable {
     let walletPublicId: String?
     let referenceIdentityParams: [String: String]?
 
-    init(
-        operatorPublicId: String? = nil,
-        walletPublicId: String? = nil,
-        referenceIdentityParams: [String: String]? = nil
-    ) {
-        self.operatorPublicId = operatorPublicId
-        self.walletPublicId = walletPublicId
-        self.referenceIdentityParams = referenceIdentityParams
-    }
-
     enum CodingKeys: String, CodingKey {
         case operatorPublicId = "operator_public_id"
         case walletPublicId = "wallet_public_id"
@@ -14738,24 +7876,6 @@ struct CreateScopeGrantCommand: Codable, Sendable {
     let sessionId: String
     let topic: String?
     let payload: CreateScopeGrantBody
-
-    init(
-        type: String? = nil,
-        sequenceId: Int,
-        publicId: String,
-        timestamp: Date,
-        sessionId: String,
-        topic: String? = nil,
-        payload: CreateScopeGrantBody
-    ) {
-        self.type = type
-        self.sequenceId = sequenceId
-        self.publicId = publicId
-        self.timestamp = timestamp
-        self.sessionId = sessionId
-        self.topic = topic
-        self.payload = payload
-    }
 
     enum CodingKeys: String, CodingKey {
         case type
@@ -14776,22 +7896,6 @@ struct CreateScopeGrantBody: Codable, Sendable {
     let instrumentPublicId: String?
     let note: String?
 
-    init(
-        operatorPublicId: String,
-        walletPublicId: String,
-        scopeKind: String,
-        underlyingPublicId: String? = nil,
-        instrumentPublicId: String? = nil,
-        note: String? = nil
-    ) {
-        self.operatorPublicId = operatorPublicId
-        self.walletPublicId = walletPublicId
-        self.scopeKind = scopeKind
-        self.underlyingPublicId = underlyingPublicId
-        self.instrumentPublicId = instrumentPublicId
-        self.note = note
-    }
-
     enum CodingKeys: String, CodingKey {
         case operatorPublicId = "operator_public_id"
         case walletPublicId = "wallet_public_id"
@@ -14811,24 +7915,6 @@ struct HandoverScopeGrantCommand: Codable, Sendable {
     let topic: String?
     let payload: HandoverScopeGrantBody
 
-    init(
-        type: String? = nil,
-        sequenceId: Int,
-        publicId: String,
-        timestamp: Date,
-        sessionId: String,
-        topic: String? = nil,
-        payload: HandoverScopeGrantBody
-    ) {
-        self.type = type
-        self.sequenceId = sequenceId
-        self.publicId = publicId
-        self.timestamp = timestamp
-        self.sessionId = sessionId
-        self.topic = topic
-        self.payload = payload
-    }
-
     enum CodingKeys: String, CodingKey {
         case type
         case sequenceId = "sequence_id"
@@ -14844,16 +7930,6 @@ struct HandoverScopeGrantBody: Codable, Sendable {
     let fromGrantPublicId: String
     let toOperatorPublicId: String
     let reason: String?
-
-    init(
-        fromGrantPublicId: String,
-        toOperatorPublicId: String,
-        reason: String? = nil
-    ) {
-        self.fromGrantPublicId = fromGrantPublicId
-        self.toOperatorPublicId = toOperatorPublicId
-        self.reason = reason
-    }
 
     enum CodingKeys: String, CodingKey {
         case fromGrantPublicId = "from_grant_public_id"
@@ -14871,24 +7947,6 @@ struct RevokeScopeGrantCommand: Codable, Sendable {
     let topic: String?
     let payload: RevokeScopeGrantBody
 
-    init(
-        type: String? = nil,
-        sequenceId: Int,
-        publicId: String,
-        timestamp: Date,
-        sessionId: String,
-        topic: String? = nil,
-        payload: RevokeScopeGrantBody
-    ) {
-        self.type = type
-        self.sequenceId = sequenceId
-        self.publicId = publicId
-        self.timestamp = timestamp
-        self.sessionId = sessionId
-        self.topic = topic
-        self.payload = payload
-    }
-
     enum CodingKeys: String, CodingKey {
         case type
         case sequenceId = "sequence_id"
@@ -14902,12 +7960,6 @@ struct RevokeScopeGrantCommand: Codable, Sendable {
 
 struct RevokeScopeGrantBody: Codable, Sendable {
     let reason: String?
-
-    init(
-        reason: String? = nil
-    ) {
-        self.reason = reason
-    }
 }
 
 struct TrailingStopCreateCommand: Codable, Sendable {
@@ -14918,24 +7970,6 @@ struct TrailingStopCreateCommand: Codable, Sendable {
     let sessionId: String
     let topic: String?
     let payload: TrailingStopCreateBody
-
-    init(
-        type: String? = nil,
-        sequenceId: Int,
-        publicId: String,
-        timestamp: Date,
-        sessionId: String,
-        topic: String? = nil,
-        payload: TrailingStopCreateBody
-    ) {
-        self.type = type
-        self.sequenceId = sequenceId
-        self.publicId = publicId
-        self.timestamp = timestamp
-        self.sessionId = sessionId
-        self.topic = topic
-        self.payload = payload
-    }
 
     enum CodingKeys: String, CodingKey {
         case type
@@ -14954,18 +7988,6 @@ struct TrailingStopCreateBody: Codable, Sendable {
     let minLockPct: Double?
     let idempotencyKey: String?
 
-    init(
-        positionCyclePublicId: String,
-        trailingPct: Double,
-        minLockPct: Double? = nil,
-        idempotencyKey: String? = nil
-    ) {
-        self.positionCyclePublicId = positionCyclePublicId
-        self.trailingPct = trailingPct
-        self.minLockPct = minLockPct
-        self.idempotencyKey = idempotencyKey
-    }
-
     enum CodingKeys: String, CodingKey {
         case positionCyclePublicId = "position_cycle_public_id"
         case trailingPct = "trailing_pct"
@@ -14983,24 +8005,6 @@ struct TrailingStopCancelCommand: Codable, Sendable {
     let topic: String?
     let payload: TrailingStopCancelBody
 
-    init(
-        type: String? = nil,
-        sequenceId: Int,
-        publicId: String,
-        timestamp: Date,
-        sessionId: String,
-        topic: String? = nil,
-        payload: TrailingStopCancelBody
-    ) {
-        self.type = type
-        self.sequenceId = sequenceId
-        self.publicId = publicId
-        self.timestamp = timestamp
-        self.sessionId = sessionId
-        self.topic = topic
-        self.payload = payload
-    }
-
     enum CodingKeys: String, CodingKey {
         case type
         case sequenceId = "sequence_id"
@@ -15014,12 +8018,6 @@ struct TrailingStopCancelCommand: Codable, Sendable {
 
 struct TrailingStopCancelBody: Codable, Sendable {
     let reason: String?
-
-    init(
-        reason: String? = nil
-    ) {
-        self.reason = reason
-    }
 }
 
 struct CreateWalletCommand: Codable, Sendable {
@@ -15030,24 +8028,6 @@ struct CreateWalletCommand: Codable, Sendable {
     let sessionId: String
     let topic: String?
     let payload: CreateWalletBody
-
-    init(
-        type: String? = nil,
-        sequenceId: Int,
-        publicId: String,
-        timestamp: Date,
-        sessionId: String,
-        topic: String? = nil,
-        payload: CreateWalletBody
-    ) {
-        self.type = type
-        self.sequenceId = sequenceId
-        self.publicId = publicId
-        self.timestamp = timestamp
-        self.sessionId = sessionId
-        self.topic = topic
-        self.payload = payload
-    }
 
     enum CodingKeys: String, CodingKey {
         case type
@@ -15064,16 +8044,6 @@ struct CreateWalletBody: Codable, Sendable {
     let label: String
     let description: String?
     let isPaper: Bool?
-
-    init(
-        label: String,
-        description: String? = nil,
-        isPaper: Bool? = nil
-    ) {
-        self.label = label
-        self.description = description
-        self.isPaper = isPaper
-    }
 
     enum CodingKeys: String, CodingKey {
         case label
