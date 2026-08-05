@@ -853,6 +853,7 @@ struct OrderRequestData: Codable, Sendable {
     let strategyTag: String?
     let leverage: Int?
     let reduceOnly: Bool?
+    let postOnly: Bool?
     let walletPublicId: String?
     let operatorPublicId: String?
     let userPublicId: String?
@@ -885,6 +886,7 @@ struct OrderRequestData: Codable, Sendable {
         case strategyTag = "strategy_tag"
         case leverage
         case reduceOnly = "reduce_only"
+        case postOnly = "post_only"
         case walletPublicId = "wallet_public_id"
         case operatorPublicId = "operator_public_id"
         case userPublicId = "user_public_id"
