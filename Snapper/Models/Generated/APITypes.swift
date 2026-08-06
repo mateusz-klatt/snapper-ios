@@ -37,7 +37,9 @@ enum PnlIncompletenessReason: String, Codable, Sendable {
     case netNonFinite = "net_non_finite"
     case attributionValueNonFinite = "attribution_value_non_finite"
     case attributionReconciliationFailed = "attribution_reconciliation_failed"
+    case attributionSumUnrepresentable = "attribution_sum_unrepresentable"
     case instrumentReconciliationFailed = "instrument_reconciliation_failed"
+    case instrumentSumUnrepresentable = "instrument_sum_unrepresentable"
     case latePreActivationExecution = "late_pre_activation_execution"
 }
 
