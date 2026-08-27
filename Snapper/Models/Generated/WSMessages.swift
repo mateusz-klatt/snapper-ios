@@ -1235,6 +1235,7 @@ struct SettingChangedData: Codable, Sendable {
     let value: String
     let category: String
     let updatedBy: String?
+    let deleted: Bool?
 
     enum CodingKeys: String, CodingKey {
         case type
@@ -1247,6 +1248,7 @@ struct SettingChangedData: Codable, Sendable {
         case value
         case category
         case updatedBy = "updated_by"
+        case deleted
     }
 }
 
