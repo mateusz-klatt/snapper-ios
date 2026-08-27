@@ -3260,6 +3260,10 @@ struct ListedCachedStatsResponse: Codable, Sendable {
     }
 }
 
+struct LivenessResponse: Codable, Sendable {
+    let status: String?
+}
+
 struct LoginData: Codable, Sendable {
     let type: String?
     let sequenceId: Int
