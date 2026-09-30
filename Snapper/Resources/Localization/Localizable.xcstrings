@@ -15419,7 +15419,7 @@
         "pl": {
           "stringUnit": {
             "state": "translated",
-            "value": "%@/%@ zgłasza %@ przez %lld kolejnych heartbeatów"
+            "value": "Raport %@/%@: %@; liczba kolejnych sygnałów heartbeat z tym stanem: %lld"
           }
         },
         "de": {
@@ -15957,271 +15957,271 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "%@ %@ %@ @ $%@ filled on %@"
+            "value": "%@ %@ %@ @ %@ filled on %@"
           }
         },
         "ga": {
           "stringUnit": {
             "state": "translated",
-            "value": "%@ %@ %@ @ $%@ comhlíonta ar %@"
+            "value": "%@ %@ %@ @ %@ comhlíonta ar %@"
           }
         },
         "pl": {
           "stringUnit": {
             "state": "translated",
-            "value": "%@ %@ %@ @ $%@ zrealizowane na %@"
+            "value": "%@ %@ %@ @ %@ zrealizowane na %@"
           }
         },
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "%@ %@ %@ @ $%@ ausgeführt auf %@"
+            "value": "%@ %@ %@ @ %@ ausgeführt auf %@"
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "%@ %@ %@ @ $%@ exécuté sur %@"
+            "value": "%@ %@ %@ @ %@ exécuté sur %@"
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "%@ %@ %@ @ $%@ ejecutada en %@"
+            "value": "%@ %@ %@ @ %@ ejecutada en %@"
           }
         },
         "it": {
           "stringUnit": {
             "state": "translated",
-            "value": "%@ %@ %@ @ $%@ eseguito su %@"
+            "value": "%@ %@ %@ @ %@ eseguito su %@"
           }
         },
         "nl": {
           "stringUnit": {
             "state": "translated",
-            "value": "%@ %@ %@ @ $%@ uitgevoerd op %@"
+            "value": "%@ %@ %@ @ %@ uitgevoerd op %@"
           }
         },
         "pt-BR": {
           "stringUnit": {
             "state": "translated",
-            "value": "%@ %@ %@ @ $%@ executada na %@"
+            "value": "%@ %@ %@ @ %@ executada na %@"
           }
         },
         "sv": {
           "stringUnit": {
             "state": "translated",
-            "value": "%@ %@ %@ @ $%@ utförd på %@"
+            "value": "%@ %@ %@ @ %@ utförd på %@"
           }
         },
         "nb": {
           "stringUnit": {
             "state": "translated",
-            "value": "%@ %@ %@ @ $%@ utført på %@"
+            "value": "%@ %@ %@ @ %@ utført på %@"
           }
         },
         "da": {
           "stringUnit": {
             "state": "translated",
-            "value": "%@ %@ %@ @ $%@ udført på %@"
+            "value": "%@ %@ %@ @ %@ udført på %@"
           }
         },
         "fi": {
           "stringUnit": {
             "state": "translated",
-            "value": "%@ %@ %@ @ $%@ toteutettu pörssissä %@"
+            "value": "%@ %@ %@ @ %@ toteutettu pörssissä %@"
           }
         },
         "cs": {
           "stringUnit": {
             "state": "translated",
-            "value": "%@ %@ %@ @ $%@ provedeno na %@"
+            "value": "%@ %@ %@ @ %@ provedeno na %@"
           }
         },
         "sk": {
           "stringUnit": {
             "state": "translated",
-            "value": "%@ %@ %@ @ $%@ vykonané na %@"
+            "value": "%@ %@ %@ @ %@ vykonané na %@"
           }
         },
         "hu": {
           "stringUnit": {
             "state": "translated",
-            "value": "%@ %@ %@ @ $%@ teljesült a(z) %@ tőzsdén"
+            "value": "%@ %@ %@ @ %@ teljesült a(z) %@ tőzsdén"
           }
         },
         "ro": {
           "stringUnit": {
             "state": "translated",
-            "value": "%@ %@ %@ @ $%@ executat pe %@"
+            "value": "%@ %@ %@ @ %@ executat pe %@"
           }
         },
         "hr": {
           "stringUnit": {
             "state": "translated",
-            "value": "%@ %@ %@ @ $%@ izvršeno na %@"
+            "value": "%@ %@ %@ @ %@ izvršeno na %@"
           }
         },
         "uk": {
           "stringUnit": {
             "state": "translated",
-            "value": "%@ %@ %@ @ $%@ виконано на %@"
+            "value": "%@ %@ %@ @ %@ виконано на %@"
           }
         },
         "ru": {
           "stringUnit": {
             "state": "translated",
-            "value": "%@ %@ %@ @ $%@ исполнено на %@"
+            "value": "%@ %@ %@ @ %@ исполнено на %@"
           }
         },
         "lt": {
           "stringUnit": {
             "state": "translated",
-            "value": "%@ %@ %@ @ $%@ įvykdyta biržoje %@"
+            "value": "%@ %@ %@ @ %@ įvykdyta biržoje %@"
           }
         },
         "lv": {
           "stringUnit": {
             "state": "translated",
-            "value": "%@ %@ %@ @ $%@ izpildīts biržā %@"
+            "value": "%@ %@ %@ @ %@ izpildīts biržā %@"
           }
         },
         "sr-Latn": {
           "stringUnit": {
             "state": "translated",
-            "value": "%@ %@ %@ @ $%@ izvršeno na %@"
+            "value": "%@ %@ %@ @ %@ izvršeno na %@"
           }
         },
         "bs": {
           "stringUnit": {
             "state": "translated",
-            "value": "%@ %@ %@ @ $%@ izvršeno na %@"
+            "value": "%@ %@ %@ @ %@ izvršeno na %@"
           }
         },
         "sq": {
           "stringUnit": {
             "state": "translated",
-            "value": "%@ %@ %@ @ $%@ u ekzekutua në %@"
+            "value": "%@ %@ %@ @ %@ u ekzekutua në %@"
           }
         },
         "is": {
           "stringUnit": {
             "state": "translated",
-            "value": "%@ %@ %@ @ $%@ framkvæmt á %@"
+            "value": "%@ %@ %@ @ %@ framkvæmt á %@"
           }
         },
         "el": {
           "stringUnit": {
             "state": "translated",
-            "value": "%@ %@ %@ @ $%@ εκτελέστηκε στο %@"
+            "value": "%@ %@ %@ @ %@ εκτελέστηκε στο %@"
           }
         },
         "tr": {
           "stringUnit": {
             "state": "translated",
-            "value": "%@ %@ %@ @ $%@ %@ üzerinde gerçekleşti"
+            "value": "%@ %@ %@ @ %@ %@ üzerinde gerçekleşti"
           }
         },
         "fil": {
           "stringUnit": {
             "state": "translated",
-            "value": "%@ %@ %@ @ $%@ naisagawa sa %@"
+            "value": "%@ %@ %@ @ %@ naisagawa sa %@"
           }
         },
         "ms": {
           "stringUnit": {
             "state": "translated",
-            "value": "%@ %@ %@ @ $%@ dilaksanakan di %@"
+            "value": "%@ %@ %@ @ %@ dilaksanakan di %@"
           }
         },
         "id": {
           "stringUnit": {
             "state": "translated",
-            "value": "%@ %@ %@ @ $%@ dieksekusi di %@"
+            "value": "%@ %@ %@ @ %@ dieksekusi di %@"
           }
         },
         "sw": {
           "stringUnit": {
             "state": "translated",
-            "value": "%@ %@ %@ @ $%@ limetekelezwa kwenye %@"
+            "value": "%@ %@ %@ @ %@ limetekelezwa kwenye %@"
           }
         },
         "bn": {
           "stringUnit": {
             "state": "translated",
-            "value": "%@ %@ %@ @ $%@ %@-এ সম্পন্ন হয়েছে"
+            "value": "%@ %@ %@ @ %@ %@-এ সম্পন্ন হয়েছে"
           }
         },
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "%@ %@ %@ 以 $%@ 在 %@ 成交"
+            "value": "%@ %@ %@ 以 %@ 在 %@ 成交"
           }
         },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
-            "value": "%@ %@ %@ 以 $%@ 在 %@ 成交"
+            "value": "%@ %@ %@ 以 %@ 在 %@ 成交"
           }
         },
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "%@ %@ %@ を $%@ で %@ にて約定"
+            "value": "%@ %@ %@ を %@ で %@ にて約定"
           }
         },
         "ko": {
           "stringUnit": {
             "state": "translated",
-            "value": "%@ %@ %@ $%@에 %@에서 체결됨"
+            "value": "%@ %@ %@ %@에 %@에서 체결됨"
           }
         },
         "th": {
           "stringUnit": {
             "state": "translated",
-            "value": "%@ %@ %@ ที่ $%@ จับคู่แล้วบน %@"
+            "value": "%@ %@ %@ ที่ %@ จับคู่แล้วบน %@"
           }
         },
         "vi": {
           "stringUnit": {
             "state": "translated",
-            "value": "%@ %@ %@ @ $%@ đã khớp trên %@"
+            "value": "%@ %@ %@ @ %@ đã khớp trên %@"
           }
         },
         "my": {
           "stringUnit": {
             "state": "translated",
-            "value": "%@ %@ %@ ကို $%@ နှုန်းဖြင့် %@ တွင် ဖြည့်ဆည်းပြီး"
+            "value": "%@ %@ %@ ကို %@ နှုန်းဖြင့် %@ တွင် ဖြည့်ဆည်းပြီး"
           }
         },
         "hi": {
           "stringUnit": {
             "state": "translated",
-            "value": "%@ %@ %@ @ $%@ %@ पर पूरा हुआ"
+            "value": "%@ %@ %@ @ %@ %@ पर पूरा हुआ"
           }
         },
         "ar": {
           "stringUnit": {
             "state": "translated",
-            "value": "تم تنفيذ %@ %@ %@ بسعر $%@ على %@"
+            "value": "تم تنفيذ %@ %@ %@ بسعر %@ على %@"
           }
         },
         "he": {
           "stringUnit": {
             "state": "translated",
-            "value": "%@ %@ %@ ב-$%@ ב-%@ בוצעה"
+            "value": "%@ %@ %@ ב-%@ ב-%@ בוצעה"
           }
         },
         "fa": {
           "stringUnit": {
             "state": "translated",
-            "value": "%@ %@ %@ با قیمت $%@ در %@ اجرا شد"
+            "value": "%@ %@ %@ با قیمت %@ در %@ اجرا شد"
           }
         },
         "hy": {
           "stringUnit": {
             "state": "translated",
-            "value": "%@ %@ %@ @ $%@ կատարվեց %@-ում"
+            "value": "%@ %@ %@ @ %@ կատարվեց %@-ում"
           }
         }
       }
@@ -16507,271 +16507,271 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "%@ %@ %@ state unknown: %@ — verifying with exchange"
+            "value": "%@ %@ %@ state unknown: %@ — venue verification pending, do not assume the position is closed"
           }
         },
         "ga": {
           "stringUnit": {
             "state": "translated",
-            "value": "%@ %@ %@ stádas anaithnid: %@ — fíorú ar siúl"
+            "value": "%@ %@ %@ stádas anaithnid: %@ — tá fíorú an mhalartáin ar feitheamh; ná glac leis go bhfuil an suíomh dúnta"
           }
         },
         "pl": {
           "stringUnit": {
             "state": "translated",
-            "value": "%@ %@ %@ stan nieznany: %@ — trwa weryfikacja na giełdzie"
+            "value": "%@ %@ %@ — stan nieznany: %@ — oczekiwanie na weryfikację giełdy; nie zakładaj, że pozycja jest zamknięta"
           }
         },
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "%@ %@ %@ Status unbekannt: %@ — Überprüfung läuft"
+            "value": "%@ %@ %@ hat einen unbekannten Status: %@ — die Verifizierung durch den Handelsplatz steht noch aus; gehen Sie nicht davon aus, dass die Position geschlossen ist"
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "%@ %@ %@ état inconnu : %@ — vérification en cours"
+            "value": "%@ %@ %@ état inconnu : %@ — la vérification auprès de la plateforme d’échange est en attente ; ne supposez pas que la position est clôturée"
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "%@ %@ %@ estado desconocido: %@ — verificación en curso"
+            "value": "%@ %@ %@ tiene un estado desconocido: %@ — la verificación por parte del centro de negociación está pendiente; no dé por cerrada la posición"
           }
         },
         "it": {
           "stringUnit": {
             "state": "translated",
-            "value": "%@ %@ %@ stato sconosciuto: %@ — verifica in corso"
+            "value": "%@ %@ %@ stato sconosciuto: %@ — verifica presso l'exchange ancora in sospeso, non presumere che la posizione sia chiusa"
           }
         },
         "nl": {
           "stringUnit": {
             "state": "translated",
-            "value": "%@ %@ %@ status onbekend: %@ — verificatie loopt"
+            "value": "%@ %@ %@ heeft een onbekende status: %@ — beursverificatie is nog in afwachting; neem niet aan dat de positie gesloten is"
           }
         },
         "pt-BR": {
           "stringUnit": {
             "state": "translated",
-            "value": "%@ %@ %@ status desconhecido: %@ — verificação em andamento"
+            "value": "%@ %@ %@ — estado desconhecido: %@ — verificação da exchange pendente; não presuma que a posição esteja encerrada"
           }
         },
         "sv": {
           "stringUnit": {
             "state": "translated",
-            "value": "%@ %@ %@ status okänd: %@ — verifiering pågår"
+            "value": "%@ %@ %@ status är okänd: %@ — verifiering hos handelsplatsen inväntas; anta inte att positionen är stängd"
           }
         },
         "nb": {
           "stringUnit": {
             "state": "translated",
-            "value": "%@ %@ %@ status ukjent: %@ — verifisering pågår"
+            "value": "%@ %@ %@ har ukjent status: %@ — verifisering hos børsen avventes; ikke anta at posisjonen er lukket"
           }
         },
         "da": {
           "stringUnit": {
             "state": "translated",
-            "value": "%@ %@ %@ status ukendt: %@ — verificering i gang"
+            "value": "%@ %@ %@ har ukendt status: %@ — verificering hos handelsstedet afventer; antag ikke, at positionen er lukket"
           }
         },
         "fi": {
           "stringUnit": {
             "state": "translated",
-            "value": "%@ %@ %@ tila tuntematon: %@ — vahvistus käynnissä"
+            "value": "%@ %@ %@ tila tuntematon: %@ — pörssivarmennus on kesken; älä oleta position olevan suljettu"
           }
         },
         "cs": {
           "stringUnit": {
             "state": "translated",
-            "value": "%@ %@ %@ stav neznámý: %@ — probíhá ověření"
+            "value": "%@ %@ %@ má neznámý stav: %@ — ověření na burze dosud nebylo dokončeno; nepředpokládejte, že je pozice uzavřená"
           }
         },
         "sk": {
           "stringUnit": {
             "state": "translated",
-            "value": "%@ %@ %@ stav neznámy: %@ — prebieha overenie"
+            "value": "%@ %@ %@ — stav neznámy: %@ — čaká sa na overenie burzou; nepredpokladajte, že pozícia je zatvorená"
           }
         },
         "hu": {
           "stringUnit": {
             "state": "translated",
-            "value": "%@ %@ %@ állapot ismeretlen: %@ — ellenőrzés folyamatban"
+            "value": "%@ %@ %@ állapota ismeretlen: %@ — a tőzsdei ellenőrzés függőben van; ne feltételezze, hogy a pozíció le van zárva"
           }
         },
         "ro": {
           "stringUnit": {
             "state": "translated",
-            "value": "%@ %@ %@ stare necunoscută: %@ — verificare în curs"
+            "value": "%@ %@ %@ — stare necunoscută: %@ — verificarea bursei este în așteptare; nu presupuneți că poziția este închisă"
           }
         },
         "hr": {
           "stringUnit": {
             "state": "translated",
-            "value": "%@ %@ %@ status nepoznat: %@ — provjera u tijeku"
+            "value": "%@ %@ %@ status nepoznat: %@ — potvrda burze je na čekanju; nemojte pretpostaviti da je pozicija zatvorena"
           }
         },
         "uk": {
           "stringUnit": {
             "state": "translated",
-            "value": "%@ %@ %@ стан невідомий: %@ — триває перевірка"
+            "value": "%@ %@ %@ стан невідомий: %@ — очікується підтвердження біржі; не вважайте, що позицію закрито"
           }
         },
         "ru": {
           "stringUnit": {
             "state": "translated",
-            "value": "%@ %@ %@ статус неизвестен: %@ — идёт проверка"
+            "value": "%@ %@ %@ — состояние неизвестно: %@ — ожидается проверка биржей; не считайте позицию закрытой"
           }
         },
         "lt": {
           "stringUnit": {
             "state": "translated",
-            "value": "%@ %@ %@ būsena nežinoma: %@ — vyksta patikra"
+            "value": "%@ %@ %@ būsena nežinoma: %@ — vis dar laukiama biržos patikros; nemanykite, kad pozicija uždaryta"
           }
         },
         "lv": {
           "stringUnit": {
             "state": "translated",
-            "value": "%@ %@ %@ statuss nezināms: %@ — notiek pārbaude"
+            "value": "%@ %@ %@ statuss nav zināms: %@ — biržas pārbaude vēl nav pabeigta; nepieņemiet, ka pozīcija ir slēgta"
           }
         },
         "sr-Latn": {
           "stringUnit": {
             "state": "translated",
-            "value": "%@ %@ %@ status nepoznat: %@ — provera u toku"
+            "value": "%@ %@ %@ status nije poznat: %@ — čeka se potvrda berze; nemojte pretpostaviti da je pozicija zatvorena"
           }
         },
         "bs": {
           "stringUnit": {
             "state": "translated",
-            "value": "%@ %@ %@ status nepoznat: %@ — provjera u toku"
+            "value": "%@ %@ %@ ima nepoznato stanje: %@ — provjera na berzi još nije završena; nemojte pretpostaviti da je pozicija zatvorena"
           }
         },
         "sq": {
           "stringUnit": {
             "state": "translated",
-            "value": "%@ %@ %@ gjendje e panjohur: %@ — verifikimi në proces"
+            "value": "%@ %@ %@ — gjendje e panjohur: %@ — verifikimi nga bursa është në pritje; mos supozoni se pozicioni është mbyllur"
           }
         },
         "is": {
           "stringUnit": {
             "state": "translated",
-            "value": "%@ %@ %@ staða óþekkt: %@ — staðfesting í gangi"
+            "value": "%@ %@ %@ staða óþekkt: %@ — staðfesting hjá kauphöll er enn í bið, ekki gera ráð fyrir að stöðunni hafi verið lokað"
           }
         },
         "el": {
           "stringUnit": {
             "state": "translated",
-            "value": "%@ %@ %@ άγνωστη κατάσταση: %@ — επαλήθευση σε εξέλιξη"
+            "value": "%@ %@ %@ έχει άγνωστη κατάσταση: %@ — εκκρεμεί η επαλήθευση από τον τόπο διαπραγμάτευσης· μην θεωρήσετε ότι η θέση έχει κλείσει"
           }
         },
         "tr": {
           "stringUnit": {
             "state": "translated",
-            "value": "%@ %@ %@ durumu bilinmiyor: %@ — doğrulama sürüyor"
+            "value": "%@ %@ %@ durumu bilinmiyor: %@ — borsa doğrulaması bekleniyor; pozisyonun kapandığını varsaymayın"
           }
         },
         "fil": {
           "stringUnit": {
             "state": "translated",
-            "value": "%@ %@ %@ hindi alam ang status: %@ — isinasagawa ang beripikasyon"
+            "value": "%@ %@ %@ hindi alam ang status: %@ — nakabinbin ang beripikasyon sa exchange; huwag ipagpalagay na sarado ang posisyon"
           }
         },
         "ms": {
           "stringUnit": {
             "state": "translated",
-            "value": "%@ %@ %@ status tidak diketahui: %@ — pengesahan sedang dijalankan"
+            "value": "%@ %@ %@ status tidak diketahui: %@ — pengesahan dengan bursa masih belum selesai, jangan anggap posisi telah ditutup"
           }
         },
         "id": {
           "stringUnit": {
             "state": "translated",
-            "value": "%@ %@ %@ status tidak diketahui: %@ — verifikasi sedang berlangsung"
+            "value": "%@ %@ %@ status tidak diketahui: %@ — verifikasi dengan bursa masih menunggu penyelesaian, jangan menganggap posisi telah ditutup"
           }
         },
         "sw": {
           "stringUnit": {
             "state": "translated",
-            "value": "%@ %@ %@ hali haijulikani: %@ — uthibitisho unaendelea"
+            "value": "%@ %@ %@ hali haijulikani: %@ — uthibitishaji kutoka soko la biashara unasubiriwa; usidhani kuwa nafasi imefungwa"
           }
         },
         "bn": {
           "stringUnit": {
             "state": "translated",
-            "value": "%@ %@ %@ অবস্থা অজানা: %@ — যাচাই চলছে"
+            "value": "%@ %@ %@-এর অবস্থা অজানা: %@ — এক্সচেঞ্জের যাচাই এখনও বাকি; পজিশন বন্ধ হয়ে গেছে বলে ধরে নেবেন না"
           }
         },
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "%@ %@ %@ 状态未知：%@ — 正在与交易所核实"
+            "value": "%@ %@ %@ 状态未知：%@ — 正在等待交易所核实；请勿假定仓位已平仓"
           }
         },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
-            "value": "%@ %@ %@ 狀態未知：%@ — 正在與交易所核實"
+            "value": "%@ %@ %@ 狀態未知：%@ — 正在等待交易所核實；請勿假定持倉已平倉"
           }
         },
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "%@ %@ %@ の状態が不明です: %@ — 取引所に確認中"
+            "value": "%@ %@ %@ の状態が不明です: %@ — 取引所での確認は保留中です。ポジションが決済済みだと判断しないでください"
           }
         },
         "ko": {
           "stringUnit": {
             "state": "translated",
-            "value": "%@ %@ %@ 상태 알 수 없음: %@ — 거래소 확인 중"
+            "value": "%@ %@ %@ 상태 알 수 없음: %@ — 거래소 확인이 아직 보류 중입니다. 포지션이 종료된 것으로 간주하지 마세요"
           }
         },
         "th": {
           "stringUnit": {
             "state": "translated",
-            "value": "%@ %@ %@ ไม่ทราบสถานะ: %@ — กำลังตรวจสอบกับตลาด"
+            "value": "%@ %@ %@ ไม่ทราบสถานะ: %@ — อยู่ระหว่างรอการยืนยันจากตลาดซื้อขาย อย่าสันนิษฐานว่าปิดสถานะแล้ว"
           }
         },
         "vi": {
           "stringUnit": {
             "state": "translated",
-            "value": "%@ %@ %@ trạng thái không xác định: %@ — đang xác minh với sàn"
+            "value": "%@ %@ %@ không xác định được trạng thái: %@ — đang chờ sàn xác minh; không được cho rằng vị thế đã đóng"
           }
         },
         "my": {
           "stringUnit": {
             "state": "translated",
-            "value": "%@ %@ %@ အခြေအနေ မသိရပါ: %@ — စိစစ်နေသည်"
+            "value": "%@ %@ %@ — အခြေအနေ မသိရပါ: %@ — အိတ်ချိန်း၏ အတည်ပြုချက်ကို စောင့်ဆိုင်းနေသည်၊ ပိုဇီရှင် ပိတ်ပြီးပြီဟု မယူဆပါနှင့်"
           }
         },
         "hi": {
           "stringUnit": {
             "state": "translated",
-            "value": "%@ %@ %@ स्थिति अज्ञात: %@ — सत्यापन जारी"
+            "value": "%@ %@ %@ स्थिति अज्ञात: %@ — एक्सचेंज सत्यापन लंबित है; यह न मानें कि पोज़िशन बंद हो चुकी है"
           }
         },
         "ar": {
           "stringUnit": {
             "state": "translated",
-            "value": "حالة %@ %@ %@ غير معروفة: %@ — جارٍ التحقق"
+            "value": "%@ %@ %@ حالته غير معروفة: %@ — لا يزال التحقق لدى منصة التداول معلقًا؛ لا تفترض أن المركز مغلق"
           }
         },
         "he": {
           "stringUnit": {
             "state": "translated",
-            "value": "%@ %@ %@ מצב לא ידוע: %@ — אימות מתבצע"
+            "value": "%@ %@ %@ מצב לא ידוע: %@ — אימות מול הבורסה נמצא בהמתנה; אין להניח שהפוזיציה סגורה"
           }
         },
         "fa": {
           "stringUnit": {
             "state": "translated",
-            "value": "%@ %@ %@ وضعیت نامشخص: %@ — در حال راستی‌آزمایی"
+            "value": "%@ %@ %@ وضعیت نامشخص: %@ — راستی‌آزمایی صرافی در انتظار است؛ فرض نکنید موقعیت بسته است"
           }
         },
         "hy": {
           "stringUnit": {
             "state": "translated",
-            "value": "%@ %@ %@ կարգավիճակն անհայտ է՝ %@ — ընթանում է ստուգում"
+            "value": "%@ %@ %@ կարգավիճակն անհայտ է՝ %@ — բորսայի կողմից ստուգումը դեռ ընթացքի մեջ է, մի՛ ենթադրեք, որ դիրքը փակ է"
           }
         }
       }
@@ -71103,7 +71103,7 @@
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Marktpreis"
+            "value": "Markpreis"
           }
         },
         "fr": {
@@ -170653,7 +170653,7 @@
         "pl": {
           "stringUnit": {
             "state": "translated",
-            "value": "Regresja kolejności zleceń w zakresie"
+            "value": "Cofnięcie chronologii zdarzeń realizacji w zakresie"
           }
         },
         "de": {
@@ -175047,7 +175047,7 @@
         "ga": {
           "stringUnit": {
             "state": "translated",
-            "value": "Instrument reconciliation failed"
+            "value": "Theip ar shuimeanna P&L de réir ionstraime a réiteach leis an P&L iomlán"
           }
         },
         "pl": {
@@ -175059,253 +175059,253 @@
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Instrument reconciliation failed"
+            "value": "Die P&L-Summen der Instrumente stimmen nicht mit dem Gesamt-P&L überein"
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Instrument reconciliation failed"
+            "value": "Échec du rapprochement des totaux de P&L par instrument avec le P&L global"
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Instrument reconciliation failed"
+            "value": "Los totales de P&L por instrumento no concuerdan con el P&L total"
           }
         },
         "it": {
           "stringUnit": {
             "state": "translated",
-            "value": "Instrument reconciliation failed"
+            "value": "Riconciliazione dei totali P&L per strumento non riuscita"
           }
         },
         "nl": {
           "stringUnit": {
             "state": "translated",
-            "value": "Instrument reconciliation failed"
+            "value": "Afstemming van de P&L per instrument is mislukt"
           }
         },
         "pt-BR": {
           "stringUnit": {
             "state": "translated",
-            "value": "Instrument reconciliation failed"
+            "value": "Falha na conciliação do P&L por instrumento"
           }
         },
         "sv": {
           "stringUnit": {
             "state": "translated",
-            "value": "Instrument reconciliation failed"
+            "value": "Summan av P&L-värdena per instrument stämmer inte med det totala P&L-värdet"
           }
         },
         "nb": {
           "stringUnit": {
             "state": "translated",
-            "value": "Instrument reconciliation failed"
+            "value": "Avstemming av instrumentenes P&L mislyktes"
           }
         },
         "da": {
           "stringUnit": {
             "state": "translated",
-            "value": "Instrument reconciliation failed"
+            "value": "P&L-totalerne pr. instrument stemmer ikke med den samlede P&L"
           }
         },
         "fi": {
           "stringUnit": {
             "state": "translated",
-            "value": "Instrument reconciliation failed"
+            "value": "Instrumenttikohtaisten P&L-summien täsmäytys kokonais-P&L:ään epäonnistui"
           }
         },
         "cs": {
           "stringUnit": {
             "state": "translated",
-            "value": "Instrument reconciliation failed"
+            "value": "Součty P&L podle instrumentů se neshodují s celkovým P&L"
           }
         },
         "sk": {
           "stringUnit": {
             "state": "translated",
-            "value": "Instrument reconciliation failed"
+            "value": "Odsúhlasenie P&L podľa inštrumentov zlyhalo"
           }
         },
         "hu": {
           "stringUnit": {
             "state": "translated",
-            "value": "Instrument reconciliation failed"
+            "value": "Az instrumentumonkénti P&L-összegek egyeztetése a teljes P&L-lel sikertelen"
           }
         },
         "ro": {
           "stringUnit": {
             "state": "translated",
-            "value": "Instrument reconciliation failed"
+            "value": "Reconcilierea P&L pe instrumente a eșuat"
           }
         },
         "hr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Instrument reconciliation failed"
+            "value": "Usklađivanje zbrojeva P&L-a po instrumentima s ukupnim P&L-om nije uspjelo"
           }
         },
         "uk": {
           "stringUnit": {
             "state": "translated",
-            "value": "Instrument reconciliation failed"
+            "value": "Сума значень P&L за інструментами не збігається із загальним P&L"
           }
         },
         "ru": {
           "stringUnit": {
             "state": "translated",
-            "value": "Instrument reconciliation failed"
+            "value": "Не удалось сверить суммы P&L по инструментам"
           }
         },
         "lt": {
           "stringUnit": {
             "state": "translated",
-            "value": "Instrument reconciliation failed"
+            "value": "Nepavyko suderinti instrumentų P&L sumų"
           }
         },
         "lv": {
           "stringUnit": {
             "state": "translated",
-            "value": "Instrument reconciliation failed"
+            "value": "Instrumentu P&L kopsummu saskaņošana neizdevās"
           }
         },
         "sr-Latn": {
           "stringUnit": {
             "state": "translated",
-            "value": "Instrument reconciliation failed"
+            "value": "Zbir P&L vrednosti po instrumentima ne podudara se sa ukupnim P&L-om"
           }
         },
         "bs": {
           "stringUnit": {
             "state": "translated",
-            "value": "Instrument reconciliation failed"
+            "value": "Zbirovi P&L-a po instrumentima nisu usklađeni s ukupnim P&L-om"
           }
         },
         "sq": {
           "stringUnit": {
             "state": "translated",
-            "value": "Instrument reconciliation failed"
+            "value": "Rakordimi i P&L sipas instrumenteve dështoi"
           }
         },
         "is": {
           "stringUnit": {
             "state": "translated",
-            "value": "Instrument reconciliation failed"
+            "value": "Afstemming P&L-samtalna eftir gerningum mistókst"
           }
         },
         "el": {
           "stringUnit": {
             "state": "translated",
-            "value": "Instrument reconciliation failed"
+            "value": "Τα σύνολα P&L ανά μέσο δεν συμφωνούν με το συνολικό P&L"
           }
         },
         "tr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Instrument reconciliation failed"
+            "value": "Enstrüman bazındaki P&L değerlerinin toplamı genel P&L toplamıyla uyuşmuyor"
           }
         },
         "fil": {
           "stringUnit": {
             "state": "translated",
-            "value": "Instrument reconciliation failed"
+            "value": "Nabigo ang pagtutugma ng mga kabuuang P&L ayon sa instrumento sa kabuuang P&L"
           }
         },
         "ms": {
           "stringUnit": {
             "state": "translated",
-            "value": "Instrument reconciliation failed"
+            "value": "Penyelarasan jumlah P&L mengikut instrumen gagal"
           }
         },
         "id": {
           "stringUnit": {
             "state": "translated",
-            "value": "Instrument reconciliation failed"
+            "value": "Rekonsiliasi total P&L instrumen gagal"
           }
         },
         "sw": {
           "stringUnit": {
             "state": "translated",
-            "value": "Instrument reconciliation failed"
+            "value": "Jumla ya P&L za instrumenti zote hailingani na P&L ya jumla"
           }
         },
         "bn": {
           "stringUnit": {
             "state": "translated",
-            "value": "Instrument reconciliation failed"
+            "value": "ইনস্ট্রুমেন্টভিত্তিক P&L-এর মোট মান সামগ্রিক P&L-এর মোট মানের সঙ্গে মেলেনি"
           }
         },
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "Instrument reconciliation failed"
+            "value": "各品种的 P&L 之和与总体 P&L 不一致"
           }
         },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
-            "value": "Instrument reconciliation failed"
+            "value": "各品種的 P&L 之和與總體 P&L 不一致"
           }
         },
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "Instrument reconciliation failed"
+            "value": "銘柄別P&L合計の照合に失敗しました"
           }
         },
         "ko": {
           "stringUnit": {
             "state": "translated",
-            "value": "Instrument reconciliation failed"
+            "value": "종목별 P&L 합계 대사 실패"
           }
         },
         "th": {
           "stringUnit": {
             "state": "translated",
-            "value": "Instrument reconciliation failed"
+            "value": "ผลรวม P&L แยกตามตราสารไม่ตรงกับ P&L รวม"
           }
         },
         "vi": {
           "stringUnit": {
             "state": "translated",
-            "value": "Instrument reconciliation failed"
+            "value": "Tổng các giá trị P&L theo công cụ không khớp với tổng P&L chung"
           }
         },
         "my": {
           "stringUnit": {
             "state": "translated",
-            "value": "Instrument reconciliation failed"
+            "value": "ငွေကြေးတူရိယာအလိုက် P&L တန်ဖိုးများ၏ ပေါင်းလဒ်သည် စုစုပေါင်း P&L နှင့် မကိုက်ညီပါ"
           }
         },
         "hi": {
           "stringUnit": {
             "state": "translated",
-            "value": "Instrument reconciliation failed"
+            "value": "इंस्ट्रूमेंट-वार P&L योग का कुल P&L से मिलान विफल हुआ"
           }
         },
         "ar": {
           "stringUnit": {
             "state": "translated",
-            "value": "Instrument reconciliation failed"
+            "value": "فشلت مطابقة إجماليات P&L حسب الأداة مع إجمالي P&L الكلي"
           }
         },
         "he": {
           "stringUnit": {
             "state": "translated",
-            "value": "Instrument reconciliation failed"
+            "value": "התאמת סכומי ה-P&L לפי מכשיר לסכום ה-P&L הכולל נכשלה"
           }
         },
         "fa": {
           "stringUnit": {
             "state": "translated",
-            "value": "Instrument reconciliation failed"
+            "value": "تطبیق مجموع P&L ابزارها با P&L کل ناموفق بود"
           }
         },
         "hy": {
           "stringUnit": {
             "state": "translated",
-            "value": "Instrument reconciliation failed"
+            "value": "Գործիքների P&L հանրագումարների համաձայնեցումը ձախողվել է"
           }
         }
       }
@@ -175322,7 +175322,7 @@
         "ga": {
           "stringUnit": {
             "state": "translated",
-            "value": "Late pre-activation execution"
+            "value": "Forghníomhú ordaithe a tháinig go déanach agus a bhfuil stampa ama roimh an ngníomhachtú air"
           }
         },
         "pl": {
@@ -175334,253 +175334,2728 @@
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Late pre-activation execution"
+            "value": "Verspätet eingegangene Handelsausführung mit Zeitstempel vor der Aktivierung"
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Late pre-activation execution"
+            "value": "Exécution d’ordre antérieure à l’activation reçue tardivement"
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Late pre-activation execution"
+            "value": "Ejecución de operación recibida con retraso y con marca de tiempo anterior a la activación"
           }
         },
         "it": {
           "stringUnit": {
             "state": "translated",
-            "value": "Late pre-activation execution"
+            "value": "Esecuzione di transazione arrivata in ritardo con timestamp precedente all'attivazione"
           }
         },
         "nl": {
           "stringUnit": {
             "state": "translated",
-            "value": "Late pre-activation execution"
+            "value": "Laat ontvangen orderexecutie met een tijdstempel van vóór activering"
           }
         },
         "pt-BR": {
           "stringUnit": {
             "state": "translated",
-            "value": "Late pre-activation execution"
+            "value": "Execução de ordem recebida com atraso, com carimbo de data/hora anterior à ativação"
           }
         },
         "sv": {
           "stringUnit": {
             "state": "translated",
-            "value": "Late pre-activation execution"
+            "value": "Sent anlänt handelsutförande med tidsstämpel före aktiveringen"
           }
         },
         "nb": {
           "stringUnit": {
             "state": "translated",
-            "value": "Late pre-activation execution"
+            "value": "Sent mottatt ordreutførelse med tidsstempel før aktivering"
           }
         },
         "da": {
           "stringUnit": {
             "state": "translated",
-            "value": "Late pre-activation execution"
+            "value": "Forsinket modtaget handelsudførelse med tidsstempel fra før aktiveringen"
           }
         },
         "fi": {
           "stringUnit": {
             "state": "translated",
-            "value": "Late pre-activation execution"
+            "value": "Myöhässä saapunut, ennen aktivointia aikaleimattu kaupankäyntitoteutus"
           }
         },
         "cs": {
           "stringUnit": {
             "state": "translated",
-            "value": "Late pre-activation execution"
+            "value": "Opožděně doručené provedení obchodu s časem před aktivací"
           }
         },
         "sk": {
           "stringUnit": {
             "state": "translated",
-            "value": "Late pre-activation execution"
+            "value": "Oneskorene prijaté plnenie príkazu s časovou pečiatkou spred aktivácie"
           }
         },
         "hu": {
           "stringUnit": {
             "state": "translated",
-            "value": "Late pre-activation execution"
+            "value": "Késve érkezett, aktiválás előtti időbélyegű megbízásteljesítés"
           }
         },
         "ro": {
           "stringUnit": {
             "state": "translated",
-            "value": "Late pre-activation execution"
+            "value": "Execuție de ordin sosită târziu, cu marcaj temporal anterior activării"
           }
         },
         "hr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Late pre-activation execution"
+            "value": "Zakašnjelo izvršenje naloga s vremenskom oznakom prije aktivacije"
           }
         },
         "uk": {
           "stringUnit": {
             "state": "translated",
-            "value": "Late pre-activation execution"
+            "value": "Виконання угоди, що надійшло із запізненням і має позначку часу до активації"
           }
         },
         "ru": {
           "stringUnit": {
             "state": "translated",
-            "value": "Late pre-activation execution"
+            "value": "Поздно поступившее исполнение заявки с меткой времени до активации"
           }
         },
         "lt": {
           "stringUnit": {
             "state": "translated",
-            "value": "Late pre-activation execution"
+            "value": "Pavėluotai gautas vykdymas, kurio laiko žyma yra ankstesnė už aktyvavimą"
           }
         },
         "lv": {
           "stringUnit": {
             "state": "translated",
-            "value": "Late pre-activation execution"
+            "value": "Novēloti saņemta izpilde ar laika zīmogu pirms aktivizēšanas"
           }
         },
         "sr-Latn": {
           "stringUnit": {
             "state": "translated",
-            "value": "Late pre-activation execution"
+            "value": "Naknadno pristiglo izvršenje trgovine sa vremenskom oznakom pre aktivacije"
           }
         },
         "bs": {
           "stringUnit": {
             "state": "translated",
-            "value": "Late pre-activation execution"
+            "value": "Naknadno pristiglo izvršenje trgovine s vremenskom oznakom prije aktivacije"
           }
         },
         "sq": {
           "stringUnit": {
             "state": "translated",
-            "value": "Late pre-activation execution"
+            "value": "Ekzekutim urdhri i mbërritur me vonesë, me vulë kohore para aktivizimit"
           }
         },
         "is": {
           "stringUnit": {
             "state": "translated",
-            "value": "Late pre-activation execution"
+            "value": "Seint móttekin viðskiptaframkvæmd með tímastimpil fyrir virkjun"
           }
         },
         "el": {
           "stringUnit": {
             "state": "translated",
-            "value": "Late pre-activation execution"
+            "value": "Εκτέλεση συναλλαγής που έφτασε καθυστερημένα με χρονική σήμανση πριν από την ενεργοποίηση"
           }
         },
         "tr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Late pre-activation execution"
+            "value": "Etkinleştirme öncesine ait zaman damgası taşıyan ve geç ulaşan işlem gerçekleşmesi"
           }
         },
         "fil": {
           "stringUnit": {
             "state": "translated",
-            "value": "Late pre-activation execution"
+            "value": "Nahuling dumating na execution ng order na may timestamp bago ang pag-activate"
           }
         },
         "ms": {
           "stringUnit": {
             "state": "translated",
-            "value": "Late pre-activation execution"
+            "value": "Pelaksanaan dagangan yang tiba lewat dengan cap masa sebelum pengaktifan"
           }
         },
         "id": {
           "stringUnit": {
             "state": "translated",
-            "value": "Late pre-activation execution"
+            "value": "Eksekusi perdagangan yang terlambat tiba dengan stempel waktu sebelum aktivasi"
           }
         },
         "sw": {
           "stringUnit": {
             "state": "translated",
-            "value": "Late pre-activation execution"
+            "value": "Utekelezaji wa agizo uliowasili kwa kuchelewa wenye muhuri wa muda wa kabla ya uanzishaji"
           }
         },
         "bn": {
           "stringUnit": {
             "state": "translated",
-            "value": "Late pre-activation execution"
+            "value": "সক্রিয়করণের আগের টাইমস্ট্যাম্পসহ বিলম্বে আসা ট্রেড এক্সিকিউশন"
           }
         },
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "Late pre-activation execution"
+            "value": "延迟到达且时间戳早于激活时间的成交"
           }
         },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
-            "value": "Late pre-activation execution"
+            "value": "延遲到達且時間戳記早於啟用時間的成交"
           }
         },
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "Late pre-activation execution"
+            "value": "有効化前のタイムスタンプを持つ、遅れて到着した約定"
           }
         },
         "ko": {
           "stringUnit": {
             "state": "translated",
-            "value": "Late pre-activation execution"
+            "value": "활성화 전 타임스탬프를 가진 지연 도착 체결"
           }
         },
         "th": {
           "stringUnit": {
             "state": "translated",
-            "value": "Late pre-activation execution"
+            "value": "การดำเนินการซื้อขายที่มาถึงล่าช้าโดยมีเวลาประทับก่อนเปิดใช้งาน"
           }
         },
         "vi": {
           "stringUnit": {
             "state": "translated",
-            "value": "Late pre-activation execution"
+            "value": "Lần khớp lệnh đến muộn có dấu thời gian trước khi kích hoạt"
           }
         },
         "my": {
           "stringUnit": {
             "state": "translated",
-            "value": "Late pre-activation execution"
+            "value": "စတင်အသက်ဝင်ချိန် မတိုင်မီ အချိန်မှတ်တမ်းပါပြီး နောက်ကျမှ ရောက်လာသော အော်ဒါအကောင်အထည်ဖော်မှု"
           }
         },
         "hi": {
           "stringUnit": {
             "state": "translated",
-            "value": "Late pre-activation execution"
+            "value": "सक्रियण से पहले के टाइमस्टैम्प वाला देर से पहुँचा ऑर्डर निष्पादन"
           }
         },
         "ar": {
           "stringUnit": {
             "state": "translated",
-            "value": "Late pre-activation execution"
+            "value": "تنفيذ صفقة وصل متأخرًا ويحمل طابعًا زمنيًا يسبق التفعيل"
           }
         },
         "he": {
           "stringUnit": {
             "state": "translated",
-            "value": "Late pre-activation execution"
+            "value": "ביצוע פקודת מסחר שהתקבל באיחור וחותמת הזמן שלו קודמת להפעלה"
           }
         },
         "fa": {
           "stringUnit": {
             "state": "translated",
-            "value": "Late pre-activation execution"
+            "value": "اجرای معاملاتی دیررس با مُهر زمانی پیش از فعال‌سازی"
           }
         },
         "hy": {
           "stringUnit": {
             "state": "translated",
-            "value": "Late pre-activation execution"
+            "value": "Ակտիվացումից առաջ ժամանակագրված, ուշ հասած առևտրային կատարում"
+          }
+        }
+      }
+    },
+    "alerts.argument.side.buy": {
+      "extractionState": "manual",
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "شراء"
+          }
+        },
+        "bn": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ক্রয়"
+          }
+        },
+        "bs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "KUPNJA"
+          }
+        },
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "NÁKUP"
+          }
+        },
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "KØB"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "KAUF"
+          }
+        },
+        "el": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ΑΓΟΡΑ"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "BUY"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "COMPRA"
+          }
+        },
+        "fa": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "خرید"
+          }
+        },
+        "fi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "OSTO"
+          }
+        },
+        "fil": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "PAGBILI"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ACHAT"
+          }
+        },
+        "ga": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "CEANNACH"
+          }
+        },
+        "he": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "קנייה"
+          }
+        },
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "खरीद"
+          }
+        },
+        "hr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "KUPNJA"
+          }
+        },
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "VÉTEL"
+          }
+        },
+        "hy": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ԳՆՈՒՄ"
+          }
+        },
+        "id": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "BELI"
+          }
+        },
+        "is": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "KAUP"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ACQUISTO"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "買い"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "매수"
+          }
+        },
+        "lt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "PIRKIMAS"
+          }
+        },
+        "lv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "PIRKŠANA"
+          }
+        },
+        "ms": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "BELI"
+          }
+        },
+        "my": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ဝယ်"
+          }
+        },
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "KJØP"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "KOOP"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "KUPNO"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "COMPRA"
+          }
+        },
+        "ro": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "CUMPĂRARE"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ПОКУПКА"
+          }
+        },
+        "sk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "NÁKUP"
+          }
+        },
+        "sq": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "BLERJE"
+          }
+        },
+        "sr-Latn": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "KUPOVINA"
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "KÖP"
+          }
+        },
+        "sw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "UNUNUZI"
+          }
+        },
+        "th": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ซื้อ"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ALIŞ"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "КУПІВЛЯ"
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "MUA"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "买入"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "買入"
+          }
+        }
+      }
+    },
+    "alerts.argument.side.sell": {
+      "extractionState": "manual",
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "بيع"
+          }
+        },
+        "bn": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "বিক্রয়"
+          }
+        },
+        "bs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "PRODAJA"
+          }
+        },
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "PRODEJ"
+          }
+        },
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "SALG"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "VERKAUF"
+          }
+        },
+        "el": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ΠΩΛΗΣΗ"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "SELL"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "VENTA"
+          }
+        },
+        "fa": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "فروش"
+          }
+        },
+        "fi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "MYYNTI"
+          }
+        },
+        "fil": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "PAGBEBENTA"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "VENTE"
+          }
+        },
+        "ga": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "DÍOL"
+          }
+        },
+        "he": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "מכירה"
+          }
+        },
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "बिक्री"
+          }
+        },
+        "hr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "PRODAJA"
+          }
+        },
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ELADÁS"
+          }
+        },
+        "hy": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ՎԱՃԱՌՔ"
+          }
+        },
+        "id": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "JUAL"
+          }
+        },
+        "is": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "SALA"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "VENDITA"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "売り"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "매도"
+          }
+        },
+        "lt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "PARDAVIMAS"
+          }
+        },
+        "lv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "PĀRDOŠANA"
+          }
+        },
+        "ms": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "JUAL"
+          }
+        },
+        "my": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ရောင်း"
+          }
+        },
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "SALG"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "VERKOOP"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "SPRZEDAŻ"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "VENDA"
+          }
+        },
+        "ro": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "VÂNZARE"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ПРОДАЖА"
+          }
+        },
+        "sk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "PREDAJ"
+          }
+        },
+        "sq": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "SHITJE"
+          }
+        },
+        "sr-Latn": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "PRODAJA"
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "FÖRSÄLJNING"
+          }
+        },
+        "sw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "UUZAJI"
+          }
+        },
+        "th": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ขาย"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "SATIŞ"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ПРОДАЖ"
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "BÁN"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "卖出"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "賣出"
+          }
+        }
+      }
+    },
+    "alerts.argument.status.healthy": {
+      "extractionState": "manual",
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "سليم"
+          }
+        },
+        "bn": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "স্বাভাবিক"
+          }
+        },
+        "bs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ispravno"
+          }
+        },
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "V pořádku"
+          }
+        },
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Normal"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "In Ordnung"
+          }
+        },
+        "el": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Κανονική λειτουργία"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Healthy"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Correcto"
+          }
+        },
+        "fa": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "سالم"
+          }
+        },
+        "fi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kunnossa"
+          }
+        },
+        "fil": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Malusog"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sain"
+          }
+        },
+        "ga": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sláintiúil"
+          }
+        },
+        "he": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "תקין"
+          }
+        },
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "स्वस्थ"
+          }
+        },
+        "hr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ispravno"
+          }
+        },
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rendben"
+          }
+        },
+        "hy": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Առողջ"
+          }
+        },
+        "id": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sehat"
+          }
+        },
+        "is": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Heilbrigt"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sano"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "正常"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "정상"
+          }
+        },
+        "lt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sveika"
+          }
+        },
+        "lv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vesels"
+          }
+        },
+        "ms": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sihat"
+          }
+        },
+        "my": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ပုံမှန်"
+          }
+        },
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Frisk"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gezond"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Prawidłowy"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Saudável"
+          }
+        },
+        "ro": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Funcțional"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Норма"
+          }
+        },
+        "sk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "V poriadku"
+          }
+        },
+        "sq": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Në rregull"
+          }
+        },
+        "sr-Latn": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ispravno"
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Frisk"
+          }
+        },
+        "sw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Inafanya kazi vizuri"
+          }
+        },
+        "th": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ปกติ"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sağlıklı"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Справний"
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ổn định"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "健康"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "健康"
+          }
+        }
+      }
+    },
+    "alerts.argument.status.warning": {
+      "extractionState": "manual",
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "تحذير"
+          }
+        },
+        "bn": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "সতর্কতা"
+          }
+        },
+        "bs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Upozorenje"
+          }
+        },
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Varování"
+          }
+        },
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Advarsel"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Warnung"
+          }
+        },
+        "el": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Προειδοποίηση"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Warning"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Advertencia"
+          }
+        },
+        "fa": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "هشدار"
+          }
+        },
+        "fi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Varoitus"
+          }
+        },
+        "fil": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Babala"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Avertissement"
+          }
+        },
+        "ga": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rabhadh"
+          }
+        },
+        "he": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "אזהרה"
+          }
+        },
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "चेतावनी"
+          }
+        },
+        "hr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Upozorenje"
+          }
+        },
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Figyelmeztetés"
+          }
+        },
+        "hy": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Նախազգուշացում"
+          }
+        },
+        "id": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Peringatan"
+          }
+        },
+        "is": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Viðvörun"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Avviso"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "警告"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "경고"
+          }
+        },
+        "lt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Įspėjimas"
+          }
+        },
+        "lv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Brīdinājums"
+          }
+        },
+        "ms": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Amaran"
+          }
+        },
+        "my": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "သတိပေးချက်"
+          }
+        },
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Advarsel"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Waarschuwing"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ostrzeżenie"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aviso"
+          }
+        },
+        "ro": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Avertisment"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Предупреждение"
+          }
+        },
+        "sk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Upozornenie"
+          }
+        },
+        "sq": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Paralajmërim"
+          }
+        },
+        "sr-Latn": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Upozorenje"
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Varning"
+          }
+        },
+        "sw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Onyo"
+          }
+        },
+        "th": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "คำเตือน"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Uyarı"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Попередження"
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cảnh báo"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "警告"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "警告"
+          }
+        }
+      }
+    },
+    "alerts.argument.status.error": {
+      "extractionState": "manual",
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "خطأ"
+          }
+        },
+        "bn": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ত্রুটি"
+          }
+        },
+        "bs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Greška"
+          }
+        },
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Chyba"
+          }
+        },
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fejl"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fehler"
+          }
+        },
+        "el": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Σφάλμα"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Error"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Error"
+          }
+        },
+        "fa": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "خطا"
+          }
+        },
+        "fi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Virhe"
+          }
+        },
+        "fil": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "May error"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Erreur"
+          }
+        },
+        "ga": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Earráid"
+          }
+        },
+        "he": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "שגיאה"
+          }
+        },
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "त्रुटि"
+          }
+        },
+        "hr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pogreška"
+          }
+        },
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hiba"
+          }
+        },
+        "hy": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Սխալ"
+          }
+        },
+        "id": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kesalahan"
+          }
+        },
+        "is": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Villa"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Errore"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "エラー"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "오류"
+          }
+        },
+        "lt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Klaida"
+          }
+        },
+        "lv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kļūda"
+          }
+        },
+        "ms": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ralat"
+          }
+        },
+        "my": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "အမှား"
+          }
+        },
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Feil"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fout"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Błąd"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Erro"
+          }
+        },
+        "ro": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Eroare"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ошибка"
+          }
+        },
+        "sk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Chyba"
+          }
+        },
+        "sq": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gabim"
+          }
+        },
+        "sr-Latn": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Greška"
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fel"
+          }
+        },
+        "sw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hitilafu"
+          }
+        },
+        "th": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ข้อผิดพลาด"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hata"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Помилка"
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Lỗi"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "错误"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "錯誤"
+          }
+        }
+      }
+    },
+    "alerts.argument.reason.unknown": {
+      "extractionState": "manual",
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "سبب غير معروف"
+          }
+        },
+        "bn": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "অজানা কারণ"
+          }
+        },
+        "bs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nepoznat razlog"
+          }
+        },
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Neznámý důvod"
+          }
+        },
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ukendt årsag"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Unbekannter Grund"
+          }
+        },
+        "el": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Άγνωστη αιτία"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Unknown reason"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Motivo desconocido"
+          }
+        },
+        "fa": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "دلیل نامشخص"
+          }
+        },
+        "fi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tuntematon syy"
+          }
+        },
+        "fil": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hindi kilalang dahilan"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Raison inconnue"
+          }
+        },
+        "ga": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cúis anaithnid"
+          }
+        },
+        "he": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "סיבה לא ידועה"
+          }
+        },
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "अज्ञात कारण"
+          }
+        },
+        "hr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nepoznat razlog"
+          }
+        },
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ismeretlen ok"
+          }
+        },
+        "hy": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Անհայտ պատճառ"
+          }
+        },
+        "id": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Alasan tidak diketahui"
+          }
+        },
+        "is": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Óþekkt ástæða"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Motivo sconosciuto"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "理由不明"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "알 수 없는 사유"
+          }
+        },
+        "lt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nežinoma priežastis"
+          }
+        },
+        "lv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nezināms iemesls"
+          }
+        },
+        "ms": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sebab tidak diketahui"
+          }
+        },
+        "my": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "မသိရသော အကြောင်းရင်း"
+          }
+        },
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ukjent årsak"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Onbekende reden"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nieznana przyczyna"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Motivo desconhecido"
+          }
+        },
+        "ro": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Motiv necunoscut"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Неизвестная причина"
+          }
+        },
+        "sk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Neznámy dôvod"
+          }
+        },
+        "sq": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Arsye e panjohur"
+          }
+        },
+        "sr-Latn": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nepoznat razlog"
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Okänd orsak"
+          }
+        },
+        "sw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sababu haijulikani"
+          }
+        },
+        "th": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ไม่ทราบสาเหตุ"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bilinmeyen neden"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Невідома причина"
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Không rõ lý do"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "未知原因"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "未知原因"
+          }
+        }
+      }
+    },
+    "alerts.argument.reason.ambiguous": {
+      "extractionState": "manual",
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "استجابة ملتبسة من منصة التداول"
+          }
+        },
+        "bn": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "এক্সচেঞ্জের অস্পষ্ট প্রতিক্রিয়া"
+          }
+        },
+        "bs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dvosmislen odgovor berze"
+          }
+        },
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nejednoznačná odpověď burzy"
+          }
+        },
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tvetydigt svar fra handelsstedet"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mehrdeutige Antwort des Handelsplatzes"
+          }
+        },
+        "el": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Αμφίσημη απόκριση του τόπου διαπραγμάτευσης"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ambiguous exchange response"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Respuesta ambigua del centro de negociación"
+          }
+        },
+        "fa": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "پاسخ مبهم صرافی"
+          }
+        },
+        "fi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pörssin monitulkintainen vastaus"
+          }
+        },
+        "fil": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Malabong tugon ng exchange"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Réponse ambiguë de la plateforme d’échange"
+          }
+        },
+        "ga": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Freagra débhríoch ón malartán"
+          }
+        },
+        "he": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "תגובה דו-משמעית מהבורסה"
+          }
+        },
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "एक्सचेंज से अस्पष्ट प्रतिक्रिया"
+          }
+        },
+        "hr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dvosmislen odgovor burze"
+          }
+        },
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nem egyértelmű tőzsdei válasz"
+          }
+        },
+        "hy": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Բորսայի երկիմաստ պատասխան"
+          }
+        },
+        "id": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Respons bursa ambigu"
+          }
+        },
+        "is": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Óljóst svar kauphallar"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Risposta ambigua dell'exchange"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "取引所からの応答が曖昧"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "거래소 응답이 모호함"
+          }
+        },
+        "lt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dviprasmiškas biržos atsakas"
+          }
+        },
+        "lv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Neviennozīmīga biržas atbilde"
+          }
+        },
+        "ms": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Respons bursa yang tidak jelas"
+          }
+        },
+        "my": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "အိတ်ချိန်း၏ မရှင်းလင်းသော တုံ့ပြန်ချက်"
+          }
+        },
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tvetydig svar fra børsen"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dubbelzinnig antwoord van de beurs"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Niejednoznaczna odpowiedź giełdy"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Resposta ambígua da exchange"
+          }
+        },
+        "ro": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Răspuns ambiguu al bursei"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Неоднозначный ответ биржи"
+          }
+        },
+        "sk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nejednoznačná odpoveď burzy"
+          }
+        },
+        "sq": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Përgjigje e paqartë nga bursa"
+          }
+        },
+        "sr-Latn": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nejasan odgovor berze"
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tvetydigt svar från handelsplatsen"
+          }
+        },
+        "sw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Jibu lisiloeleweka kutoka soko la biashara"
+          }
+        },
+        "th": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "การตอบกลับจากตลาดซื้อขายไม่ชัดเจน"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Borsadan belirsiz yanıt"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Неоднозначна відповідь біржі"
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Phản hồi không rõ ràng từ sàn giao dịch"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "交易所响应含义不明确"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "交易所回應含義不明確"
+          }
+        }
+      }
+    },
+    "alerts.body.order_fill_full_quoted": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ %@ %@ @ %@ filled on %@"
+          }
+        },
+        "ga": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ %@ %@ @ %@ comhlíonta ar %@"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ %@ %@ @ %@ zrealizowane na %@"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ %@ %@ @ %@ ausgeführt auf %@"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ %@ %@ @ %@ exécuté sur %@"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ %@ %@ @ %@ ejecutada en %@"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ %@ %@ @ %@ eseguito su %@"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ %@ %@ @ %@ uitgevoerd op %@"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ %@ %@ @ %@ executada na %@"
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ %@ %@ @ %@ utförd på %@"
+          }
+        },
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ %@ %@ @ %@ utført på %@"
+          }
+        },
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ %@ %@ @ %@ udført på %@"
+          }
+        },
+        "fi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ %@ %@ @ %@ toteutettu pörssissä %@"
+          }
+        },
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ %@ %@ @ %@ provedeno na %@"
+          }
+        },
+        "sk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ %@ %@ @ %@ vykonané na %@"
+          }
+        },
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ %@ %@ @ %@ teljesült a(z) %@ tőzsdén"
+          }
+        },
+        "ro": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ %@ %@ @ %@ executat pe %@"
+          }
+        },
+        "hr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ %@ %@ @ %@ izvršeno na %@"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ %@ %@ @ %@ виконано на %@"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ %@ %@ @ %@ исполнено на %@"
+          }
+        },
+        "lt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ %@ %@ @ %@ įvykdyta biržoje %@"
+          }
+        },
+        "lv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ %@ %@ @ %@ izpildīts biržā %@"
+          }
+        },
+        "sr-Latn": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ %@ %@ @ %@ izvršeno na %@"
+          }
+        },
+        "bs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ %@ %@ @ %@ izvršeno na %@"
+          }
+        },
+        "sq": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ %@ %@ @ %@ u ekzekutua në %@"
+          }
+        },
+        "is": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ %@ %@ @ %@ framkvæmt á %@"
+          }
+        },
+        "el": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ %@ %@ @ %@ εκτελέστηκε στο %@"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ %@ %@ @ %@ %@ üzerinde gerçekleşti"
+          }
+        },
+        "fil": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ %@ %@ @ %@ naisagawa sa %@"
+          }
+        },
+        "ms": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ %@ %@ @ %@ dilaksanakan di %@"
+          }
+        },
+        "id": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ %@ %@ @ %@ dieksekusi di %@"
+          }
+        },
+        "sw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ %@ %@ @ %@ limetekelezwa kwenye %@"
+          }
+        },
+        "bn": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ %@ %@ @ %@ %@-এ সম্পন্ন হয়েছে"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ %@ %@ 以 %@ 在 %@ 成交"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ %@ %@ 以 %@ 在 %@ 成交"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ %@ %@ を %@ で %@ にて約定"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ %@ %@ %@에 %@에서 체결됨"
+          }
+        },
+        "th": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ %@ %@ ที่ %@ จับคู่แล้วบน %@"
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ %@ %@ @ %@ đã khớp trên %@"
+          }
+        },
+        "my": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ %@ %@ ကို %@ နှုန်းဖြင့် %@ တွင် ဖြည့်ဆည်းပြီး"
+          }
+        },
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ %@ %@ @ %@ %@ पर पूरा हुआ"
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "تم تنفيذ %@ %@ %@ بسعر %@ على %@"
+          }
+        },
+        "he": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ %@ %@ ב-%@ ב-%@ בוצעה"
+          }
+        },
+        "fa": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ %@ %@ با قیمت %@ در %@ اجرا شد"
+          }
+        },
+        "hy": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ %@ %@ @ %@ կատարվեց %@-ում"
+          }
+        }
+      }
+    },
+    "alerts.body.order_unknown_unresolved": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ %@ %@ state unknown: %@ — venue verification pending, do not assume the position is closed"
+          }
+        },
+        "ga": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ %@ %@ stádas anaithnid: %@ — tá fíorú an mhalartáin ar feitheamh; ná glac leis go bhfuil an suíomh dúnta"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ %@ %@ — stan nieznany: %@ — oczekiwanie na weryfikację giełdy; nie zakładaj, że pozycja jest zamknięta"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ %@ %@ hat einen unbekannten Status: %@ — die Verifizierung durch den Handelsplatz steht noch aus; gehen Sie nicht davon aus, dass die Position geschlossen ist"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ %@ %@ état inconnu : %@ — la vérification auprès de la plateforme d’échange est en attente ; ne supposez pas que la position est clôturée"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ %@ %@ tiene un estado desconocido: %@ — la verificación por parte del centro de negociación está pendiente; no dé por cerrada la posición"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ %@ %@ stato sconosciuto: %@ — verifica presso l'exchange ancora in sospeso, non presumere che la posizione sia chiusa"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ %@ %@ heeft een onbekende status: %@ — beursverificatie is nog in afwachting; neem niet aan dat de positie gesloten is"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ %@ %@ — estado desconhecido: %@ — verificação da exchange pendente; não presuma que a posição esteja encerrada"
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ %@ %@ status är okänd: %@ — verifiering hos handelsplatsen inväntas; anta inte att positionen är stängd"
+          }
+        },
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ %@ %@ har ukjent status: %@ — verifisering hos børsen avventes; ikke anta at posisjonen er lukket"
+          }
+        },
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ %@ %@ har ukendt status: %@ — verificering hos handelsstedet afventer; antag ikke, at positionen er lukket"
+          }
+        },
+        "fi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ %@ %@ tila tuntematon: %@ — pörssivarmennus on kesken; älä oleta position olevan suljettu"
+          }
+        },
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ %@ %@ má neznámý stav: %@ — ověření na burze dosud nebylo dokončeno; nepředpokládejte, že je pozice uzavřená"
+          }
+        },
+        "sk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ %@ %@ — stav neznámy: %@ — čaká sa na overenie burzou; nepredpokladajte, že pozícia je zatvorená"
+          }
+        },
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ %@ %@ állapota ismeretlen: %@ — a tőzsdei ellenőrzés függőben van; ne feltételezze, hogy a pozíció le van zárva"
+          }
+        },
+        "ro": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ %@ %@ — stare necunoscută: %@ — verificarea bursei este în așteptare; nu presupuneți că poziția este închisă"
+          }
+        },
+        "hr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ %@ %@ status nepoznat: %@ — potvrda burze je na čekanju; nemojte pretpostaviti da je pozicija zatvorena"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ %@ %@ стан невідомий: %@ — очікується підтвердження біржі; не вважайте, що позицію закрито"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ %@ %@ — состояние неизвестно: %@ — ожидается проверка биржей; не считайте позицию закрытой"
+          }
+        },
+        "lt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ %@ %@ būsena nežinoma: %@ — vis dar laukiama biržos patikros; nemanykite, kad pozicija uždaryta"
+          }
+        },
+        "lv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ %@ %@ statuss nav zināms: %@ — biržas pārbaude vēl nav pabeigta; nepieņemiet, ka pozīcija ir slēgta"
+          }
+        },
+        "sr-Latn": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ %@ %@ status nije poznat: %@ — čeka se potvrda berze; nemojte pretpostaviti da je pozicija zatvorena"
+          }
+        },
+        "bs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ %@ %@ ima nepoznato stanje: %@ — provjera na berzi još nije završena; nemojte pretpostaviti da je pozicija zatvorena"
+          }
+        },
+        "sq": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ %@ %@ — gjendje e panjohur: %@ — verifikimi nga bursa është në pritje; mos supozoni se pozicioni është mbyllur"
+          }
+        },
+        "is": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ %@ %@ staða óþekkt: %@ — staðfesting hjá kauphöll er enn í bið, ekki gera ráð fyrir að stöðunni hafi verið lokað"
+          }
+        },
+        "el": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ %@ %@ έχει άγνωστη κατάσταση: %@ — εκκρεμεί η επαλήθευση από τον τόπο διαπραγμάτευσης· μην θεωρήσετε ότι η θέση έχει κλείσει"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ %@ %@ durumu bilinmiyor: %@ — borsa doğrulaması bekleniyor; pozisyonun kapandığını varsaymayın"
+          }
+        },
+        "fil": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ %@ %@ hindi alam ang status: %@ — nakabinbin ang beripikasyon sa exchange; huwag ipagpalagay na sarado ang posisyon"
+          }
+        },
+        "ms": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ %@ %@ status tidak diketahui: %@ — pengesahan dengan bursa masih belum selesai, jangan anggap posisi telah ditutup"
+          }
+        },
+        "id": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ %@ %@ status tidak diketahui: %@ — verifikasi dengan bursa masih menunggu penyelesaian, jangan menganggap posisi telah ditutup"
+          }
+        },
+        "sw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ %@ %@ hali haijulikani: %@ — uthibitishaji kutoka soko la biashara unasubiriwa; usidhani kuwa nafasi imefungwa"
+          }
+        },
+        "bn": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ %@ %@-এর অবস্থা অজানা: %@ — এক্সচেঞ্জের যাচাই এখনও বাকি; পজিশন বন্ধ হয়ে গেছে বলে ধরে নেবেন না"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ %@ %@ 状态未知：%@ — 正在等待交易所核实；请勿假定仓位已平仓"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ %@ %@ 狀態未知：%@ — 正在等待交易所核實；請勿假定持倉已平倉"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ %@ %@ の状態が不明です: %@ — 取引所での確認は保留中です。ポジションが決済済みだと判断しないでください"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ %@ %@ 상태 알 수 없음: %@ — 거래소 확인이 아직 보류 중입니다. 포지션이 종료된 것으로 간주하지 마세요"
+          }
+        },
+        "th": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ %@ %@ ไม่ทราบสถานะ: %@ — อยู่ระหว่างรอการยืนยันจากตลาดซื้อขาย อย่าสันนิษฐานว่าปิดสถานะแล้ว"
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ %@ %@ không xác định được trạng thái: %@ — đang chờ sàn xác minh; không được cho rằng vị thế đã đóng"
+          }
+        },
+        "my": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ %@ %@ — အခြေအနေ မသိရပါ: %@ — အိတ်ချိန်း၏ အတည်ပြုချက်ကို စောင့်ဆိုင်းနေသည်၊ ပိုဇီရှင် ပိတ်ပြီးပြီဟု မယူဆပါနှင့်"
+          }
+        },
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ %@ %@ स्थिति अज्ञात: %@ — एक्सचेंज सत्यापन लंबित है; यह न मानें कि पोज़िशन बंद हो चुकी है"
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ %@ %@ حالته غير معروفة: %@ — لا يزال التحقق لدى منصة التداول معلقًا؛ لا تفترض أن المركز مغلق"
+          }
+        },
+        "he": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ %@ %@ מצב לא ידוע: %@ — אימות מול הבורסה נמצא בהמתנה; אין להניח שהפוזיציה סגורה"
+          }
+        },
+        "fa": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ %@ %@ وضعیت نامشخص: %@ — راستی‌آزمایی صرافی در انتظار است؛ فرض نکنید موقعیت بسته است"
+          }
+        },
+        "hy": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ %@ %@ կարգավիճակն անհայտ է՝ %@ — բորսայի կողմից ստուգումը դեռ ընթացքի մեջ է, մի՛ ենթադրեք, որ դիրքը փակ է"
           }
         }
       }
