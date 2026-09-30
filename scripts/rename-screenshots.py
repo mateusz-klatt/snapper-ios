@@ -61,8 +61,7 @@ def parse_manifest(manifest_path: Path) -> list[dict]:
         data = json.load(fp)
     entries: list[dict] = []
     for run in data:
-        for att in run.get("attachments", []):
-            entries.append(att)
+        entries.extend(run.get("attachments", []))
     return entries
 
 
