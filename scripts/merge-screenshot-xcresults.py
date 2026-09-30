@@ -60,8 +60,7 @@ def parse(manifest: Path):
     with manifest.open() as fp:
         data = json.load(fp)
     for run in data:
-        for att in run.get("attachments", []):
-            yield att
+        yield from run.get("attachments", [])
 
 
 def derive_target(name: str):
