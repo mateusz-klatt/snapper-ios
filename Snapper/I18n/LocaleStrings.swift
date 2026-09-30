@@ -121,9 +121,63 @@ enum LocaleStrings {
             .replacingOccurrences(of: "%lld", with: "%@")
             .replacingOccurrences(of: "%d", with: "%@")
         let locale = Locale(identifier: language.rawValue)
-        let cvargs: [CVarArg] = args.map { $0 as NSString }
+        let cvargs: [CVarArg] = args.enumerated().map { index, value in
+            localizedArgument(value, at: index, for: key, in: language) as NSString
+        }
         return String(format: normalized, locale: locale, arguments: cvargs)
     }
+
+    /// Localize only known semantic tokens at the documented argument
+    /// positions. Wire values stay stable so changing the app language can
+    /// re-render the same alert. Unknown tokens and venue error text remain
+    /// verbatim, including values that resemble tokens in unrelated slots.
+    private static func localizedArgument(
+        _ value: String,
+        at index: Int,
+        for key: String,
+        in language: CatalogLanguage
+    ) -> String {
+        let normalized = value.lowercased()
+        let argumentKey: String?
+        if index == 0, orderBodyKeys.contains(key) {
+            argumentKey = [
+                "buy": "alerts.argument.side.buy",
+                "sell": "alerts.argument.side.sell"
+            ][normalized]
+        } else if index == 2, key == "alerts.body.critical_system_error" {
+            argumentKey = [
+                "healthy": "alerts.argument.status.healthy",
+                "warning": "alerts.argument.status.warning",
+                "error": "alerts.argument.status.error"
+            ][normalized]
+        } else if index == 3, reasonBodyKeys.contains(key) {
+            argumentKey = [
+                "unknown reason": "alerts.argument.reason.unknown",
+                "ambiguous venue response": "alerts.argument.reason.ambiguous"
+            ][normalized]
+        } else {
+            argumentKey = nil
+        }
+        guard let argumentKey else { return value }
+        let translated = localized(argumentKey, in: language)
+        return translated == argumentKey ? value : translated
+    }
+
+    private static let orderBodyKeys: Set<String> = [
+        "alerts.body.order_fill_full",
+        "alerts.body.order_fill_full_quoted",
+        "alerts.body.order_rejected",
+        "alerts.body.margin_warning",
+        "alerts.body.order_unknown",
+        "alerts.body.order_unknown_unresolved"
+    ]
+
+    private static let reasonBodyKeys: Set<String> = [
+        "alerts.body.order_rejected",
+        "alerts.body.margin_warning",
+        "alerts.body.order_unknown",
+        "alerts.body.order_unknown_unresolved"
+    ]
 
     /// Resolve a ``Bundle`` for ``language`` with the same fallback
     /// chain as ``localized(_:in:)`` — requested language -> EN ->

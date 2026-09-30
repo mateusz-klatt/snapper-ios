@@ -1,11 +1,11 @@
 import Foundation
 
 /// Pure accessibility-label builder for ``LocaleSwitcher`` flag
-/// buttons. Picks between the "Switch to <country>" and "Current
-/// language: <country>" templates based on whether the target
-/// ``code`` is already the current locale; resolves the country
-/// name via ``Locale.localizedString(forRegionCode:)`` so it
-/// follows the active catalog language.
+/// buttons. Picks between the "Switch to <language>" and "Current
+/// language: <language>" templates based on whether the target
+/// ``code`` is already the current locale. Resolve the catalog's
+/// language identifier, including its script or regional variant,
+/// in the active language rather than announcing a country as a language.
 ///
 /// Extracted as a pure function (no SwiftUI environment, no
 /// ``AppState`` injection) so the test surface mirrors the
@@ -21,12 +21,12 @@ enum LocaleSwitcherLabels {
     ///   resolves against the active catalog language).
     static func accessibilityLabel(for code: AppLocale, current: AppLocale) -> String {
         let locale = current.nativeLocale
-        let country = locale.localizedString(forRegionCode: code.rawValue.uppercased())
-            ?? code.rawValue.uppercased()
+        let languageCode = code.catalogLanguage.rawValue
+        let language = locale.localizedString(forIdentifier: languageCode) ?? languageCode
         let key = code == current
             ? "common.localeSwitcher.currentAccessibilityLabel"
             : "common.localeSwitcher.flagAccessibilityLabel"
         let template = LocaleStrings.localized(key, in: current.catalogLanguage)
-        return String(format: template, locale: locale, country)
+        return String(format: template, locale: locale, language)
     }
 }
