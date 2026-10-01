@@ -13,7 +13,7 @@ This document captures the design decisions a reader would otherwise need to rev
 
 ### REST (`APIClient`)
 
-- Generic `request<T: Decodable>` core that all endpoint methods delegate to.
+- Shared `transport` core for REST requests, with separate response handling in generic `request<T: Decodable>`, `requestWithFractionalSecondsDates`, and the AI-review methods.
 - One-shot 401 handling: on `401`, call `AuthService.fetchFreshWsToken()` to refresh, then replay the original request once. A second 401 forces logout and routes the UI to `LoginView` via `SnapperApp`'s `isAuthenticated` observer.
 - Mutating requests attach `X-CSRF-Token` from the matching `csrf_token` cookie in `HTTPCookieStorage`. Login, refresh, and logout stay server-exempt and do not flow through this client.
 - `encodePathSegment` encodes path segments against the RFC 3986 unreserved character set. `querySuffix` applies the same encoding to query names and values for P&L, candle-cache, and alert-history requests, including opaque cursors. `fetchCandles` builds its query separately with Foundation's `URLComponents` and `URLQueryItem`.
