@@ -32,14 +32,10 @@ state or decision logic to extract.
 @Observable
 final class XxxViewModel {
 
-    // MARK: - Public state (read by View)
-
     var data: [Item] = []
     var isLoading = false
     var loadError: APIError?
     var submitError: String?
-
-    // MARK: - Dependencies (init-injected)
 
     private let api: APIClientProtocol
     private let appState: AppState
@@ -48,8 +44,6 @@ final class XxxViewModel {
         self.api = api
         self.appState = appState
     }
-
-    // MARK: - Behavior (called by View)
 
     func load() async { ... }
     func submit(...) async -> Bool { ... }

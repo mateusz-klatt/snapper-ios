@@ -4,7 +4,7 @@ This document captures the design decisions a reader would otherwise need to rev
 
 ## Concurrency posture
 
-- **Swift 6.0 strict concurrency** throughout. No `@unchecked Sendable` outside test fakes that hand-prove their own synchronization.
+- **Swift 6.0 strict concurrency** throughout. Production `@unchecked Sendable` boundaries include the lock-protected `BackendURLStore` and generated `AnyCodable`; test fakes also use explicit synchronization where needed.
 - Auth and WebSocket state live on `@MainActor`. UI binds to them directly via `@EnvironmentObject` without crossing actor boundaries.
 - `DeviceRegistrationService` is a Swift `actor`. APNs token + login state arrive on different async paths; the actor serializes the handshake so a registration POST only fires when both inputs are present.
 - `EnvelopeMinter` is `@MainActor` (single mint sequence per app session). Tests inject a deterministic `Provenance` so the per-attempt `publicId` / `sequenceId` are reproducible.
@@ -16,7 +16,7 @@ This document captures the design decisions a reader would otherwise need to rev
 - Generic `request<T: Decodable>` core that all endpoint methods delegate to.
 - One-shot 401 handling: on `401`, call `AuthService.fetchFreshWsToken()` to refresh, then replay the original request once. A second 401 forces logout and routes the UI to `LoginView` via `SnapperApp`'s `isAuthenticated` observer.
 - Mutating requests attach `X-CSRF-Token` from the matching `csrf_token` cookie in `HTTPCookieStorage`. Login, refresh, and logout stay server-exempt and do not flow through this client.
-- Path segments interpolated through `encodePathSegment` (percent-encoded with `.urlPathAllowed`); query strings built with `URLComponents` + `URLQueryItem` so opaque server-emitted cursors with reserved characters round-trip correctly.
+- Path segments and query names/values are percent-encoded against the RFC 3986 unreserved character set by `encodePathSegment` and `querySuffix`, so reserved characters in opaque server-emitted cursors round-trip correctly.
 - ISO-8601 date encoding/decoding on both sides — backend Pydantic models expect ISO strings, not Unix timestamps.
 
 ### WebSocket (`WebSocketManager`)
@@ -36,8 +36,8 @@ This document captures the design decisions a reader would otherwise need to rev
 
 ## Auth flow
 
-- Session-cookie based (`URLSession.shared` cookie jar). Login `POST /api/auth/login` with `username`/`password`; backend sets `session_id` and `csrf_token` cookies.
-- Refresh: `POST /api/auth/refresh?return_tokens=true` returns a new `ws_token` (used by `WebSocketManager`) plus rotated session cookies.
+- Cookie-based (`URLSession.shared` cookie jar). Login `POST /api/auth/login` sends username/password inside the typed request envelope; the backend sets `access_token`, `refresh_token`, and `csrf_token` cookies.
+- Refresh: `POST /api/auth/refresh` returns a new `ws_token` (used by `WebSocketManager`) plus rotated auth cookies. Concurrent refresh callers share one in-flight task.
 - Logout: `POST /api/auth/logout` invalidates the session server-side; client-side state is cleared regardless.
 - `WebSocketManager.wsToken` is a separate token from auth — used only in `authenticate` / `reauth` WebSocket frames. It rotates independently of the session cookie.
 
@@ -97,7 +97,7 @@ Two CI surfaces collaborate, each playing the role it is best suited for:
   mutating admin/operator/viewer Desk release UAT runs locally against a
   disposable, fingerprinted loopback fixture via `viewer-uat`.
 
-This is the **gate**: nothing reaches `master` without these green.
+These workflows provide build, test, coverage, and secret-scan evidence. The screenshot workflow is manually dispatched; its results are separate from the automatic push/PR checks. Branch protection is configured on GitHub rather than in these workflow files.
 
 ### Xcode Cloud (Apple-hosted)
 

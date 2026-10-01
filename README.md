@@ -68,7 +68,7 @@ The release build's runtime editor enforces the same rules `BackendURLStore.cano
   - `APIClient` — REST with one-shot 401-refresh-and-replay, generic `Decodable` body, path/query encoding, and `X-CSRF-Token` attachment for mutating requests when a matching `csrf_token` cookie exists.
   - `WebSocketManager` — capped exponential backoff reconnect (300s ceiling), proactive `ws_token` refresh, terminal `.authFailed` state distinct from transient `.error`.
   - `EnvelopeMinter` — actor-isolated provenance stamper (per-app session id, separate control / telemetry counters, ms-precision ISO-8601). Mirrors the bridge's `integrations/snapper-mcp/src/envelope.ts` so backend gap detection sees a coherent session across iOS-originated commands.
-- **Generated types** under `Snapper/Models/Generated/` are upstream-owned snapshots of the backend's OpenAPI + WebSocket schemas. External contributors cannot regenerate them without backend access — see [`docs/known-limitations.md`](docs/known-limitations.md).
+- **Generated types** under `Snapper/Models/Generated/` are upstream-owned snapshots of the backend's OpenAPI + WebSocket schemas. Regeneration requires the backend repository and its generator environment; the iOS subtree has no standalone generator — see [`docs/known-limitations.md`](docs/known-limitations.md).
 
 ## Continuous integration
 

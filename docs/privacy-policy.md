@@ -5,7 +5,7 @@
 > This markdown file is the source-of-truth for developers reading the iOS repo. The Apple App Store submission references the published HTML at the URL above.
 
 **Effective date:** 2026-05-05
-**Last updated:** 2026-08-03
+**Last updated:** 2026-10-01
 **App:** Snapper (iOS)
 **Source:** [github.com/mateusz-klatt/snapper-ios](https://github.com/mateusz-klatt/snapper-ios)
 **Contact:** mateusz@klatt.ie
@@ -60,7 +60,7 @@ The app processes the following categories of data **on your device** so it can 
 
 - **What:** UI choices like selected wallet, app locale, financial-color preference, and custom backend URL.
 - **How stored:** Apple `UserDefaults` (declared in `PrivacyInfo.xcprivacy` under `CA92.1`).
-- **Where it goes:** stays on your device.
+- **Where it goes:** the selected app language also syncs to your backend account's `default_language` after login and when changed, so backend responses can use that language. The other preferences stay on your device, apart from the selected backend URL determining where requests are sent and the wallet selection scoping those requests.
 
 ## Data we do NOT collect
 
