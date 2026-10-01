@@ -16,7 +16,7 @@ This document captures the design decisions a reader would otherwise need to rev
 - Generic `request<T: Decodable>` core that all endpoint methods delegate to.
 - One-shot 401 handling: on `401`, call `AuthService.fetchFreshWsToken()` to refresh, then replay the original request once. A second 401 forces logout and routes the UI to `LoginView` via `SnapperApp`'s `isAuthenticated` observer.
 - Mutating requests attach `X-CSRF-Token` from the matching `csrf_token` cookie in `HTTPCookieStorage`. Login, refresh, and logout stay server-exempt and do not flow through this client.
-- Path segments and query names/values are percent-encoded against the RFC 3986 unreserved character set by `encodePathSegment` and `querySuffix`, so reserved characters in opaque server-emitted cursors round-trip correctly.
+- `encodePathSegment` encodes path segments against the RFC 3986 unreserved character set. `querySuffix` applies the same encoding to query names and values for P&L, candle-cache, and alert-history requests, including opaque cursors. `fetchCandles` builds its query separately with Foundation's `URLComponents` and `URLQueryItem`.
 - ISO-8601 date encoding/decoding on both sides — backend Pydantic models expect ISO strings, not Unix timestamps.
 
 ### WebSocket (`WebSocketManager`)
