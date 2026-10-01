@@ -1,10 +1,10 @@
 # Known limitations
 
-Open items in the current public source. Each has a tracked path forward; nothing here is permanent.
+Open items in the current public source, with possible follow-up work described below.
 
 ## Generated types are upstream-owned snapshots
 
-`Snapper/Models/Generated/{APITypes,WSMessages,Permissions}.swift` are produced by the Snapper backend's regeneration script (`scripts/generate_types.py --ios` in the upstream repo). External contributors cannot regenerate them from this iOS subtree alone, and no public iOS generator script exists under `ios/scripts/` today.
+`Snapper/Models/Generated/{APITypes,WSMessages,Permissions}.swift` are produced by the Snapper backend's regeneration script (`scripts/generate_types.py --ios` in the upstream repo). Contributors can use the public backend repository and its generator environment, but cannot regenerate these files from this iOS subtree alone; no standalone iOS generator script exists under `ios/scripts/` today.
 
 **Plan**: add a public `scripts/gen-from-backend.sh` flow that can curl a running backend's `/openapi.json` plus the published WebSocket schema document. Until then, hand-edits to generated files will be lost on the next upstream regen; open an issue describing the schema-side fix instead of patching generated Swift.
 
