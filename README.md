@@ -1,5 +1,10 @@
 # Snapper iOS
 
+[![Build and Tests](https://github.com/mateusz-klatt/snapper-ios/actions/workflows/ci.yml/badge.svg?branch=master)](https://github.com/mateusz-klatt/snapper-ios/actions/workflows/ci.yml)
+[![Bugs](https://sonarcloud.io/api/project_badges/measure?project=mateusz-klatt_snapper-ios&metric=bugs)](https://sonarcloud.io/summary/overall?id=mateusz-klatt_snapper-ios)
+[![Vulnerabilities](https://sonarcloud.io/api/project_badges/measure?project=mateusz-klatt_snapper-ios&metric=vulnerabilities)](https://sonarcloud.io/summary/overall?id=mateusz-klatt_snapper-ios)
+[![Code Smells](https://sonarcloud.io/api/project_badges/measure?project=mateusz-klatt_snapper-ios&metric=code_smells)](https://sonarcloud.io/summary/overall?id=mateusz-klatt_snapper-ios)
+
 Native iOS client for the [Snapper](https://github.com/mateusz-klatt/snapper) trading platform — a SwiftUI app that lets the maintainer run trading actions from a phone against a self-hosted Snapper backend.
 
 ## Status
@@ -71,6 +76,9 @@ The release build's runtime editor enforces the same rules `BackendURLStore.cano
 - **Generated types** under `Snapper/Models/Generated/` are upstream-owned snapshots of the backend's OpenAPI + WebSocket schemas. Regeneration requires the backend repository and its generator environment; the iOS subtree has no standalone generator — see [`docs/known-limitations.md`](docs/known-limitations.md).
 
 ## Continuous integration
+
+The badges above link to public GitHub Actions build/test results and SonarCloud issue counts.
+Xcode Cloud handles the maintainer's signed release builds; its build reports require access to the maintainer's Apple developer team in Xcode or App Store Connect.
 
 GitHub Actions uses runner-specific workflows:
 
