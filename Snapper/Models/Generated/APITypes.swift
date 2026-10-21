@@ -111,6 +111,11 @@ enum UserRole: String, Codable, Sendable {
     case admin
 }
 
+enum AndroidPushConfigInfoAvailability: String, Codable, Sendable {
+    case configured
+    case unavailable
+}
+
 enum AvailableProcessLifecycle: String, Codable, Sendable {
     case longRunning = "long_running"
     case oneShot = "one_shot"
@@ -928,6 +933,190 @@ struct AlertHistoryResponse: Codable, Sendable {
     }
 }
 
+struct AndroidDeviceInfo: Codable, Sendable {
+    let type: String?
+    let sequenceId: Int
+    let publicId: String
+    let timestamp: Date
+    let sessionId: String
+    let topic: String?
+    let userPublicId: String
+    let installationId: String
+    let bindingId: String
+    let configurationId: String
+    let `protocol`: String?
+    let platform: String?
+    let packageName: String
+    let status: String?
+    let registeredAt: Date
+    let lastSeenAt: Date?
+
+    enum CodingKeys: String, CodingKey {
+        case type
+        case sequenceId = "sequence_id"
+        case publicId = "public_id"
+        case timestamp
+        case sessionId = "session_id"
+        case topic
+        case userPublicId = "user_public_id"
+        case installationId = "installation_id"
+        case bindingId = "binding_id"
+        case configurationId = "configuration_id"
+        case `protocol`
+        case platform
+        case packageName = "package_name"
+        case status
+        case registeredAt = "registered_at"
+        case lastSeenAt = "last_seen_at"
+    }
+}
+
+struct AndroidDeviceListResponse: Codable, Sendable {
+    let type: String?
+    let sequenceId: Int
+    let publicId: String
+    let timestamp: Date
+    let sessionId: String
+    let topic: String?
+    let payload: [AndroidDeviceInfo]
+    let count: Int
+
+    enum CodingKeys: String, CodingKey {
+        case type
+        case sequenceId = "sequence_id"
+        case publicId = "public_id"
+        case timestamp
+        case sessionId = "session_id"
+        case topic
+        case payload
+        case count
+    }
+}
+
+struct AndroidDeviceResponse: Codable, Sendable {
+    let type: String?
+    let sequenceId: Int
+    let publicId: String
+    let timestamp: Date
+    let sessionId: String
+    let topic: String?
+    let payload: AndroidDeviceInfo
+
+    enum CodingKeys: String, CodingKey {
+        case type
+        case sequenceId = "sequence_id"
+        case publicId = "public_id"
+        case timestamp
+        case sessionId = "session_id"
+        case topic
+        case payload
+    }
+}
+
+struct AndroidPushConfigInfo: Codable, Sendable {
+    let type: String?
+    let sequenceId: Int
+    let publicId: String
+    let timestamp: Date
+    let sessionId: String
+    let topic: String?
+    let availability: String
+    let configuration: AndroidPushConfiguration?
+
+    enum CodingKeys: String, CodingKey {
+        case type
+        case sequenceId = "sequence_id"
+        case publicId = "public_id"
+        case timestamp
+        case sessionId = "session_id"
+        case topic
+        case availability
+        case configuration
+    }
+}
+
+struct AndroidPushConfigResponse: Codable, Sendable {
+    let type: String?
+    let sequenceId: Int
+    let publicId: String
+    let timestamp: Date
+    let sessionId: String
+    let topic: String?
+    let payload: AndroidPushConfigInfo
+
+    enum CodingKeys: String, CodingKey {
+        case type
+        case sequenceId = "sequence_id"
+        case publicId = "public_id"
+        case timestamp
+        case sessionId = "session_id"
+        case topic
+        case payload
+    }
+}
+
+struct AndroidPushConfiguration: Codable, Sendable {
+    let configurationId: String
+    let `protocol`: String?
+    let packageName: String
+    let projectId: String
+    let applicationId: String
+    let apiKey: String
+    let messagingSenderId: String
+
+    enum CodingKeys: String, CodingKey {
+        case configurationId = "configuration_id"
+        case `protocol`
+        case packageName = "package_name"
+        case projectId = "project_id"
+        case applicationId = "application_id"
+        case apiKey = "api_key"
+        case messagingSenderId = "messaging_sender_id"
+    }
+}
+
+struct AndroidRegistrationStateInfo: Codable, Sendable {
+    let type: String?
+    let sequenceId: Int
+    let publicId: String
+    let timestamp: Date
+    let sessionId: String
+    let topic: String?
+    let revision: String
+    let currentBindingId: String?
+
+    enum CodingKeys: String, CodingKey {
+        case type
+        case sequenceId = "sequence_id"
+        case publicId = "public_id"
+        case timestamp
+        case sessionId = "session_id"
+        case topic
+        case revision
+        case currentBindingId = "current_binding_id"
+    }
+}
+
+struct AndroidRegistrationStateResponse: Codable, Sendable {
+    let type: String?
+    let sequenceId: Int
+    let publicId: String
+    let timestamp: Date
+    let sessionId: String
+    let topic: String?
+    let payload: AndroidRegistrationStateInfo
+
+    enum CodingKeys: String, CodingKey {
+        case type
+        case sequenceId = "sequence_id"
+        case publicId = "public_id"
+        case timestamp
+        case sessionId = "session_id"
+        case topic
+        case payload
+    }
+}
+
 struct AsyncioMetrics: Codable, Sendable {
     let activeTasks: Int
     let pendingTasks: Int
@@ -1595,7 +1784,7 @@ struct CacheHealthResponse: Codable, Sendable {
 struct CachedCandle: Codable, Sendable {
     let openAtMs: Int
     let timeframe: String
-    let open: Double
+    let `open`: Double
     let high: Double
     let low: Double
     let close: Double
@@ -1604,7 +1793,7 @@ struct CachedCandle: Codable, Sendable {
     enum CodingKeys: String, CodingKey {
         case openAtMs = "open_at_ms"
         case timeframe
-        case open
+        case `open`
         case high
         case low
         case close
@@ -1703,7 +1892,7 @@ struct CandleData: Codable, Sendable {
     let exchange: String
     let timeframe: String
     let openAt: Date
-    let open: Double
+    let `open`: Double
     let high: Double
     let low: Double
     let close: Double
@@ -1726,7 +1915,7 @@ struct CandleData: Codable, Sendable {
         case exchange
         case timeframe
         case openAt = "open_at"
-        case open
+        case `open`
         case high
         case low
         case close
@@ -1869,7 +2058,7 @@ struct ContinuousCandleData: Codable, Sendable {
     let topic: String?
     let openAt: Date
     let timeframe: String
-    let open: Double
+    let `open`: Double
     let high: Double
     let low: Double
     let close: Double
@@ -1888,7 +2077,7 @@ struct ContinuousCandleData: Codable, Sendable {
         case topic
         case openAt = "open_at"
         case timeframe
-        case open
+        case `open`
         case high
         case low
         case close
@@ -7274,6 +7463,50 @@ struct UserAlertDefaultBody: Codable, Sendable {
         case alertType = "alert_type"
         case enabled
         case minPriority = "min_priority"
+    }
+}
+
+struct RegisterAndroidDeviceCommand: Codable, Sendable {
+    let type: String?
+    let sequenceId: Int
+    let publicId: String
+    let timestamp: Date
+    let sessionId: String
+    let topic: String?
+    let payload: RegisterAndroidDeviceBody
+
+    enum CodingKeys: String, CodingKey {
+        case type
+        case sequenceId = "sequence_id"
+        case publicId = "public_id"
+        case timestamp
+        case sessionId = "session_id"
+        case topic
+        case payload
+    }
+}
+
+struct RegisterAndroidDeviceBody: Codable, Sendable {
+    let `protocol`: String
+    let configurationId: String
+    let packageName: String
+    let installationId: String
+    let bindingId: String
+    let expectedRevision: String
+    let firebaseInstallationId: String
+    let expectedUserPublicId: String
+    let appVersion: String?
+
+    enum CodingKeys: String, CodingKey {
+        case `protocol`
+        case configurationId = "configuration_id"
+        case packageName = "package_name"
+        case installationId = "installation_id"
+        case bindingId = "binding_id"
+        case expectedRevision = "expected_revision"
+        case firebaseInstallationId = "firebase_installation_id"
+        case expectedUserPublicId = "expected_user_public_id"
+        case appVersion = "app_version"
     }
 }
 
