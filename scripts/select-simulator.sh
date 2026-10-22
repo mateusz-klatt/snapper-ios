@@ -25,16 +25,38 @@ trap diagnostics EXIT
 command -v jq >/dev/null || { echo "Install jq: brew install jq" >&2; exit 1; }
 [[ -n "$MINIMUM_OS" ]] || { echo "Missing iOS deployment target in project.yml" >&2; exit 1; }
 STATE=$(xcrun simctl list --json)
+COMPATIBILITY_FILTER='
+  def version: split(".") | map(tonumber) | . + [range(length; 3) | 0];
+  def compatible_model($name; $runtime):
+    (.name | startswith("iPhone "))
+    and ($name == "" or .name == $name)
+    and (((.minRuntimeVersionString // "0") | version) <= ($runtime | version))
+    and (((.maxRuntimeVersionString // "65535") | version) >= ($runtime | version));
+'
+if [[ -n "${SIMULATOR:-}" ]]; then
+  if ! jq -e --arg name "$SIMULATOR" '
+    any(.devicetypes[]; .name == $name and (.name | startswith("iPhone ")))
+  ' <<< "$STATE" >/dev/null; then
+    echo "No compatible iPhone model $SIMULATOR in the selected Xcode installation" >&2
+    exit 1
+  fi
+fi
 
 select_runtime() {
-  jq -r --arg minimum "$MINIMUM_OS" --arg requested "${SIMULATOR_OS:-}" '
-    def version: split(".") | map(tonumber) | . + [range(length; 3) | 0];
-    [.runtimes[]
+  jq -r --arg minimum "$MINIMUM_OS" --arg requested "${SIMULATOR_OS:-}" \
+    --arg model "${SIMULATOR:-}" "$COMPATIBILITY_FILTER"'
+    .devicetypes as $models
+    | [.runtimes[]
       | select(.identifier | startswith("com.apple.CoreSimulator.SimRuntime.iOS-"))
       | select(.isAvailable == true)
       | select((.version | version) >= ($minimum | version))
       | select($requested == "" or (.version | version) == ($requested | version))]
-    | sort_by(.version | version) | last
+    | sort_by(.version | version) | reverse
+    | . as $eligible
+    | ([.[] | . as $runtime
+        | select(any($models[]; compatible_model($model; $runtime.version)))]
+        + $eligible)
+    | first
     | if . == null then empty else [.identifier, .version] | @tsv end
   ' <<< "$STATE"
 }
@@ -55,13 +77,9 @@ if [[ -z "$RUNTIME" ]]; then
 fi
 IFS=$'\t' read -r RUNTIME_ID RUNTIME_VERSION <<< "$RUNTIME"
 
-MODEL=$(jq -r --arg runtime "$RUNTIME_VERSION" --arg requested "${SIMULATOR:-}" '
-  def version: split(".") | map(tonumber) | . + [range(length; 3) | 0];
+MODEL=$(jq -r --arg runtime "$RUNTIME_VERSION" --arg requested "${SIMULATOR:-}" "$COMPATIBILITY_FILTER"'
   [.devicetypes[]
-    | select(.name | startswith("iPhone "))
-    | select($requested == "" or .name == $requested)
-    | select(((.minRuntimeVersionString // "0") | version) <= ($runtime | version))
-    | select(((.maxRuntimeVersionString // "65535") | version) >= ($runtime | version))]
+    | select(compatible_model($requested; $runtime))]
   | sort_by(.name != "iPhone 17 Pro") | first
   | if . == null then empty else [.identifier, .name] | @tsv end
 ' <<< "$STATE")

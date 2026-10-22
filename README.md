@@ -48,8 +48,10 @@ make test      # SnapperTests + SnapperUITests scheme test action
 ```
 
 The Makefile selects the newest installed iOS Simulator runtime that satisfies the
-deployment target and reuses or creates a compatible iPhone simulator. Set a model
-and runtime explicitly, or provide an existing simulator UUID:
+deployment target and supports the requested iPhone model, then reuses or creates
+a compatible simulator. Without a model override, it selects a compatible iPhone,
+preferring iPhone 17 Pro. Set a model and runtime explicitly, or provide an existing
+simulator UUID:
 
 ```bash
 make test SIMULATOR='iPhone 17' SIMULATOR_OS='26.2'

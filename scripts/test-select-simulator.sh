@@ -77,7 +77,7 @@ expect_destination() {
 }
 
 expect_failure() {
-  if bash "$ROOT/scripts/select-simulator.sh" > "$FIXTURE/stdout" 2> "$FIXTURE/stderr"; then
+  if bash "$SELECTOR" "$@" > "$FIXTURE/stdout" 2> "$FIXTURE/stderr"; then
     echo "Expected simulator preparation to fail" >&2
     exit 1
   fi
@@ -181,6 +181,31 @@ SELECTOR="$FIXTURE/project/scripts/select-simulator.sh" SIMULATOR_OS=26.2 \
   expect_destination 22222222-2222-2222-2222-222222222222
 grep -q 'iOS-26-2' "$SIMULATOR_TEST_CALLS"
 
+reset_state
+jq '(.devicetypes[] | select(.identifier == "iphone17pro") | .maxRuntimeVersionString) = "26.6"' \
+  "$FIXTURE/available.json" > "$SIMULATOR_TEST_STATE"
+SIMULATOR='iPhone 17 Pro' expect_destination 22222222-2222-2222-2222-222222222222
+grep -q 'simctl create Snapper tests iphone17pro com.apple.CoreSimulator.SimRuntime.iOS-26-6' "$SIMULATOR_TEST_CALLS"
+
+reset_state
+jq '(.devicetypes[] | select(.identifier == "iphone17pro") | .maxRuntimeVersionString) = "26.6"' \
+  "$FIXTURE/available.json" > "$SIMULATOR_TEST_STATE"
+SIMULATOR='iPhone 17 Pro' SIMULATOR_OS=26.10 expect_failure --install-runtime
+grep -q 'No compatible iPhone model iPhone 17 Pro for iOS 26.10' "$FIXTURE/stderr"
+assert_no_call 'downloadPlatform'
+
+reset_state
+jq '(.devicetypes[] | select(.name | startswith("iPhone ")) | .maxRuntimeVersionString) = "26.6"' \
+  "$FIXTURE/available.json" > "$SIMULATOR_TEST_STATE"
+expect_destination 22222222-2222-2222-2222-222222222222
+grep -q 'simctl create Snapper tests iphone17pro com.apple.CoreSimulator.SimRuntime.iOS-26-6' "$SIMULATOR_TEST_CALLS"
+
+reset_state
+jq '.runtimes = []' "$FIXTURE/available.json" > "$SIMULATOR_TEST_STATE"
+SIMULATOR='iPhone Missing' expect_failure --install-runtime
+grep -q 'No compatible iPhone model iPhone Missing' "$FIXTURE/stderr"
+assert_no_call 'downloadPlatform'
+
 printf 'simctl create forbidden fixture\n' > "$SIMULATOR_TEST_CALLS"
 if (assert_no_call 'simctl create') 2> "$FIXTURE/stderr"; then
   echo 'The forbidden-command assertion did not stop its process' >&2
@@ -193,4 +218,4 @@ expect_device_id 'platform=iOS Simulator,id=11111111-1111-1111-1111-111111111111
 expect_invalid_destination 'platform=iOS Simulator,name=iPhone 17 Pro,OS=26.6'
 expect_invalid_destination 'platform=iOS Simulator,id=11111111-1111-1111-1111-111111111111invalid,arch=arm64'
 
-echo 'Simulator selection and destination parsing: 18 regression scenarios passed.'
+echo 'Simulator selection and destination parsing: 22 regression scenarios passed.'
