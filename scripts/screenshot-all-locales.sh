@@ -202,11 +202,9 @@ PY
 DESTINATION=${DESTINATION:-$(bash "$ROOT/scripts/select-simulator.sh")}
 if [[ "$MODE" = "showcase" ]]; then
   echo "==> Uninstalling Snapper from booted simulator (showcase needs clean state)"
-  DEVICE_UDID=${DESTINATION##*id=}
-  if [[ "$DEVICE_UDID" != "$DESTINATION" ]]; then
-    xcrun simctl boot "$DEVICE_UDID" 2>/dev/null || true
-    xcrun simctl uninstall "$DEVICE_UDID" com.example.snapper 2>/dev/null || true
-  fi
+  DEVICE_UDID=$(bash "$ROOT/scripts/simulator-device-id.sh" "$DESTINATION")
+  xcrun simctl boot "$DEVICE_UDID" 2>/dev/null || true
+  xcrun simctl uninstall "$DEVICE_UDID" com.example.snapper 2>/dev/null || true
 fi
 
 XCODEBUILD_ARGS=(

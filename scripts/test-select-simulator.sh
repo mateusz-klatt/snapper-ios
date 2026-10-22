@@ -85,10 +85,35 @@ expect_failure() {
   grep -q 'Fixture diagnostics' "$FIXTURE/stderr"
 }
 
+assert_no_call() {
+  if grep -Fq -- "$1" "$SIMULATOR_TEST_CALLS"; then
+    echo "Unexpected simulator command: $1" >&2
+    exit 1
+  fi
+}
+
+expect_device_id() {
+  local actual
+  actual=$(bash "$ROOT/scripts/simulator-device-id.sh" "$1")
+  [[ "$actual" == '11111111-1111-1111-1111-111111111111' ]] || {
+    echo "Unexpected simulator UUID: $actual" >&2
+    exit 1
+  }
+}
+
+expect_invalid_destination() {
+  if bash "$ROOT/scripts/simulator-device-id.sh" "$1" > "$FIXTURE/stdout" 2> "$FIXTURE/stderr"; then
+    echo "Expected showcase destination validation to fail" >&2
+    exit 1
+  fi
+  [[ ! -s "$FIXTURE/stdout" ]]
+  grep -q 'requires DESTINATION with an explicit simulator UUID' "$FIXTURE/stderr"
+}
+
 reset_state
 expect_destination 11111111-1111-1111-1111-111111111111
 grep -q 'iOS 26.10' "$FIXTURE/stderr"
-! grep -q 'simctl create' "$SIMULATOR_TEST_CALLS"
+assert_no_call 'simctl create'
 
 reset_state
 jq '.devices = {}' "$FIXTURE/available.json" > "$SIMULATOR_TEST_STATE"
@@ -110,7 +135,7 @@ grep -q 'No compatible iPhone model iPhone Missing' "$FIXTURE/stderr"
 reset_state
 SIMULATOR_OS=26.1 expect_failure
 grep -q 'No available iOS Simulator runtime 26.1' "$FIXTURE/stderr"
-! grep -q 'downloadPlatform' "$SIMULATOR_TEST_CALLS"
+assert_no_call 'downloadPlatform'
 
 reset_state
 jq '.runtimes = []' "$FIXTURE/available.json" > "$SIMULATOR_TEST_STATE"
@@ -127,4 +152,16 @@ jq '.runtimes = []' "$FIXTURE/available.json" > "$SIMULATOR_TEST_STATE"
 SIMULATOR_OS=26.6 expect_destination 22222222-2222-2222-2222-222222222222 --install-runtime
 grep -q '^-downloadPlatform iOS -buildVersion 26.6$' "$SIMULATOR_TEST_CALLS"
 
-echo 'Simulator selection: 9 regression scenarios passed.'
+printf 'simctl create forbidden fixture\n' > "$SIMULATOR_TEST_CALLS"
+if (assert_no_call 'simctl create') 2> "$FIXTURE/stderr"; then
+  echo 'The forbidden-command assertion did not stop its process' >&2
+  exit 1
+fi
+grep -q 'Unexpected simulator command' "$FIXTURE/stderr"
+
+expect_device_id 'platform=iOS Simulator,id=11111111-1111-1111-1111-111111111111'
+expect_device_id 'platform=iOS Simulator,id=11111111-1111-1111-1111-111111111111,OS=26.6,arch=arm64'
+expect_invalid_destination 'platform=iOS Simulator,name=iPhone 17 Pro,OS=26.6'
+expect_invalid_destination 'platform=iOS Simulator,id=11111111-1111-1111-1111-111111111111invalid,arch=arm64'
+
+echo 'Simulator selection and destination parsing: 14 regression scenarios passed.'
