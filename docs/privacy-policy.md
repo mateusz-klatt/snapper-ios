@@ -22,7 +22,7 @@ Snapper is a self-hosted trading client. **You run your own backend; the app tal
 
 ## Who we are
 
-The Snapper iOS app is open-source software published at [github.com/mateusz-klatt/snapper-ios](https://github.com/mateusz-klatt/snapper-ios) under the MIT license. The app is distributed via the Apple App Store and TestFlight by Mateusz Klatt as the App Store developer of record.
+The Snapper iOS app is open-source software published at [github.com/mateusz-klatt/snapper-ios](https://github.com/mateusz-klatt/snapper-ios) under the Apache License, Version 2.0. The app is distributed via the Apple App Store and TestFlight by Mateusz Klatt as the App Store developer of record.
 
 The app is a thin client — it has no server-side component operated by us. All of your data (orders, positions, alerts, credentials) is stored on the backend you (or your operator) run. We have no access to that backend.
 
