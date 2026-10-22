@@ -2,6 +2,7 @@
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
+SELECTOR="$ROOT/scripts/select-simulator.sh"
 FIXTURE=$(mktemp -d)
 trap 'rm -rf "$FIXTURE"' EXIT
 mkdir -p "$FIXTURE/bin"
@@ -68,7 +69,7 @@ expect_destination() {
   local expected=$1
   shift
   local actual
-  actual=$(bash "$ROOT/scripts/select-simulator.sh" "$@" 2> "$FIXTURE/stderr")
+  actual=$(bash "$SELECTOR" "$@" 2> "$FIXTURE/stderr")
   [[ "$actual" == "platform=iOS Simulator,id=$expected" ]] || {
     echo "Unexpected destination: $actual" >&2
     exit 1
@@ -152,6 +153,34 @@ jq '.runtimes = []' "$FIXTURE/available.json" > "$SIMULATOR_TEST_STATE"
 SIMULATOR_OS=26.6 expect_destination 22222222-2222-2222-2222-222222222222 --install-runtime
 grep -q '^-downloadPlatform iOS -buildVersion 26.6$' "$SIMULATOR_TEST_CALLS"
 
+reset_state
+jq '(.devicetypes[] | select(.identifier == "iphone17pro") | .minRuntimeVersionString) = "26.6.0"' \
+  "$FIXTURE/available.json" > "$SIMULATOR_TEST_STATE"
+SIMULATOR_OS=26.6 expect_destination 22222222-2222-2222-2222-222222222222
+grep -q 'simctl create Snapper tests iphone17pro com.apple.CoreSimulator.SimRuntime.iOS-26-6' "$SIMULATOR_TEST_CALLS"
+
+reset_state
+jq '(.runtimes[] | select(.version == "26.6") | .version) = "26.6.0"
+  | (.devicetypes[] | select(.identifier == "iphone17pro") | .maxRuntimeVersionString) = "26.6"' \
+  "$FIXTURE/available.json" > "$SIMULATOR_TEST_STATE"
+SIMULATOR_OS=26.6.0 expect_destination 22222222-2222-2222-2222-222222222222
+grep -q 'simctl create Snapper tests iphone17pro com.apple.CoreSimulator.SimRuntime.iOS-26-6' "$SIMULATOR_TEST_CALLS"
+
+reset_state
+SIMULATOR_OS=26.6.0 expect_destination 22222222-2222-2222-2222-222222222222
+grep -q 'iOS-26-6' "$SIMULATOR_TEST_CALLS"
+assert_no_call 'downloadPlatform'
+
+reset_state
+mkdir -p "$FIXTURE/project/scripts"
+cp "$SELECTOR" "$FIXTURE/project/scripts/select-simulator.sh"
+printf 'options:\n  deploymentTarget:\n    iOS: "26.2.0"\n' > "$FIXTURE/project/project.yml"
+jq '(.runtimes[] | select(.version == "26.2") | .isAvailable) = true' \
+  "$FIXTURE/available.json" > "$SIMULATOR_TEST_STATE"
+SELECTOR="$FIXTURE/project/scripts/select-simulator.sh" SIMULATOR_OS=26.2 \
+  expect_destination 22222222-2222-2222-2222-222222222222
+grep -q 'iOS-26-2' "$SIMULATOR_TEST_CALLS"
+
 printf 'simctl create forbidden fixture\n' > "$SIMULATOR_TEST_CALLS"
 if (assert_no_call 'simctl create') 2> "$FIXTURE/stderr"; then
   echo 'The forbidden-command assertion did not stop its process' >&2
@@ -164,4 +193,4 @@ expect_device_id 'platform=iOS Simulator,id=11111111-1111-1111-1111-111111111111
 expect_invalid_destination 'platform=iOS Simulator,name=iPhone 17 Pro,OS=26.6'
 expect_invalid_destination 'platform=iOS Simulator,id=11111111-1111-1111-1111-111111111111invalid,arch=arm64'
 
-echo 'Simulator selection and destination parsing: 14 regression scenarios passed.'
+echo 'Simulator selection and destination parsing: 18 regression scenarios passed.'

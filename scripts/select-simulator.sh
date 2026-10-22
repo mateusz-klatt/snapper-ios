@@ -28,12 +28,12 @@ STATE=$(xcrun simctl list --json)
 
 select_runtime() {
   jq -r --arg minimum "$MINIMUM_OS" --arg requested "${SIMULATOR_OS:-}" '
-    def version: split(".") | map(tonumber);
+    def version: split(".") | map(tonumber) | . + [range(length; 3) | 0];
     [.runtimes[]
       | select(.identifier | startswith("com.apple.CoreSimulator.SimRuntime.iOS-"))
       | select(.isAvailable == true)
       | select((.version | version) >= ($minimum | version))
-      | select($requested == "" or .version == $requested)]
+      | select($requested == "" or (.version | version) == ($requested | version))]
     | sort_by(.version | version) | last
     | if . == null then empty else [.identifier, .version] | @tsv end
   ' <<< "$STATE"
@@ -56,7 +56,7 @@ fi
 IFS=$'\t' read -r RUNTIME_ID RUNTIME_VERSION <<< "$RUNTIME"
 
 MODEL=$(jq -r --arg runtime "$RUNTIME_VERSION" --arg requested "${SIMULATOR:-}" '
-  def version: split(".") | map(tonumber);
+  def version: split(".") | map(tonumber) | . + [range(length; 3) | 0];
   [.devicetypes[]
     | select(.name | startswith("iPhone "))
     | select($requested == "" or .name == $requested)

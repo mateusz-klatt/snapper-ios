@@ -56,6 +56,9 @@ make test SIMULATOR='iPhone 17' SIMULATOR_OS='26.2'
 make test DESTINATION='platform=iOS Simulator,id=YOUR-SIMULATOR-UUID'
 ```
 
+Runtime and device compatibility checks treat omitted patch versions as zero,
+so `26.6` and `26.6.0` select the same runtime.
+
 If a runtime is missing, install it in **Xcode Settings → Components**.
 `bash scripts/select-simulator.sh --install-runtime` can download a missing runtime
 using the selected Xcode. Simulator selection regression tests run on macOS or
