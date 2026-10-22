@@ -601,10 +601,17 @@ final class WebSocketManagerTests: XCTestCase {
 
         manager.connect()
         fakeTask.pumpInbound(frame(["type": "auth_required"]))
-        await drainSendTasks()
-        await drainSendTasks()
+        let authenticationSent = await fakeTask.waitUntilSentMessage(where: { message in
+            guard case let .string(text) = message,
+                  let data = text.data(using: .utf8),
+                  let parsed = try? JSONSerialization.jsonObject(with: data) as? [String: Any]
+            else { return false }
+            return (parsed["type"] as? String) == "authenticate"
+                && (parsed["ws_token"] as? String) == "first-token"
+        })
+        XCTAssertTrue(authenticationSent, "Expected authenticate frame carrying first-token")
 
-        var frames = fakeTask.sentMessages.compactMap(decodeFrame)
+        var frames = fakeTask.sentMessagesSnapshot().compactMap(decodeFrame)
         let authFrame = frames.first { ($0["type"] as? String) == "authenticate" }
         XCTAssertEqual(authFrame?["ws_token"] as? String, "first-token")
         XCTAssertEqual(manager.connectionState, .authenticating)
@@ -618,10 +625,17 @@ final class WebSocketManagerTests: XCTestCase {
         fakeTask.pumpInbound(frame(["type": "auth_ok"]))
         fakeTask.pumpInbound(frame(["type": "reauth_ok"]))
         fakeTask.pumpInbound(frame(["type": "pong"]))
-        await drainSendTasks()
-        await drainSendTasks()
+        let reauthenticationSent = await fakeTask.waitUntilSentMessage(where: { message in
+            guard case let .string(text) = message,
+                  let data = text.data(using: .utf8),
+                  let parsed = try? JSONSerialization.jsonObject(with: data) as? [String: Any]
+            else { return false }
+            return (parsed["type"] as? String) == "reauth"
+                && (parsed["ws_token"] as? String) == "second-token"
+        })
+        XCTAssertTrue(reauthenticationSent, "Expected reauth frame carrying second-token")
 
-        frames = fakeTask.sentMessages.compactMap(decodeFrame)
+        frames = fakeTask.sentMessagesSnapshot().compactMap(decodeFrame)
         let reauthFrame = frames.first { ($0["type"] as? String) == "reauth" }
         XCTAssertEqual(reauthFrame?["ws_token"] as? String, "second-token")
         let fetchCalls = await fakeAuth.fetchCalls
