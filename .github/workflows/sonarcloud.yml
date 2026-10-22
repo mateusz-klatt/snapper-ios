@@ -24,6 +24,12 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Prepare iOS Simulator
+        run: |
+          xcodebuild -version
+          destination=$(bash scripts/select-simulator.sh --install-runtime)
+          echo "DESTINATION=$destination" >> "$GITHUB_ENV"
+
       - name: Install XcodeGen
         run: brew install xcodegen
 

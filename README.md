@@ -34,23 +34,42 @@ Captured on iPhone 17 Pro Max (iOS 26.2) signed in as a viewer-role account agai
 
 ## Requirements
 
-- macOS with **Xcode 26.2** (matches the iOS 26.2 SDK the deployment target requires)
+- macOS with **Xcode 26.2 or newer** and an iOS Simulator runtime at least 26.2
 - **XcodeGen** (`brew install xcodegen`)
+- **jq** (`brew install jq`) for simulator discovery
 - A running Snapper backend (the app defaults to `http://localhost:8000` — pair with `make dev-backend` from the parent repo)
 
 ## Build & test
 
 ```bash
 make setup     # generates Snapper.xcodeproj from project.yml
-make build     # iPhone 17 Pro simulator
+make build     # available iPhone simulator, preferring iPhone 17 Pro
 make test      # SnapperTests + SnapperUITests scheme test action
 ```
 
-The Makefile uses sensible simulator defaults that match the GitHub Actions `macos-26` runner image. Override at the command line if needed:
+The Makefile selects the newest installed iOS Simulator runtime that satisfies the
+deployment target and supports the requested iPhone model, then reuses or creates
+a compatible simulator. Without a model override, it selects a compatible iPhone,
+preferring iPhone 17 Pro. Set a model and runtime explicitly, or provide an existing
+simulator UUID:
 
 ```bash
 make test SIMULATOR='iPhone 17' SIMULATOR_OS='26.2'
+make test DESTINATION='platform=iOS Simulator,id=YOUR-SIMULATOR-UUID'
 ```
+
+Runtime and device compatibility checks treat omitted patch versions as zero,
+so `26.6` and `26.6.0` select the same runtime. An explicit runtime must satisfy
+the deployment target and support the chosen model; invalid overrides fail before
+runtime installation.
+
+If a runtime is missing, install it in **Xcode Settings → Components**.
+`bash scripts/select-simulator.sh --install-runtime` can download a missing runtime
+using the selected Xcode. Without `SIMULATOR_OS`, Xcode downloads its default iOS
+runtime release. If an older model requires an earlier runtime and none is
+installed, set `SIMULATOR_OS` to a supported version before running the helper.
+Simulator selection regression tests run on macOS or Linux with
+`make check-simulator`.
 
 ## Configure the backend URL
 
@@ -82,7 +101,7 @@ Xcode Cloud handles the maintainer's signed release builds; its build reports re
 
 GitHub Actions uses runner-specific workflows:
 
-- `ci.yml` (`macos-26`) — `make build && make test` on every push to `master` and every PR.
+- `ci.yml` (`macos-26`) — `make check-all` on every push to `master` and every PR.
 - `sonarcloud.yml` (`macos-26`) — coverage scan via Xcode `xccov` → SonarCloud generic XML.
 - `gitleaks.yml` (`ubuntu-latest`) — secret scan on push / PR / weekly cron.
 - `i18n-screenshots.yml` (`macos-26`, manual dispatch) — opt-in screenshot
@@ -90,6 +109,11 @@ GitHub Actions uses runner-specific workflows:
   verification; every workflow mode requires a live backend URL input. The
   mutating admin/operator/viewer Desk release UAT runs locally against a
   disposable, fingerprinted loopback fixture via `viewer-uat`.
+
+All macOS workflows prepare a simulator with the same discovery script before
+building or testing. They install a missing iOS runtime when needed and pass its
+device UUID to subsequent steps, so runner image updates can change the installed
+runtime without requiring a destination version change in the workflows.
 
 ## Signing & release
 

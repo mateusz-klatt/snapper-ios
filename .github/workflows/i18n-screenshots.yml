@@ -48,10 +48,11 @@ jobs:
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
 
-      - name: Show Xcode + simulator state
+      - name: Prepare iOS Simulator
         run: |
           xcodebuild -version
-          xcrun simctl list devices available iOS
+          destination=$(bash scripts/select-simulator.sh --install-runtime)
+          echo "DESTINATION=$destination" >> "$GITHUB_ENV"
 
       - name: Install XcodeGen
         run: brew install xcodegen

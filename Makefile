@@ -1,10 +1,14 @@
-.PHONY: setup build test coverage archive clean check-all check-no-comments check-no-comments-strict ios-i18n-check ios-i18n-check-strict
+.PHONY: setup build test coverage archive clean check-all check-simulator check-no-comments check-no-comments-strict ios-i18n-check ios-i18n-check-strict
 
 DEVELOPMENT_TEAM ?=
 PRODUCT_BUNDLE_IDENTIFIER ?= com.example.snapper
-SIMULATOR ?= iPhone 17 Pro
-SIMULATOR_OS ?= 26.2
-DESTINATION = platform=iOS Simulator,name=$(SIMULATOR),OS=$(SIMULATOR_OS)
+SIMULATOR ?=
+SIMULATOR_OS ?=
+DESTINATION ?=
+RESOLVE_DESTINATION = destination='$(DESTINATION)'; \
+	if [ -z "$$destination" ]; then \
+		destination=$$(SIMULATOR='$(SIMULATOR)' SIMULATOR_OS='$(SIMULATOR_OS)' bash scripts/select-simulator.sh) || exit $$?; \
+	fi
 COVERAGE_RESULT_BUNDLE = build/test-results.xcresult
 COVERAGE_REPORT = build/sonarqube-generic-coverage.xml
 # xccov-to-Sonar converter — verified at build time so a tampered script
@@ -16,15 +20,18 @@ setup:
 	xcodegen generate
 
 build: setup
-	xcodebuild -scheme Snapper -destination '$(DESTINATION)' build
+	@$(RESOLVE_DESTINATION); \
+	xcodebuild -scheme Snapper -destination "$$destination" build
 
 test: setup
-	xcodebuild -scheme Snapper -destination '$(DESTINATION)' test
+	@$(RESOLVE_DESTINATION); \
+	xcodebuild -scheme Snapper -destination "$$destination" test
 
 coverage: setup
 	rm -rf $(COVERAGE_RESULT_BUNDLE)
 	mkdir -p build
-	xcodebuild -scheme Snapper -destination '$(DESTINATION)' \
+	@$(RESOLVE_DESTINATION); \
+	xcodebuild -scheme Snapper -destination "$$destination" \
 		-resultBundlePath $(COVERAGE_RESULT_BUNDLE) \
 		-enableCodeCoverage YES test
 	@test -x scripts/xccov-to-sonarqube-generic.sh || \
@@ -44,7 +51,10 @@ ios-i18n-check:
 ios-i18n-check-strict:
 	bash scripts/check_i18n_strict.sh
 
-check-all: build test check-no-comments-strict ios-i18n-check ios-i18n-check-strict
+check-simulator:
+	bash scripts/test-select-simulator.sh
+
+check-all: check-simulator build test check-no-comments-strict ios-i18n-check ios-i18n-check-strict
 
 archive: setup
 	@test -n "$(DEVELOPMENT_TEAM)" || (echo "Set DEVELOPMENT_TEAM env var (your Apple Developer team)" && exit 1)

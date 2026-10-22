@@ -12,11 +12,12 @@ Thanks for your interest. This is a single-maintainer project but PRs and issues
 
 ## Local setup
 
-Prerequisites: **macOS with Xcode 26.2** (matches the iOS 26.2 SDK) and **XcodeGen** (`brew install xcodegen`).
+Prerequisites: **macOS with Xcode 26.2 or newer**, an iOS Simulator runtime at
+least 26.2, **XcodeGen**, and **jq** (`brew install xcodegen jq`).
 
 ```bash
 make setup     # xcodegen generate -> Snapper.xcodeproj
-make build     # iPhone 17 Pro simulator
+make build     # available iPhone simulator
 make test      # XCTest + Swift Testing
 ```
 
@@ -33,6 +34,7 @@ By default the app talks to `http://localhost:8000`; pair with the upstream Snap
 
 - `make test` — XCTest + Swift Testing
 - `make coverage` — Xcode coverage → SonarCloud-compatible generic XML
+- `make check-simulator` — simulator discovery regression tests; also runs on Linux
 - New features should land with tests covering the happy path and at least one edge case
 
 ## What lands fast
