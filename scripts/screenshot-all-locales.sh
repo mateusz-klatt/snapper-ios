@@ -199,10 +199,11 @@ for sentinel, current in zip(values[0::2], values[1::2]):
 open(path, 'w').write(text)
 PY
 
+DESTINATION=${DESTINATION:-$(bash "$ROOT/scripts/select-simulator.sh")}
 if [[ "$MODE" = "showcase" ]]; then
   echo "==> Uninstalling Snapper from booted simulator (showcase needs clean state)"
-  DEVICE_UDID=$(xcrun simctl list devices "iPhone 17 Pro" | grep -E "iOS 26.2|(26.2)" -A1 | grep "iPhone 17 Pro (" | grep -v Max | grep -oE "[A-F0-9]{8}-[A-F0-9]{4}-[A-F0-9]{4}-[A-F0-9]{4}-[A-F0-9]{12}" | head -1)
-  if [[ -n "$DEVICE_UDID" ]]; then
+  DEVICE_UDID=${DESTINATION##*id=}
+  if [[ "$DEVICE_UDID" != "$DESTINATION" ]]; then
     xcrun simctl boot "$DEVICE_UDID" 2>/dev/null || true
     xcrun simctl uninstall "$DEVICE_UDID" com.example.snapper 2>/dev/null || true
   fi
@@ -211,7 +212,7 @@ fi
 XCODEBUILD_ARGS=(
   test
   -scheme Snapper
-  -destination 'platform=iOS Simulator,name=iPhone 17 Pro,OS=26.2'
+  -destination "$DESTINATION"
   -only-testing:"SnapperUITests/I18nScreenshotUITests/$METHOD"
   -resultBundlePath "$XCRESULT"
 )
