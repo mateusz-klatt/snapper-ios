@@ -59,12 +59,17 @@ make test DESTINATION='platform=iOS Simulator,id=YOUR-SIMULATOR-UUID'
 ```
 
 Runtime and device compatibility checks treat omitted patch versions as zero,
-so `26.6` and `26.6.0` select the same runtime.
+so `26.6` and `26.6.0` select the same runtime. An explicit runtime must satisfy
+the deployment target and support the chosen model; invalid overrides fail before
+runtime installation.
 
 If a runtime is missing, install it in **Xcode Settings → Components**.
 `bash scripts/select-simulator.sh --install-runtime` can download a missing runtime
-using the selected Xcode. Simulator selection regression tests run on macOS or
-Linux with `make check-simulator`.
+using the selected Xcode. Without `SIMULATOR_OS`, Xcode downloads its default iOS
+runtime release. If an older model requires an earlier runtime and none is
+installed, set `SIMULATOR_OS` to a supported version before running the helper.
+Simulator selection regression tests run on macOS or Linux with
+`make check-simulator`.
 
 ## Configure the backend URL
 

@@ -139,6 +139,38 @@ grep -q 'No available iOS Simulator runtime 26.1' "$FIXTURE/stderr"
 assert_no_call 'downloadPlatform'
 
 reset_state
+SIMULATOR='iPhone Future' expect_failure
+grep -q 'No available iOS Simulator runtime' "$FIXTURE/stderr"
+assert_no_call 'downloadPlatform'
+
+reset_state
+jq '.runtimes += [{"identifier":"com.apple.CoreSimulator.SimRuntime.iOS-27-0","version":"27.0","isAvailable":true}]' \
+  "$FIXTURE/available.json" > "$SIMULATOR_TEST_DOWNLOADED"
+SIMULATOR='iPhone Future' expect_destination 22222222-2222-2222-2222-222222222222 --install-runtime
+grep -q '^-downloadPlatform iOS$' "$SIMULATOR_TEST_CALLS"
+grep -q 'simctl create Snapper tests future com.apple.CoreSimulator.SimRuntime.iOS-27-0' "$SIMULATOR_TEST_CALLS"
+
+reset_state
+SIMULATOR='iPhone Future' SIMULATOR_OS=27.0 expect_destination \
+  22222222-2222-2222-2222-222222222222 --install-runtime
+grep -q '^-downloadPlatform iOS -buildVersion 27.0$' "$SIMULATOR_TEST_CALLS"
+grep -q 'simctl create Snapper tests future com.apple.CoreSimulator.SimRuntime.iOS-27-0' "$SIMULATOR_TEST_CALLS"
+cp "$FIXTURE/available.json" "$SIMULATOR_TEST_DOWNLOADED"
+
+reset_state
+jq '(.devicetypes[] | select(.identifier == "iphone17pro") | .maxRuntimeVersionString) = "26.6"
+  | .runtimes |= map(select(.version != "26.10"))' \
+  "$FIXTURE/available.json" > "$SIMULATOR_TEST_STATE"
+SIMULATOR='iPhone 17 Pro' SIMULATOR_OS=26.10 expect_failure --install-runtime
+grep -q 'No compatible iPhone model iPhone 17 Pro for iOS 26.10' "$FIXTURE/stderr"
+assert_no_call 'downloadPlatform'
+
+reset_state
+SIMULATOR_OS=26.0 expect_failure --install-runtime
+grep -q 'the deployment target requires iOS >= 26.2' "$FIXTURE/stderr"
+assert_no_call 'downloadPlatform'
+
+reset_state
 jq '.runtimes = []' "$FIXTURE/available.json" > "$SIMULATOR_TEST_STATE"
 expect_failure
 grep -q 'No available iOS Simulator runtime' "$FIXTURE/stderr"
@@ -218,4 +250,4 @@ expect_device_id 'platform=iOS Simulator,id=11111111-1111-1111-1111-111111111111
 expect_invalid_destination 'platform=iOS Simulator,name=iPhone 17 Pro,OS=26.6'
 expect_invalid_destination 'platform=iOS Simulator,id=11111111-1111-1111-1111-111111111111invalid,arch=arm64'
 
-echo 'Simulator selection and destination parsing: 22 regression scenarios passed.'
+echo 'Simulator selection and destination parsing: 27 regression scenarios passed.'

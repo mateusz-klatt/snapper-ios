@@ -41,6 +41,20 @@ if [[ -n "${SIMULATOR:-}" ]]; then
     exit 1
   fi
 fi
+if [[ -n "${SIMULATOR_OS:-}" ]]; then
+  if ! jq -e --arg runtime "$SIMULATOR_OS" --arg minimum "$MINIMUM_OS" "$COMPATIBILITY_FILTER"'
+    ($runtime | version) >= ($minimum | version)
+  ' <<< "$STATE" >/dev/null; then
+    echo "No available iOS Simulator runtime $SIMULATOR_OS: the deployment target requires iOS >= $MINIMUM_OS" >&2
+    exit 1
+  fi
+  if ! jq -e --arg runtime "$SIMULATOR_OS" --arg name "${SIMULATOR:-}" "$COMPATIBILITY_FILTER"'
+    any(.devicetypes[]; compatible_model($name; $runtime))
+  ' <<< "$STATE" >/dev/null; then
+    echo "No compatible iPhone model ${SIMULATOR:-available} for iOS $SIMULATOR_OS" >&2
+    exit 1
+  fi
+fi
 
 select_runtime() {
   jq -r --arg minimum "$MINIMUM_OS" --arg requested "${SIMULATOR_OS:-}" \
@@ -55,7 +69,7 @@ select_runtime() {
     | . as $eligible
     | ([.[] | . as $runtime
         | select(any($models[]; compatible_model($model; $runtime.version)))]
-        + $eligible)
+        + (if $requested != "" then $eligible else [] end))
     | first
     | if . == null then empty else [.identifier, .version] | @tsv end
   ' <<< "$STATE"
