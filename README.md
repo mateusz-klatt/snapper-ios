@@ -104,7 +104,10 @@ The repo intentionally ships with `com.example.snapper` and no hardcoded team â€
 ## Repository conventions
 
 - All commits via fork-and-PR; see [`CONTRIBUTING.md`](CONTRIBUTING.md).
-- License: [MIT](LICENSE).
+- License: [Apache License, Version 2.0](LICENSE); attribution: [NOTICE](NOTICE).
 - Security disclosures: [`SECURITY.md`](SECURITY.md).
 - Architectural deep-dive: [`docs/architecture.md`](docs/architecture.md).
 - Privacy policy (App Store): [`docs/privacy-policy.md`](docs/privacy-policy.md) â€” markdown source-of-truth; canonical published version served from [snapper.ch/privacy-policy.html](https://snapper.ch/privacy-policy.html).
+
+Revisions through the `last-mit` tag were released under MIT. Subsequent original
+work is licensed under Apache-2.0; earlier MIT grants remain valid.
