@@ -156,6 +156,7 @@ final class NewOrderSheetTests: XCTestCase {
 
     func testParsePositiveHandlesWhitespaceCommaAndInvalidValues() {
         XCTAssertEqual(NewOrderSheetViewModel.parsePositive(" 1,25 "), 1.25)
+        XCTAssertEqual(NewOrderSheetViewModel.parsePositive("\n 1,25\t"), 1.25)
         XCTAssertNil(NewOrderSheetViewModel.parsePositive(""))
         XCTAssertNil(NewOrderSheetViewModel.parsePositive("0"))
         XCTAssertNil(NewOrderSheetViewModel.parsePositive("-1"))
@@ -164,10 +165,123 @@ final class NewOrderSheetTests: XCTestCase {
 
     func testParsePositiveIntHandlesWhitespaceAndInvalidValues() {
         XCTAssertEqual(NewOrderSheetViewModel.parsePositiveInt(" 5 "), 5)
+        XCTAssertEqual(NewOrderSheetViewModel.parsePositiveInt("\n 5\t"), 5)
         XCTAssertNil(NewOrderSheetViewModel.parsePositiveInt(""))
         XCTAssertNil(NewOrderSheetViewModel.parsePositiveInt("0"))
         XCTAssertNil(NewOrderSheetViewModel.parsePositiveInt("-1"))
         XCTAssertNil(NewOrderSheetViewModel.parsePositiveInt("1.5"))
+    }
+
+    func testParsePositiveRejectsNonFiniteValuesAndOverflow() {
+        for text in ["inf", "+inf", "Infinity", "-Infinity", "nan", "NaN", "1e309"] {
+            XCTAssertNil(NewOrderSheetViewModel.parsePositive(text), text)
+        }
+        XCTAssertEqual(NewOrderSheetViewModel.parsePositive("1e308"), 1e308)
+    }
+
+    func testParsePositiveIntUsesBackendInt32Range() {
+        XCTAssertEqual(NewOrderSheetViewModel.parsePositiveInt("2147483647"), Int(Int32.max))
+        for text in ["2147483648", "9223372036854775807", "9223372036854775808", "inf", "NaN"] {
+            XCTAssertNil(NewOrderSheetViewModel.parsePositiveInt(text), text)
+        }
+    }
+
+    func testNonFiniteRequiredNumbersBlockGateAndBody() {
+        for text in ["inf", "NaN", "1e309"] {
+            var form = Self.baseForm()
+            form.quantityText = text
+            assertSubmissionRejected(form, message: "quantity: \(text)")
+            form.quantityText = "1"
+            form.orderType = "limit"
+            form.priceText = text
+            assertSubmissionRejected(form, message: "price: \(text)")
+            form.orderType = "stop"
+            form.priceText = ""
+            form.stopPriceText = text
+            assertSubmissionRejected(form, message: "stop price: \(text)")
+        }
+    }
+
+    func testNonblankInvalidLeverageBlocksGateAndBody() {
+        for text in ["abc", "0", "-1", "1.5", "2147483648", "inf", "NaN"] {
+            var form = Self.baseForm()
+            form.leverageText = text
+            assertSubmissionRejected(form, message: "leverage: \(text)")
+        }
+    }
+
+    func testLeverageIsAcceptedForLiveKrakenSpot() {
+        var form = Self.baseForm()
+        form.leverageText = "\n 5\t"
+        XCTAssertTrue(NewOrderSheetViewModel.canSubmit(form: form, gate: Self.baseGate()))
+        let body = NewOrderSheetViewModel.buildBody(
+            form: form,
+            wallet: Self.walletContext(),
+            idempotencyKey: Self.testIdempotencyKey
+        )
+        XCTAssertEqual(body?.leverage, 5)
+    }
+
+    func testFrozenXStockCannotSubmitWithLeverage() {
+        var form = Self.baseForm()
+        form.instrument = Self.makeInstrument(
+            canTrade: false,
+            instrumentPublicId: "tokenized-nvdax",
+            symbol: "NVDAx-EUR"
+        )
+        form.leverageText = "5"
+        assertSubmissionRejected(form, message: "Tokenized instrument remains market data only")
+    }
+
+    func testPerOrderLeverageIsRejectedForPaperAndOtherVenues() {
+        var form = Self.baseForm()
+        form.leverageText = "5"
+        var paperGate = Self.baseGate()
+        paperGate.walletIsPaper = true
+        XCTAssertFalse(NewOrderSheetViewModel.canSubmit(form: form, gate: paperGate))
+        XCTAssertNil(NewOrderSheetViewModel.buildBody(
+            form: form,
+            wallet: Self.walletContext(isPaper: true),
+            idempotencyKey: Self.testIdempotencyKey
+        ))
+        for exchange in ["kraken_futures", "binance"] {
+            form.selectedExchange = exchange
+            form.instrument = Self.makeInstrument(exchange: exchange)
+            assertSubmissionRejected(form, message: exchange)
+        }
+    }
+
+    func testBlankLeverageIsOmittedForPaperAndFutures() {
+        for isPaper in [false, true] {
+            for exchange in ["kraken", "kraken_futures"] {
+                var form = Self.baseForm()
+                form.selectedExchange = exchange
+                form.instrument = Self.makeInstrument(exchange: exchange)
+                form.leverageText = " \n\t"
+                var gate = Self.baseGate()
+                gate.walletIsPaper = isPaper
+                XCTAssertTrue(NewOrderSheetViewModel.canSubmit(form: form, gate: gate))
+                let body = NewOrderSheetViewModel.buildBody(
+                    form: form,
+                    wallet: Self.walletContext(isPaper: isPaper),
+                    idempotencyKey: Self.testIdempotencyKey
+                )
+                XCTAssertNotNil(body)
+                XCTAssertNil(body?.leverage)
+            }
+        }
+    }
+
+    private func assertSubmissionRejected(
+        _ form: NewOrderSheetViewModel.OrderFormSnapshot,
+        message: String
+    ) {
+        XCTAssertFalse(NewOrderSheetViewModel.canSubmit(form: form, gate: Self.baseGate()), message)
+        XCTAssertNil(NewOrderSheetViewModel.buildBody(
+            form: form,
+            wallet: Self.walletContext(),
+            idempotencyKey: Self.testIdempotencyKey
+        ), message)
     }
 
     /// Submit gate: instrument must be tradable, exchange must

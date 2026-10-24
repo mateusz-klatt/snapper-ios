@@ -22,8 +22,8 @@ import SwiftUI
 /// 4. Submit fires the parent-injected `onSubmit` closure (which in
 ///    turn calls ``APIClient.createOrder`` with provenance from
 ///    ``EnvelopeMinter``). On success the sheet dismisses; on
-///    failure it stays open so the user can correct + retry under
-///    the same idempotency key.
+///    failure it stays open. Unchanged orders retain their retry
+///    key; material payload corrections start a new order attempt.
 struct NewOrderSheet: View {
 
     @State private var viewModel: NewOrderSheetViewModel
@@ -144,8 +144,8 @@ struct NewOrderSheet: View {
                 ToolbarItem(placement: .confirmationAction) {
                     Button(LocalizedStringKey("trading.order.submit")) {
                         Task {
-                            /// Keep the sheet open on failure so the user can correct
-                            /// input and retry under the same idempotency key.
+                            /// Keep the sheet open on failure. Unchanged orders reuse
+                            /// their key; material corrections start a new attempt.
                             if await viewModel.submit(via: onSubmit) {
                                 dismiss()
                             }
