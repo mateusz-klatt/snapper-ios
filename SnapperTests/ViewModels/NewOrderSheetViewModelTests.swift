@@ -64,6 +64,16 @@ final class NewOrderSheetViewModelTests: XCTestCase {
             expiryAt: nil
         )
     }
+
+    private func makeValidOrderViewModel() -> NewOrderSheetViewModel {
+        let viewModel = makeViewModel(idempotencyKey: "initial-order-key")
+        viewModel.selectedInstrument = makeInstrument()
+        viewModel.quantityText = "1"
+        viewModel.priceText = "100"
+        viewModel.stopPriceText = "90"
+        viewModel.orderType = "stop_limit"
+        return viewModel
+    }
     func testInitialStateUsesFirstExchangeWhenNoDefault() {
         let viewModel = makeViewModel(exchanges: ["kraken", "binance"])
         XCTAssertEqual(viewModel.selectedExchange, "kraken")
@@ -355,10 +365,8 @@ final class NewOrderSheetViewModelTests: XCTestCase {
         XCTAssertEqual(totalCalls, 1, "Re-entry guard must reject concurrent submit")
         XCTAssertFalse(secondResult)
     }
-    /// The idempotency key must stay stable across retries within
-    /// the same VM instance — server-side dedup index keys on it,
-    /// and a regenerated key on retry would create a duplicate
-    /// live order.
+    /// An unchanged order retains its key after a missing response
+    /// so a retry cannot duplicate an order accepted by the server.
     func testIdempotencyKeyStableAcrossRetries() async {
         let viewModel = makeViewModel(idempotencyKey: "stable-key-9")
         viewModel.selectedInstrument = makeInstrument()
@@ -377,6 +385,122 @@ final class NewOrderSheetViewModelTests: XCTestCase {
         }
         let keys = await collector.keys
         XCTAssertEqual(keys, ["stable-key-9", "stable-key-9"])
+    }
+
+    func testCorrectedPayloadRotatesKeyAndRetainsItForRetry() async {
+        let viewModel = makeValidOrderViewModel()
+        let collector = KeyCollector()
+        _ = await viewModel.submit { body in
+            await collector.append(body.idempotencyKey ?? "")
+            return false
+        }
+        viewModel.quantityText = "2"
+        _ = await viewModel.submit { body in
+            await collector.append(body.idempotencyKey ?? "")
+            return false
+        }
+        viewModel.quantityText = " 2,00\n"
+        _ = await viewModel.submit { body in
+            await collector.append(body.idempotencyKey ?? "")
+            return true
+        }
+        let keys = await collector.keys
+        XCTAssertEqual(keys.count, 3)
+        guard keys.count == 3 else { return }
+        XCTAssertEqual(keys[0], "initial-order-key")
+        XCTAssertFalse(keys[1].isEmpty)
+        XCTAssertNotEqual(keys[1], keys[0])
+        XCTAssertEqual(keys[2], keys[1])
+    }
+
+    func testEveryMaterialPayloadChangeRotatesKey() {
+        let changes: [(String, @MainActor (NewOrderSheetViewModel) -> Void)] = [
+            ("quantity", { $0.quantityText = "2" }),
+            ("side", { $0.side = "sell" }),
+            ("order type", { $0.orderType = "market" }),
+            ("price", { $0.priceText = "101" }),
+            ("stop price", { $0.stopPriceText = "91" }),
+            ("leverage", { $0.leverageText = "2" }),
+            ("reduce only", { $0.reduceOnly = true }),
+            ("instrument identity", { $0.selectedInstrument = self.makeInstrument(instrumentPublicId: "inst-2") }),
+            ("instrument symbol", { $0.selectedInstrument = self.makeInstrument(symbol: "ETH-USD") }),
+            ("venue", {
+                $0.selectedExchange = "kraken_futures"
+                $0.selectedInstrument = self.makeInstrument(exchange: "kraken_futures")
+            })
+        ]
+        for (name, change) in changes {
+            let viewModel = makeValidOrderViewModel()
+            let initialBody = viewModel.buildBody()
+            XCTAssertEqual(initialBody?.idempotencyKey, "initial-order-key", name)
+            change(viewModel)
+            let changedBody = viewModel.buildBody()
+            XCTAssertNotNil(changedBody, name)
+            XCTAssertNotEqual(changedBody?.idempotencyKey, initialBody?.idempotencyKey, name)
+            XCTAssertEqual(viewModel.buildBody()?.idempotencyKey, changedBody?.idempotencyKey, name)
+        }
+    }
+
+    func testEquivalentParsedNumbersAndWhitespaceRetainKey() {
+        let viewModel = makeValidOrderViewModel()
+        viewModel.leverageText = "5"
+        let initialBody = viewModel.buildBody()
+        viewModel.quantityText = "\n 1,00\t"
+        viewModel.priceText = "1e2"
+        viewModel.stopPriceText = "90.00"
+        viewModel.leverageText = " 05 "
+        let equivalentBody = viewModel.buildBody()
+        XCTAssertNotNil(equivalentBody)
+        XCTAssertEqual(equivalentBody?.idempotencyKey, initialBody?.idempotencyKey)
+    }
+
+    func testUnusedPriceFieldsAndBlankLeverageRetainKey() {
+        let viewModel = makeValidOrderViewModel()
+        viewModel.orderType = "market"
+        let initialBody = viewModel.buildBody()
+        viewModel.priceText = "NaN"
+        viewModel.stopPriceText = "inf"
+        viewModel.leverageText = " \n\t"
+        let equivalentBody = viewModel.buildBody()
+        XCTAssertNotNil(equivalentBody)
+        XCTAssertEqual(equivalentBody?.idempotencyKey, initialBody?.idempotencyKey)
+        XCTAssertNil(equivalentBody?.price)
+        XCTAssertNil(equivalentBody?.stopPrice)
+        XCTAssertNil(equivalentBody?.leverage)
+    }
+
+    func testInvalidFormDoesNotReplacePreviousAttemptKey() {
+        let viewModel = makeValidOrderViewModel()
+        let initialBody = viewModel.buildBody()
+        viewModel.quantityText = "inf"
+        XCTAssertNil(viewModel.buildBody())
+        XCTAssertEqual(viewModel.idempotencyKey, initialBody?.idempotencyKey)
+        viewModel.quantityText = "1"
+        XCTAssertEqual(viewModel.buildBody()?.idempotencyKey, initialBody?.idempotencyKey)
+    }
+
+    func testInFlightFormEditsCannotRotateKeyOrSendAnotherOrder() async {
+        let viewModel = makeValidOrderViewModel()
+        let collector = KeyCollector()
+        _ = await viewModel.submit { body in
+            await collector.append(body.idempotencyKey ?? "")
+            viewModel.quantityText = "2"
+            XCTAssertNil(viewModel.buildBody())
+            XCTAssertEqual(viewModel.idempotencyKey, "initial-order-key")
+            let secondResult = await viewModel.submit { _ in
+                XCTFail("A second order must not be sent while the first is in flight")
+                return true
+            }
+            XCTAssertFalse(secondResult)
+            viewModel.quantityText = "1"
+            return false
+        }
+        _ = await viewModel.submit { body in
+            await collector.append(body.idempotencyKey ?? "")
+            return true
+        }
+        let keys = await collector.keys
+        XCTAssertEqual(keys, ["initial-order-key", "initial-order-key"])
     }
 
     /// Sheet re-presentation gets a fresh VM (and therefore a fresh
@@ -433,6 +557,45 @@ final class NewOrderSheetViewModelTests: XCTestCase {
         XCTAssertTrue(viewModel.canSubmit, "Market order with quantity + instrument")
         viewModel.isSubmitting = true
         XCTAssertFalse(viewModel.canSubmit, "Cannot submit while a submit is in flight")
+    }
+
+    func testCanSubmitUsesWalletContextForLeverage() {
+        for isPaper in [false, true] {
+            let viewModel = makeViewModel(walletIsPaper: isPaper)
+            viewModel.selectedInstrument = makeInstrument()
+            viewModel.quantityText = "1"
+            viewModel.orderType = "market"
+            viewModel.leverageText = "5"
+            XCTAssertEqual(viewModel.canSubmit, !isPaper)
+            XCTAssertEqual(viewModel.buildBody() != nil, !isPaper)
+            viewModel.leverageText = ""
+            XCTAssertTrue(viewModel.canSubmit)
+            XCTAssertNotNil(viewModel.buildBody())
+        }
+    }
+
+    func testSubmitDoesNotSendInvalidLeverageOrNonFiniteQuantity() async {
+        let viewModel = makeViewModel()
+        viewModel.selectedInstrument = makeInstrument()
+        viewModel.quantityText = "1"
+        viewModel.orderType = "market"
+        viewModel.leverageText = "abc"
+        let calls = CallCounter()
+        let invalidLeverageResult = await viewModel.submit { _ in
+            await calls.increment()
+            return true
+        }
+        XCTAssertFalse(invalidLeverageResult)
+        viewModel.leverageText = ""
+        viewModel.quantityText = "inf"
+        let invalidQuantityResult = await viewModel.submit { _ in
+            await calls.increment()
+            return true
+        }
+        XCTAssertFalse(invalidQuantityResult)
+        let count = await calls.count
+        XCTAssertEqual(count, 0)
+        XCTAssertFalse(viewModel.isSubmitting)
     }
 
     func testBuildBodyDelegatesToStaticHelperWithVMState() {

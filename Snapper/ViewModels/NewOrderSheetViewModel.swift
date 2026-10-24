@@ -8,7 +8,7 @@ import os
 /// Owns every piece of state the pre-MVVM body kept inside `@State`:
 /// form fields (exchange / instrument / side / order type / quantity
 /// / price / stop price / leverage / reduce-only), the available
-/// instruments cache, async / submit flags, the per-presentation
+/// instruments cache, async / submit flags, the order attempt's
 /// idempotency key, and the load-error string. The View now reads
 /// the VM through `@Bindable`-style `$viewModel.field` bindings on
 /// each form control, and the VM is the single test surface for
@@ -31,11 +31,11 @@ import os
 ///    flagged this; the VM now clears the slot whenever a fresh
 ///    fetch completes successfully.
 ///
-/// 3. **Per-presentation idempotency key.** Minted exactly once in
-///    `init` and re-used across retries inside the same VM
-///    instance so the backend dedup index sees a stable key on
-///    user-driven retries; a new sheet presentation gets a new
-///    instance and a new key. Tests cover both halves.
+/// 3. **Stable idempotency key for unchanged orders.** The initial
+///    key is retained across retries of the same effective payload,
+///    including numeric formatting changes. A changed payload or
+///    new sheet presentation gets a new key, so corrected orders
+///    cannot conflict with an earlier attempt's backend fingerprint.
 ///
 /// 4. **Re-entry guard on submit.** A submit in flight rejects a
 ///    second tap before the closure runs, so a frantic
@@ -60,6 +60,7 @@ final class NewOrderSheetViewModel {
     struct SubmitGateState {
         var isLoadingInstruments: Bool
         var isSubmitting: Bool
+        var walletIsPaper: Bool = false
     }
 
     struct WalletContext {
@@ -83,10 +84,10 @@ final class NewOrderSheetViewModel {
     let walletPublicId: String
     let walletIsPaper: Bool
 
-    /// Stable across retries within this VM presentation. Tests
-    /// inject a deterministic value via the `idempotencyKey` init
-    /// parameter; production code lets it default to a random UUID.
-    let idempotencyKey: String
+    /// Stable across retries of the same effective payload. Tests
+    /// inject the initial key; material payload changes rotate it.
+    private(set) var idempotencyKey: String
+    private var lastPayloadFingerprint: Data?
     private let api: APIClientProtocol
 
     private let logger = AppLogger.make(category: "NewOrderSheetViewModel")
@@ -185,11 +186,20 @@ final class NewOrderSheetViewModel {
 
     /// Build the outbound `CreateOrderBody` from the current form
     /// state. Returns `nil` when the selected instrument or numeric
-    /// fields cannot produce a backend-valid payload.
+    /// fields cannot produce a backend-valid payload, or a submit
+    /// is in flight. Only effective payload changes rotate the key.
     func buildBody() -> CreateOrderBody? {
+        guard !isSubmitting else { return nil }
+        let form = orderFormSnapshot
+        let wallet = walletContext
+        guard let fingerprint = Self.payloadFingerprint(form: form, wallet: wallet) else { return nil }
+        if let previous = lastPayloadFingerprint, previous != fingerprint {
+            idempotencyKey = UUID().uuidString
+        }
+        lastPayloadFingerprint = fingerprint
         return Self.buildBody(
-            form: orderFormSnapshot,
-            wallet: walletContext,
+            form: form,
+            wallet: wallet,
             idempotencyKey: idempotencyKey
         )
     }
@@ -197,7 +207,7 @@ final class NewOrderSheetViewModel {
     /// Submit the current form via the parent-injected closure.
     /// Re-entry guard rejects a second tap while the first is in
     /// flight; the `defer` clears `isSubmitting` so the user can
-    /// retry on failure under the same idempotency key.
+    /// retry an unchanged order under the same idempotency key.
     @discardableResult
     func submit(via onSubmit: (CreateOrderBody) async -> Bool) async -> Bool {
         guard !isSubmitting, let body = buildBody() else { return false }
@@ -229,16 +239,17 @@ final class NewOrderSheetViewModel {
     }
 
     static func parsePositive(_ text: String) -> Double? {
-        let trimmed = text.trimmingCharacters(in: .whitespaces)
+        let trimmed = text.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimmed.isEmpty else { return nil }
         let normalized = trimmed.replacingOccurrences(of: ",", with: ".")
-        guard let value = Double(normalized), value > 0 else { return nil }
+        guard let value = Double(normalized), value.isFinite, value > 0 else { return nil }
         return value
     }
 
     static func parsePositiveInt(_ text: String) -> Int? {
-        let trimmed = text.trimmingCharacters(in: .whitespaces)
-        guard !trimmed.isEmpty, let value = Int(trimmed), value > 0 else { return nil }
+        let trimmed = text.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmed.isEmpty, let value = Int(trimmed), value > 0, value <= Int(Int32.max)
+        else { return nil }
         return value
     }
 
@@ -251,7 +262,8 @@ final class NewOrderSheetViewModel {
               let instrument = form.instrument,
               instrument.canTrade,
               instrument.exchange == form.selectedExchange,
-              parsePositive(form.quantityText) != nil
+              parsePositive(form.quantityText) != nil,
+              isValidLeverage(form: form, walletIsPaper: gate.walletIsPaper)
         else { return false }
         if needsPrice(orderType: form.orderType), parsePositive(form.priceText) == nil {
             return false
@@ -273,7 +285,8 @@ final class NewOrderSheetViewModel {
     ) -> CreateOrderBody? {
         guard let instrument = form.instrument,
               instrument.canTrade,
-              instrument.exchange == form.selectedExchange
+              instrument.exchange == form.selectedExchange,
+              isValidLeverage(form: form, walletIsPaper: wallet.isPaper)
         else { return nil }
         guard let quantity = parsePositive(form.quantityText) else { return nil }
         let price: Double? = needsPrice(orderType: form.orderType) ? parsePositive(form.priceText) : nil
@@ -324,6 +337,28 @@ final class NewOrderSheetViewModel {
 
 private extension NewOrderSheetViewModel {
 
+    /// Encode the actual outbound payload deterministically with a
+    /// fixed key placeholder. Parsed numbers and omitted optional
+    /// prices therefore match across equivalent form spellings.
+    static func payloadFingerprint(form: OrderFormSnapshot, wallet: WalletContext) -> Data? {
+        guard let body = buildBody(form: form, wallet: wallet, idempotencyKey: "") else { return nil }
+        let encoder = JSONEncoder()
+        encoder.outputFormatting = [.sortedKeys]
+        return try? encoder.encode(body)
+    }
+
+    /// Per-order leverage belongs to live Kraken spot orders. A
+    /// nonblank unsupported or invalid value must block submission
+    /// instead of silently changing the requested order semantics.
+    static func isValidLeverage(form: OrderFormSnapshot, walletIsPaper: Bool) -> Bool {
+        if form.leverageText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+            return true
+        }
+        return !walletIsPaper
+            && form.selectedExchange == "kraken"
+            && parsePositiveInt(form.leverageText) != nil
+    }
+
     var orderFormSnapshot: OrderFormSnapshot {
         return OrderFormSnapshot(
             instrument: selectedInstrument,
@@ -341,7 +376,8 @@ private extension NewOrderSheetViewModel {
     var submitGateState: SubmitGateState {
         return SubmitGateState(
             isLoadingInstruments: isLoadingInstruments,
-            isSubmitting: isSubmitting
+            isSubmitting: isSubmitting,
+            walletIsPaper: walletIsPaper
         )
     }
 
