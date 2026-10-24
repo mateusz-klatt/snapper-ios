@@ -16,7 +16,8 @@ state or decision logic to extract.
 | Concern | Owner | Example |
 |---|---|---|
 | Layout / SwiftUI body | View | `Form { Section { ... } }` |
-| Sheet / alert booleans | View `@State` | `presentingNewOrder`, `pendingClosePosition` |
+| Sheet / alert booleans | View `@State` | `pendingCancelOrder`, `pendingClosePosition` |
+| New-order presentation identity | VM | `OrdersViewModel.NewOrderPresentation` |
 | Form `FocusState`, navigation | View `@State` | `@FocusState private var field` |
 | Form-binding scaffolding (`Binding<Bool>` adapters for sheets) | View | `Binding(get: { ... != nil }, set: { ... })` |
 | Data arrays | VM | `var positions: [PositionSnapshot]` |
@@ -24,6 +25,13 @@ state or decision logic to extract.
 | Submit / mutation errors | VM | `var submitError: String?` |
 | Async load / submit methods | VM | `func load() async`, `func submitMarketReduce(...) async -> Bool` |
 | Filtered / derived getters | VM | `var filteredOpen: [OrderStatus]` |
+
+New-order presentation is a narrow exception to View-owned presentation flags.
+The VM freezes a fresh UUID and the selected wallet and venues before showing
+the sheet. Submission, reload publication and dismissal require that original
+UUID to remain active. Cancel, interactive dismissal and disappearance end only
+their captured presentation UUID, so an old completion cannot affect a newer
+sheet. The View uses the item UUID as its identity to create a fresh form VM.
 
 ## ViewModel contract
 
@@ -121,14 +129,16 @@ Sonar metric now reports unexecuted declarative chrome instead of hiding it.
 
 Sheets that mint an idempotency key for retry-safe submission
 (`NewOrderSheet`, `AttachBracketSheet`, `AttachTrailingStopSheet`)
-preserve a single key per presentation:
+preserve the key across retries of the same effective request:
 
 - VM init (or sheet init) mints the key once.
-- Retry within the same sheet reuses the key (backend dedup).
+- Retry of an unchanged request within the same sheet reuses the key (backend dedup).
+- `NewOrderSheet` rotates its key for a material payload correction, while equivalent parsed numbers retain it.
 - Sheet dismissal + re-open mints a fresh key (new presentation).
 
-Tests must verify the key is stable across retries inside one
-presentation and rotates across presentations.
+Tests must verify the key is stable across unchanged retries, material
+new-order corrections rotate it, and new presentations receive a fresh key.
+The presentation UUID is independent of this backend idempotency key.
 
 ## Backend URL override (v0.4.0)
 

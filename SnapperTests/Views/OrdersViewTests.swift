@@ -1,3 +1,4 @@
+import SwiftUI
 import XCTest
 @testable import Snapper
 
@@ -5,6 +6,110 @@ import XCTest
 final class OrdersViewTests: XCTestCase {
 
     private static let baseTimestamp = Date(timeIntervalSince1970: 1_700_000_000)
+
+    private func makePresentationViewModel() throws -> OrdersViewModel {
+        let suiteName = "OrdersViewBindingTests-\(UUID().uuidString)"
+        let defaults = try XCTUnwrap(UserDefaults(suiteName: suiteName))
+        defer { defaults.removePersistentDomain(forName: suiteName) }
+        let state = AppState(userDefaults: defaults)
+        state.availableWallets = [
+            WalletInfo(
+                type: "wallet_info",
+                sequenceId: 1,
+                publicId: "wallet-binding",
+                timestamp: Self.baseTimestamp,
+                sessionId: "session-binding-test",
+                topic: nil,
+                label: "Binding test wallet",
+                description: nil,
+                isPaper: false
+            ),
+        ]
+        state.selectedWalletPublicId = "wallet-binding"
+        return OrdersViewModel(api: MockAPIClient(), appState: state)
+    }
+
+    /// Given the View has not constructed its model, when SwiftUI reads or clears
+    /// the real sheet binding, then the adapter safely retains no presentation.
+    func testNewOrderBindingWithoutViewModelIsSafe() {
+        let binding = OrdersView.newOrderPresentationBinding(for: nil)
+        XCTAssertNil(binding.wrappedValue)
+        binding.wrappedValue = nil
+        XCTAssertNil(binding.wrappedValue)
+    }
+
+    /// Given the actual binding captured active A, when SwiftUI dismisses through
+    /// its nil setter, then only A ends and unrelated submit error state survives.
+    func testCurrentNewOrderBindingDismissesItsCapturedPresentation() throws {
+        let model = try makePresentationViewModel()
+        let presentation = try XCTUnwrap(model.beginNewOrderPresentation())
+        let binding = OrdersView.newOrderPresentationBinding(for: model)
+        model.submitError = "Current submission error"
+        XCTAssertEqual(binding.wrappedValue, presentation)
+
+        binding.wrappedValue = nil
+
+        XCTAssertNil(model.newOrderPresentation)
+        XCTAssertNil(binding.wrappedValue)
+        XCTAssertEqual(model.submitError, "Current submission error")
+    }
+
+    /// Given A's real binding remains retained after B opens, when A's delayed
+    /// nil callback executes, then B and its exact error remain untouched.
+    func testRetainedNewOrderBindingCannotDismissReplacementPresentation() throws {
+        let model = try makePresentationViewModel()
+        let first = try XCTUnwrap(model.beginNewOrderPresentation())
+        let retained = OrdersView.newOrderPresentationBinding(for: model)
+        model.endNewOrderPresentation(id: first.id)
+        let second = try XCTUnwrap(model.beginNewOrderPresentation())
+        model.submitError = "Replacement B error"
+        XCTAssertNotEqual(first.id, second.id)
+        XCTAssertEqual(retained.wrappedValue, second)
+
+        retained.wrappedValue = nil
+
+        XCTAssertEqual(model.newOrderPresentation, second)
+        XCTAssertEqual(retained.wrappedValue, second)
+        XCTAssertEqual(model.submitError, "Replacement B error")
+    }
+
+    /// Given the binding captured no active lifetime, when a sheet opens later
+    /// and the earlier binding clears, then it cannot borrow that newer lifetime.
+    func testInitiallyEmptyNewOrderBindingCannotDismissLaterPresentation() throws {
+        let model = try makePresentationViewModel()
+        let binding = OrdersView.newOrderPresentationBinding(for: model)
+        XCTAssertNil(binding.wrappedValue)
+        let presentation = try XCTUnwrap(model.beginNewOrderPresentation())
+        XCTAssertEqual(binding.wrappedValue, presentation)
+
+        binding.wrappedValue = nil
+
+        XCTAssertEqual(model.newOrderPresentation, presentation)
+    }
+
+    /// Given an empty or active actual model, when SwiftUI writes a nonnil item,
+    /// then the adapter cannot create or replace the model-owned presentation.
+    func testNewOrderBindingCannotFabricateOrReplacePresentation() throws {
+        let model = try makePresentationViewModel()
+        let offered = OrdersViewModel.NewOrderPresentation(
+            id: UUID(),
+            exchanges: ["paper"],
+            walletPublicId: "unselected-wallet",
+            walletIsPaper: true
+        )
+        let initiallyEmpty = OrdersView.newOrderPresentationBinding(for: model)
+        initiallyEmpty.wrappedValue = offered
+        XCTAssertNil(model.newOrderPresentation)
+
+        let actual = try XCTUnwrap(model.beginNewOrderPresentation())
+        let active = OrdersView.newOrderPresentationBinding(for: model)
+        model.submitError = "Actual presentation error"
+        active.wrappedValue = offered
+
+        XCTAssertEqual(model.newOrderPresentation, actual)
+        XCTAssertEqual(active.wrappedValue, actual)
+        XCTAssertEqual(model.submitError, "Actual presentation error")
+    }
 
     private func makeOrder(
         publicId: String,

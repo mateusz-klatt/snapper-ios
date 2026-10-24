@@ -3,8 +3,8 @@ import SwiftUI
 /// Orders + executions list, segmented by lifecycle state.
 ///
 /// Refactored to MVVM in v0.3.1 — data, async I/O, and submit
-/// flows live in `OrdersViewModel`. The View binds segment
-/// selection + sheet/alert presentation flags via `@State`.
+/// flows live in `OrdersViewModel`. The View owns segment and
+/// cancel confirmation state; the VM owns new-order presentation identity.
 ///
 /// Picker tabs:
 /// - Open: orders whose `status` is one of the live-lifecycle
@@ -28,7 +28,6 @@ struct OrdersView: View {
     @State private var viewModel: OrdersViewModel?
 
     @State private var segment: OrdersSegment = .open
-    @State private var presentingNewOrder = false
     @State private var pendingCancelOrder: OrderStatus?
 
     var body: some View {
@@ -120,7 +119,7 @@ struct OrdersView: View {
                 if authService.hasPermission(.createOrders) {
                     ToolbarItem(placement: .topBarTrailing) {
                         Button {
-                            presentingNewOrder = true
+                            viewModel?.beginNewOrderPresentation()
                         } label: {
                             Label(LocalizedStringKey("orders.newOrder.button"), systemImage: "plus.circle")
                         }
@@ -145,16 +144,23 @@ struct OrdersView: View {
                 }
             }
         }
-        .sheet(isPresented: $presentingNewOrder) {
-            if let viewModel, let wallet = viewModel.resolvedWallet {
+        .sheet(item: Self.newOrderPresentationBinding(for: viewModel)) { presentation in
+            if let viewModel {
                 NewOrderSheet(
-                    exchanges: viewModel.derivedExchanges,
-                    walletPublicId: wallet.publicId,
-                    walletIsPaper: wallet.isPaper,
+                    exchanges: presentation.exchanges,
+                    walletPublicId: presentation.walletPublicId,
+                    walletIsPaper: presentation.walletIsPaper,
+                    onCancel: {
+                        viewModel.endNewOrderPresentation(id: presentation.id)
+                    },
                     onSubmit: { body in
-                        await viewModel.submitNewOrder(body: body)
+                        await viewModel.submitNewOrder(body: body, presentationID: presentation.id)
                     }
                 )
+                .id(presentation.id)
+                .onDisappear {
+                    viewModel.endNewOrderPresentation(id: presentation.id)
+                }
             }
         }
         .alert(
@@ -188,6 +194,21 @@ struct OrdersView: View {
         } message: { error in
             Text(error)
         }
+    }
+
+    /// Keep the sheet adapter View-owned while retaining the exact dismissal lifetime.
+    @MainActor
+    static func newOrderPresentationBinding(
+        for model: OrdersViewModel?
+    ) -> Binding<OrdersViewModel.NewOrderPresentation?> {
+        let presentationID = model?.newOrderPresentation?.id
+        return Binding(
+            get: { model?.newOrderPresentation },
+            set: { presentation in
+                guard presentation == nil, let presentationID else { return }
+                model?.endNewOrderPresentation(id: presentationID)
+            }
+        )
     }
 
     private func activeSegmentIsEmpty(viewModel: OrdersViewModel) -> Bool {

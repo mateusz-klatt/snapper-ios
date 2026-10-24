@@ -9,20 +9,27 @@ import os
 /// derived filtered collections; the View becomes a thin Picker /
 /// List binder over `$viewModel.X`.
 ///
-/// Architecture rules in `docs/architecture-mvvm.md`. Sheet /
-/// alert booleans (`presentingNewOrder`, `pendingCancelOrder`)
-/// stay as `@State` in the View per Q3 of the v0.3.1 architect
-/// consensus — moving them into the VM adds `Binding<Bool>`
-/// ceremony without coverage gain.
+/// Architecture rules in `docs/architecture-mvvm.md`. New-order
+/// presentation identity also owns the asynchronous submit lifetime;
+/// cancel confirmation remains local View state.
 @MainActor
 @Observable
 final class OrdersViewModel {
+
+    /// Immutable sheet identity and selected-wallet snapshot, separate from an order retry key.
+    struct NewOrderPresentation: Identifiable, Equatable, Sendable {
+        let id: UUID
+        let exchanges: [String]
+        let walletPublicId: String
+        let walletIsPaper: Bool
+    }
 
     var orders: [OrderStatus] = []
     var executions: [ExecutionRecord] = []
     var isLoading: Bool = false
     var errorMessage: String?
     var submitError: String?
+    private(set) var newOrderPresentation: NewOrderPresentation?
 
     @ObservationIgnored private var observationTasks: [Task<Void, Never>] = []
     @ObservationIgnored private var liveReloadTask: Task<Void, Never>?
@@ -144,41 +151,77 @@ final class OrdersViewModel {
         guard let id = appState.selectedWalletPublicId else { return nil }
         return appState.availableWallets.first { $0.publicId == id }
     }
+
+    /// Freeze the selected wallet and a fresh lifetime before the sheet can submit.
+    @discardableResult
+    func beginNewOrderPresentation() -> NewOrderPresentation? {
+        guard let wallet = resolvedWallet else { return nil }
+        let presentation = NewOrderPresentation(
+            id: UUID(),
+            exchanges: derivedExchanges,
+            walletPublicId: wallet.publicId,
+            walletIsPaper: wallet.isPaper
+        )
+        newOrderPresentation = presentation
+        submitError = nil
+        return presentation
+    }
+
+    /// A retained dismissal callback can end only its own original presentation.
+    func endNewOrderPresentation(id: UUID) {
+        guard newOrderPresentation?.id == id else { return }
+        newOrderPresentation = nil
+    }
+
     func load() async {
         isLoading = true
         defer { isLoading = false }
+        _ = await reload(presentationID: nil)
+    }
 
+    /// Fetch first, then publish only while the submitting presentation still owns the result.
+    private func reload(presentationID: UUID?) async -> Bool {
         async let ordersResult = api.fetchOrders()
         async let executionsResult = api.fetchExecutions()
 
-        /// Capture both results before mutating errorMessage so a
-        /// partial failure on either fetch surfaces — the Fills
-        /// segment was previously hiding executions failures because
-        /// only fetchOrders' catch was wired up.
+        var loadedOrders: [OrderStatus]?
+        var loadedExecutions: [ExecutionRecord]?
         var encounteredError: String?
         do {
-            orders = try await ordersResult
+            loadedOrders = try await ordersResult
         } catch {
-            logger.error("Failed to fetch orders: \(error.localizedDescription, privacy: .public)")
             encounteredError = error.localizedDescription
         }
         do {
-            executions = try await executionsResult
+            loadedExecutions = try await executionsResult
         } catch {
-            logger.error("Failed to fetch executions: \(error.localizedDescription, privacy: .public)")
             encounteredError = encounteredError ?? error.localizedDescription
         }
+        guard presentationID == nil || newOrderPresentation?.id == presentationID else { return false }
+        if let loadedOrders { orders = loadedOrders }
+        if let loadedExecutions { executions = loadedExecutions }
+        if let encounteredError {
+            logger.error("Failed to refresh orders: \(encounteredError, privacy: .public)")
+        }
         errorMessage = encounteredError
+        return true
     }
 
+    /// Only the original active sheet may publish completion or dismiss itself.
     @discardableResult
-    func submitNewOrder(body: CreateOrderBody) async -> Bool {
+    func submitNewOrder(body: CreateOrderBody, presentationID: UUID) async -> Bool {
+        guard newOrderPresentation?.id == presentationID else { return false }
+        submitError = nil
         do {
             let command = NewOrderSheetViewModel.makeCommand(body: body)
             _ = try await api.createOrder(command: command)
-            await load()
+            guard newOrderPresentation?.id == presentationID else { return false }
+            guard await reload(presentationID: presentationID) else { return false }
+            guard newOrderPresentation?.id == presentationID else { return false }
+            endNewOrderPresentation(id: presentationID)
             return true
         } catch {
+            guard newOrderPresentation?.id == presentationID else { return false }
             logger.error("Failed to submit new order: \(error.localizedDescription, privacy: .public)")
             submitError = "Couldn't submit the order. Try again."
             return false
