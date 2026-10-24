@@ -15,6 +15,6 @@
 
 # Numeric placeholder examples — locale-neutral, no value in translating
 Snapper/Views/AttachTrailingStopSheet.swift:39:numeric placeholder — locale-neutral "1.5"
-Snapper/Views/NewOrderSheet.swift:97:numeric placeholder — locale-neutral "0.0"
-Snapper/Views/NewOrderSheet.swift:107:numeric placeholder — locale-neutral "0.0"
-Snapper/Views/NewOrderSheet.swift:118:numeric placeholder — locale-neutral "0.0"
+Snapper/Views/NewOrderSheet.swift:98:numeric placeholder — locale-neutral "0.0"
+Snapper/Views/NewOrderSheet.swift:108:numeric placeholder — locale-neutral "0.0"
+Snapper/Views/NewOrderSheet.swift:119:numeric placeholder — locale-neutral "0.0"

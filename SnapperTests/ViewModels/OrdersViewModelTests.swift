@@ -142,6 +142,36 @@ final class OrdersViewModelTests: XCTestCase {
         )
     }
 
+    private func beginNewOrder(
+        on viewModel: OrdersViewModel
+    ) throws -> OrdersViewModel.NewOrderPresentation {
+        appState.availableWallets = [makeWallet(publicId: "wallet-1")]
+        appState.selectedWalletPublicId = "wallet-1"
+        return try XCTUnwrap(viewModel.beginNewOrderPresentation())
+    }
+
+    private func makeOrderBody(idempotencyKey: String = "attempt-A") -> CreateOrderBody {
+        return CreateOrderBody(
+            instrument: "BTC-USD",
+            instrumentPublicId: "inst-1",
+            exchange: "kraken",
+            mode: "live",
+            side: "buy",
+            orderType: "market",
+            quantity: 1,
+            price: nil,
+            stopPrice: nil,
+            timeInForce: "GTC",
+            postOnly: false,
+            leverage: nil,
+            reduceOnly: false,
+            walletPublicId: "wallet-1",
+            operatorPublicId: nil,
+            idempotencyKey: idempotencyKey,
+            aiReviewPublicId: nil
+        )
+    }
+
     private func makeExecutionPlan() -> ExecutionPlanResponse {
         return ExecutionPlanResponse(
             type: "execution_plan_response",
@@ -235,8 +265,9 @@ final class OrdersViewModelTests: XCTestCase {
         XCTAssertTrue(viewModel.executions.isEmpty)
         XCTAssertNotNil(viewModel.errorMessage)
     }
-    func testSubmitNewOrderSuccessTriggersReload() async {
+    func testSubmitNewOrderSuccessTriggersReload() async throws {
         let viewModel = makeViewModel()
+        let presentation = try beginNewOrder(on: viewModel)
         let order = makeOrder(publicId: "ord-fresh")
         mockAPI.fetchOrdersHandler = { [order] }
         mockAPI.fetchExecutionsHandler = { [] }
@@ -261,14 +292,16 @@ final class OrdersViewModelTests: XCTestCase {
             idempotencyKey: "k-1",
             aiReviewPublicId: nil
         )
-        let result = await viewModel.submitNewOrder(body: body)
+        let result = await viewModel.submitNewOrder(body: body, presentationID: presentation.id)
         XCTAssertTrue(result)
         XCTAssertEqual(viewModel.orders.count, 1, "Successful submit triggers a reload")
         XCTAssertNil(viewModel.submitError)
+        XCTAssertNil(viewModel.newOrderPresentation)
     }
 
-    func testSubmitNewOrderFailureStampsSubmitError() async {
+    func testSubmitNewOrderFailureStampsSubmitError() async throws {
         let viewModel = makeViewModel()
+        let presentation = try beginNewOrder(on: viewModel)
         mockAPI.createOrderHandler = { _ in throw APIError.httpError(422) }
         let body = CreateOrderBody(
             instrument: "BTC-USD",
@@ -289,9 +322,147 @@ final class OrdersViewModelTests: XCTestCase {
             idempotencyKey: "k-1",
             aiReviewPublicId: nil
         )
-        let result = await viewModel.submitNewOrder(body: body)
+        let result = await viewModel.submitNewOrder(body: body, presentationID: presentation.id)
         XCTAssertFalse(result)
         XCTAssertEqual(viewModel.submitError, "Couldn't submit the order. Try again.")
+        XCTAssertEqual(viewModel.newOrderPresentation?.id, presentation.id)
+    }
+
+    /// Given A is awaiting its API response and B has opened after A was dismissed,
+    /// when A fails, B must remain open without inheriting A's submit error.
+    func testDismissedSubmissionCannotSetErrorOnNewPresentation() async throws {
+        try await assertStaleCreateCompletion(fails: true, currentError: nil, cancelOriginal: false)
+    }
+
+    /// Given B already has its own visible error, when an older A request fails,
+    /// then B's exact error and presentation remain owned by B.
+    func testDismissedSubmissionCannotReplaceCurrentPresentationError() async throws {
+        try await assertStaleCreateCompletion(
+            fails: true, currentError: "Current presentation B error", cancelOriginal: false
+        )
+    }
+
+    /// Given an API ignores A's cancellation and B opens, when A later succeeds,
+    /// then its completion cannot reload shared state, clear B's error or dismiss B.
+    func testCancelledSuccessfulSubmissionCannotReloadOrDismissNewPresentation() async throws {
+        try await assertStaleCreateCompletion(
+            fails: false, currentError: "Current presentation B error", cancelOriginal: true
+        )
+    }
+
+    private func assertStaleCreateCompletion(
+        fails: Bool, currentError: String?, cancelOriginal: Bool
+    ) async throws {
+        let viewModel = makeViewModel()
+        let first = try beginNewOrder(on: viewModel)
+        let body = makeOrderBody()
+        let plan = makeExecutionPlan()
+        let gate = OrdersSubmissionGate()
+        let reloads = OrdersLiveReloadCallCounter()
+        mockAPI.createOrderHandler = { _ in
+            await gate.markStartedAndWait()
+            if fails { throw APIError.httpError(422) }
+            return plan
+        }
+        mockAPI.fetchOrdersHandler = { await reloads.increment(); return [] }
+        mockAPI.fetchExecutionsHandler = { [] }
+        let pending = Task { await viewModel.submitNewOrder(body: body, presentationID: first.id) }
+        await gate.awaitStarted()
+        if cancelOriginal { pending.cancel() }
+        viewModel.endNewOrderPresentation(id: first.id)
+        let second = try beginNewOrder(on: viewModel)
+        viewModel.submitError = currentError
+        viewModel.endNewOrderPresentation(id: first.id)
+        XCTAssertEqual(viewModel.newOrderPresentation?.id, second.id)
+        XCTAssertNotEqual(first.id, second.id)
+        await gate.release()
+        let result = await pending.value
+        let reloadCount = await reloads.value
+        XCTAssertFalse(result)
+        XCTAssertEqual(viewModel.newOrderPresentation?.id, second.id)
+        XCTAssertEqual(viewModel.submitError, currentError)
+        XCTAssertEqual(reloadCount, 0)
+    }
+
+    /// Given A has succeeded but its reload remains suspended, when B opens before
+    /// those fetches finish, then A publishes neither list state nor dismissal into B.
+    func testDismissedSubmissionReloadCannotPublishIntoNewPresentation() async throws {
+        let viewModel = makeViewModel()
+        let first = try beginNewOrder(on: viewModel)
+        let body = makeOrderBody()
+        let plan = makeExecutionPlan()
+        let oldOrder = makeOrder(publicId: "old-A")
+        let oldExecution = makeExecution(publicId: "old-A-execution")
+        let gate = OrdersSubmissionGate()
+        mockAPI.createOrderHandler = { _ in plan }
+        mockAPI.fetchOrdersHandler = {
+            await gate.markStartedAndWait()
+            return [oldOrder]
+        }
+        mockAPI.fetchExecutionsHandler = { [oldExecution] }
+        let pending = Task { await viewModel.submitNewOrder(body: body, presentationID: first.id) }
+        await gate.awaitStarted()
+        viewModel.endNewOrderPresentation(id: first.id)
+        let second = try beginNewOrder(on: viewModel)
+        viewModel.orders = [makeOrder(publicId: "current-B")]
+        viewModel.executions = [makeExecution(publicId: "current-B-execution")]
+        viewModel.errorMessage = "Current B load error"
+        viewModel.submitError = "Current B submit error"
+        viewModel.isLoading = true
+        await gate.release()
+        let result = await pending.value
+        XCTAssertFalse(result)
+        XCTAssertEqual(viewModel.newOrderPresentation?.id, second.id)
+        XCTAssertEqual(viewModel.orders.map(\.publicId), ["current-B"])
+        XCTAssertEqual(viewModel.executions.map(\.publicId), ["current-B-execution"])
+        XCTAssertEqual(viewModel.errorMessage, "Current B load error")
+        XCTAssertEqual(viewModel.submitError, "Current B submit error")
+        XCTAssertTrue(viewModel.isLoading)
+    }
+
+    /// Given A's callbacks are retained after B replaces it, when A tries to submit
+    /// or dismiss, then no API request is made and B's current state is preserved.
+    func testStalePresentationCannotStartRequestOrDismissCurrentPresentation() async throws {
+        let viewModel = makeViewModel()
+        let first = try beginNewOrder(on: viewModel)
+        viewModel.endNewOrderPresentation(id: first.id)
+        let second = try beginNewOrder(on: viewModel)
+        viewModel.submitError = "Current B submit error"
+        let calls = OrdersLiveReloadCallCounter()
+        let plan = makeExecutionPlan()
+        mockAPI.createOrderHandler = { _ in await calls.increment(); return plan }
+        let result = await viewModel.submitNewOrder(body: makeOrderBody(), presentationID: first.id)
+        viewModel.endNewOrderPresentation(id: first.id)
+        let callCount = await calls.value
+        XCTAssertFalse(result)
+        XCTAssertEqual(callCount, 0)
+        XCTAssertEqual(viewModel.newOrderPresentation?.id, second.id)
+        XCTAssertEqual(viewModel.submitError, "Current B submit error")
+    }
+
+    /// Given a selected wallet and venue, when selection changes after opening a sheet,
+    /// then its original snapshot stays fixed and a replacement gets a fresh lifetime.
+    func testNewOrderPresentationFreezesWalletAndVenue() throws {
+        let viewModel = makeViewModel()
+        let first = try beginNewOrder(on: viewModel)
+        appState.availableWallets = [makeWallet(publicId: "wallet-2", isPaper: true)]
+        appState.selectedWalletPublicId = "wallet-2"
+        viewModel.orders = [makeOrder(publicId: "other-venue", exchange: "binance")]
+        XCTAssertEqual(first.walletPublicId, "wallet-1")
+        XCTAssertFalse(first.walletIsPaper)
+        XCTAssertEqual(first.exchanges, ["kraken"])
+        let second = try XCTUnwrap(viewModel.beginNewOrderPresentation())
+        XCTAssertNotEqual(first.id, second.id)
+        XCTAssertEqual(second.walletPublicId, "wallet-2")
+        XCTAssertTrue(second.walletIsPaper)
+        XCTAssertEqual(second.exchanges, ["binance"])
+    }
+
+    /// Given no selected wallet resolves, when presentation begins, then no sheet lifetime is created.
+    func testNewOrderPresentationRequiresResolvedWallet() {
+        let viewModel = makeViewModel()
+        XCTAssertNil(viewModel.beginNewOrderPresentation())
+        XCTAssertNil(viewModel.newOrderPresentation)
     }
     func testSubmitCancelSuccessTriggersReload() async {
         let viewModel = makeViewModel()
@@ -532,4 +703,31 @@ final class OrdersViewModelTests: XCTestCase {
 private actor OrdersLiveReloadCallCounter {
     var value: Int = 0
     func increment() { value += 1 }
+}
+
+/// Deterministic API suspension that deliberately ignores caller cancellation.
+private actor OrdersSubmissionGate {
+    private var started = false
+    private var released = false
+    private var startedWaiters: [CheckedContinuation<Void, Never>] = []
+    private var releaseWaiters: [CheckedContinuation<Void, Never>] = []
+
+    func markStartedAndWait() async {
+        started = true
+        for waiter in startedWaiters { waiter.resume() }
+        startedWaiters.removeAll()
+        if released { return }
+        await withCheckedContinuation { releaseWaiters.append($0) }
+    }
+
+    func awaitStarted() async {
+        if started { return }
+        await withCheckedContinuation { startedWaiters.append($0) }
+    }
+
+    func release() {
+        released = true
+        for waiter in releaseWaiters { waiter.resume() }
+        releaseWaiters.removeAll()
+    }
 }
