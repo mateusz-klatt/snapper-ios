@@ -144,7 +144,7 @@ struct OrdersView: View {
                 }
             }
         }
-        .sheet(item: newOrderPresentationBinding) { presentation in
+        .sheet(item: Self.newOrderPresentationBinding(for: viewModel)) { presentation in
             if let viewModel {
                 NewOrderSheet(
                     exchanges: presentation.exchanges,
@@ -196,9 +196,11 @@ struct OrdersView: View {
         }
     }
 
-    /// Capture this render's identity so a delayed interactive dismissal cannot end a newer sheet.
-    private var newOrderPresentationBinding: Binding<OrdersViewModel.NewOrderPresentation?> {
-        let model = viewModel
+    /// Keep the sheet adapter View-owned while retaining the exact dismissal lifetime.
+    @MainActor
+    static func newOrderPresentationBinding(
+        for model: OrdersViewModel?
+    ) -> Binding<OrdersViewModel.NewOrderPresentation?> {
         let presentationID = model?.newOrderPresentation?.id
         return Binding(
             get: { model?.newOrderPresentation },
