@@ -1,4 +1,5 @@
 import Combine
+import Synchronization
 import XCTest
 @testable import Snapper
 
@@ -26,6 +27,15 @@ final class LiveUpdateObserverTests: XCTestCase {
 
     private func disconnected() -> CurrentValueSubject<WebSocketManager.ConnectionState, Never> {
         return CurrentValueSubject<WebSocketManager.ConnectionState, Never>(.disconnected)
+    }
+
+    /// Each subscription must consume its replay and request the next value before it is ready.
+    /// A cancelled prior loop can subscribe late, but exits before making that second request.
+    private nonisolated func readyPublisher<Output>(
+        _ publisher: AnyPublisher<Output, Never>,
+        ready: XCTestExpectation
+    ) -> AnyPublisher<Output, Never> {
+        return ReadyPublisher(upstream: publisher, ready: ready).eraseToAnyPublisher()
     }
 
     func testBurstOnSingleSlotCoalescesToOneReload() async throws {
@@ -267,21 +277,39 @@ final class LiveUpdateObserverTests: XCTestCase {
         let state = WSState()
         let connection = disconnected()
         let counter = ReloadCounter()
+        let slotReady = expectation(description: "Current slot awaits a value after its initial replay")
+        let connectionReady = expectation(description: "Current connection awaits its next value")
+        let startupReload = expectation(description: "Current startup reconciliation completed")
+        let pulseReload = expectation(description: "Current session reloaded after the signal pulse")
 
         let staleToken = observer.start(slots: signalSlots(state), connection: connection.eraseToAnyPublisher(),
                                         reload: { await counter.increment() })
-        let currentToken = observer.start(slots: signalSlots(state), connection: connection.eraseToAnyPublisher(),
-                                          reload: { await counter.increment() })
+        let currentToken = observer.start(
+            slots: [readyPublisher(LiveUpdateObserver.pulse(state.$lastSignalAt), ready: slotReady)],
+            connection: readyPublisher(connection.eraseToAnyPublisher(), ready: connectionReady),
+            reload: {
+                await counter.increment()
+                let count = await counter.value
+                if count == 1 { startupReload.fulfill() }
+                if count == 2 { pulseReload.fulfill() }
+            }
+        )
+        defer { observer.stop(session: currentToken) }
         XCTAssertNotEqual(staleToken, currentToken)
+        let readiness = await XCTWaiter.fulfillment(
+            of: [slotReady, connectionReady, startupReload], timeout: 1.0
+        )
+        XCTAssertEqual(readiness, .completed, "both current subscriptions must consume their replay")
+        let baseline = await counter.value
+        XCTAssertEqual(baseline, 1, "the current startup reconciliation must complete once")
 
         observer.stop(session: staleToken)
-        try await Task.sleep(nanoseconds: 100_000_000)
         state.lastSignalAt = Date()
-        try await Task.sleep(nanoseconds: 500_000_000)
+        let pulse = await XCTWaiter.fulfillment(of: [pulseReload], timeout: 1.0)
+        XCTAssertEqual(pulse, .completed, "the current session must receive and reload the actual pulse")
 
         let count = await counter.value
-        XCTAssertGreaterThanOrEqual(count, 1, "a stale-token stop must not disable the current session")
-        observer.stop(session: currentToken)
+        XCTAssertEqual(count, baseline + 1, "a stale-token stop must preserve the current pulse reload")
     }
 
     /// CRITICAL round-2: session B's reload must not overlap session A's
@@ -345,6 +373,72 @@ final class LiveUpdateObserverTests: XCTestCase {
         let count = await counter.value
         XCTAssertEqual(count, 1, "replayed initial slot/connection values are dropped; only reconciliation reloads")
         observer.stop()
+    }
+}
+
+/// Wrap each genuine subscription without replacing its replay, events or completion.
+private struct ReadyPublisher<Upstream: Publisher>: Publisher {
+    typealias Output = Upstream.Output
+    typealias Failure = Upstream.Failure
+
+    let upstream: Upstream
+    let ready: XCTestExpectation
+
+    func receive<Downstream: Subscriber>(subscriber: Downstream)
+    where Downstream.Input == Output, Downstream.Failure == Failure {
+        upstream.receive(subscriber: ReadySubscriber(downstream: subscriber, ready: ready))
+    }
+}
+
+/// Forward the actual source unchanged while installing a per-subscription demand witness.
+private final class ReadySubscriber<Downstream: Subscriber>: Subscriber {
+    typealias Input = Downstream.Input
+    typealias Failure = Downstream.Failure
+
+    private let downstream: Downstream
+    private let ready: XCTestExpectation
+
+    init(downstream: Downstream, ready: XCTestExpectation) {
+        self.downstream = downstream
+        self.ready = ready
+    }
+
+    func receive(subscription: Subscription) {
+        downstream.receive(subscription: ReadySubscription(upstream: subscription, ready: ready))
+    }
+
+    func receive(_ input: Input) -> Subscribers.Demand {
+        return downstream.receive(input)
+    }
+
+    func receive(completion: Subscribers.Completion<Failure>) {
+        downstream.receive(completion: completion)
+    }
+}
+
+/// Publish readiness only after the actual upstream request has completed forwarding.
+private final class ReadySubscription: Subscription {
+    private let upstream: Subscription
+    private let ready: XCTestExpectation
+    private let count = Mutex(0)
+
+    init(upstream: Subscription, ready: XCTestExpectation) {
+        self.upstream = upstream
+        self.ready = ready
+    }
+
+    func request(_ demand: Subscribers.Demand) {
+        upstream.request(demand)
+        guard demand > .none else { return }
+        let isReady = count.withLock { value in
+            value += 1
+            return value == 2
+        }
+        if isReady { ready.fulfill() }
+    }
+
+    func cancel() {
+        upstream.cancel()
     }
 }
 
