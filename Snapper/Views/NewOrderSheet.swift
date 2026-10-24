@@ -27,15 +27,15 @@ import SwiftUI
 struct NewOrderSheet: View {
 
     @State private var viewModel: NewOrderSheetViewModel
+    let onCancel: () -> Void
     let onSubmit: (CreateOrderBody) async -> Bool
-
-    @Environment(\.dismiss) private var dismiss
 
     init(
         exchanges: [String],
         walletPublicId: String,
         walletIsPaper: Bool,
         defaultExchange: String? = nil,
+        onCancel: @escaping () -> Void,
         onSubmit: @escaping (CreateOrderBody) async -> Bool
     ) {
         _viewModel = State(initialValue: NewOrderSheetViewModel(
@@ -44,6 +44,7 @@ struct NewOrderSheet: View {
             walletIsPaper: walletIsPaper,
             defaultExchange: defaultExchange
         ))
+        self.onCancel = onCancel
         self.onSubmit = onSubmit
     }
 
@@ -139,16 +140,14 @@ struct NewOrderSheet: View {
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button(LocalizedStringKey("trading.order.cancel")) { dismiss() }
+                    Button(LocalizedStringKey("trading.order.cancel"), action: onCancel)
                 }
                 ToolbarItem(placement: .confirmationAction) {
                     Button(LocalizedStringKey("trading.order.submit")) {
                         Task {
-                            /// Keep the sheet open on failure. Unchanged orders reuse
-                            /// their key; material corrections start a new attempt.
-                            if await viewModel.submit(via: onSubmit) {
-                                dismiss()
-                            }
+                            /// The parent checks the original presentation token before
+                            /// publishing completion or dismissing its matching sheet.
+                            _ = await viewModel.submit(via: onSubmit)
                         }
                     }
                     .accessibilityLabel(LocalizedStringKey("trading.order.accessibility.label.submitButton"))
@@ -173,6 +172,7 @@ struct NewOrderSheet_Previews: PreviewProvider {
             exchanges: ["kraken"],
             walletPublicId: "preview",
             walletIsPaper: true,
+            onCancel: {},
             onSubmit: { _ in true }
         )
     }
