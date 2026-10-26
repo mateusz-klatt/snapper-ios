@@ -129,13 +129,18 @@ struct SettingsView: View {
                 }
 
                 Section(LocalizedStringKey("settings.section.notifications")) {
+                    if !authService.hasPermission(.manageSelfAccount) {
+                        Text(LocalizedStringKey("settings.account.readOnly"))
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                    }
                     HStack {
                         Text(LocalizedStringKey("settings.notifications.permission"))
                         Spacer()
                         notificationStatusView
                     }
 
-                    if notificationService.authorizationStatus == .notDetermined {
+                    if notificationService.authorizationStatus == .notDetermined && authService.hasPermission(.manageSelfAccount) {
                         Button(LocalizedStringKey("settings.notifications.enableButton")) {
                             Task {
                                 await notificationService.requestAuthorization()
@@ -160,7 +165,7 @@ struct SettingsView: View {
                                 Text(isRetrying ? "Retrying…" : "Retry registration")
                             }
                         }
-                        .disabled(isRetrying)
+                        .disabled(isRetrying || !authService.hasPermission(.manageSelfAccount))
                     }
 
                     NavigationLink(LocalizedStringKey("settings.notifications.managePreferences")) {
@@ -432,7 +437,7 @@ struct SettingsView: View {
     }
 
     private func triggerRetry() {
-        guard !isRetrying else { return }
+        guard !isRetrying, authService.hasPermission(.manageSelfAccount) else { return }
         isRetrying = true
         Task {
             defer { isRetrying = false }

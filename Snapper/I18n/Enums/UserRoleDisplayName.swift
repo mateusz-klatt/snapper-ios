@@ -15,6 +15,8 @@ extension UserRole {
             return LocaleStrings.localized("user.role.aiResearcher", in: language)
         case .viewer:
             return LocaleStrings.localized("user.role.viewer", in: language)
+        case .auditor:
+            return LocaleStrings.localized("user.role.auditor", in: language)
         case .operatorRole:
             return LocaleStrings.localized("user.role.operatorRole", in: language)
         case .admin:

@@ -109,10 +109,13 @@ final class AuthServiceTests: XCTestCase {
                 .readOrders,
                 .readPositions,
                 .readProcesses,
+                .readScopeGrants,
                 .readSignals,
                 .readStrategies,
                 .readSystemStatus,
                 .manageNotificationDevices,
+                .manageSelfAccount,
+                .initializePnlAnchors,
             ])
         )
 
@@ -148,6 +151,22 @@ final class AuthServiceTests: XCTestCase {
             XCTAssertTrue(authService.hasPermission(.createBacktestComparisons))
             XCTAssertTrue(authService.hasPermission(.manageRuntimeDiagnostics))
         }
+    }
+
+    func testAuditorReadsAdministrativePagesWithoutMutationPermissions() {
+        authService.currentUser = makeUser(
+            role: .auditor,
+            effectivePermissions: rolePermissions[.auditor] ?? []
+        )
+
+        XCTAssertTrue(authService.canAccess("admin"))
+        XCTAssertTrue(authService.canAccess("settings"))
+        XCTAssertTrue(authService.hasPermission(.readAllScopes))
+        XCTAssertFalse(authService.hasPermission(.manageSelfAccount))
+        XCTAssertFalse(authService.hasPermission(.manageUsers))
+        XCTAssertFalse(authService.hasPermission(.configureSystem))
+        XCTAssertFalse(authService.hasPermission(.createOrders))
+        XCTAssertFalse(authService.hasPermission(.impersonateOperator))
     }
 
     func testAiReviewPrincipalsRetainHistoricalComparisonAndDiagnosticsAccess() {
@@ -321,7 +340,7 @@ final class AuthServiceTests: XCTestCase {
     }
 
     private var allUserRoles: [UserRole] {
-        [.aiResearcher, .aiReviewer, .aiDelegate, .viewer, .operatorRole, .admin]
+        [.aiResearcher, .aiReviewer, .aiDelegate, .viewer, .auditor, .operatorRole, .admin]
     }
 
 }

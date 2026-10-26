@@ -180,6 +180,7 @@ final class AuthServiceNetworkTests: XCTestCase {
                         "username": "testuser",
                         "email": "test@example.com",
                         "role": "viewer",
+                        "effective_permissions": ["manage:self_account"],
                         "is_active": true,
                         "created_at": "2025-01-01T00:00:00Z"
                     ]
@@ -236,6 +237,7 @@ final class AuthServiceNetworkTests: XCTestCase {
                         "username": "testuser",
                         "email": "test@example.com",
                         "role": "viewer",
+                        "effective_permissions": ["manage:self_account"],
                         "is_active": true,
                         "created_at": "2025-01-01T00:00:00Z"
                     ]

@@ -68,7 +68,7 @@ final class DeviceRegistrationServiceTests: XCTestCase {
         status = await service.currentStatus()
         XCTAssertEqual(status, .idle)
 
-        await service.onLogin()
+        await service.onLogin(canRegister: true)
         status = await service.currentStatus()
         XCTAssertEqual(status, .awaitingToken)
     }
@@ -82,12 +82,54 @@ final class DeviceRegistrationServiceTests: XCTestCase {
         }
 
         await service.retryNow()
-        await service.onLogin()
+        await service.onLogin(canRegister: true)
         await service.retryNow()
 
         XCTAssertEqual(calls, 0)
         let status = await service.currentStatus()
         XCTAssertEqual(status, .awaitingToken)
+    }
+
+    func testReadOnlyLoginNeverRegistersOrRetries() async {
+        let service = DeviceRegistrationService(apiClient: apiClient)
+        var calls = 0
+        MockURLProtocol.requestHandler = { _ in
+            calls += 1
+            return MockURLProtocol.jsonResponse(statusCode: 200, json: _deviceResponseJSON)
+        }
+
+        await service.onTokenReceived(Data([0x10]))
+        await service.onLogin(canRegister: false)
+        await service.onTokenReceived(Data([0x20]))
+        await service.retryNow()
+
+        XCTAssertEqual(calls, 0)
+        let status = await service.currentStatus()
+        let deviceId = await service.currentDevicePublicId()
+        XCTAssertEqual(status, .idle)
+        XCTAssertNil(deviceId)
+    }
+
+    func testPermissionReductionCancelsScheduledRegistrationRetry() async {
+        let sleeper = ManualSleeper()
+        let service = DeviceRegistrationService(apiClient: apiClient, sleeper: sleeper)
+        var calls = 0
+        MockURLProtocol.requestHandler = { _ in
+            calls += 1
+            return MockURLProtocol.errorResponse(statusCode: 500, message: "temporary")
+        }
+
+        await service.onLogin(canRegister: true)
+        await service.onTokenReceived(Data([0x10]))
+        await sleeper.waitUntilSleeping()
+        await service.updatePermission(canRegister: false)
+        await sleeper.resume()
+        await service.retryNow()
+        await drainAsyncWork()
+
+        XCTAssertEqual(calls, 1)
+        let status = await service.currentStatus()
+        XCTAssertEqual(status, .idle)
     }
 
     func testRetryNowRegistersWhenLoginAndTokenReady() async {
@@ -99,7 +141,7 @@ final class DeviceRegistrationServiceTests: XCTestCase {
             return MockURLProtocol.jsonResponse(statusCode: 200, json: _deviceResponseJSON)
         }
 
-        await service.onLogin()
+        await service.onLogin(canRegister: true)
         await service.onTokenReceived(token)
         await service.retryNow()
 
@@ -137,7 +179,7 @@ final class DeviceRegistrationServiceTests: XCTestCase {
             return MockURLProtocol.jsonResponse(statusCode: 200, json: _deviceResponseJSON)
         }
 
-        await service.onLogin()
+        await service.onLogin(canRegister: true)
         XCTAssertEqual(calls.count, 0)
 
         await service.onTokenReceived(token)
@@ -160,7 +202,7 @@ final class DeviceRegistrationServiceTests: XCTestCase {
         await service.onTokenReceived(token)
         XCTAssertEqual(calls.count, 0)
 
-        await service.onLogin()
+        await service.onLogin(canRegister: true)
         XCTAssertEqual(calls.count, 1)
         XCTAssertEqual(calls[0].httpMethod, "POST")
     }
@@ -176,7 +218,7 @@ final class DeviceRegistrationServiceTests: XCTestCase {
             return MockURLProtocol.jsonResponse(statusCode: 200, json: _deviceResponseJSON)
         }
 
-        await service.onLogin()
+        await service.onLogin(canRegister: true)
         await service.onTokenReceived(token)
 
         XCTAssertEqual(capturedRequests.count, 1)
@@ -205,16 +247,16 @@ final class DeviceRegistrationServiceTests: XCTestCase {
         }
 
         let firstService = DeviceRegistrationService(apiClient: apiClient, userDefaultsSuiteName: suiteName)
-        await firstService.onLogin()
+        await firstService.onLogin(canRegister: true)
         await firstService.onTokenReceived(Data([0x01]))
 
         let secondService = DeviceRegistrationService(apiClient: apiClient, userDefaultsSuiteName: suiteName)
-        await secondService.onLogin()
+        await secondService.onLogin(canRegister: true)
         await secondService.onTokenReceived(Data([0x02]))
 
         userDefaults.removePersistentDomain(forName: suiteName)
         let resetService = DeviceRegistrationService(apiClient: apiClient, userDefaultsSuiteName: suiteName)
-        await resetService.onLogin()
+        await resetService.onLogin(canRegister: true)
         await resetService.onTokenReceived(Data([0x03]))
 
         XCTAssertEqual(capturedIdentifiers.count, 3)
@@ -236,7 +278,7 @@ final class DeviceRegistrationServiceTests: XCTestCase {
             return MockURLProtocol.jsonResponse(statusCode: 200, json: _deviceResponseJSON)
         }
 
-        await service.onLogin()
+        await service.onLogin(canRegister: true)
         await service.onTokenReceived(token)
         await service.onLogout()
 
@@ -245,7 +287,7 @@ final class DeviceRegistrationServiceTests: XCTestCase {
             afterLogoutCalls += 1
             return MockURLProtocol.jsonResponse(statusCode: 200, json: _deviceResponseJSON)
         }
-        await service.onLogin()
+        await service.onLogin(canRegister: true)
 
         XCTAssertEqual(afterLogoutCalls, 0, "no re-registration after logout cleared the token")
     }
@@ -263,7 +305,7 @@ final class DeviceRegistrationServiceTests: XCTestCase {
             return MockURLProtocol.jsonResponse(statusCode: 200, json: _deviceResponseJSON)
         }
 
-        await service.onLogin()
+        await service.onLogin(canRegister: true)
         await service.onTokenReceived(token)
         let pidBeforeLogout = await service.currentDevicePublicId()
         XCTAssertEqual(pidBeforeLogout, "dev-registered-pid")
@@ -297,7 +339,7 @@ final class DeviceRegistrationServiceTests: XCTestCase {
             return MockURLProtocol.jsonResponse(statusCode: 200, json: _deviceResponseJSON)
         }
 
-        await service.onLogin()
+        await service.onLogin(canRegister: true)
         /// Fire register; the inner await holds for ~200 ms.
         let registerTask = Task { await service.onTokenReceived(token) }
 
@@ -331,7 +373,7 @@ final class DeviceRegistrationServiceTests: XCTestCase {
             return MockURLProtocol.jsonResponse(statusCode: 200, json: _deviceResponseJSON)
         }
 
-        await service.onLogin()
+        await service.onLogin(canRegister: true)
         await service.onTokenReceived(token)
 
         let firstPid = await service.currentDevicePublicId()
@@ -356,7 +398,7 @@ final class DeviceRegistrationServiceTests: XCTestCase {
             return MockURLProtocol.jsonResponse(statusCode: 200, json: _deviceResponseJSON)
         }
 
-        await service.onLogin()
+        await service.onLogin(canRegister: true)
         await service.onTokenReceived(token)
         let status = await waitForStatus(service) { $0 == .succeeded }
 
@@ -379,7 +421,7 @@ final class DeviceRegistrationServiceTests: XCTestCase {
             return MockURLProtocol.errorResponse(statusCode: 500, message: "still down")
         }
 
-        await service.onLogin()
+        await service.onLogin(canRegister: true)
         await service.onTokenReceived(token)
         let status = await waitForStatus(service) {
             if case .failed(let attempt, _) = $0 {
@@ -409,7 +451,7 @@ final class DeviceRegistrationServiceTests: XCTestCase {
             return MockURLProtocol.errorResponse(statusCode: 500, message: "late failure")
         }
 
-        await service.onLogin()
+        await service.onLogin(canRegister: true)
         let registerTask = Task { await service.onTokenReceived(token) }
         try? await Task.sleep(nanoseconds: 50_000_000)
         await service.onLogout()
@@ -432,7 +474,7 @@ final class DeviceRegistrationServiceTests: XCTestCase {
             return MockURLProtocol.errorResponse(statusCode: 500, message: "temporary")
         }
 
-        await service.onLogin()
+        await service.onLogin(canRegister: true)
         await service.onTokenReceived(token)
         await sleeper.waitUntilSleeping()
 

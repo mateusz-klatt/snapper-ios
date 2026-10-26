@@ -133,7 +133,9 @@ class AuthService: ObservableObject {
                     return
                 }
                 isAuthenticated = true
-                await DeviceRegistrationService.shared().onLogin()
+                await DeviceRegistrationService.shared().onLogin(
+                    canRegister: hasPermission(.manageSelfAccount)
+                )
             } else {
                 let errorResponse = try? JSONDecoder().decode(ErrorResponse.self, from: data)
                 self.error = errorResponse.map { .serverDetail($0.detail) } ?? .loginFailed
@@ -357,6 +359,14 @@ class AuthService: ObservableObject {
             if let freshToken {
                 self.wsToken = freshToken.wsToken
                 self.currentUser = freshToken.user
+                await DeviceRegistrationService.shared().updatePermission(
+                    canRegister: self.hasPermission(.manageSelfAccount)
+                )
+                guard !Task.isCancelled,
+                      self.refreshGeneration == generation,
+                      !self.isLoggingOut else {
+                    return nil
+                }
             }
             return freshToken
         }

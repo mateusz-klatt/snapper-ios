@@ -5,12 +5,12 @@ import os
 ///
 /// Two asynchronous inputs feed this actor:
 /// 1. `onTokenReceived(_:)` — from `AppDelegate.didRegisterForRemoteNotificationsWithDeviceToken`.
-/// 2. `onLogin()` / `onLogout()` — from `AuthService.login` / `.logout`.
+/// 2. `onLogin(canRegister:)` / `onLogout()` — from `AuthService.login` / `.logout`.
 ///
 /// The actor holds both the most recent APNs token and the current
 /// authenticated state; registration to `POST /api/devices` fires
-/// only when BOTH are present. A token that arrives pre-login waits
-/// inside `pendingToken` until login flips the guard; a login that
+/// only when both are present and account mutation permission is granted.
+/// A token that arrives pre-login waits inside `pendingToken` until login flips the guard; a login that
 /// happens before the token arrives waits for the token.
 ///
 /// ``APIClient`` is `@MainActor`-annotated, so `register()` uses an
@@ -68,6 +68,7 @@ actor DeviceRegistrationService {
     private var isLoggedIn: Bool = false
     private var lastRegisteredDevicePublicId: String?
     private var status: DeviceRegistrationStatus = .idle
+    private var canRegister = false
     private var retryTask: Task<Void, Never>?
 
     init(
@@ -89,10 +90,10 @@ actor DeviceRegistrationService {
     func onTokenReceived(_ token: Data) async {
         cancelPendingRetry()
         pendingToken = token
-        if isLoggedIn {
+        if isLoggedIn && canRegister {
             await register(token: token, attempt: 1)
         } else {
-            status = .awaitingLogin
+            status = isLoggedIn ? .idle : .awaitingLogin
         }
     }
 
@@ -102,14 +103,31 @@ actor DeviceRegistrationService {
     /// flips `isAuthenticated = true`. If the token arrived earlier
     /// (cold-start permission prompt on a previously-authorized device)
     /// it is registered now.
-    func onLogin() async {
+    func onLogin(canRegister: Bool) async {
         cancelPendingRetry()
         isLoggedIn = true
+        self.canRegister = canRegister
+        guard canRegister else {
+            lastRegisteredDevicePublicId = nil
+            status = .idle
+            return
+        }
         if let token = pendingToken {
             await register(token: token, attempt: 1)
         } else {
             status = .awaitingToken
         }
+    }
+
+    /// Refresh capability without re-registering unchanged authorized sessions.
+    func updatePermission(canRegister: Bool) {
+        guard isLoggedIn, self.canRegister != canRegister else { return }
+        self.canRegister = canRegister
+        cancelPendingRetry()
+        if !canRegister {
+            lastRegisteredDevicePublicId = nil
+        }
+        status = .idle
     }
 
     /// Clear login state + forget the pending token AND the cached
@@ -130,6 +148,7 @@ actor DeviceRegistrationService {
     func onLogout() {
         cancelPendingRetry()
         isLoggedIn = false
+        canRegister = false
         pendingToken = nil
         lastRegisteredDevicePublicId = nil
         status = .idle
@@ -157,13 +176,14 @@ actor DeviceRegistrationService {
     /// full retry envelope rather than tail-end backoff.
     func retryNow() async {
         cancelPendingRetry()
-        guard isLoggedIn, let token = pendingToken else {
+        guard isLoggedIn, canRegister, let token = pendingToken else {
             return
         }
         await register(token: token, attempt: 1)
     }
 
     private func register(token: Data, attempt: Int) async {
+        guard isLoggedIn, canRegister else { return }
         status = .inFlight
         let hex = token.map { String(format: "%02x", $0) }.joined()
         let appVersion = Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String
@@ -197,8 +217,8 @@ actor DeviceRegistrationService {
             /// back to ``.succeeded``) for a session the user has
             /// already torn down — exactly the cross-user-leak window
             /// ``onLogout()``'s slot clear was meant to close.
-            guard isLoggedIn else {
-                logger.info("Device registration response landed after logout; dropping result.")
+            guard isLoggedIn, canRegister else {
+                logger.info("Device registration authority ended; dropping response.")
                 return
             }
             lastRegisteredDevicePublicId = response.payload.publicId
@@ -210,8 +230,8 @@ actor DeviceRegistrationService {
             /// would leave ``status`` pinned at ``.failed`` with a
             /// stale attempt counter and even schedule a retry against
             /// a torn-down session.
-            guard isLoggedIn else {
-                logger.info("Device registration error landed after logout; dropping retry schedule.")
+            guard isLoggedIn, canRegister else {
+                logger.info("Device registration authority ended; dropping retry schedule.")
                 return
             }
             let message = error.localizedDescription
@@ -258,7 +278,7 @@ actor DeviceRegistrationService {
 
     private func attemptRetryIfPending(attempt: Int) async {
         if Task.isCancelled { return }
-        guard isLoggedIn, let token = pendingToken else {
+        guard isLoggedIn, canRegister, let token = pendingToken else {
             return
         }
         await register(token: token, attempt: attempt)

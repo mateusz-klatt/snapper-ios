@@ -37,6 +37,14 @@ final class UserRoleDisplayNameTests: XCTestCase {
         XCTAssertEqual(UserRole.viewer.displayName(in: .pl), "Obserwator")
     }
 
+    func testAuditorInEnglish() {
+        XCTAssertEqual(UserRole.auditor.displayName(in: .en), "Auditor")
+    }
+
+    func testAuditorInPolish() {
+        XCTAssertEqual(UserRole.auditor.displayName(in: .pl), "Audytor")
+    }
+
     func testOperatorRoleInEnglish() {
         XCTAssertEqual(UserRole.operatorRole.displayName(in: .en), "Operator")
     }

@@ -45,6 +45,7 @@ final class AiReviewPermissionContractTests: XCTestCase {
             .aiReviewer: (submit: true, createOrders: false, readAudit: false, readSignals: true),
             .aiDelegate: (submit: true, createOrders: true, readAudit: false, readSignals: true),
             .viewer: (submit: false, createOrders: false, readAudit: true, readSignals: true),
+            .auditor: (submit: false, createOrders: false, readAudit: true, readSignals: true),
             .operatorRole: (submit: false, createOrders: true, readAudit: true, readSignals: true),
             .admin: (submit: true, createOrders: true, readAudit: true, readSignals: true),
         ]

@@ -10,6 +10,11 @@ Native iOS client for the [Snapper](https://github.com/mateusz-klatt/snapper) tr
 ## Status
 
 - Current source: order entry, cancel, brackets, trailing stops, alerts, push notifications, wallet and desk visibility, permission-gated viewer-to-desk attachment, live WebSocket order/heartbeat updates, market-data charts, runtime backend URL override, and 45-country localization. See [`CHANGELOG.md`](CHANGELOG.md) for the per-release breakdown.
+- Auditor sessions use generated backend role and permission contracts. They can
+  inspect administrative data and notification preferences while account writes
+  and automatic device registration require `manage:self_account`. Language
+  selection remains local for read-only accounts. Rebuild the app to decode the
+  new `auditor` role.
 - Public source mirror; the maintainer owns the App Store / TestFlight pipeline. Forks build for the simulator out of the box.
 
 ## Screenshots

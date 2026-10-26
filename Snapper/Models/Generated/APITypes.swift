@@ -107,6 +107,7 @@ enum UserRole: String, Codable, Sendable {
     case aiReviewer = "ai_reviewer"
     case aiDelegate = "ai_delegate"
     case viewer
+    case auditor
     case operatorRole = "operator"
     case admin
 }
