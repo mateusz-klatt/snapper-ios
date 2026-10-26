@@ -4,7 +4,7 @@ import os
 
 /// ViewModel for ``AdminView`` — the read-only platform-users roster
 /// from ``APIClientProtocol/fetchUsers`` (`GET /api/auth/users`), the
-/// admin-only "User Management" surface.
+/// permission-gated "User Management" surface.
 ///
 /// Mirrors ``StrategiesViewModel``: typed error handling, pure ``static``
 /// decision helpers. Not wallet-scoped: ``UserProfile`` carries no wallet
@@ -26,6 +26,12 @@ final class AdminViewModel {
 
     init(api: APIClientProtocol = APIClient.shared) {
         self.api = api
+    }
+
+    /// The native administrative page contains only the users directory.
+    static func canReadUsers(user: UserProfile?) -> Bool {
+        return user?.effectivePermissions?.contains(.readUsers) == true
+            || user?.effectivePermissions?.contains(.manageUsers) == true
     }
 
     /// Username-sorted rows for a stable render order.

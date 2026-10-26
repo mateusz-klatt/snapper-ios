@@ -119,15 +119,23 @@ actor DeviceRegistrationService {
         }
     }
 
-    /// Refresh capability without re-registering unchanged authorized sessions.
+    /// Resume newly authorized registration outside the caller's refresh task.
     func updatePermission(canRegister: Bool) {
         guard isLoggedIn, self.canRegister != canRegister else { return }
         self.canRegister = canRegister
         cancelPendingRetry()
-        if !canRegister {
-            lastRegisteredDevicePublicId = nil
+        guard canRegister else {
+            status = .idle
+            return
+        }
+        guard pendingToken != nil else {
+            status = .awaitingToken
+            return
         }
         status = .idle
+        retryTask = Task { [weak self] in
+            await self?.attemptRetryIfPending(attempt: 1)
+        }
     }
 
     /// Clear login state + forget the pending token AND the cached

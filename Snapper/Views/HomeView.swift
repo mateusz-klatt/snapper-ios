@@ -94,7 +94,7 @@ struct HomeView: View {
                         .buttonStyle(.plain)
                     }
 
-                    if authService.canAccess("admin") {
+                    if AdminViewModel.canReadUsers(user: authService.currentUser) {
                         NavigationLink {
                             AdminView()
                         } label: {

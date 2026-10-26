@@ -132,6 +132,62 @@ final class DeviceRegistrationServiceTests: XCTestCase {
         XCTAssertEqual(status, .idle)
     }
 
+    func testPermissionGrantSchedulesCachedTokenOnlyOnAuthorityTransition() async {
+        let service = DeviceRegistrationService(apiClient: apiClient)
+        var calls = 0
+        MockURLProtocol.requestHandler = { _ in
+            calls += 1
+            return MockURLProtocol.jsonResponse(statusCode: 200, json: _deviceResponseJSON)
+        }
+
+        await service.updatePermission(canRegister: true)
+        await service.onTokenReceived(Data([0x10]))
+        await service.onLogin(canRegister: false)
+        XCTAssertEqual(calls, 0)
+
+        await service.updatePermission(canRegister: true)
+        let status = await waitForStatus(service) { $0 == .succeeded }
+        XCTAssertEqual(status, .succeeded)
+        XCTAssertEqual(calls, 1)
+
+        await service.updatePermission(canRegister: true)
+        await drainAsyncWork()
+        XCTAssertEqual(calls, 1)
+    }
+
+    func testPermissionGrantWithoutCachedTokenAwaitsToken() async {
+        let service = DeviceRegistrationService(apiClient: apiClient)
+        await service.onLogin(canRegister: false)
+        await service.updatePermission(canRegister: true)
+
+        let status = await service.currentStatus()
+        XCTAssertEqual(status, .awaitingToken)
+    }
+
+    func testPermissionReductionPreservesDeviceForPreferenceReadsUntilLogout() async {
+        let service = DeviceRegistrationService(apiClient: apiClient)
+        var calls = 0
+        MockURLProtocol.requestHandler = { _ in
+            calls += 1
+            return MockURLProtocol.jsonResponse(statusCode: 200, json: _deviceResponseJSON)
+        }
+
+        await service.onLogin(canRegister: true)
+        await service.onTokenReceived(Data([0x10]))
+        await service.updatePermission(canRegister: false)
+        await service.retryNow()
+
+        let status = await service.currentStatus()
+        let deviceId = await service.currentDevicePublicId()
+        XCTAssertEqual(status, .idle)
+        XCTAssertEqual(deviceId, "dev-registered-pid")
+        XCTAssertEqual(calls, 1)
+
+        await service.onLogout()
+        let clearedId = await service.currentDevicePublicId()
+        XCTAssertNil(clearedId)
+    }
+
     func testRetryNowRegistersWhenLoginAndTokenReady() async {
         let service = DeviceRegistrationService(apiClient: apiClient)
         let token = Data([0x10, 0x20])
