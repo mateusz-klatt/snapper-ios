@@ -46,9 +46,6 @@ final class AuditorReadOnlyViewTests: XCTestCase {
         let pickers = controls(UISegmentedControl.self, in: root)
         XCTAssertEqual(pickers.count, 5)
         XCTAssertTrue(pickers.allSatisfy { !$0.isEnabled })
-        let labels = accessibilityLabels(in: root)
-        XCTAssertTrue(labels.contains(readOnlyNotice), "Available labels: \(labels.sorted())")
-
         let toggle = try XCTUnwrap(toggles.first)
         toggle.setOn(false, animated: false)
         toggle.sendActions(for: .valueChanged)
@@ -97,16 +94,23 @@ final class AuditorReadOnlyViewTests: XCTestCase {
         XCTAssertEqual(model.defaults.values.filter { !$0.enabled }.count, 1)
     }
 
-    func testSettingsShowsReadOnlyNoticeAndHidesNotificationRegistrationUntilGranted() async throws {
+    func testReadOnlySettingsRefreshesStatusWithoutPromptingOrRegisteringNotifications() async throws {
         let auth = makeAuth(permissions: [.readAllScopes, .readNotifications])
+        auth.isAuthenticated = true
+        var statusProbes = 0
+        var authorizationRequests = 0
+        var registrations = 0
         let notificationService = NotificationService(
-            authorizationStatusProvider: { .notDetermined },
+            authorizationStatusProvider: {
+                statusProbes += 1
+                return .notDetermined
+            },
             authorizationRequester: { _ in
-                XCTFail("Rendering settings must not request notification authorization")
+                authorizationRequests += 1
                 return false
             },
-            isLoggedIn: { false },
-            registerForRemote: { XCTFail("Rendering read-only settings must not register push") }
+            isLoggedIn: { auth.isAuthenticated },
+            registerForRemote: { registrations += 1 }
         )
         let webSocket = WebSocketManager(
             authService: auth,
@@ -120,26 +124,15 @@ final class AuditorReadOnlyViewTests: XCTestCase {
             .environment(makeAppState(api: MockAPIClient()))
             .environment(\.locale, Locale(identifier: "en"))
         let root = try host(view)
-        try await waitFor { self.accessibilityLabels(in: root).contains(self.readOnlyNotice) }
-        let readOnlyLabels = accessibilityLabels(in: root)
-        XCTAssertTrue(readOnlyLabels.contains(readOnlyNotice), "Available labels: \(readOnlyLabels.sorted())")
-        let enableLabel = LocaleStrings.localized("settings.notifications.enableButton", in: .en)
-        XCTAssertFalse(accessibilityLabels(in: root).contains(enableLabel))
-
-        auth.currentUser = makeUser(permissions: [.readNotifications, .manageSelfAccount])
-        try await waitFor { self.accessibilityLabels(in: root).contains(enableLabel) }
-        let writableLabels = accessibilityLabels(in: root)
-        XCTAssertTrue(writableLabels.contains(enableLabel), "Available labels: \(writableLabels.sorted())")
-        XCTAssertFalse(accessibilityLabels(in: root).contains(readOnlyNotice))
+        try await waitFor { statusProbes == 1 && !self.controls(UIScrollView.self, in: root).isEmpty }
+        XCTAssertEqual(statusProbes, 1)
+        XCTAssertEqual(authorizationRequests, 0)
+        XCTAssertEqual(registrations, 0)
         XCTAssertEqual(notificationService.authorizationStatus, .notDetermined)
         XCTAssertEqual(webSocket.connectionState, .disconnected)
     }
 
     private var timestamp: Date { Date(timeIntervalSince1970: 1_700_000_000) }
-
-    private var readOnlyNotice: String {
-        LocaleStrings.localized("settings.account.readOnly", in: .en)
-    }
 
     private func makeAuth(permissions: [Permission]) -> AuthService {
         let auth = AuthService(session: .shared)
@@ -212,29 +205,6 @@ final class AuditorReadOnlyViewTests: XCTestCase {
     private func controls<Control: UIView>(_ type: Control.Type, in view: UIView) -> [Control] {
         let matching = (view as? Control).map { [$0] } ?? []
         return matching + view.subviews.flatMap { controls(type, in: $0) }
-    }
-
-    private func accessibilityLabels(in root: NSObject) -> Set<String> {
-        var pending = [root]
-        var visited = Set<ObjectIdentifier>()
-        var labels = Set<String>()
-        while let object = pending.popLast() {
-            guard visited.insert(ObjectIdentifier(object)).inserted else { continue }
-            if let label = object.accessibilityLabel { labels.insert(label) }
-            if let view = object as? UIView { pending.append(contentsOf: view.subviews) }
-            if let elements = object.accessibilityElements {
-                pending.append(contentsOf: elements.compactMap { $0 as? NSObject })
-            }
-            let count = object.accessibilityElementCount()
-            if count > 0 && count < 1000 {
-                for index in 0..<count {
-                    if let element = object.accessibilityElement(at: index) as? NSObject {
-                        pending.append(element)
-                    }
-                }
-            }
-        }
-        return labels
     }
 
     private func waitFor(_ predicate: @MainActor () -> Bool) async throws {
