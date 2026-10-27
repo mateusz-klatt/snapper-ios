@@ -24,6 +24,7 @@ final class AuditorReadOnlyViewTests: XCTestCase {
         let api = MockAPIClient()
         let writes = PreferenceWriteCounter()
         let model = makePreferences(api: api)
+        await model.load()
         api.updateAlertDefaultHandler = { _ in
             await writes.record()
             throw APIError.invalidResponse
@@ -33,7 +34,7 @@ final class AuditorReadOnlyViewTests: XCTestCase {
             .environmentObject(auth)
             .environment(makeAppState(api: api))
             .environment(\.locale, Locale(identifier: "en"))
-        let root = host(view)
+        let root = try host(view)
         try await waitFor {
             self.controls(UISwitch.self, in: root).count == 5 && model.defaults.count == 5 && model.devicePrefs.count == 1
         }
@@ -45,7 +46,8 @@ final class AuditorReadOnlyViewTests: XCTestCase {
         let pickers = controls(UISegmentedControl.self, in: root)
         XCTAssertEqual(pickers.count, 5)
         XCTAssertTrue(pickers.allSatisfy { !$0.isEnabled })
-        XCTAssertTrue(accessibilityLabels(in: root).contains(readOnlyNotice))
+        let labels = accessibilityLabels(in: root)
+        XCTAssertTrue(labels.contains(readOnlyNotice), "Available labels: \(labels.sorted())")
 
         let toggle = try XCTUnwrap(toggles.first)
         toggle.setOn(false, animated: false)
@@ -60,6 +62,7 @@ final class AuditorReadOnlyViewTests: XCTestCase {
         let api = MockAPIClient()
         let writes = PreferenceWriteCounter()
         let model = makePreferences(api: api)
+        await model.load()
         let responses = Dictionary(uniqueKeysWithValues: NotificationPrefsViewModel.alertTypes.map { alertType in
             (alertType, UserAlertDefaultResponse(
                 type: "user_alert_default_response", sequenceId: 1, publicId: "response",
@@ -76,7 +79,7 @@ final class AuditorReadOnlyViewTests: XCTestCase {
         let view = NotificationPrefsView(viewModel: model)
             .environmentObject(auth)
             .environment(makeAppState(api: api))
-        let root = host(view)
+        let root = try host(view)
         try await waitFor {
             self.controls(UISwitch.self, in: root).count == 5 && model.defaults.count == 5 && model.devicePrefs.count == 1
         }
@@ -85,6 +88,7 @@ final class AuditorReadOnlyViewTests: XCTestCase {
         XCTAssertTrue(toggles.allSatisfy(\.isEnabled))
         XCTAssertTrue(controls(UISegmentedControl.self, in: root).allSatisfy(\.isEnabled))
         let toggle = try XCTUnwrap(toggles.first)
+        XCTAssertTrue(toggle.allControlEvents.contains(.valueChanged), "Registered events: \(toggle.allControlEvents.rawValue)")
         toggle.setOn(false, animated: false)
         toggle.sendActions(for: .valueChanged)
         try await waitFor { model.defaults.values.contains { !$0.enabled } }
@@ -115,13 +119,17 @@ final class AuditorReadOnlyViewTests: XCTestCase {
             .environmentObject(webSocket)
             .environment(makeAppState(api: MockAPIClient()))
             .environment(\.locale, Locale(identifier: "en"))
-        let root = host(view)
+        let root = try host(view)
         try await waitFor { self.accessibilityLabels(in: root).contains(self.readOnlyNotice) }
+        let readOnlyLabels = accessibilityLabels(in: root)
+        XCTAssertTrue(readOnlyLabels.contains(readOnlyNotice), "Available labels: \(readOnlyLabels.sorted())")
         let enableLabel = LocaleStrings.localized("settings.notifications.enableButton", in: .en)
         XCTAssertFalse(accessibilityLabels(in: root).contains(enableLabel))
 
         auth.currentUser = makeUser(permissions: [.readNotifications, .manageSelfAccount])
         try await waitFor { self.accessibilityLabels(in: root).contains(enableLabel) }
+        let writableLabels = accessibilityLabels(in: root)
+        XCTAssertTrue(writableLabels.contains(enableLabel), "Available labels: \(writableLabels.sorted())")
         XCTAssertFalse(accessibilityLabels(in: root).contains(readOnlyNotice))
         XCTAssertEqual(notificationService.authorizationStatus, .notDetermined)
         XCTAssertEqual(webSocket.connectionState, .disconnected)
@@ -189,14 +197,10 @@ final class AuditorReadOnlyViewTests: XCTestCase {
         return NotificationPrefsViewModel(api: api, deviceIdProvider: { "device" })
     }
 
-    private func host<Content: View>(_ content: Content) -> UIView {
+    private func host<Content: View>(_ content: Content) throws -> UIView {
         let controller = UIHostingController(rootView: content)
-        let hostedWindow: UIWindow
-        if let scene = UIApplication.shared.connectedScenes.compactMap({ $0 as? UIWindowScene }).first {
-            hostedWindow = UIWindow(windowScene: scene)
-        } else {
-            hostedWindow = UIWindow(frame: .zero)
-        }
+        let scene = try XCTUnwrap(UIApplication.shared.connectedScenes.compactMap { $0 as? UIWindowScene }.first)
+        let hostedWindow = UIWindow(windowScene: scene)
         hostedWindow.frame = CGRect(x: 0, y: 0, width: 430, height: 2400)
         hostedWindow.rootViewController = controller
         hostedWindow.makeKeyAndVisible()
@@ -218,6 +222,9 @@ final class AuditorReadOnlyViewTests: XCTestCase {
             guard visited.insert(ObjectIdentifier(object)).inserted else { continue }
             if let label = object.accessibilityLabel { labels.insert(label) }
             if let view = object as? UIView { pending.append(contentsOf: view.subviews) }
+            if let elements = object.accessibilityElements {
+                pending.append(contentsOf: elements.compactMap { $0 as? NSObject })
+            }
             let count = object.accessibilityElementCount()
             if count > 0 && count < 1000 {
                 for index in 0..<count {
