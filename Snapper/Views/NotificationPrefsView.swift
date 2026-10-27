@@ -19,8 +19,12 @@ struct NotificationPrefsView: View {
 
     @EnvironmentObject private var authService: AuthService
     @Environment(AppState.self) private var appState
-    @State private var viewModel = NotificationPrefsViewModel()
+    @State private var viewModel: NotificationPrefsViewModel
     @State private var sheetMode: EditDevicePrefView.Mode?
+
+    init(viewModel: NotificationPrefsViewModel = NotificationPrefsViewModel()) {
+        _viewModel = State(initialValue: viewModel)
+    }
 
     var body: some View {
         Form {
