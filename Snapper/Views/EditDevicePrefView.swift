@@ -44,6 +44,7 @@ struct EditDevicePrefView: View {
     let onSaved: (DeviceAlertPrefInfo) -> Void
 
     @Environment(AppState.self) private var appState
+    @EnvironmentObject private var authService: AuthService
     @Environment(\.dismiss) private var dismiss
     @State private var alertType: String
     @State private var scopeKind: ScopeKind
@@ -274,7 +275,7 @@ struct EditDevicePrefView: View {
                     Button(LocalizedStringKey("backend.url.save")) {
                         Task { await save() }
                     }
-                    .disabled(!canSave || isSaving)
+                    .disabled(!canSave || isSaving || !authService.hasPermission(.manageSelfAccount))
                 }
             }
             .overlay {
@@ -451,6 +452,7 @@ struct EditDevicePrefView: View {
         )
     }
     private func save() async {
+        guard authService.hasPermission(.manageSelfAccount) else { return }
         isSaving = true
         defer { isSaving = false }
         saveError = nil

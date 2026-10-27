@@ -1,7 +1,7 @@
 import SwiftUI
 
 /// Read-only platform-users roster from `GET /api/auth/users` — the
-/// admin-only "User Management" surface. Pushed from ``HomeView`` (nested
+/// permission-gated "User Management" surface. Pushed from ``HomeView`` (nested
 /// in its ``NavigationStack``) rather than owning a tab, mirroring
 /// ``StrategiesView``. Not wallet-scoped (see ``AdminViewModel``);
 /// pull-to-refresh only. The web's create / edit / deactivate /
@@ -126,6 +126,7 @@ private struct UserRow: View {
         case .aiReviewer: return .orange
         case .aiResearcher: return .purple
         case .viewer: return .secondary
+        case .auditor: return .teal
         }
     }
 

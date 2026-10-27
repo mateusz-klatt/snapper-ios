@@ -16,6 +16,28 @@ final class AppStateTests: XCTestCase {
         return defaults
     }
 
+    private func selfServiceUser(canManage: Bool = true) -> UserProfile {
+        UserProfile(
+            type: nil,
+            sequenceId: 0,
+            publicId: "01961234-5678-7000-8000-000000000099",
+            timestamp: Date(timeIntervalSince1970: 0),
+            sessionId: "test-session",
+            topic: nil,
+            username: "testuser",
+            email: nil,
+            role: canManage ? .viewer : .auditor,
+            isActive: true,
+            createdAt: Date(timeIntervalSince1970: 0),
+            operatorPublicIds: nil,
+            primaryOperatorPublicId: nil,
+            activeWalletPublicId: nil,
+            defaultLanguage: nil,
+            effectivePermissions: canManage ? [.manageSelfAccount] : [.readSystemSettings],
+            delegatePublicId: nil
+        )
+    }
+
     func testSelectedWalletDefaultsToNil() {
         let defaults = makeIsolatedDefaults()
         let state = AppState(userDefaults: defaults)
@@ -102,11 +124,29 @@ final class AppStateTests: XCTestCase {
         }
         let (appState, _) = makeAppState(locale: .us, apiClientProvider: { mock })
         let auth = AuthService(session: .shared, apiBaseURLProvider: { "http://test.invalid" })
+        auth.currentUser = selfServiceUser()
         auth.isAuthenticated = false
 
         await appState.syncLocaleToBackend(skipAuthCheck: false, authService: auth)
 
         XCTAssertEqual(calls.values, [])
+    }
+
+    func testReadOnlyLocaleRemainsLocalDuringLoginAndSession() async {
+        let mock = MockAPIClient()
+        let calls = CallRecorder()
+        mock.updateDefaultLanguageHandler = { language in calls.record(language) }
+        let (state, defaults) = makeAppState(locale: .pl, apiClientProvider: { mock })
+        let auth = AuthService(session: .shared, apiBaseURLProvider: { "http://test.invalid" })
+        auth.currentUser = selfServiceUser(canManage: false)
+
+        await state.syncLocaleToBackend(skipAuthCheck: true, authService: auth)
+        auth.isAuthenticated = true
+        await state.syncLocaleToBackend(skipAuthCheck: false, authService: auth)
+
+        XCTAssertEqual(calls.values, [])
+        XCTAssertEqual(state.locale, .pl)
+        XCTAssertEqual(defaults.string(forKey: "snapper-locale"), AppLocale.pl.rawValue)
     }
 
     /// Authenticated locale change persists to backend via the mock.
@@ -118,6 +158,7 @@ final class AppStateTests: XCTestCase {
         }
         let (appState, _) = makeAppState(locale: .pl, apiClientProvider: { mock })
         let auth = AuthService(session: .shared, apiBaseURLProvider: { "http://test.invalid" })
+        auth.currentUser = selfServiceUser()
         auth.isAuthenticated = true
 
         await appState.syncLocaleToBackend(skipAuthCheck: false, authService: auth)
@@ -136,6 +177,7 @@ final class AppStateTests: XCTestCase {
         }
         let (appState, _) = makeAppState(locale: .pl, apiClientProvider: { mock })
         let auth = AuthService(session: .shared, apiBaseURLProvider: { "http://test.invalid" })
+        auth.currentUser = selfServiceUser()
         auth.isAuthenticated = false
 
         await appState.syncLocaleToBackend(skipAuthCheck: true, authService: auth)
@@ -151,6 +193,7 @@ final class AppStateTests: XCTestCase {
         }
         let (failingState, _) = makeAppState(locale: .pl, apiClientProvider: { failingMock })
         let auth = AuthService(session: .shared, apiBaseURLProvider: { "http://test.invalid" })
+        auth.currentUser = selfServiceUser()
         auth.isAuthenticated = true
 
         let receivedFailure = NotificationCounter()
@@ -187,6 +230,7 @@ final class AppStateTests: XCTestCase {
         successMock.updateDefaultLanguageHandler = { _ in }
         let (successState, _) = makeAppState(locale: .pl, apiClientProvider: { successMock })
         let auth = AuthService(session: .shared, apiBaseURLProvider: { "http://test.invalid" })
+        auth.currentUser = selfServiceUser()
         auth.isAuthenticated = true
 
         let captured = NotificationCapture()

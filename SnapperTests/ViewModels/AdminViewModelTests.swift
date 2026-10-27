@@ -28,7 +28,8 @@ final class AdminViewModelTests: XCTestCase {
         publicId: String,
         username: String = "viewer",
         role: UserRole = .viewer,
-        isActive: Bool? = true
+        isActive: Bool? = true,
+        effectivePermissions: [Permission]? = nil
     ) -> UserProfile {
         return UserProfile(
             type: nil,
@@ -46,7 +47,7 @@ final class AdminViewModelTests: XCTestCase {
             primaryOperatorPublicId: nil,
             activeWalletPublicId: nil,
             defaultLanguage: nil,
-            effectivePermissions: nil,
+            effectivePermissions: effectivePermissions,
             delegatePublicId: nil
         )
     }
@@ -56,6 +57,19 @@ final class AdminViewModelTests: XCTestCase {
         XCTAssertTrue(viewModel.users.isEmpty)
         XCTAssertFalse(viewModel.isLoading)
         XCTAssertNil(viewModel.loadError)
+    }
+
+    func testUsersDirectoryRequiresItsOwnReadCapability() {
+        XCTAssertFalse(AdminViewModel.canReadUsers(user: nil))
+        let deniedPermissions: [[Permission]?] = [nil, [], [.manageDeskMemberships], [.readScopeGrants]]
+        for permissions in deniedPermissions {
+            let user = makeUser(publicId: "u-1", role: .admin, effectivePermissions: permissions)
+            XCTAssertFalse(AdminViewModel.canReadUsers(user: user))
+        }
+        for permission in [Permission.readUsers, .manageUsers] {
+            let user = makeUser(publicId: "u-1", effectivePermissions: [permission])
+            XCTAssertTrue(AdminViewModel.canReadUsers(user: user))
+        }
     }
 
     func testLoadHappyPathPopulatesUsers() async {

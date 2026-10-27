@@ -193,6 +193,7 @@ final class AppState {
         if !skipAuthCheck && !authService.isAuthenticated {
             return
         }
+        guard authService.hasPermission(.manageSelfAccount) else { return }
         let intendedLanguage = locale.catalogLanguage.rawValue
         do {
             try await apiClientProvider().updateDefaultLanguage(intendedLanguage)

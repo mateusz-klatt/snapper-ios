@@ -17,12 +17,22 @@ import SwiftUI
 ///   for the registered device.
 struct NotificationPrefsView: View {
 
+    @EnvironmentObject private var authService: AuthService
     @Environment(AppState.self) private var appState
-    @State private var viewModel = NotificationPrefsViewModel()
+    @State private var viewModel: NotificationPrefsViewModel
     @State private var sheetMode: EditDevicePrefView.Mode?
+
+    init(viewModel: NotificationPrefsViewModel = NotificationPrefsViewModel()) {
+        _viewModel = State(initialValue: viewModel)
+    }
 
     var body: some View {
         Form {
+            if !authService.hasPermission(.manageSelfAccount) {
+                Text(LocalizedStringKey("settings.account.readOnly"))
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+            }
             if let loadError = viewModel.loadError {
                 Section {
                     Text(loadError)
@@ -38,13 +48,15 @@ struct NotificationPrefsView: View {
                         existing: viewModel.defaults[alertType],
                         isInflight: viewModel.inflightAlertTypes.contains(alertType),
                         onChange: { enabled, minPriority in
-                            await viewModel.mutateDefault(
+                            guard authService.hasPermission(.manageSelfAccount) else { return false }
+                            return await viewModel.mutateDefault(
                                 alertType: alertType,
                                 enabled: enabled,
                                 minPriority: minPriority
                             )
                         }
                     )
+                    .disabled(!authService.hasPermission(.manageSelfAccount))
                 }
             } header: {
                 Text(LocalizedStringKey("notifications.prefs.section.userDefaults"))
@@ -72,12 +84,14 @@ struct NotificationPrefsView: View {
                                 DevicePrefRow(pref: pref)
                             }
                             .buttonStyle(.plain)
+                            .disabled(!authService.hasPermission(.manageSelfAccount))
                             .swipeActions(edge: .trailing, allowsFullSwipe: true) {
                                 Button(role: .destructive) {
                                     Task { await viewModel.revokeDevicePref(prefPublicId: pref.publicId) }
                                 } label: {
                                     Label(LocalizedStringKey("notifications.prefs.action.remove"), systemImage: "trash")
                                 }
+                                .disabled(!authService.hasPermission(.manageSelfAccount))
                             }
                         }
                     }
@@ -87,7 +101,7 @@ struct NotificationPrefsView: View {
                     } label: {
                         Label(LocalizedStringKey("notifications.prefs.action.addOverride"), systemImage: "plus.circle")
                     }
-                    .disabled(viewModel.devicePublicId == nil)
+                    .disabled(viewModel.devicePublicId == nil || !authService.hasPermission(.manageSelfAccount))
                 }
             } header: {
                 Text(LocalizedStringKey("notifications.prefs.section.deviceOverrides"))
@@ -244,6 +258,7 @@ struct NotificationPrefsView_Previews: PreviewProvider {
     static var previews: some View {
         NavigationStack {
             NotificationPrefsView()
+                .environmentObject(AuthService.shared)
                 .environment(AppState.shared)
         }
     }
