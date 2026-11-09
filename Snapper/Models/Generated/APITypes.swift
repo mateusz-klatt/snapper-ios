@@ -10,6 +10,12 @@ enum PnlAttributionOrigin: String, Codable, Sendable {
     case unattributed
 }
 
+enum PnlCarriedInputRole: String, Codable, Sendable {
+    case mark
+    case fx
+    case event
+}
+
 enum PnlExecutionCorrectionReason: String, Codable, Sendable {
     case unwitnessedPhantom = "unwitnessed_phantom"
     case unwitnessedLegacyLineage = "unwitnessed_legacy_lineage"
@@ -4209,6 +4215,22 @@ struct PnlAttributionContributionData: Codable, Sendable {
     }
 }
 
+struct PnlCarriedInputData: Codable, Sendable {
+    let instrumentPublicId: String
+    let role: PnlCarriedInputRole
+    let sourceMinute: Date
+    let ageMinutes: Int
+    let sourcePlane: String?
+
+    enum CodingKeys: String, CodingKey {
+        case instrumentPublicId = "instrument_public_id"
+        case role
+        case sourceMinute = "source_minute"
+        case ageMinutes = "age_minutes"
+        case sourcePlane = "source_plane"
+    }
+}
+
 struct PnlEquityCoverageData: Codable, Sendable {
     let sampled: Bool
     let venueScope: String?
@@ -4495,6 +4517,8 @@ struct PnlTimelinePointData: Codable, Sendable {
     let incompletenessReasons: [PnlIncompletenessReasonData]
     let perInstrument: [PnlInstrumentContributionData]
     let attribution: [PnlAttributionContributionData]
+    let carriedInputs: [PnlCarriedInputData]?
+    let maxCarryAgeMinutes: Int?
 
     enum CodingKeys: String, CodingKey {
         case pointTime = "point_time"
@@ -4511,6 +4535,8 @@ struct PnlTimelinePointData: Codable, Sendable {
         case incompletenessReasons = "incompleteness_reasons"
         case perInstrument = "per_instrument"
         case attribution
+        case carriedInputs = "carried_inputs"
+        case maxCarryAgeMinutes = "max_carry_age_minutes"
     }
 }
 
