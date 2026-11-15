@@ -12,7 +12,9 @@ final class AuditorReadOnlyViewTests: XCTestCase {
     override func tearDown() async throws {
         window?.isHidden = true
         window?.rootViewController = nil
+        window?.windowScene = nil
         window = nil
+        try await Task.sleep(for: .milliseconds(50))
         if let defaultsSuite {
             UserDefaults.standard.removePersistentDomain(forName: defaultsSuite)
         }
@@ -22,8 +24,9 @@ final class AuditorReadOnlyViewTests: XCTestCase {
 
     func testAuditorCanReadPreferencesButCannotChangeControls() async throws {
         let api = MockAPIClient()
+        let loads = PreferenceWriteCounter()
         let writes = PreferenceWriteCounter()
-        let model = makePreferences(api: api)
+        let model = makePreferences(api: api, loads: loads)
         await model.load()
         api.updateAlertDefaultHandler = { _ in
             await writes.record()
@@ -34,9 +37,16 @@ final class AuditorReadOnlyViewTests: XCTestCase {
             .environmentObject(auth)
             .environment(makeAppState(api: api))
             .environment(\.locale, Locale(identifier: "en"))
-        let root = try host(view)
+        let root = try await host(view)
         try await waitFor {
-            self.controls(UISwitch.self, in: root).count == 5 && model.defaults.count == 5 && model.devicePrefs.count == 1
+            let loadCount = await loads.count
+            let switches = self.controls(UISwitch.self, in: root)
+            return loadCount >= 2
+                && !model.isLoading
+                && model.defaults.count == 5
+                && model.devicePrefs.count == 1
+                && switches.count == 5
+                && switches.allSatisfy { $0.window != nil && $0.isOn && !$0.isEnabled }
         }
 
         XCTAssertEqual(model.defaults.count, 5)
@@ -57,8 +67,9 @@ final class AuditorReadOnlyViewTests: XCTestCase {
 
     func testSelfAccountCapabilityEnablesPreferenceChanges() async throws {
         let api = MockAPIClient()
+        let loads = PreferenceWriteCounter()
         let writes = PreferenceWriteCounter()
-        let model = makePreferences(api: api)
+        let model = makePreferences(api: api, loads: loads)
         await model.load()
         let responses = Dictionary(uniqueKeysWithValues: NotificationPrefsViewModel.alertTypes.map { alertType in
             (alertType, UserAlertDefaultResponse(
@@ -76,10 +87,22 @@ final class AuditorReadOnlyViewTests: XCTestCase {
         let view = NotificationPrefsView(viewModel: model)
             .environmentObject(auth)
             .environment(makeAppState(api: api))
-        let root = try host(view)
+            .environment(\.locale, Locale(identifier: "en"))
+        let root = try await host(view)
         try await waitFor {
-            self.controls(UISwitch.self, in: root).count == 5 && model.defaults.count == 5 && model.devicePrefs.count == 1
+            let loadCount = await loads.count
+            let switches = self.controls(UISwitch.self, in: root)
+            return loadCount >= 2
+                && !model.isLoading
+                && model.defaults.count == 5
+                && model.devicePrefs.count == 1
+                && switches.count == 5
+                && switches.allSatisfy {
+                    $0.window != nil && $0.isOn && $0.isEnabled && $0.allControlEvents.contains(.valueChanged)
+                }
         }
+        try await Task.sleep(for: .milliseconds(50))
+        root.layoutIfNeeded()
 
         let toggles = controls(UISwitch.self, in: root)
         XCTAssertTrue(toggles.allSatisfy(\.isEnabled))
@@ -123,7 +146,7 @@ final class AuditorReadOnlyViewTests: XCTestCase {
             .environmentObject(webSocket)
             .environment(makeAppState(api: MockAPIClient()))
             .environment(\.locale, Locale(identifier: "en"))
-        let root = try host(view)
+        let root = try await host(view)
         try await waitFor { statusProbes == 1 && !self.controls(UIScrollView.self, in: root).isEmpty }
         XCTAssertEqual(statusProbes, 1)
         XCTAssertEqual(authorizationRequests, 0)
@@ -169,7 +192,10 @@ final class AuditorReadOnlyViewTests: XCTestCase {
         )
     }
 
-    private func makePreferences(api: MockAPIClient) -> NotificationPrefsViewModel {
+    private func makePreferences(
+        api: MockAPIClient,
+        loads: PreferenceWriteCounter
+    ) -> NotificationPrefsViewModel {
         let defaults = NotificationPrefsViewModel.alertTypes.map { makeDefault(alertType: $0) }
         let defaultResponse = UserAlertDefaultListResponse(
             type: "user_alert_default_list_response", sequenceId: 1, publicId: "defaults",
@@ -185,12 +211,15 @@ final class AuditorReadOnlyViewTests: XCTestCase {
             type: "device_alert_pref_list_response", sequenceId: 1, publicId: "preferences",
             timestamp: timestamp, sessionId: "test", topic: nil, payload: [pref], count: 1
         )
-        api.fetchAlertDefaultsHandler = { defaultResponse }
+        api.fetchAlertDefaultsHandler = {
+            await loads.record()
+            return defaultResponse
+        }
         api.fetchDevicePrefsHandler = { _ in prefResponse }
         return NotificationPrefsViewModel(api: api, deviceIdProvider: { "device" })
     }
 
-    private func host<Content: View>(_ content: Content) throws -> UIView {
+    private func host<Content: View>(_ content: Content) async throws -> UIView {
         let controller = UIHostingController(rootView: content)
         let scene = try XCTUnwrap(UIApplication.shared.connectedScenes.compactMap { $0 as? UIWindowScene }.first)
         let hostedWindow = UIWindow(windowScene: scene)
@@ -199,6 +228,9 @@ final class AuditorReadOnlyViewTests: XCTestCase {
         hostedWindow.makeKeyAndVisible()
         controller.view.layoutIfNeeded()
         window = hostedWindow
+        try await waitFor { controller.view.window != nil }
+        try await Task.sleep(for: .milliseconds(50))
+        controller.view.layoutIfNeeded()
         return controller.view
     }
 
@@ -207,12 +239,13 @@ final class AuditorReadOnlyViewTests: XCTestCase {
         return matching + view.subviews.flatMap { controls(type, in: $0) }
     }
 
-    private func waitFor(_ predicate: @MainActor () -> Bool) async throws {
-        for _ in 0..<40 {
-            if predicate() { return }
+    private func waitFor(_ predicate: @MainActor () async -> Bool) async throws {
+        for _ in 0..<60 {
+            if await predicate() { return }
             try await Task.sleep(for: .milliseconds(50))
         }
-        XCTAssertTrue(predicate(), "Hosted view did not reach the expected state")
+        let settled = await predicate()
+        XCTAssertTrue(settled, "Hosted view did not reach the expected state")
     }
 }
 
