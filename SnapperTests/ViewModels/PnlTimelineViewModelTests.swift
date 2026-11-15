@@ -109,7 +109,9 @@ final class PnlTimelineViewModelTests: XCTestCase {
             valuationStatus: status,
             incompletenessReasons: [],
             perInstrument: [],
-            attribution: []
+            attribution: [],
+            carriedInputs: nil,
+            maxCarryAgeMinutes: nil
         )
     }
 
