@@ -3,6 +3,14 @@
 
 import Foundation
 
+enum FreshnessFailureReason: String, Codable, Sendable {
+    case missingSnapshot = "missing_snapshot"
+    case invalidTimestamp = "invalid_timestamp"
+    case futureTimestamp = "future_timestamp"
+    case staleSnapshot = "stale_snapshot"
+    case invalidPrice = "invalid_price"
+}
+
 enum PnlAttributionOrigin: String, Codable, Sendable {
     case manual
     case plan
@@ -2792,6 +2800,26 @@ struct ExchangeListResponse: Codable, Sendable {
     }
 }
 
+struct ExcludedMarketSnapshotFxInstrument: Codable, Sendable {
+    let instrumentPublicId: String
+    let nativeSymbol: String
+    let exchange: String
+    let base: String
+    let quote: String
+    let assetType: String
+    let reason: FxExclusionReason?
+
+    enum CodingKeys: String, CodingKey {
+        case instrumentPublicId = "instrument_public_id"
+        case nativeSymbol = "native_symbol"
+        case exchange
+        case base
+        case quote
+        case assetType = "asset_type"
+        case reason
+    }
+}
+
 struct ExecutionData: Codable, Sendable {
     let type: String?
     let sequenceId: Int
@@ -3574,6 +3602,84 @@ struct MarketFeedHealthResponse: Codable, Sendable {
     let sessionId: String
     let topic: String?
     let payload: MarketFeedHealthPayload
+
+    enum CodingKeys: String, CodingKey {
+        case type
+        case sequenceId = "sequence_id"
+        case publicId = "public_id"
+        case timestamp
+        case sessionId = "session_id"
+        case topic
+        case payload
+    }
+}
+
+struct MarketSnapshotFreshnessData: Codable, Sendable {
+    let type: String?
+    let sequenceId: Int
+    let publicId: String
+    let timestamp: Date
+    let sessionId: String
+    let topic: String?
+    let requestedInstrumentPublicIds: [String]
+    let configuredFxExchanges: [String]
+    let scopeDigest: String
+    let checkedAt: Date
+    let freshnessReady: Bool
+    let unresolvedFxCurrencies: [String]
+    let instruments: [MarketSnapshotFreshnessItem]
+    let excludedFxInstruments: [ExcludedMarketSnapshotFxInstrument]
+
+    enum CodingKeys: String, CodingKey {
+        case type
+        case sequenceId = "sequence_id"
+        case publicId = "public_id"
+        case timestamp
+        case sessionId = "session_id"
+        case topic
+        case requestedInstrumentPublicIds = "requested_instrument_public_ids"
+        case configuredFxExchanges = "configured_fx_exchanges"
+        case scopeDigest = "scope_digest"
+        case checkedAt = "checked_at"
+        case freshnessReady = "freshness_ready"
+        case unresolvedFxCurrencies = "unresolved_fx_currencies"
+        case instruments
+        case excludedFxInstruments = "excluded_fx_instruments"
+    }
+}
+
+struct MarketSnapshotFreshnessItem: Codable, Sendable {
+    let instrumentPublicId: String
+    let nativeSymbol: String
+    let exchange: String
+    let base: String
+    let quote: String
+    let assetType: String
+    let snapshotTimestamp: Date?
+    let ageSeconds: Double?
+    let reason: FreshnessFailureReason?
+
+    enum CodingKeys: String, CodingKey {
+        case instrumentPublicId = "instrument_public_id"
+        case nativeSymbol = "native_symbol"
+        case exchange
+        case base
+        case quote
+        case assetType = "asset_type"
+        case snapshotTimestamp = "snapshot_timestamp"
+        case ageSeconds = "age_seconds"
+        case reason
+    }
+}
+
+struct MarketSnapshotFreshnessResponse: Codable, Sendable {
+    let type: String?
+    let sequenceId: Int
+    let publicId: String
+    let timestamp: Date
+    let sessionId: String
+    let topic: String?
+    let payload: MarketSnapshotFreshnessData
 
     enum CodingKeys: String, CodingKey {
         case type
