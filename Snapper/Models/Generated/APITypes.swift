@@ -11,6 +11,10 @@ enum FreshnessFailureReason: String, Codable, Sendable {
     case invalidPrice = "invalid_price"
 }
 
+enum FxExclusionReason: String, Codable, Sendable {
+    case fxVenueNotSelected = "fx_venue_not_selected"
+}
+
 enum PnlAttributionOrigin: String, Codable, Sendable {
     case manual
     case plan
