@@ -1146,6 +1146,34 @@ struct AsyncioMetrics: Codable, Sendable {
     }
 }
 
+struct AuthorizationServerMetadata: Codable, Sendable {
+    let issuer: String
+    let authorizationEndpoint: String
+    let tokenEndpoint: String
+    let revocationEndpoint: String
+    let scopesSupported: [String]
+    let responseTypesSupported: [String]
+    let grantTypesSupported: [String]
+    let codeChallengeMethodsSupported: [String]
+    let tokenEndpointAuthMethodsSupported: [String]
+    let revocationEndpointAuthMethodsSupported: [String]
+    let authorizationResponseIssParameterSupported: Bool
+
+    enum CodingKeys: String, CodingKey {
+        case issuer
+        case authorizationEndpoint = "authorization_endpoint"
+        case tokenEndpoint = "token_endpoint"
+        case revocationEndpoint = "revocation_endpoint"
+        case scopesSupported = "scopes_supported"
+        case responseTypesSupported = "response_types_supported"
+        case grantTypesSupported = "grant_types_supported"
+        case codeChallengeMethodsSupported = "code_challenge_methods_supported"
+        case tokenEndpointAuthMethodsSupported = "token_endpoint_auth_methods_supported"
+        case revocationEndpointAuthMethodsSupported = "revocation_endpoint_auth_methods_supported"
+        case authorizationResponseIssParameterSupported = "authorization_response_iss_parameter_supported"
+    }
+}
+
 struct AvailableProcess: Codable, Sendable {
     let type: String?
     let sequenceId: Int
@@ -2065,6 +2093,82 @@ struct ConnectionStats: Codable, Sendable {
         case subscriberTasks = "subscriber_tasks"
         case activeTopics = "active_topics"
         case activeClients = "active_clients"
+    }
+}
+
+struct ConsentOperatorOption: Codable, Sendable {
+    let publicId: String
+    let name: String
+
+    enum CodingKeys: String, CodingKey {
+        case publicId = "public_id"
+        case name
+    }
+}
+
+struct ConsentRedirect: Codable, Sendable {
+    let redirectTo: String
+
+    enum CodingKeys: String, CodingKey {
+        case redirectTo = "redirect_to"
+    }
+}
+
+struct ConsentRedirectResponse: Codable, Sendable {
+    let type: String?
+    let sequenceId: Int
+    let publicId: String
+    let timestamp: Date
+    let sessionId: String
+    let topic: String?
+    let payload: ConsentRedirect
+
+    enum CodingKeys: String, CodingKey {
+        case type
+        case sequenceId = "sequence_id"
+        case publicId = "public_id"
+        case timestamp
+        case sessionId = "session_id"
+        case topic
+        case payload
+    }
+}
+
+struct ConsentRequestDetail: Codable, Sendable {
+    let clientName: String
+    let scopes: [String]
+    let resource: String
+    let operators: [ConsentOperatorOption]
+    let readOnly: Bool?
+    let expiresIn: Int
+
+    enum CodingKeys: String, CodingKey {
+        case clientName = "client_name"
+        case scopes
+        case resource
+        case operators
+        case readOnly = "read_only"
+        case expiresIn = "expires_in"
+    }
+}
+
+struct ConsentRequestResponse: Codable, Sendable {
+    let type: String?
+    let sequenceId: Int
+    let publicId: String
+    let timestamp: Date
+    let sessionId: String
+    let topic: String?
+    let payload: ConsentRequestDetail
+
+    enum CodingKeys: String, CodingKey {
+        case type
+        case sequenceId = "sequence_id"
+        case publicId = "public_id"
+        case timestamp
+        case sessionId = "session_id"
+        case topic
+        case payload
     }
 }
 
@@ -5416,6 +5520,20 @@ struct ProcessSummaryResponse: Codable, Sendable {
     }
 }
 
+struct ProtectedResourceMetadata: Codable, Sendable {
+    let resource: String
+    let authorizationServers: [String]
+    let scopesSupported: [String]
+    let bearerMethodsSupported: [String]
+
+    enum CodingKeys: String, CodingKey {
+        case resource
+        case authorizationServers = "authorization_servers"
+        case scopesSupported = "scopes_supported"
+        case bearerMethodsSupported = "bearer_methods_supported"
+    }
+}
+
 struct PushBetaConfigRead: Codable, Sendable {
     let type: String?
     let sequenceId: Int
@@ -5782,6 +5900,9 @@ struct RetentionRunResponse: Codable, Sendable {
         case topic
         case payload
     }
+}
+
+struct RevocationResponse: Codable, Sendable {
 }
 
 struct RevokeDevicePrefResponse: Codable, Sendable {
@@ -6397,6 +6518,22 @@ struct TableStatsItem: Codable, Sendable {
         case archivable
         case isStale = "is_stale"
         case lastSampledAt = "last_sampled_at"
+    }
+}
+
+struct TokenResponse: Codable, Sendable {
+    let accessToken: String
+    let tokenType: String
+    let expiresIn: Int
+    let scope: String
+    let refreshToken: String?
+
+    enum CodingKeys: String, CodingKey {
+        case accessToken = "access_token"
+        case tokenType = "token_type"
+        case expiresIn = "expires_in"
+        case scope
+        case refreshToken = "refresh_token"
     }
 }
 
@@ -8013,6 +8150,68 @@ struct BracketCancelCommand: Codable, Sendable {
 
 struct BracketCancelBody: Codable, Sendable {
     let reason: String?
+}
+
+struct ConsentApproveRequest: Codable, Sendable {
+    let type: String?
+    let sequenceId: Int
+    let publicId: String
+    let timestamp: Date
+    let sessionId: String
+    let topic: String?
+    let payload: ConsentApproveBody
+
+    enum CodingKeys: String, CodingKey {
+        case type
+        case sequenceId = "sequence_id"
+        case publicId = "public_id"
+        case timestamp
+        case sessionId = "session_id"
+        case topic
+        case payload
+    }
+}
+
+struct ConsentApproveBody: Codable, Sendable {
+    let oauthRequest: String
+    let operatorPublicId: String?
+    let replaceExistingGrant: Bool?
+
+    enum CodingKeys: String, CodingKey {
+        case oauthRequest = "oauth_request"
+        case operatorPublicId = "operator_public_id"
+        case replaceExistingGrant = "replace_existing_grant"
+    }
+}
+
+struct ConsentDenyRequest: Codable, Sendable {
+    let type: String?
+    let sequenceId: Int
+    let publicId: String
+    let timestamp: Date
+    let sessionId: String
+    let topic: String?
+    let payload: ConsentDenyBody
+
+    enum CodingKeys: String, CodingKey {
+        case type
+        case sequenceId = "sequence_id"
+        case publicId = "public_id"
+        case timestamp
+        case sessionId = "session_id"
+        case topic
+        case payload
+    }
+}
+
+struct ConsentDenyBody: Codable, Sendable {
+    let oauthRequest: String
+    let operatorPublicId: String?
+
+    enum CodingKeys: String, CodingKey {
+        case oauthRequest = "oauth_request"
+        case operatorPublicId = "operator_public_id"
+    }
 }
 
 struct CreateOperatorCommand: Codable, Sendable {
