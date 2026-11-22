@@ -67,7 +67,12 @@ final class PnlTimelineViewTests: XCTestCase {
             perInstrument: perInstrument,
             attribution: [],
             carriedInputs: nil,
-            maxCarryAgeMinutes: nil
+            maxCarryAgeMinutes: nil,
+            totalRoundingAdjusted: nil,
+            totalDeviationUlps: nil,
+            absorberDeviationUlps: nil,
+            instrumentAbsorberId: nil,
+            attributionAbsorberKey: nil
         )
     }
 
