@@ -4429,6 +4429,16 @@ struct PnlAttributionContributionData: Codable, Sendable {
     }
 }
 
+struct PnlAttributionKeyData: Codable, Sendable {
+    let origin: PnlAttributionOrigin
+    let strategyName: String?
+
+    enum CodingKeys: String, CodingKey {
+        case origin
+        case strategyName = "strategy_name"
+    }
+}
+
 struct PnlCarriedInputData: Codable, Sendable {
     let instrumentPublicId: String
     let role: PnlCarriedInputRole
@@ -4733,6 +4743,11 @@ struct PnlTimelinePointData: Codable, Sendable {
     let attribution: [PnlAttributionContributionData]
     let carriedInputs: [PnlCarriedInputData]?
     let maxCarryAgeMinutes: Int?
+    let totalRoundingAdjusted: Bool?
+    let totalDeviationUlps: Double?
+    let absorberDeviationUlps: Double?
+    let instrumentAbsorberId: String?
+    let attributionAbsorberKey: PnlAttributionKeyData?
 
     enum CodingKeys: String, CodingKey {
         case pointTime = "point_time"
@@ -4751,6 +4766,11 @@ struct PnlTimelinePointData: Codable, Sendable {
         case attribution
         case carriedInputs = "carried_inputs"
         case maxCarryAgeMinutes = "max_carry_age_minutes"
+        case totalRoundingAdjusted = "total_rounding_adjusted"
+        case totalDeviationUlps = "total_deviation_ulps"
+        case absorberDeviationUlps = "absorber_deviation_ulps"
+        case instrumentAbsorberId = "instrument_absorber_id"
+        case attributionAbsorberKey = "attribution_absorber_key"
     }
 }
 
