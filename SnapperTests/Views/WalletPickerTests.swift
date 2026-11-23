@@ -96,8 +96,8 @@ final class WalletPickerTests: XCTestCase {
             "User-controlled label must lead the rendered string in every locale; got \(myRendered)"
         )
         XCTAssertTrue(
-            myRendered.contains("စက္ကူ"),
-            "Burmese paperLabel must render the native `(စက္ကူ)` suffix; got \(myRendered)"
+            myRendered.contains("စမ်းသပ်"),
+            "Burmese paperLabel must render the native `(စမ်းသပ်)` suffix; got \(myRendered)"
         )
     }
 
