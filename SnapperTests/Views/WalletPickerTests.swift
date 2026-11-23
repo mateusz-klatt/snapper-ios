@@ -83,11 +83,11 @@ final class WalletPickerTests: XCTestCase {
         XCTAssertNotEqual(
             plRendered,
             "firm (paper)",
-            "Polish paperLabel must NOT fall back to the English suffix; the catalog value is `%@ (papierowy)`."
+            "Polish paperLabel must NOT fall back to the English suffix; the catalog value is `%@ (demo)`."
         )
         XCTAssertTrue(
-            plRendered.contains("papierowy"),
-            "Polish paperLabel must render the native `(papierowy)` suffix; got \(plRendered)"
+            plRendered.contains("(demo)"),
+            "Polish paperLabel must render the native `(demo)` suffix; got \(plRendered)"
         )
 
         let myRendered = WalletPickerViewModel.walletDisplayName(paper, language: .my)
@@ -96,8 +96,8 @@ final class WalletPickerTests: XCTestCase {
             "User-controlled label must lead the rendered string in every locale; got \(myRendered)"
         )
         XCTAssertTrue(
-            myRendered.contains("စက္ကူ"),
-            "Burmese paperLabel must render the native `(စက္ကူ)` suffix; got \(myRendered)"
+            myRendered.contains("စမ်းသပ်"),
+            "Burmese paperLabel must render the native `(စမ်းသပ်)` suffix; got \(myRendered)"
         )
     }
 
