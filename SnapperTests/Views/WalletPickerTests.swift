@@ -83,11 +83,11 @@ final class WalletPickerTests: XCTestCase {
         XCTAssertNotEqual(
             plRendered,
             "firm (paper)",
-            "Polish paperLabel must NOT fall back to the English suffix; the catalog value is `%@ (papierowy)`."
+            "Polish paperLabel must NOT fall back to the English suffix; the catalog value is `%@ (demo)`."
         )
         XCTAssertTrue(
-            plRendered.contains("papierowy"),
-            "Polish paperLabel must render the native `(papierowy)` suffix; got \(plRendered)"
+            plRendered.contains("(demo)"),
+            "Polish paperLabel must render the native `(demo)` suffix; got \(plRendered)"
         )
 
         let myRendered = WalletPickerViewModel.walletDisplayName(paper, language: .my)

@@ -179,7 +179,7 @@ final class OrdersViewTests: XCTestCase {
         )
         XCTAssertEqual(
             OrdersView.cancelConfirmationMessage(for: order, locale: .pl),
-            "BTCUSD BUY 1,0000 @ rynkowa zostanie anulowane na giełdzie."
+            "BTCUSD BUY 1,0000 @ rynkowa zostanie anulowane na platformie."
         )
     }
 
