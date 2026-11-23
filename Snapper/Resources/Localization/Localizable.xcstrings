@@ -113232,7 +113232,7 @@
         "fil": {
           "stringUnit": {
             "state": "translated",
-            "value": "Cryptocurrency"
+            "value": "Kriptosalapi"
           }
         },
         "fr": {
@@ -113453,19 +113453,19 @@
         "bs": {
           "stringUnit": {
             "state": "translated",
-            "value": "Forex"
+            "value": "Devizno tržište"
           }
         },
         "cs": {
           "stringUnit": {
             "state": "translated",
-            "value": "Forex"
+            "value": "Devizový trh"
           }
         },
         "da": {
           "stringUnit": {
             "state": "translated",
-            "value": "Forex"
+            "value": "Valuta"
           }
         },
         "de": {
@@ -113477,7 +113477,7 @@
         "el": {
           "stringUnit": {
             "state": "translated",
-            "value": "Forex"
+            "value": "Συνάλλαγμα"
           }
         },
         "en": {
@@ -113489,7 +113489,7 @@
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Forex"
+            "value": "Divisas"
           }
         },
         "fa": {
@@ -113507,13 +113507,13 @@
         "fil": {
           "stringUnit": {
             "state": "translated",
-            "value": "Forex"
+            "value": "Palitan ng salapi"
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Forex"
+            "value": "Devises"
           }
         },
         "ga": {
@@ -113537,13 +113537,13 @@
         "hr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Forex"
+            "value": "Devizno tržište"
           }
         },
         "hu": {
           "stringUnit": {
             "state": "translated",
-            "value": "Forex"
+            "value": "Devizapiac"
           }
         },
         "hy": {
@@ -113555,7 +113555,7 @@
         "id": {
           "stringUnit": {
             "state": "translated",
-            "value": "Forex"
+            "value": "Valuta asing"
           }
         },
         "is": {
@@ -113567,7 +113567,7 @@
         "it": {
           "stringUnit": {
             "state": "translated",
-            "value": "Forex"
+            "value": "Valute"
           }
         },
         "ja": {
@@ -113585,19 +113585,19 @@
         "lt": {
           "stringUnit": {
             "state": "translated",
-            "value": "Forex"
+            "value": "Užsienio valiutos"
           }
         },
         "lv": {
           "stringUnit": {
             "state": "translated",
-            "value": "Forex"
+            "value": "Ārvalstu valūtas"
           }
         },
         "ms": {
           "stringUnit": {
             "state": "translated",
-            "value": "Forex"
+            "value": "Pertukaran asing"
           }
         },
         "my": {
@@ -113609,7 +113609,7 @@
         "nl": {
           "stringUnit": {
             "state": "translated",
-            "value": "Forex"
+            "value": "Valuta"
           }
         },
         "nb": {
@@ -113621,19 +113621,19 @@
         "pl": {
           "stringUnit": {
             "state": "translated",
-            "value": "Forex"
+            "value": "Rynek walutowy"
           }
         },
         "pt-BR": {
           "stringUnit": {
             "state": "translated",
-            "value": "Forex"
+            "value": "Câmbio"
           }
         },
         "ro": {
           "stringUnit": {
             "state": "translated",
-            "value": "Forex"
+            "value": "Piața valutară"
           }
         },
         "ru": {
@@ -113645,31 +113645,31 @@
         "sk": {
           "stringUnit": {
             "state": "translated",
-            "value": "Forex"
+            "value": "Devízový trh"
           }
         },
         "sq": {
           "stringUnit": {
             "state": "translated",
-            "value": "Forex"
+            "value": "Këmbim valutor"
           }
         },
         "sr-Latn": {
           "stringUnit": {
             "state": "translated",
-            "value": "Forex"
+            "value": "Devizno tržište"
           }
         },
         "sv": {
           "stringUnit": {
             "state": "translated",
-            "value": "Forex"
+            "value": "Valuta"
           }
         },
         "sw": {
           "stringUnit": {
             "state": "translated",
-            "value": "Forex"
+            "value": "Fedha za kigeni"
           }
         },
         "th": {
@@ -113681,7 +113681,7 @@
         "tr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Forex"
+            "value": "Döviz"
           }
         },
         "uk": {
@@ -113693,7 +113693,7 @@
         "vi": {
           "stringUnit": {
             "state": "translated",
-            "value": "Forex"
+            "value": "Ngoại hối"
           }
         },
         "zh-Hans": {
@@ -114332,7 +114332,7 @@
         "fil": {
           "stringUnit": {
             "state": "translated",
-            "value": "Yield"
+            "value": "Kita"
           }
         },
         "fr": {
@@ -114978,7 +114978,7 @@
         "my": {
           "stringUnit": {
             "state": "translated",
-            "value": "အင်စထရူးမင့် ဖော်ပြချက်"
+            "value": "ကုန်သွယ်ပစ္စည်း ဖော်ပြချက်"
           }
         },
         "nl": {
@@ -115020,7 +115020,7 @@
         "sk": {
           "stringUnit": {
             "state": "translated",
-            "value": "Popis nástroja"
+            "value": "Popis inštrumentu"
           }
         },
         "sq": {
@@ -115044,7 +115044,7 @@
         "sw": {
           "stringUnit": {
             "state": "translated",
-            "value": "Maelezo ya chombo"
+            "value": "Maelezo ya chombo cha kifedha"
           }
         },
         "th": {
@@ -117602,7 +117602,7 @@
         "el": {
           "stringUnit": {
             "state": "translated",
-            "value": "Δεν έχουν διαμορφωθεί σχετικά μέσα για %1$@ στην αγορά %2$@."
+            "value": "Δεν έχουν διαμορφωθεί σχετικά μέσα για %1$@ στο ανταλλακτήριο %2$@."
           }
         },
         "en": {
@@ -117728,7 +117728,7 @@
         "my": {
           "stringUnit": {
             "state": "translated",
-            "value": "%2$@ ပေါ်ရှိ %1$@ အတွက် related instrument များ configure မလုပ်ထားပါ။"
+            "value": "%2$@ ပေါ်ရှိ %1$@ အတွက် related ကုန်သွယ်ပစ္စည်း များ configure မလုပ်ထားပါ။"
           }
         },
         "nl": {
@@ -117794,7 +117794,7 @@
         "sw": {
           "stringUnit": {
             "state": "translated",
-            "value": "Hakuna instrumenti zinazohusiana zilizosanidiwa kwa %1$@ kwenye %2$@."
+            "value": "Hakuna vyombo vya kifedha vinavyohusiana vilivyosanidiwa kwa %1$@ kwenye %2$@."
           }
         },
         "th": {
@@ -120041,43 +120041,43 @@
         "ar": {
           "stringUnit": {
             "state": "translated",
-            "value": "(مشتق من 1m)"
+            "value": "(مشتق من 1 د)"
           }
         },
         "bn": {
           "stringUnit": {
             "state": "translated",
-            "value": "(1m থেকে derived)"
+            "value": "(1 মিঃ থেকে derived)"
           }
         },
         "bs": {
           "stringUnit": {
             "state": "translated",
-            "value": "(izvedeno iz 1m)"
+            "value": "(izvedeno iz 1 min)"
           }
         },
         "cs": {
           "stringUnit": {
             "state": "translated",
-            "value": "(odvozeno z 1m)"
+            "value": "(odvozeno z 1 min)"
           }
         },
         "da": {
           "stringUnit": {
             "state": "translated",
-            "value": "(afledt fra 1m)"
+            "value": "(afledt fra 1 min)"
           }
         },
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "(abgeleitet aus 1m)"
+            "value": "(abgeleitet aus 1 min)"
           }
         },
         "el": {
           "stringUnit": {
             "state": "translated",
-            "value": "(παράγεται από 1m)"
+            "value": "(παράγεται από 1 λεπ.)"
           }
         },
         "en": {
@@ -120089,85 +120089,85 @@
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "(derivadas de 1m)"
+            "value": "(derivadas de 1 min)"
           }
         },
         "fa": {
           "stringUnit": {
             "state": "translated",
-            "value": "(مشتق‌شده از 1m)"
+            "value": "(مشتق‌شده از 1 د)"
           }
         },
         "fi": {
           "stringUnit": {
             "state": "translated",
-            "value": "(johdettu 1m-datasta)"
+            "value": "(johdettu 1 min-datasta)"
           }
         },
         "fil": {
           "stringUnit": {
             "state": "translated",
-            "value": "(derived mula sa 1m)"
+            "value": "(derived mula sa 1 min)"
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "(dérivé du 1m)"
+            "value": "(dérivé du 1 min)"
           }
         },
         "ga": {
           "stringUnit": {
             "state": "translated",
-            "value": "(díorthaithe ó 1m)"
+            "value": "(díorthaithe ó 1 nóim)"
           }
         },
         "he": {
           "stringUnit": {
             "state": "translated",
-            "value": "(נגזר מ-1m)"
+            "value": "(נגזר מ-1 דק׳)"
           }
         },
         "hi": {
           "stringUnit": {
             "state": "translated",
-            "value": "(1m से व्युत्पन्न)"
+            "value": "(1 मि से व्युत्पन्न)"
           }
         },
         "hr": {
           "stringUnit": {
             "state": "translated",
-            "value": "(izvedeno iz 1m)"
+            "value": "(izvedeno iz 1 min)"
           }
         },
         "hu": {
           "stringUnit": {
             "state": "translated",
-            "value": "(1m-ből származtatva)"
+            "value": "(1 p-ből származtatva)"
           }
         },
         "hy": {
           "stringUnit": {
             "state": "translated",
-            "value": "(ստացված է 1m-ից)"
+            "value": "(ստացված է 1 ր-ից)"
           }
         },
         "id": {
           "stringUnit": {
             "state": "translated",
-            "value": "(diturunkan dari 1m)"
+            "value": "(diturunkan dari 1 mnt)"
           }
         },
         "is": {
           "stringUnit": {
             "state": "translated",
-            "value": "(leitt af 1m)"
+            "value": "(leitt af 1 mín.)"
           }
         },
         "it": {
           "stringUnit": {
             "state": "translated",
-            "value": "(derivate da 1m)"
+            "value": "(derivate da 1 min)"
           }
         },
         "ja": {
@@ -120185,127 +120185,127 @@
         "lt": {
           "stringUnit": {
             "state": "translated",
-            "value": "(išvesta iš 1m)"
+            "value": "(išvesta iš 1 min)"
           }
         },
         "lv": {
           "stringUnit": {
             "state": "translated",
-            "value": "(atvasināts no 1m)"
+            "value": "(atvasināts no 1 min)"
           }
         },
         "ms": {
           "stringUnit": {
             "state": "translated",
-            "value": "(diterbitkan daripada 1m)"
+            "value": "(diterbitkan daripada 1 min)"
           }
         },
         "my": {
           "stringUnit": {
             "state": "translated",
-            "value": "(1m မှ derive လုပ်ထားသည်)"
+            "value": "(1 မိနစ် မှ derive လုပ်ထားသည်)"
           }
         },
         "nl": {
           "stringUnit": {
             "state": "translated",
-            "value": "(afgeleid van 1m)"
+            "value": "(afgeleid van 1 min)"
           }
         },
         "nb": {
           "stringUnit": {
             "state": "translated",
-            "value": "(avledet fra 1m)"
+            "value": "(avledet fra 1 min)"
           }
         },
         "pl": {
           "stringUnit": {
             "state": "translated",
-            "value": "(zagregowane z 1m)"
+            "value": "(zagregowane z 1 min)"
           }
         },
         "pt-BR": {
           "stringUnit": {
             "state": "translated",
-            "value": "(derivado de 1m)"
+            "value": "(derivado de 1 min)"
           }
         },
         "ro": {
           "stringUnit": {
             "state": "translated",
-            "value": "(derivat din 1m)"
+            "value": "(derivat din 1 min)"
           }
         },
         "ru": {
           "stringUnit": {
             "state": "translated",
-            "value": "(агрегировано из 1m)"
+            "value": "(агрегировано из 1 мин)"
           }
         },
         "sk": {
           "stringUnit": {
             "state": "translated",
-            "value": "(odvodené z 1m)"
+            "value": "(odvodené z 1 min)"
           }
         },
         "sq": {
           "stringUnit": {
             "state": "translated",
-            "value": "(nxjerrë nga 1m)"
+            "value": "(nxjerrë nga 1 min)"
           }
         },
         "sr-Latn": {
           "stringUnit": {
             "state": "translated",
-            "value": "(izvedeno iz 1m)"
+            "value": "(izvedeno iz 1 min)"
           }
         },
         "sv": {
           "stringUnit": {
             "state": "translated",
-            "value": "(härlett från 1m)"
+            "value": "(härlett från 1 min)"
           }
         },
         "sw": {
           "stringUnit": {
             "state": "translated",
-            "value": "(imetokana na 1m)"
+            "value": "(imetokana na dak 1)"
           }
         },
         "th": {
           "stringUnit": {
             "state": "translated",
-            "value": "(คำนวณจาก 1m)"
+            "value": "(คำนวณจาก 1 นาที)"
           }
         },
         "tr": {
           "stringUnit": {
             "state": "translated",
-            "value": "(1m'den türetildi)"
+            "value": "(1 dk. verisinden türetildi)"
           }
         },
         "uk": {
           "stringUnit": {
             "state": "translated",
-            "value": "(похідні з 1m)"
+            "value": "(похідні з 1 хв)"
           }
         },
         "vi": {
           "stringUnit": {
             "state": "translated",
-            "value": "(suy ra từ 1m)"
+            "value": "(suy ra từ 1 phút)"
           }
         },
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "(由 1m 派生)"
+            "value": "(由 1分钟 派生)"
           }
         },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
-            "value": "(由 1m 衍生)"
+            "value": "(由 1分鐘 衍生)"
           }
         }
       }
@@ -120352,7 +120352,7 @@
         "el": {
           "stringUnit": {
             "state": "translated",
-            "value": "Στατιστικά ζεύγους με %1$@ στην αγορά %2$@: Pearson %3$@, τιμή p %4$@"
+            "value": "Στατιστικά ζεύγους με %1$@ στο ανταλλακτήριο %2$@: Pearson %3$@, τιμή p %4$@"
           }
         },
         "en": {
