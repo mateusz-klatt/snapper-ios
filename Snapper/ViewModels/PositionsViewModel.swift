@@ -102,7 +102,7 @@ final class PositionsViewModel {
     func submitMarketReduce(position: PositionSnapshot, quantity: Double) async -> Bool {
         guard let command = Self.makeReduceCommand(position: position, quantity: quantity) else {
             logger.error("Refusing to submit reduce/close: position missing instrument or wallet public id")
-            submitError = "Position is missing the wallet or instrument identifier the backend requires. Try refreshing the positions list."
+            submitError = LocaleStrings.localized("positions.error.missingIdentifiers", in: appState.locale.catalogLanguage)
             return false
         }
         do {
@@ -111,7 +111,7 @@ final class PositionsViewModel {
             return true
         } catch {
             logger.error("Failed to submit reduce/close: \(error.localizedDescription, privacy: .public)")
-            submitError = "Couldn't submit the order. Try again."
+            submitError = LocaleStrings.localized("trading.order.error.submitFailed", in: appState.locale.catalogLanguage)
             return false
         }
     }
@@ -124,7 +124,7 @@ final class PositionsViewModel {
         idempotencyKey: String
     ) async -> Bool {
         guard let cycleId = position.positionCyclePublicId else {
-            submitError = "Position has no active cycle to attach a bracket to."
+            submitError = LocaleStrings.localized("trading.bracket.error.noActiveCycle", in: appState.locale.catalogLanguage)
             return false
         }
         do {
@@ -139,7 +139,7 @@ final class PositionsViewModel {
             return true
         } catch {
             logger.error("Failed to submit bracket: \(error.localizedDescription, privacy: .public)")
-            submitError = "Couldn't attach bracket. Try again."
+            submitError = LocaleStrings.localized("trading.bracket.error.attachFailed", in: appState.locale.catalogLanguage)
             return false
         }
     }
@@ -152,7 +152,7 @@ final class PositionsViewModel {
         idempotencyKey: String
     ) async -> Bool {
         guard let cycleId = position.positionCyclePublicId else {
-            submitError = "Position has no active cycle to attach a trailing stop to."
+            submitError = LocaleStrings.localized("trading.trailingStop.error.noActiveCycle", in: appState.locale.catalogLanguage)
             return false
         }
         do {
@@ -167,7 +167,7 @@ final class PositionsViewModel {
             return true
         } catch {
             logger.error("Failed to submit trailing stop: \(error.localizedDescription, privacy: .public)")
-            submitError = "Couldn't attach trailing stop. Try again."
+            submitError = LocaleStrings.localized("trading.trailingStop.error.attachFailed", in: appState.locale.catalogLanguage)
             return false
         }
     }

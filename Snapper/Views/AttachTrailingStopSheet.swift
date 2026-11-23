@@ -28,7 +28,7 @@ struct AttachTrailingStopSheet: View {
                     HStack {
                         Text(position.instrument).font(.headline)
                         Spacer()
-                        Text("\(PositionCard.direction(for: position.quantity)) \(position.quantity.formattedDecimal(in: appState.locale, fractionDigits: 4))")
+                        Text("\(PositionCard.direction(for: position.quantity, in: appState.locale.catalogLanguage)) \(position.quantity.formattedDecimal(in: appState.locale, fractionDigits: 4))")
                             .foregroundStyle(.secondary)
                     }
                 }

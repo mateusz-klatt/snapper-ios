@@ -162,7 +162,7 @@ struct SettingsView: View {
                                 if isRetrying {
                                     ProgressView()
                                 }
-                                Text(isRetrying ? "Retrying…" : "Retry registration")
+                                Text(LocalizedStringKey(isRetrying ? "settings.notifications.retrying" : "settings.notifications.retryRegistration"))
                             }
                         }
                         .disabled(isRetrying || !authService.hasPermission(.manageSelfAccount))
@@ -177,14 +177,14 @@ struct SettingsView: View {
                     HStack {
                         Text(LocalizedStringKey("settings.appInfo.version"))
                         Spacer()
-                        Text(Bundle.main.appVersion)
+                        Text(Bundle.main.appVersion(in: appState.locale.catalogLanguage))
                             .foregroundColor(.secondary)
                     }
 
                     HStack {
                         Text(LocalizedStringKey("settings.appInfo.build"))
                         Spacer()
-                        Text(Bundle.main.buildVersion)
+                        Text(Bundle.main.buildVersion(in: appState.locale.catalogLanguage))
                             .foregroundColor(.secondary)
                     }
                 }
@@ -425,7 +425,7 @@ struct SettingsView: View {
                     .font(.caption)
                     .foregroundColor(.secondary)
             case .failed(let attempt, _):
-                Text("Failed (attempt \(attempt))")
+                Text(verbatim: Self.registrationFailureMessage(attempt: attempt, locale: appState.locale))
                     .font(.caption)
                     .foregroundColor(.brandRed)
             case .awaitingLogin, .awaitingToken, .idle:
@@ -434,6 +434,14 @@ struct SettingsView: View {
                     .foregroundColor(.secondary)
             }
         }
+    }
+
+    static func registrationFailureMessage(attempt: Int, locale: AppLocale) -> String {
+        return String(
+            format: LocaleStrings.localized("settings.notifications.registrationFailed", in: locale.catalogLanguage),
+            locale: locale.nativeLocale,
+            Int64(attempt)
+        )
     }
 
     private func triggerRetry() {
@@ -456,12 +464,12 @@ struct SettingsView: View {
 }
 
 extension Bundle {
-    var appVersion: String {
-        return infoDictionary?["CFBundleShortVersionString"] as? String ?? "Unknown"
+    func appVersion(in language: CatalogLanguage = .en) -> String {
+        return infoDictionary?["CFBundleShortVersionString"] as? String ?? LocaleStrings.localized("common.unknown", in: language)
     }
 
-    var buildVersion: String {
-        return infoDictionary?["CFBundleVersion"] as? String ?? "Unknown"
+    func buildVersion(in language: CatalogLanguage = .en) -> String {
+        return infoDictionary?["CFBundleVersion"] as? String ?? LocaleStrings.localized("common.unknown", in: language)
     }
 }
 

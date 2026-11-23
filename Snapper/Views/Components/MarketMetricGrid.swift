@@ -110,10 +110,17 @@ struct MarketMetricCard: View {
 /// - "Live" badge when ``isReady`` is true and no error is
 ///   present.
 struct MarketStatusRow: View {
+    @Environment(AppState.self) private var appState
+
     let isDelayed: Bool
     let isReady: Bool
     let isLoading: Bool
     let loadError: APIError?
+
+    static func loadErrorMessage(errorDescription: String?, language: CatalogLanguage) -> String {
+        return errorDescription
+            ?? LocaleStrings.localized("market.data.error.loadFailed", in: language)
+    }
 
     var body: some View {
         HStack(spacing: 8) {
@@ -125,7 +132,7 @@ struct MarketStatusRow: View {
             } else if let loadError {
                 Image(systemName: "exclamationmark.triangle.fill")
                     .foregroundColor(.brandRed)
-                Text(loadError.errorDescription ?? "Failed to load")
+                Text(Self.loadErrorMessage(errorDescription: loadError.errorDescription, language: appState.locale.catalogLanguage))
                     .font(.caption)
                     .foregroundColor(.brandRed)
                     .lineLimit(2)

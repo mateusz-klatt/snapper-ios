@@ -46,7 +46,12 @@ struct AlertRow: View {
             }
         }
         .accessibilityElement(children: .combine)
-        .accessibilityLabel("\(displayTitle). \(displayBody). \(alert.priority) priority.")
+        .accessibilityLabel(String(
+            format: LocaleStrings.localized("alerts.accessibility.label.row", in: locale.catalogLanguage),
+            displayTitle,
+            displayBody,
+            alert.priority
+        ))
     }
 
     private var displayTitle: String {

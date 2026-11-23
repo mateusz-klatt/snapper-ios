@@ -223,14 +223,14 @@ final class OrdersViewModel {
         } catch {
             guard newOrderPresentation?.id == presentationID else { return false }
             logger.error("Failed to submit new order: \(error.localizedDescription, privacy: .public)")
-            submitError = "Couldn't submit the order. Try again."
+            submitError = LocaleStrings.localized("trading.order.error.submitFailed", in: appState.locale.catalogLanguage)
             return false
         }
     }
 
     func submitCancel(order: OrderStatus) async {
         guard let planId = order.planPublicId else {
-            submitError = "This order has no execution plan to cancel."
+            submitError = LocaleStrings.localized("orders.error.missingExecutionPlan", in: appState.locale.catalogLanguage)
             return
         }
         do {
@@ -238,7 +238,7 @@ final class OrdersViewModel {
             await load()
         } catch {
             logger.error("Failed to cancel order: \(error.localizedDescription, privacy: .public)")
-            submitError = "Couldn't cancel the order. Try again."
+            submitError = LocaleStrings.localized("orders.error.cancelFailed", in: appState.locale.catalogLanguage)
         }
     }
     /// Backward-compatible test contract.

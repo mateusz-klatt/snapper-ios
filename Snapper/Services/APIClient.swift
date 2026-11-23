@@ -998,13 +998,18 @@ enum APIError: LocalizedError {
     case serverError(String)
 
     var errorDescription: String? {
+        let language = LocaleResolver.resolveInitialLocale(
+            userDefaults: .standard,
+            preferredLanguages: Locale.preferredLanguages,
+            localeKey: "snapper-locale"
+        ).catalogLanguage
         switch self {
         case .invalidURL:
-            return "Invalid URL"
+            return LocaleStrings.localized("errors.api.invalidURL", in: language)
         case .invalidResponse:
-            return "Invalid response from server"
+            return LocaleStrings.localized("errors.api.invalidResponse", in: language)
         case .httpError(let code):
-            return "HTTP error: \(code)"
+            return String(format: LocaleStrings.localized("errors.api.http", in: language), Int64(code))
         case .serverError(let message):
             return message
         }

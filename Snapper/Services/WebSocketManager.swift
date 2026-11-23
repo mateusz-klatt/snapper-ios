@@ -94,7 +94,7 @@ class WebSocketManager: ObservableObject {
         if case .authFailed = connectionState { return }
 
         guard let url = URL(string: webSocketURLProvider()) else {
-            connectionState = .error("Invalid WebSocket URL")
+            connectionState = .error(LocaleStrings.localized("errors.websocket.invalidURL", in: AppState.shared.locale.catalogLanguage))
             return
         }
 
@@ -328,7 +328,9 @@ class WebSocketManager: ObservableObject {
             /// Server rejection is also terminal — route through the same
             /// logout flow as client-side refresh failure so the UI
             /// consistently falls back to LoginView.
-            Task { await self.enterAuthFailedAndLogout(reason: "Server rejected auth: \(reason)") }
+            let language = AppState.shared.locale.catalogLanguage
+            let detail = json["reason"] as? String ?? LocaleStrings.localized("errors.websocket.unknownReason", in: language)
+            Task { await self.enterAuthFailedAndLogout(reason: String(format: LocaleStrings.localized("errors.websocket.authRejected", in: language), detail)) }
 
         case "reauth_required":
             Task { await self.performReauthentication() }
@@ -549,7 +551,7 @@ class WebSocketManager: ObservableObject {
         guard isLiveSession else { return }
         guard let token = token else {
             logger.error("Failed to get ws_token for WebSocket auth — forcing logout")
-            await enterAuthFailedAndLogout(reason: "Token refresh failed")
+            await enterAuthFailedAndLogout(reason: LocaleStrings.localized("errors.websocket.tokenRefresh", in: AppState.shared.locale.catalogLanguage))
             return
         }
         sendEnvelope(["type": "authenticate", "ws_token": token], counter: .control)
@@ -560,7 +562,7 @@ class WebSocketManager: ObservableObject {
         guard isLiveSession else { return }
         guard let token = token else {
             logger.error("Failed to get ws_token for reauth — forcing logout")
-            await enterAuthFailedAndLogout(reason: "Token refresh failed")
+            await enterAuthFailedAndLogout(reason: LocaleStrings.localized("errors.websocket.tokenRefresh", in: AppState.shared.locale.catalogLanguage))
             return
         }
         sendEnvelope(["type": "reauth", "ws_token": token], counter: .control)

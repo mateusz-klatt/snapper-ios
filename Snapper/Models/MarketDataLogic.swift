@@ -227,20 +227,17 @@ enum CacheWarmingBannerLogic {
         let sampleLabel = String(cacheState.sampleCount)
         let expectedLabel = String(expected)
         let sourceSuffix = localizedSourceSuffix(source: cacheState.source, lang: lang)
-        let template = LocaleStrings.localized("market.cacheBanner.message", in: lang)
-        let rendered: String
-        if template == "market.cacheBanner.message" {
-            let trail = sourceSuffix.isEmpty ? "" : " \(sourceSuffix)"
-            rendered = "Cache warming up: \(sampleLabel) / \(expectedLabel) candles available\(trail)"
-        } else {
-            rendered = String(
-                format: template,
-                locale: Locale(identifier: lang.rawValue),
-                sampleLabel,
-                expectedLabel,
-                sourceSuffix
-            )
-        }
+        let template = LocaleStrings.englishTemplateOnCatalogMiss(
+            LocaleStrings.localized("market.cacheBanner.message", in: lang),
+            key: "market.cacheBanner.message"
+        )
+        let rendered = String(
+            format: template,
+            locale: Locale(identifier: lang.rawValue),
+            sampleLabel,
+            expectedLabel,
+            sourceSuffix
+        )
         /// Trim the trailing whitespace that the catalog template
         /// leaves dangling for ``source == "cache"`` (the suffix
         /// slot is the empty string in EN; the template ends with

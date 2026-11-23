@@ -33,6 +33,12 @@ enum LocaleStrings {
         return key
     }
 
+    /// Resolve a catalog miss to the English template while preserving
+    /// an already-localized value verbatim.
+    static func englishTemplateOnCatalogMiss(_ template: String, key: String) -> String {
+        return template == key ? localized(key, in: .en) : template
+    }
+
     /// Resolve ``key`` against a specific lproj folder. Returns ``nil``
     /// when either the resource path or the lookup itself misses
     /// (``NSLocalizedString`` echoes the key on miss, so we

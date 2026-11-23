@@ -118,7 +118,7 @@ struct PositionsView: View {
             }
         }
         .confirmationDialog(
-            actionSheetPosition.map { "\($0.instrument) on \($0.exchange)" } ?? "",
+            Self.actionSheetTitle(for: actionSheetPosition, in: appState.locale.catalogLanguage),
             isPresented: Binding(
                 get: { actionSheetPosition != nil },
                 set: { if !$0 { actionSheetPosition = nil } }
@@ -150,11 +150,11 @@ struct PositionsView: View {
             }
         } message: { position in
             Text(
-                "\(PositionCard.direction(for: position.quantity)) \(position.quantity.formattedDecimal(in: appState.locale, fractionDigits: 4)) @ \(position.averagePrice?.formattedDecimal(in: appState.locale, fractionDigits: 4) ?? "—")"
+                "\(PositionCard.direction(for: position.quantity, in: appState.locale.catalogLanguage)) \(position.quantity.formattedDecimal(in: appState.locale, fractionDigits: 4)) @ \(position.averagePrice?.formattedDecimal(in: appState.locale, fractionDigits: 4) ?? "—")"
             )
         }
         .alert(
-            "Close \(pendingClosePosition?.instrument ?? "position")?",
+            Self.closeConfirmationTitle(for: pendingClosePosition, in: appState.locale.catalogLanguage),
             isPresented: Binding(
                 get: { pendingClosePosition != nil },
                 set: { if !$0 { pendingClosePosition = nil } }
@@ -168,9 +168,7 @@ struct PositionsView: View {
                 pendingClosePosition = nil
             }
         } message: { position in
-            Text(
-                "Submits a reduce-only market order for \(abs(position.quantity).formattedDecimal(in: appState.locale, fractionDigits: 4)) \(position.instrument)."
-            )
+            Text(Self.closeSubmitMessage(for: position, locale: appState.locale))
         }
         .sheet(item: $reduceModalPosition) { wrapper in
             ReducePositionView(
@@ -220,6 +218,31 @@ struct PositionsView: View {
         } message: { error in
             Text(error)
         }
+    }
+
+    static func actionSheetTitle(for position: PositionSnapshot?, in language: CatalogLanguage) -> String {
+        guard let position else { return "" }
+        return String(
+            format: LocaleStrings.localized("positions.row.actions.instrumentExchange", in: language),
+            position.instrument,
+            position.exchange
+        )
+    }
+
+    static func closeConfirmationTitle(for position: PositionSnapshot?, in language: CatalogLanguage) -> String {
+        return String(
+            format: LocaleStrings.localized("positions.close.confirmTitle", in: language),
+            position?.instrument
+                ?? LocaleStrings.localized("positions.close.positionFallback", in: language)
+        )
+    }
+
+    static func closeSubmitMessage(for position: PositionSnapshot, locale: AppLocale) -> String {
+        return String(
+            format: LocaleStrings.localized("positions.close.submitMessage", in: locale.catalogLanguage),
+            abs(position.quantity).formattedDecimal(in: locale, fractionDigits: 4),
+            position.instrument
+        )
     }
 }
 
@@ -271,7 +294,7 @@ struct ReducePositionView: View {
                         Text(position.instrument)
                             .font(.headline)
                         Spacer()
-                        Text("\(PositionCard.direction(for: position.quantity)) \(position.quantity.formattedDecimal(in: appState.locale, fractionDigits: 4))")
+                        Text("\(PositionCard.direction(for: position.quantity, in: appState.locale.catalogLanguage)) \(position.quantity.formattedDecimal(in: appState.locale, fractionDigits: 4))")
                             .foregroundStyle(.secondary)
                     }
                     HStack {
@@ -368,14 +391,14 @@ struct PositionCard: View {
         .contentShape(Rectangle())
     }
 
-    static func direction(for quantity: Double) -> String {
-        if quantity > 0 { return "Long" }
-        if quantity < 0 { return "Short" }
-        return "Flat"
+    static func direction(for quantity: Double, in language: CatalogLanguage = .en) -> String {
+        if quantity > 0 { return LocaleStrings.localized("positions.direction.long", in: language) }
+        if quantity < 0 { return LocaleStrings.localized("positions.direction.short", in: language) }
+        return LocaleStrings.localized("positions.direction.flat", in: language)
     }
 
     private var directionLabel: String {
-        return "\(Self.direction(for: position.quantity)) · \(position.quantity.formattedDecimal(in: appState.locale, fractionDigits: 4))"
+        return "\(Self.direction(for: position.quantity, in: appState.locale.catalogLanguage)) · \(position.quantity.formattedDecimal(in: appState.locale, fractionDigits: 4))"
     }
 
     private var directionColor: Color {

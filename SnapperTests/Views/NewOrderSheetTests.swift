@@ -154,6 +154,14 @@ final class NewOrderSheetTests: XCTestCase {
         XCTAssertEqual(NewOrderSheetViewModel.displayName(forOrderType: "iceberg"), "iceberg")
     }
 
+    func testDisplayNameLocalizesOrderTypesInPolish() {
+        XCTAssertEqual(NewOrderSheetViewModel.displayName(forOrderType: "limit", in: .pl), "Limitowane")
+        XCTAssertEqual(NewOrderSheetViewModel.displayName(forOrderType: "market", in: .pl), "Rynkowe")
+        XCTAssertEqual(NewOrderSheetViewModel.displayName(forOrderType: "stop", in: .pl), "Stop")
+        XCTAssertEqual(NewOrderSheetViewModel.displayName(forOrderType: "stop_limit", in: .pl), "Stop limitowane")
+        XCTAssertEqual(NewOrderSheetViewModel.displayName(forOrderType: "iceberg", in: .pl), "iceberg")
+    }
+
     func testParsePositiveHandlesWhitespaceCommaAndInvalidValues() {
         XCTAssertEqual(NewOrderSheetViewModel.parsePositive(" 1,25 "), 1.25)
         XCTAssertEqual(NewOrderSheetViewModel.parsePositive("\n 1,25\t"), 1.25)

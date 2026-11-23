@@ -178,7 +178,7 @@ struct OrdersView: View {
                 pendingCancelOrder = nil
             }
         } message: { order in
-            Text("\(order.instrument) \(order.side.uppercased()) \(order.size.formattedDecimal(in: appState.locale, fractionDigits: 4)) @ \(order.price.map { $0.formattedDecimal(in: appState.locale, fractionDigits: 4) } ?? "market") will be cancelled at the venue.")
+            Text(Self.cancelConfirmationMessage(for: order, locale: appState.locale))
         }
         .alert(
             LocalizedStringKey("common.error.submissionFailed"),
@@ -194,6 +194,18 @@ struct OrdersView: View {
         } message: { error in
             Text(error)
         }
+    }
+
+    static func cancelConfirmationMessage(for order: OrderStatus, locale: AppLocale) -> String {
+        let language = locale.catalogLanguage
+        return String(
+            format: LocaleStrings.localized("orders.cancel.confirmMessage", in: language),
+            order.instrument,
+            order.side.uppercased(),
+            order.size.formattedDecimal(in: locale, fractionDigits: 4),
+            order.price.map { $0.formattedDecimal(in: locale, fractionDigits: 4) }
+                ?? LocaleStrings.localized("orders.cancel.marketPrice", in: language)
+        )
     }
 
     /// Keep the sheet adapter View-owned while retaining the exact dismissal lifetime.

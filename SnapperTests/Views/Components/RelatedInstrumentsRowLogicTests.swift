@@ -130,6 +130,7 @@ final class RelatedInstrumentsRowLogicTests: XCTestCase {
             exchange: "polygon",
             lang: .en
         )
+        XCTAssertEqual(pl, "Brak skonfigurowanych powiązanych instrumentów dla GLD na polygon.")
         XCTAssertTrue(pl.contains("GLD"), "PL message must substitute the instrument placeholder.")
         XCTAssertTrue(pl.contains("polygon"), "PL message must substitute the exchange placeholder.")
         XCTAssertNotEqual(pl, en, "PL message must differ from EN so the localization path is exercised.")
