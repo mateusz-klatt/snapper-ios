@@ -683,7 +683,6 @@ enum ExpectedKeys {
         "positions.timeline.contributions.unrealized",
         "positions.timeline.contributions.net",
         "positions.timeline.contributions.empty",
-        // Remaining user-visible literals, localized across all catalog languages.
         "alerts.accessibility.label.row",
         "alerts.detail.priority",
         "alerts.detail.safetyCritical",
