@@ -25,7 +25,7 @@ import SwiftUI
 ///    failure it stays open. Unchanged orders retain their retry
 ///    key; material payload corrections start a new order attempt.
 struct NewOrderSheet: View {
-
+    @Environment(AppState.self) private var appState
     @State private var viewModel: NewOrderSheetViewModel
     let onCancel: () -> Void
     let onSubmit: (CreateOrderBody) async -> Bool
@@ -175,5 +175,6 @@ struct NewOrderSheet_Previews: PreviewProvider {
             onCancel: {},
             onSubmit: { _ in true }
         )
+        .environment(AppState.shared)
     }
 }
