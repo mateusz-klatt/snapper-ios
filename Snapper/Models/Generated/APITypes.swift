@@ -4962,6 +4962,9 @@ struct PositionCycleData: Codable, Sendable {
     let maxQty: Double
     let openedAt: String
     let ageHours: Double
+    let isDust: Bool?
+    let quantityDecimals: Int?
+    let priceDecimals: Int?
 
     enum CodingKeys: String, CodingKey {
         case type
@@ -4981,6 +4984,9 @@ struct PositionCycleData: Codable, Sendable {
         case maxQty = "max_qty"
         case openedAt = "opened_at"
         case ageHours = "age_hours"
+        case isDust = "is_dust"
+        case quantityDecimals = "quantity_decimals"
+        case priceDecimals = "price_decimals"
     }
 }
 
@@ -5026,6 +5032,9 @@ struct PositionData: Codable, Sendable {
     let sourceVenueEventId: Int?
     let positionCyclePublicId: String?
     let walletPublicId: String?
+    let isDust: Bool?
+    let quantityDecimals: Int?
+    let priceDecimals: Int?
 
     enum CodingKeys: String, CodingKey {
         case type
@@ -5047,6 +5056,9 @@ struct PositionData: Codable, Sendable {
         case sourceVenueEventId = "source_venue_event_id"
         case positionCyclePublicId = "position_cycle_public_id"
         case walletPublicId = "wallet_public_id"
+        case isDust = "is_dust"
+        case quantityDecimals = "quantity_decimals"
+        case priceDecimals = "price_decimals"
     }
 }
 

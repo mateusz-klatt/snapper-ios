@@ -60,7 +60,10 @@ final class ProtocolAndBridgeTests: XCTestCase {
             markedAt: nil,
             sourceVenueEventId: nil,
             positionCyclePublicId: nil,
-            walletPublicId: nil
+            walletPublicId: nil,
+            isDust: nil,
+            quantityDecimals: nil,
+            priceDecimals: nil
         )
         let signal = SignalData(
             type: nil,
