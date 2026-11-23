@@ -45,7 +45,10 @@ final class PositionsViewTests: XCTestCase {
             markedAt: nil,
             sourceVenueEventId: nil,
             positionCyclePublicId: positionCyclePublicId,
-            walletPublicId: walletPublicId
+            walletPublicId: walletPublicId,
+            isDust: nil,
+            quantityDecimals: nil,
+            priceDecimals: nil
         )
     }
 
@@ -237,7 +240,10 @@ final class PositionsViewTests: XCTestCase {
             markedAt: nil,
             sourceVenueEventId: nil,
             positionCyclePublicId: nil,
-            walletPublicId: ""
+            walletPublicId: "",
+            isDust: nil,
+            quantityDecimals: nil,
+            priceDecimals: nil
         )
         let missingInstrument = makePosition(
             publicId: "p-missing-inst",
