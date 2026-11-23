@@ -39,6 +39,23 @@ struct PairStatsRowView: View {
         }
     }
 
+    static func accessibilityLabel(for chip: PairStatsChipModel, in language: CatalogLanguage) -> String {
+        let pearsonStr = PairStatsRowLogic.signedPearsonString(chip.pearsonR)
+        let pvalueStr = PairStatsRowLogic.pvalueString(chip.cointPvalue)
+        let template = LocaleStrings.englishTemplateOnCatalogMiss(
+            LocaleStrings.localized("market.pairStats.chipAriaLabel", in: language),
+            key: "market.pairStats.chipAriaLabel"
+        )
+        return String(
+            format: template,
+            locale: Locale(identifier: language.rawValue),
+            chip.otherSymbol,
+            chip.otherExchange,
+            pearsonStr,
+            pvalueStr
+        )
+    }
+
     private func chipView(_ chip: PairStatsChipModel) -> some View {
         let style = PairStatsRowLogic.resolveChipStyle(chip: chip)
         let pearsonStr = PairStatsRowLogic.signedPearsonString(chip.pearsonR)
@@ -55,26 +72,7 @@ struct PairStatsRowView: View {
                 pvalueStr
             )
         }
-        let ariaTemplate = LocaleStrings.localized("market.pairStats.chipAriaLabel", in: language)
-        let ariaText: String
-        if ariaTemplate == "market.pairStats.chipAriaLabel" {
-            ariaText = String(
-                format: LocaleStrings.localized("market.pairStats.chipAriaLabel", in: .en),
-                chip.otherSymbol,
-                chip.otherExchange,
-                pearsonStr,
-                pvalueStr
-            )
-        } else {
-            ariaText = String(
-                format: ariaTemplate,
-                locale: Locale(identifier: language.rawValue),
-                chip.otherSymbol,
-                chip.otherExchange,
-                pearsonStr,
-                pvalueStr
-            )
-        }
+        let ariaText = Self.accessibilityLabel(for: chip, in: language)
         let borderColor: Color
         let chipOpacity: Double
         switch style {

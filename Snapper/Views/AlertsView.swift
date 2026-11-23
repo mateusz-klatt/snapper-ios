@@ -205,6 +205,10 @@ struct AlertsView: View {
         case fetchAndRetain(String)
     }
 
+    static func safetyCriticalValue(_ isSafetyCritical: Bool, in language: CatalogLanguage) -> String {
+        return LocaleStrings.localized(isSafetyCritical ? "common.yes" : "common.no", in: language)
+    }
+
     /// Map the current ``pendingId`` and whether its anchor row is
     /// present to the next ``DeepLinkStep``.
     static func deepLinkStep(pendingId: String?, targetPresent: Bool) -> DeepLinkStep {
@@ -239,7 +243,7 @@ private struct AlertDetailView: View {
                     Divider()
                     LabeledContent(LocalizedStringKey("alerts.detail.type"), value: alert.alertType)
                     LabeledContent(LocalizedStringKey("alerts.detail.priority"), value: alert.priority)
-                    LabeledContent(LocalizedStringKey("alerts.detail.safetyCritical"), value: LocaleStrings.localized(alert.isSafetyCritical ? "common.yes" : "common.no", in: locale.catalogLanguage))
+                    LabeledContent(LocalizedStringKey("alerts.detail.safetyCritical"), value: AlertsView.safetyCriticalValue(alert.isSafetyCritical, in: locale.catalogLanguage))
                     LabeledContent(LocalizedStringKey("alerts.detail.timestamp"), value: alert.timestamp.formatted(date: .abbreviated, time: .standard))
                     if let threadKey = alert.threadKey {
                         LabeledContent(LocalizedStringKey("alerts.detail.thread"), value: threadKey)

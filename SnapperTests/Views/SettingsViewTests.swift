@@ -32,6 +32,29 @@ final class SettingsViewTests: XCTestCase {
         XCTAssertNil(pid)
     }
 
+    func testRegistrationFailureMessageENSubstitutesAttempt() {
+        XCTAssertEqual(
+            SettingsView.registrationFailureMessage(attempt: 3, locale: .us),
+            "Failed (attempt 3)"
+        )
+    }
+
+    func testRegistrationFailureMessagePLSubstitutesAttempt() {
+        XCTAssertEqual(
+            SettingsView.registrationFailureMessage(attempt: 3, locale: .pl),
+            "Niepowodzenie (próba 3)"
+        )
+    }
+
+    func testBundleVersionHelpersUseInfoDictionaryOrLocalizedFallback() {
+        let expectedApp = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String
+            ?? LocaleStrings.localized("common.unknown", in: .pl)
+        let expectedBuild = Bundle.main.infoDictionary?["CFBundleVersion"] as? String
+            ?? LocaleStrings.localized("common.unknown", in: .pl)
+        XCTAssertEqual(Bundle.main.appVersion(in: .pl), expectedApp)
+        XCTAssertEqual(Bundle.main.buildVersion(in: .pl), expectedBuild)
+    }
+
     func testSettingsViewCanBeInstantiatedWithInjectedEnvironment() {
         let view = SettingsView()
             .environmentObject(AuthService.shared)

@@ -132,6 +132,34 @@ final class PairStatsRowLogicTests: XCTestCase {
         XCTAssertEqual(chips.map(\.otherSymbol), ["B", "C", "A", "D"])
     }
 
+    func testAccessibilityLabelENSubstitutesChipAndMetrics() {
+        let chip = PairStatsChipModel(
+            otherExchange: "polygon",
+            otherSymbol: "IAU",
+            pearsonR: 0.853,
+            cointPvalue: 0.00009,
+            isWarm: true
+        )
+        XCTAssertEqual(
+            PairStatsRowView.accessibilityLabel(for: chip, in: .en),
+            "Pair stats with IAU on polygon: Pearson +0.85, p-value <0.001"
+        )
+    }
+
+    func testAccessibilityLabelPLUsesLocalizedTemplate() {
+        let chip = PairStatsChipModel(
+            otherExchange: "polygon",
+            otherSymbol: "IAU",
+            pearsonR: 0.853,
+            cointPvalue: 0.00009,
+            isWarm: true
+        )
+        XCTAssertEqual(
+            PairStatsRowView.accessibilityLabel(for: chip, in: .pl),
+            "Statystyki pary z IAU na polygon: Pearson +0.85, wartość p <0.001"
+        )
+    }
+
     func testResolveChipStyleLowPvalueWarmReturnsCointegrated() {
         let chip = PairStatsChipModel(
             otherExchange: "polygon",

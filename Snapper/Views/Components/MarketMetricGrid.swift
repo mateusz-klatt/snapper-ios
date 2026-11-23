@@ -117,6 +117,11 @@ struct MarketStatusRow: View {
     let isLoading: Bool
     let loadError: APIError?
 
+    static func loadErrorMessage(errorDescription: String?, language: CatalogLanguage) -> String {
+        return errorDescription
+            ?? LocaleStrings.localized("market.data.error.loadFailed", in: language)
+    }
+
     var body: some View {
         HStack(spacing: 8) {
             if isLoading {
@@ -127,7 +132,7 @@ struct MarketStatusRow: View {
             } else if let loadError {
                 Image(systemName: "exclamationmark.triangle.fill")
                     .foregroundColor(.brandRed)
-                Text(loadError.errorDescription ?? LocaleStrings.localized("market.data.error.loadFailed", in: appState.locale.catalogLanguage))
+                Text(Self.loadErrorMessage(errorDescription: loadError.errorDescription, language: appState.locale.catalogLanguage))
                     .font(.caption)
                     .foregroundColor(.brandRed)
                     .lineLimit(2)

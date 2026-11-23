@@ -31,6 +31,13 @@ final class AlertsViewTests: XCTestCase {
         XCTAssertNotNil(row.body)
     }
 
+    func testSafetyCriticalValueIsLocalized() {
+        XCTAssertEqual(AlertsView.safetyCriticalValue(true, in: .en), "Yes")
+        XCTAssertEqual(AlertsView.safetyCriticalValue(false, in: .en), "No")
+        XCTAssertEqual(AlertsView.safetyCriticalValue(true, in: .pl), "Tak")
+        XCTAssertEqual(AlertsView.safetyCriticalValue(false, in: .pl), "Nie")
+    }
+
     func testDeepLinkStepIdleWhenNoPendingId() {
         XCTAssertEqual(
             AlertsView.deepLinkStep(pendingId: nil, targetPresent: false),

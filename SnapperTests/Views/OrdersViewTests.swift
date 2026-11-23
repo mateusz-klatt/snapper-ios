@@ -115,7 +115,8 @@ final class OrdersViewTests: XCTestCase {
         publicId: String,
         status: String,
         walletPublicId: String?,
-        createdAtOffset: TimeInterval
+        createdAtOffset: TimeInterval,
+        price: Double? = 50000.0
     ) -> OrderStatus {
         return OrderData(
             type: "order_data",
@@ -134,7 +135,7 @@ final class OrdersViewTests: XCTestCase {
             orderType: "limit",
             size: 1.0,
             filledSize: 0.0,
-            price: 50000.0,
+            price: price,
             averagePrice: nil,
             reason: nil,
             timeInForce: nil,
@@ -151,6 +152,34 @@ final class OrdersViewTests: XCTestCase {
             pairedGroupSize: nil,
             pairedGroupIndex: nil,
             pairedGroupPolicy: nil
+        )
+    }
+
+    func testCancelConfirmationMessageENFormatsLimitOrder() {
+        let order = makeOrder(
+            publicId: "order-en",
+            status: "open",
+            walletPublicId: "wallet-a",
+            createdAtOffset: 0,
+            price: 1.5
+        )
+        XCTAssertEqual(
+            OrdersView.cancelConfirmationMessage(for: order, locale: .us),
+            "BTCUSD BUY 1.0000 @ 1.5000 will be cancelled at the venue."
+        )
+    }
+
+    func testCancelConfirmationMessagePLFormatsMarketOrder() {
+        let order = makeOrder(
+            publicId: "order-pl",
+            status: "open",
+            walletPublicId: "wallet-a",
+            createdAtOffset: 0,
+            price: nil
+        )
+        XCTAssertEqual(
+            OrdersView.cancelConfirmationMessage(for: order, locale: .pl),
+            "BTCUSD BUY 1,0000 @ rynkowa zostanie anulowane na giełdzie."
         )
     }
 

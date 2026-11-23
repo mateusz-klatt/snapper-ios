@@ -97,6 +97,41 @@ final class EditDevicePrefViewTests: XCTestCase {
         XCTAssertTrue(combined.contains("op "))
     }
 
+    func testScopeDescriptionLocalizesEveryShapeInPolish() {
+        XCTAssertEqual(
+            EditDevicePrefView.scopeDescription(
+                operatorPublicId: nil,
+                walletPublicId: nil,
+                language: .pl
+            ),
+            "Całe urządzenie"
+        )
+        XCTAssertEqual(
+            EditDevicePrefView.scopeDescription(
+                operatorPublicId: "op-1234567890",
+                walletPublicId: nil,
+                language: .pl
+            ),
+            "Operator op-12345…"
+        )
+        XCTAssertEqual(
+            EditDevicePrefView.scopeDescription(
+                operatorPublicId: nil,
+                walletPublicId: "wallet-abcdef0123",
+                language: .pl
+            ),
+            "Portfel wallet-a…"
+        )
+        XCTAssertEqual(
+            EditDevicePrefView.scopeDescription(
+                operatorPublicId: "op-1234567890",
+                walletPublicId: "wallet-abcdef0123",
+                language: .pl
+            ),
+            "Portfel wallet-a… · op. op-123…"
+        )
+    }
+
     /// Use a UTC calendar so the round-trip is timezone-independent.
     private var utcCalendar: Calendar {
         var calendar = Calendar(identifier: .gregorian)

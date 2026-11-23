@@ -68,6 +68,58 @@ final class PositionsViewTests: XCTestCase {
         XCTAssertEqual(PositionCard.direction(for: 0.0), "Flat")
     }
 
+    func testDirectionLocalizesEveryQuantityShapeInPolish() {
+        XCTAssertEqual(PositionCard.direction(for: 1.5, in: .pl), "Długa")
+        XCTAssertEqual(PositionCard.direction(for: -2.0, in: .pl), "Krótka")
+        XCTAssertEqual(PositionCard.direction(for: 0.0, in: .pl), "Zerowa")
+    }
+
+    func testActionSheetTitleLocalizesAndSubstitutesInstrumentAndExchange() {
+        let position = makePosition(publicId: "p-title", walletPublicId: "wallet-a")
+        XCTAssertEqual(
+            PositionsView.actionSheetTitle(for: position, in: .en),
+            "BTC-USD on kraken"
+        )
+        XCTAssertEqual(
+            PositionsView.actionSheetTitle(for: position, in: .pl),
+            "BTC-USD na kraken"
+        )
+    }
+
+    func testActionSheetTitleWithoutPositionIsEmpty() {
+        XCTAssertEqual(PositionsView.actionSheetTitle(for: nil, in: .pl), "")
+    }
+
+    func testCloseConfirmationTitleUsesInstrumentAndLocalizedFallback() {
+        let position = makePosition(publicId: "p-close", walletPublicId: "wallet-a")
+        XCTAssertEqual(
+            PositionsView.closeConfirmationTitle(for: position, in: .en),
+            "Close BTC-USD?"
+        )
+        XCTAssertEqual(
+            PositionsView.closeConfirmationTitle(for: position, in: .pl),
+            "Zamknąć BTC-USD?"
+        )
+        XCTAssertEqual(PositionsView.closeConfirmationTitle(for: nil, in: .en), "Close position?")
+        XCTAssertEqual(PositionsView.closeConfirmationTitle(for: nil, in: .pl), "Zamknąć pozycję?")
+    }
+
+    func testCloseSubmitMessageUsesAbsoluteQuantityAndLocalizedTemplate() {
+        let position = makePosition(
+            publicId: "p-submit",
+            walletPublicId: "wallet-a",
+            quantity: -2.5
+        )
+        XCTAssertEqual(
+            PositionsView.closeSubmitMessage(for: position, locale: .us),
+            "Submits a reduce-only market order for 2.5000 BTC-USD."
+        )
+        XCTAssertEqual(
+            PositionsView.closeSubmitMessage(for: position, locale: .pl),
+            "Składa zlecenie rynkowe tylko zmniejszające pozycję na 2,5000 BTC-USD."
+        )
+    }
+
     func testFilterRespectsWalletScope() {
         let walletA = makePosition(publicId: "p-a", walletPublicId: "wallet-a")
         let walletB = makePosition(publicId: "p-b", walletPublicId: "wallet-b")

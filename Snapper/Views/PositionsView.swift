@@ -118,13 +118,7 @@ struct PositionsView: View {
             }
         }
         .confirmationDialog(
-            actionSheetPosition.map {
-                String(
-                    format: LocaleStrings.localized("positions.row.actions.instrumentExchange", in: appState.locale.catalogLanguage),
-                    $0.instrument,
-                    $0.exchange
-                )
-            } ?? "",
+            Self.actionSheetTitle(for: actionSheetPosition, in: appState.locale.catalogLanguage),
             isPresented: Binding(
                 get: { actionSheetPosition != nil },
                 set: { if !$0 { actionSheetPosition = nil } }
@@ -160,11 +154,7 @@ struct PositionsView: View {
             )
         }
         .alert(
-            String(
-                format: LocaleStrings.localized("positions.close.confirmTitle", in: appState.locale.catalogLanguage),
-                pendingClosePosition?.instrument
-                    ?? LocaleStrings.localized("positions.close.positionFallback", in: appState.locale.catalogLanguage)
-            ),
+            Self.closeConfirmationTitle(for: pendingClosePosition, in: appState.locale.catalogLanguage),
             isPresented: Binding(
                 get: { pendingClosePosition != nil },
                 set: { if !$0 { pendingClosePosition = nil } }
@@ -178,11 +168,7 @@ struct PositionsView: View {
                 pendingClosePosition = nil
             }
         } message: { position in
-            Text(String(
-                format: LocaleStrings.localized("positions.close.submitMessage", in: appState.locale.catalogLanguage),
-                abs(position.quantity).formattedDecimal(in: appState.locale, fractionDigits: 4),
-                position.instrument
-            ))
+            Text(Self.closeSubmitMessage(for: position, locale: appState.locale))
         }
         .sheet(item: $reduceModalPosition) { wrapper in
             ReducePositionView(
@@ -232,6 +218,31 @@ struct PositionsView: View {
         } message: { error in
             Text(error)
         }
+    }
+
+    static func actionSheetTitle(for position: PositionSnapshot?, in language: CatalogLanguage) -> String {
+        guard let position else { return "" }
+        return String(
+            format: LocaleStrings.localized("positions.row.actions.instrumentExchange", in: language),
+            position.instrument,
+            position.exchange
+        )
+    }
+
+    static func closeConfirmationTitle(for position: PositionSnapshot?, in language: CatalogLanguage) -> String {
+        return String(
+            format: LocaleStrings.localized("positions.close.confirmTitle", in: language),
+            position?.instrument
+                ?? LocaleStrings.localized("positions.close.positionFallback", in: language)
+        )
+    }
+
+    static func closeSubmitMessage(for position: PositionSnapshot, locale: AppLocale) -> String {
+        return String(
+            format: LocaleStrings.localized("positions.close.submitMessage", in: locale.catalogLanguage),
+            abs(position.quantity).formattedDecimal(in: locale, fractionDigits: 4),
+            position.instrument
+        )
     }
 }
 

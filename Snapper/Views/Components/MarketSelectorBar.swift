@@ -11,6 +11,16 @@ struct MarketSelectorBar: View {
     @Bindable var vm: MarketDataViewModel
     @Environment(AppState.self) private var appState
 
+    static func exchangeLabel(selectedExchange: String?, language: CatalogLanguage) -> String {
+        return selectedExchange?.uppercased()
+            ?? LocaleStrings.localized("trading.order.exchangeLabel", in: language)
+    }
+
+    static func instrumentLabel(selectedSymbol: String?, language: CatalogLanguage) -> String {
+        return selectedSymbol
+            ?? LocaleStrings.localized("market.data.instrumentPicker.pick", in: language)
+    }
+
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
             HStack(spacing: 8) {
@@ -22,7 +32,7 @@ struct MarketSelectorBar: View {
                     }
                 } label: {
                     HStack(spacing: 4) {
-                        Text(vm.selectedExchange?.uppercased() ?? LocaleStrings.localized("trading.order.exchangeLabel", in: appState.locale.catalogLanguage))
+                        Text(Self.exchangeLabel(selectedExchange: vm.selectedExchange, language: appState.locale.catalogLanguage))
                             .font(.system(.body, weight: .semibold))
                         Image(systemName: "chevron.down")
                             .font(.caption2)
@@ -38,7 +48,10 @@ struct MarketSelectorBar: View {
                     vm.showInstrumentPicker = true
                 } label: {
                     HStack(spacing: 4) {
-                        Text(vm.selectedInstrument?.symbol ?? LocaleStrings.localized("market.data.instrumentPicker.pick", in: appState.locale.catalogLanguage))
+                        Text(Self.instrumentLabel(
+                            selectedSymbol: vm.selectedInstrument?.symbol,
+                            language: appState.locale.catalogLanguage
+                        ))
                             .font(.system(.body, weight: .semibold))
                             .lineLimit(1)
                         Image(systemName: "magnifyingglass")

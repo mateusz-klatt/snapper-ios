@@ -37,6 +37,30 @@ final class LocaleStringsTests: XCTestCase {
         XCTAssertEqual(value, "nonexistent.test.key")
     }
 
+    func testEnglishTemplateOnCatalogMissSubstitutesPlaceholders() {
+        let key = "market.cacheBanner.message"
+        let template = LocaleStrings.englishTemplateOnCatalogMiss(key, key: key)
+        let result = String(
+            format: template,
+            locale: Locale(identifier: "pl"),
+            "50",
+            "100",
+            "(derived from 1m)"
+        )
+        XCTAssertEqual(result, "Cache warming up: 50 / 100 candles available (derived from 1m)")
+    }
+
+    func testEnglishTemplateOnCatalogMissPreservesLocalizedTemplate() {
+        let key = "market.cacheBanner.message"
+        let polish = LocaleStrings.localized(key, in: .pl)
+        XCTAssertEqual(LocaleStrings.englishTemplateOnCatalogMiss(polish, key: key), polish)
+    }
+
+    func testEnglishTemplateOnCatalogMissReturnsKeyWhenEnglishAlsoMisses() {
+        let key = "nonexistent.test.key"
+        XCTAssertEqual(LocaleStrings.englishTemplateOnCatalogMiss(key, key: key), key)
+    }
+
     /// Catalog parity sanity — every key in the EN catalog must
     /// resolve in the PL catalog (no orphan keys); this is also
     /// covered by ``CatalogParityTests`` but exercising it through

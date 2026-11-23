@@ -425,11 +425,7 @@ struct SettingsView: View {
                     .font(.caption)
                     .foregroundColor(.secondary)
             case .failed(let attempt, _):
-                Text(verbatim: String(
-                    format: LocaleStrings.localized("settings.notifications.registrationFailed", in: appState.locale.catalogLanguage),
-                    locale: appState.locale.nativeLocale,
-                    Int64(attempt)
-                ))
+                Text(verbatim: Self.registrationFailureMessage(attempt: attempt, locale: appState.locale))
                     .font(.caption)
                     .foregroundColor(.brandRed)
             case .awaitingLogin, .awaitingToken, .idle:
@@ -438,6 +434,14 @@ struct SettingsView: View {
                     .foregroundColor(.secondary)
             }
         }
+    }
+
+    static func registrationFailureMessage(attempt: Int, locale: AppLocale) -> String {
+        return String(
+            format: LocaleStrings.localized("settings.notifications.registrationFailed", in: locale.catalogLanguage),
+            locale: locale.nativeLocale,
+            Int64(attempt)
+        )
     }
 
     private func triggerRetry() {

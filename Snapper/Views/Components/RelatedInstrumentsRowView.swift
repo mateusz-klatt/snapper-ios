@@ -71,14 +71,10 @@ enum RelatedInstrumentsRowLogic {
         exchange: String,
         lang: CatalogLanguage
     ) -> String {
-        let template = LocaleStrings.localized("market.related.empty", in: lang)
-        if template == "market.related.empty" {
-            return String(
-                format: LocaleStrings.localized("market.related.empty", in: .en),
-                symbol,
-                exchange
-            )
-        }
+        let template = LocaleStrings.englishTemplateOnCatalogMiss(
+            LocaleStrings.localized("market.related.empty", in: lang),
+            key: "market.related.empty"
+        )
         return String(
             format: template,
             locale: Locale(identifier: lang.rawValue),
