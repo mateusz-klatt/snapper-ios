@@ -5062,6 +5062,18 @@ struct PositionData: Codable, Sendable {
     }
 }
 
+struct PositionDisplayFields: Codable, Sendable {
+    let isDust: Bool?
+    let quantityDecimals: Int?
+    let priceDecimals: Int?
+
+    enum CodingKeys: String, CodingKey {
+        case isDust = "is_dust"
+        case quantityDecimals = "quantity_decimals"
+        case priceDecimals = "price_decimals"
+    }
+}
+
 struct PositionListResponse: Codable, Sendable {
     let type: String?
     let sequenceId: Int
