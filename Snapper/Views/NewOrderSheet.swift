@@ -88,7 +88,7 @@ struct NewOrderSheet: View {
 
                     Picker(LocalizedStringKey("trading.order.orderTypeLabel"), selection: $viewModel.orderType) {
                         ForEach(NewOrderSheetViewModel.orderTypes, id: \.self) { type in
-                            Text(NewOrderSheetViewModel.displayName(forOrderType: type)).tag(type)
+                            Text(NewOrderSheetViewModel.displayName(forOrderType: type, in: appState.locale.catalogLanguage)).tag(type)
                         }
                     }
 

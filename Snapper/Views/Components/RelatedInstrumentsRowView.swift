@@ -73,7 +73,11 @@ enum RelatedInstrumentsRowLogic {
     ) -> String {
         let template = LocaleStrings.localized("market.related.empty", in: lang)
         if template == "market.related.empty" {
-            return "No related instruments configured for \(symbol) on \(exchange)."
+            return String(
+                format: LocaleStrings.localized("market.related.empty", in: .en),
+                symbol,
+                exchange
+            )
         }
         return String(
             format: template,

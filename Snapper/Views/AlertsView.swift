@@ -237,9 +237,9 @@ private struct AlertDetailView: View {
                     Text(verbatim: alert.displayBody(in: locale.catalogLanguage))
                         .font(.body)
                     Divider()
-                    LabeledContent("Type", value: alert.alertType)
-                    LabeledContent("Priority", value: alert.priority)
-                    LabeledContent("Safety-critical", value: alert.isSafetyCritical ? "Yes" : "No")
+                    LabeledContent(LocalizedStringKey("alerts.detail.type"), value: alert.alertType)
+                    LabeledContent(LocalizedStringKey("alerts.detail.priority"), value: alert.priority)
+                    LabeledContent(LocalizedStringKey("alerts.detail.safetyCritical"), value: LocaleStrings.localized(alert.isSafetyCritical ? "common.yes" : "common.no", in: locale.catalogLanguage))
                     LabeledContent(LocalizedStringKey("alerts.detail.timestamp"), value: alert.timestamp.formatted(date: .abbreviated, time: .standard))
                     if let threadKey = alert.threadKey {
                         LabeledContent(LocalizedStringKey("alerts.detail.thread"), value: threadKey)

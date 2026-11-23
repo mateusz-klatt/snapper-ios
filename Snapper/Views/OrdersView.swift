@@ -178,7 +178,14 @@ struct OrdersView: View {
                 pendingCancelOrder = nil
             }
         } message: { order in
-            Text("\(order.instrument) \(order.side.uppercased()) \(order.size.formattedDecimal(in: appState.locale, fractionDigits: 4)) @ \(order.price.map { $0.formattedDecimal(in: appState.locale, fractionDigits: 4) } ?? "market") will be cancelled at the venue.")
+            Text(String(
+                format: LocaleStrings.localized("orders.cancel.confirmMessage", in: appState.locale.catalogLanguage),
+                order.instrument,
+                order.side.uppercased(),
+                order.size.formattedDecimal(in: appState.locale, fractionDigits: 4),
+                order.price.map { $0.formattedDecimal(in: appState.locale, fractionDigits: 4) }
+                    ?? LocaleStrings.localized("orders.cancel.marketPrice", in: appState.locale.catalogLanguage)
+            ))
         }
         .alert(
             LocalizedStringKey("common.error.submissionFailed"),

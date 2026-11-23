@@ -158,7 +158,8 @@ struct EditDevicePrefView: View {
                             Spacer()
                             Text(Self.scopeDescription(
                                 operatorPublicId: lockedOperatorPublicId,
-                                walletPublicId: lockedWalletPublicId
+                                walletPublicId: lockedWalletPublicId,
+                                language: appState.locale.catalogLanguage
                             ))
                             .foregroundStyle(.secondary)
                         }
@@ -379,16 +380,31 @@ struct EditDevicePrefView: View {
     /// ``DevicePrefRow`` summary on the parent screen.
     static func scopeDescription(
         operatorPublicId: String?,
-        walletPublicId: String?
+        walletPublicId: String?,
+        language: CatalogLanguage = .en
     ) -> String {
         if let walletId = walletPublicId {
-            let suffix = operatorPublicId.map { " · op \(String($0.prefix(6)))…" } ?? ""
-            return "Wallet \(String(walletId.prefix(8)))…\(suffix)"
+            let suffix = operatorPublicId.map {
+                String(
+                    format: LocaleStrings.localized("notifications.devicePref.scopeLabel.operatorSuffix", in: language),
+                    locale: Locale(identifier: language.rawValue),
+                    String($0.prefix(6))
+                )
+            } ?? ""
+            return String(
+                format: LocaleStrings.localized("notifications.devicePref.scopeLabel.wallet", in: language),
+                locale: Locale(identifier: language.rawValue),
+                String(walletId.prefix(8))
+            ) + suffix
         }
         if let operatorId = operatorPublicId {
-            return "Operator \(String(operatorId.prefix(8)))…"
+            return String(
+                format: LocaleStrings.localized("notifications.devicePref.scopeLabel.operator", in: language),
+                locale: Locale(identifier: language.rawValue),
+                String(operatorId.prefix(8))
+            )
         }
-        return "Device-global"
+        return LocaleStrings.localized("notifications.devicePref.scopeLabel.deviceGlobal", in: language)
     }
 
     /// Convert a ``DatePicker`` Date to the minutes-since-midnight
@@ -486,7 +502,7 @@ struct EditDevicePrefView: View {
             dismiss()
         } catch {
             logger.error("Failed to save device pref: \(error)")
-            saveError = "Couldn't save preference. Try again."
+            saveError = LocaleStrings.localized("notifications.prefs.error.saveRetry", in: appState.locale.catalogLanguage)
         }
     }
 }

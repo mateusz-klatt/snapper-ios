@@ -230,8 +230,13 @@ enum CacheWarmingBannerLogic {
         let template = LocaleStrings.localized("market.cacheBanner.message", in: lang)
         let rendered: String
         if template == "market.cacheBanner.message" {
-            let trail = sourceSuffix.isEmpty ? "" : " \(sourceSuffix)"
-            rendered = "Cache warming up: \(sampleLabel) / \(expectedLabel) candles available\(trail)"
+            rendered = String(
+                format: LocaleStrings.localized("market.cacheBanner.message", in: .en),
+                locale: Locale(identifier: lang.rawValue),
+                sampleLabel,
+                expectedLabel,
+                sourceSuffix
+            )
         } else {
             rendered = String(
                 format: template,

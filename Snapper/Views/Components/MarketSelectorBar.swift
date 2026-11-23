@@ -9,6 +9,7 @@ import SwiftUI
 /// accent when the timeframe is active.
 struct MarketSelectorBar: View {
     @Bindable var vm: MarketDataViewModel
+    @Environment(AppState.self) private var appState
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
@@ -21,7 +22,7 @@ struct MarketSelectorBar: View {
                     }
                 } label: {
                     HStack(spacing: 4) {
-                        Text(vm.selectedExchange?.uppercased() ?? "Exchange")
+                        Text(vm.selectedExchange?.uppercased() ?? LocaleStrings.localized("trading.order.exchangeLabel", in: appState.locale.catalogLanguage))
                             .font(.system(.body, weight: .semibold))
                         Image(systemName: "chevron.down")
                             .font(.caption2)
@@ -37,7 +38,7 @@ struct MarketSelectorBar: View {
                     vm.showInstrumentPicker = true
                 } label: {
                     HStack(spacing: 4) {
-                        Text(vm.selectedInstrument?.symbol ?? "Pick instrument")
+                        Text(vm.selectedInstrument?.symbol ?? LocaleStrings.localized("market.data.instrumentPicker.pick", in: appState.locale.catalogLanguage))
                             .font(.system(.body, weight: .semibold))
                             .lineLimit(1)
                         Image(systemName: "magnifyingglass")

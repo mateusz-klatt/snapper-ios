@@ -58,7 +58,13 @@ struct PairStatsRowView: View {
         let ariaTemplate = LocaleStrings.localized("market.pairStats.chipAriaLabel", in: language)
         let ariaText: String
         if ariaTemplate == "market.pairStats.chipAriaLabel" {
-            ariaText = "Pair stats with \(chip.otherSymbol) on \(chip.otherExchange): Pearson \(pearsonStr), p-value \(pvalueStr)"
+            ariaText = String(
+                format: LocaleStrings.localized("market.pairStats.chipAriaLabel", in: .en),
+                chip.otherSymbol,
+                chip.otherExchange,
+                pearsonStr,
+                pvalueStr
+            )
         } else {
             ariaText = String(
                 format: ariaTemplate,

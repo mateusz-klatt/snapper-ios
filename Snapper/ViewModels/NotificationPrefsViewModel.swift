@@ -70,7 +70,7 @@ final class NotificationPrefsViewModel {
             defaults = Dictionary(uniqueKeysWithValues: envelope.payload.map { ($0.alertType, $0) })
         } catch {
             logger.error("Failed to fetch alert defaults: \(error.localizedDescription, privacy: .public)")
-            loadError = "Couldn't load preferences. Pull to refresh."
+            loadError = LocaleStrings.localized("notifications.prefs.error.loadRetry", in: AppState.shared.locale.catalogLanguage)
         }
 
         do {
@@ -112,7 +112,7 @@ final class NotificationPrefsViewModel {
             return true
         } catch {
             logger.error("Failed to update alert default for \(alertType, privacy: .public): \(error.localizedDescription, privacy: .public)")
-            loadError = "Couldn't save preference. Try again."
+            loadError = LocaleStrings.localized("notifications.prefs.error.saveRetry", in: AppState.shared.locale.catalogLanguage)
             return false
         }
     }
@@ -166,7 +166,7 @@ final class NotificationPrefsViewModel {
                 let insertAt = min(originalIndex, devicePrefs.count)
                 devicePrefs.insert(snapshot, at: insertAt)
             }
-            loadError = "Couldn't remove override. Try again."
+            loadError = LocaleStrings.localized("notifications.devicePref.error.removeFailed", in: AppState.shared.locale.catalogLanguage)
             return false
         }
     }

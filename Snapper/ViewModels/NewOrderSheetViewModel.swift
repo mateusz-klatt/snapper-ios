@@ -179,7 +179,7 @@ final class NewOrderSheetViewModel {
             /// previous exchange must not surface an error banner
             /// for the exchange the user has since switched to.
             guard exchangeBeingLoaded == selectedExchange else { return }
-            loadError = "Couldn't load instruments. Pull to refresh."
+            loadError = LocaleStrings.localized("trading.order.error.instrumentsLoadFailed", in: AppState.shared.locale.catalogLanguage)
             availableInstruments = []
         }
     }
@@ -220,12 +220,12 @@ final class NewOrderSheetViewModel {
 
     static let orderTypes: [String] = ["limit", "market", "stop", "stop_limit"]
 
-    static func displayName(forOrderType orderType: String) -> String {
+    static func displayName(forOrderType orderType: String, in language: CatalogLanguage = .en) -> String {
         switch orderType {
-        case "limit": return "Limit"
-        case "market": return "Market"
-        case "stop": return "Stop"
-        case "stop_limit": return "Stop limit"
+        case "limit": return LocaleStrings.localized("trading.orderType.limit", in: language)
+        case "market": return LocaleStrings.localized("trading.orderType.market", in: language)
+        case "stop": return LocaleStrings.localized("trading.orderType.stop", in: language)
+        case "stop_limit": return LocaleStrings.localized("trading.orderType.stop_limit", in: language)
         default: return orderType
         }
     }
