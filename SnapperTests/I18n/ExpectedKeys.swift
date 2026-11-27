@@ -713,6 +713,8 @@ enum ExpectedKeys {
         "positions.direction.flat",
         "positions.direction.long",
         "positions.direction.short",
+        "positions.mark.stale",
+        "positions.mark.staleAsOf",
         "positions.error.missingIdentifiers",
         "positions.row.actions.instrumentExchange",
         "settings.notifications.registrationFailed",

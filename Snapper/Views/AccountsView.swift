@@ -318,11 +318,7 @@ struct AccountCard: View {
     }
 
     static func formatTimestamp(_ value: Date, locale: AppLocale) -> String {
-        let formatter = DateFormatter()
-        formatter.locale = locale.westernDigitsLocale
-        formatter.dateStyle = .medium
-        formatter.timeStyle = .medium
-        return formatter.string(from: value)
+        return LocaleFormatters.timestamp(for: locale).string(from: value)
     }
 
     static func modeLabel(_ mode: String?, appState: AppState) -> String {

@@ -83,6 +83,12 @@ final class PositionsViewModel {
             selectedWalletPublicId: appState.selectedWalletPublicId
         )
     }
+
+    var stalePositionsForSelectedWallet: [PositionSnapshot] {
+        guard let wallet = appState.selectedWalletPublicId else { return [] }
+        return positions.filter { $0.walletPublicId == wallet && $0.hasStaleMark }
+    }
+
     func load() async {
         isLoading = true
         defer { isLoading = false }

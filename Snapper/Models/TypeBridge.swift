@@ -13,6 +13,7 @@ extension OrderData: Identifiable {
 
 extension PositionData: Identifiable {
     var id: String { publicId }
+    var hasStaleMark: Bool { markStale == true }
 }
 
 extension SignalData: Identifiable {

@@ -399,15 +399,14 @@ struct HomeView: View {
                     VStack(alignment: .trailing, spacing: 4) {
                         Text(verbatim: position.unrealizedPnl?.formattedCurrency(in: appState.locale, code: "USD", fractionDigits: 2) ?? "—")
                             .font(.subheadline)
-                            .foregroundColor(
-                                position.unrealizedPnl.map {
-                                    $0 >= 0 ? Color.financialRising(for: appState) : Color.financialFalling(for: appState)
-                                } ?? Color.secondary
-                            )
+                            .foregroundColor(PositionCard.unrealizedPnlColor(for: position, appState: appState))
 
                         Text(LocalizedStringKey("home.position.unrealizedPnl"))
                             .font(.caption2)
                             .foregroundColor(.secondary)
+                        if position.hasStaleMark {
+                            StalePositionMark(position: position)
+                        }
                     }
                 }
                 .padding(.vertical, 8)

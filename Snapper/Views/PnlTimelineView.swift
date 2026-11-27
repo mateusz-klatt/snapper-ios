@@ -14,6 +14,8 @@ import SwiftUI
 /// chart shows gaps, the attribution table shows "Withheld", and the
 /// contribution table shows "—". A displayed zero is a proven zero.
 struct PnlTimelineView: View {
+    let staleOpenPositions: [PositionSnapshot]
+    let refreshPositions: @MainActor @Sendable () async -> Void
 
     @Environment(AppState.self) private var appState
     @State private var viewModel: PnlTimelineViewModel?
@@ -21,7 +23,11 @@ struct PnlTimelineView: View {
     var body: some View {
         Group {
             if let viewModel {
-                PnlTimelineContent(viewModel: viewModel)
+                PnlTimelineContent(
+                    viewModel: viewModel,
+                    staleOpenPositions: staleOpenPositions,
+                    refreshPositions: refreshPositions
+                )
             } else {
                 ProgressView(LocalizedStringKey("positions.timeline.loading"))
                     .frame(maxWidth: .infinity, minHeight: 360)
@@ -56,6 +62,8 @@ struct PnlTimelineLoadKey: Hashable {
 private struct PnlTimelineContent: View {
 
     @Bindable var viewModel: PnlTimelineViewModel
+    let staleOpenPositions: [PositionSnapshot]
+    let refreshPositions: @MainActor @Sendable () async -> Void
     @Environment(AppState.self) private var appState
 
     private var loadKey: PnlTimelineLoadKey {
@@ -71,14 +79,33 @@ private struct PnlTimelineContent: View {
         ScrollView {
             VStack(alignment: .leading, spacing: 16) {
                 controls
+                if !staleOpenPositions.isEmpty {
+                    staleOpenPositionsSection
+                }
                 content
             }
             .padding()
         }
         .scrollContentBackground(.hidden)
         .background(Color.bgBase)
-        .refreshable { await viewModel.load() }
+        .refreshable {
+            await viewModel.load()
+            await refreshPositions()
+        }
         .task(id: loadKey) { await viewModel.load() }
+    }
+
+    private var staleOpenPositionsSection: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Text(LocalizedStringKey("home.section.openPositions"))
+                .font(.headline)
+                .accessibilityAddTraits(.isHeader)
+            ForEach(staleOpenPositions) { position in
+                PositionCard(position: position)
+            }
+        }
+        .padding()
+        .background(Color.bgSurface, in: RoundedRectangle(cornerRadius: 16))
     }
 
     private var controls: some View {
