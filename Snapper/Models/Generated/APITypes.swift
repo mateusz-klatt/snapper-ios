@@ -8474,11 +8474,13 @@ struct ProcessConfigScopeRequest: Codable, Sendable {
 struct ProcessConfigScopeBody: Codable, Sendable {
     let operatorPublicId: String?
     let walletPublicId: String?
+    let maxOrderBaseQty: AnyCodable?
     let referenceIdentityParams: [String: String]?
 
     enum CodingKeys: String, CodingKey {
         case operatorPublicId = "operator_public_id"
         case walletPublicId = "wallet_public_id"
+        case maxOrderBaseQty = "max_order_base_qty"
         case referenceIdentityParams = "reference_identity_params"
     }
 }
