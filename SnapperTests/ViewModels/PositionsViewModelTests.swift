@@ -57,6 +57,8 @@ final class PositionsViewModelTests: XCTestCase {
             realizedPnl: 0,
             markPrice: nil,
             markedAt: nil,
+            markAsOf: nil,
+            markStale: nil,
             sourceVenueEventId: nil,
             positionCyclePublicId: positionCyclePublicId,
             walletPublicId: walletPublicId,

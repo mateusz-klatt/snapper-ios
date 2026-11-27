@@ -58,6 +58,8 @@ final class ProtocolAndBridgeTests: XCTestCase {
             realizedPnl: 0.0,
             markPrice: nil,
             markedAt: nil,
+            markAsOf: nil,
+            markStale: nil,
             sourceVenueEventId: nil,
             positionCyclePublicId: nil,
             walletPublicId: nil,
