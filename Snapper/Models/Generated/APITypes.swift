@@ -711,6 +711,8 @@ struct AiReviewAftermathPosition: Codable, Sendable {
     let realizedPnl: Double?
     let markPrice: Double?
     let markedAt: Date?
+    let markAsOf: Date?
+    let markStale: Bool?
     let sourceVenueEventId: Int?
     let positionCyclePublicId: String?
     let walletPublicId: String
@@ -730,6 +732,8 @@ struct AiReviewAftermathPosition: Codable, Sendable {
         case realizedPnl = "realized_pnl"
         case markPrice = "mark_price"
         case markedAt = "marked_at"
+        case markAsOf = "mark_as_of"
+        case markStale = "mark_stale"
         case sourceVenueEventId = "source_venue_event_id"
         case positionCyclePublicId = "position_cycle_public_id"
         case walletPublicId = "wallet_public_id"
@@ -5029,6 +5033,8 @@ struct PositionData: Codable, Sendable {
     let realizedPnl: Double
     let markPrice: Double?
     let markedAt: Date?
+    let markAsOf: Date?
+    let markStale: Bool?
     let sourceVenueEventId: Int?
     let positionCyclePublicId: String?
     let walletPublicId: String?
@@ -5053,6 +5059,8 @@ struct PositionData: Codable, Sendable {
         case realizedPnl = "realized_pnl"
         case markPrice = "mark_price"
         case markedAt = "marked_at"
+        case markAsOf = "mark_as_of"
+        case markStale = "mark_stale"
         case sourceVenueEventId = "source_venue_event_id"
         case positionCyclePublicId = "position_cycle_public_id"
         case walletPublicId = "wallet_public_id"
