@@ -1,3 +1,4 @@
+import SwiftUI
 import XCTest
 @testable import Snapper
 
@@ -24,7 +25,10 @@ final class PositionsViewTests: XCTestCase {
         instrumentPublicId: String? = "inst-1",
         quantity: Double = 1.0,
         positionCyclePublicId: String? = nil,
-        averagePrice: Double? = 50000.0
+        averagePrice: Double? = 50000.0,
+        unrealizedPnl: Double? = 0,
+        markPrice: Double? = nil,
+        markStale: Bool? = nil
     ) -> PositionSnapshot {
         return PositionData(
             type: "position",
@@ -39,12 +43,12 @@ final class PositionsViewTests: XCTestCase {
             mode: nil,
             quantity: quantity,
             averagePrice: averagePrice,
-            unrealizedPnl: 0.0,
+            unrealizedPnl: unrealizedPnl,
             realizedPnl: 0.0,
-            markPrice: nil,
+            markPrice: markPrice,
             markedAt: nil,
             markAsOf: nil,
-            markStale: nil,
+            markStale: markStale,
             sourceVenueEventId: nil,
             positionCyclePublicId: positionCyclePublicId,
             walletPublicId: walletPublicId,
@@ -52,6 +56,43 @@ final class PositionsViewTests: XCTestCase {
             quantityDecimals: nil,
             priceDecimals: nil
         )
+    }
+
+    func testStaleMarkKeepsTheMarkPriceAndDimsUnrealizedPnL() {
+        let position = makePosition(
+            publicId: "stale",
+            walletPublicId: "wallet-a",
+            unrealizedPnl: -124.875,
+            markPrice: 49875.125,
+            markStale: true
+        )
+
+        XCTAssertTrue(position.hasStaleMark)
+        XCTAssertEqual(StalePositionMark.priceLabel(for: position, locale: .us), "49,875.125")
+        XCTAssertEqual(PositionCard.unrealizedPnlColor(for: position, appState: .shared), .secondary)
+    }
+
+    func testFreshAndLegacyMarksKeepExistingUnrealizedPnLColors() {
+        let appState = AppState.shared
+        let fresh = makePosition(publicId: "fresh", walletPublicId: "wallet-a", unrealizedPnl: 100, markStale: false)
+        let legacy = makePosition(publicId: "legacy", walletPublicId: "wallet-a", unrealizedPnl: -100)
+
+        XCTAssertFalse(fresh.hasStaleMark)
+        XCTAssertFalse(legacy.hasStaleMark)
+        XCTAssertEqual(PositionCard.unrealizedPnlColor(for: fresh, appState: appState), .financialRising(for: appState))
+        XCTAssertEqual(PositionCard.unrealizedPnlColor(for: legacy, appState: appState), .financialFalling(for: appState))
+    }
+
+    func testStaleMarkAccessibilityLabelLocalizesTheTimestampInTheUsersTimeZone() throws {
+        let timeZone = try XCTUnwrap(TimeZone(secondsFromGMT: 7_200))
+        let label = StalePositionMark.accessibilityLabel(asOf: Self.baseTimestamp, locale: .pl, timeZone: timeZone)
+
+        XCTAssertTrue(label.hasPrefix("Nieaktualne. Wycena z "))
+        XCTAssertTrue(label.contains("00:13:20"))
+    }
+
+    func testStaleMarkAccessibilityLabelWithoutEvidenceTimeUsesTheBadgeLabel() {
+        XCTAssertEqual(StalePositionMark.accessibilityLabel(asOf: nil, locale: .us, timeZone: .gmt), "Stale")
     }
 
     func testDirectionForPositiveQuantityIsLong() {

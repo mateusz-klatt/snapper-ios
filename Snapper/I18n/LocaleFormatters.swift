@@ -57,6 +57,15 @@ enum LocaleFormatters {
         return formatter
     }
 
+    static func timestamp(for locale: AppLocale, timeZone: TimeZone = .current) -> DateFormatter {
+        let formatter = DateFormatter()
+        formatter.locale = locale.westernDigitsLocale
+        formatter.timeZone = timeZone
+        formatter.dateStyle = .medium
+        formatter.timeStyle = .medium
+        return formatter
+    }
+
     /// Compact-duration formatter ("5m 30s" / "5min 30 s").
     static func compactDuration(for locale: AppLocale) -> DateComponentsFormatter {
         let formatter = DateComponentsFormatter()

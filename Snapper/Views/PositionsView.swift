@@ -91,7 +91,9 @@ struct PositionsView: View {
                 }
                     }
                 case .pnlTimeline:
-                    PnlTimelineView()
+                    PnlTimelineView(staleOpenPositions: viewModel?.stalePositionsForSelectedWallet ?? []) {
+                        await viewModel?.load()
+                    }
                 }
             }
             .navigationTitle(LocalizedStringKey("positions.navTitle"))
@@ -303,6 +305,9 @@ struct ReducePositionView: View {
                         Text(verbatim: position.averagePrice?.formattedDecimal(in: appState.locale, fractionDigits: 4) ?? "—")
                             .foregroundStyle(.secondary)
                     }
+                    if position.hasStaleMark {
+                        StalePositionMark(position: position)
+                    }
                 }
                 Section {
                     HStack {
@@ -374,17 +379,16 @@ struct PositionCard: View {
             VStack(alignment: .trailing, spacing: 4) {
                 Text(verbatim: position.unrealizedPnl?.formattedCurrency(in: appState.locale, code: "USD", fractionDigits: 2) ?? "—")
                     .font(.body.monospaced())
-                    .foregroundStyle(
-                        position.unrealizedPnl.map {
-                            $0 >= 0 ? Color.financialRising(for: appState) : Color.financialFalling(for: appState)
-                        } ?? Color.secondary
-                    )
+                    .foregroundStyle(Self.unrealizedPnlColor(for: position, appState: appState))
                 Text(String(
                     format: LocaleStrings.localized("positions.row.avgPrice", in: appState.locale.catalogLanguage),
                     position.averagePrice?.formattedDecimal(in: appState.locale, fractionDigits: 4) ?? "—"
                 ))
                     .font(.caption)
                     .foregroundStyle(.secondary)
+                if position.hasStaleMark {
+                    StalePositionMark(position: position)
+                }
             }
         }
         .padding(.vertical, 4)
@@ -395,6 +399,11 @@ struct PositionCard: View {
         if quantity > 0 { return LocaleStrings.localized("positions.direction.long", in: language) }
         if quantity < 0 { return LocaleStrings.localized("positions.direction.short", in: language) }
         return LocaleStrings.localized("positions.direction.flat", in: language)
+    }
+
+    static func unrealizedPnlColor(for position: PositionSnapshot, appState: AppState) -> Color {
+        guard !position.hasStaleMark, let pnl = position.unrealizedPnl else { return .secondary }
+        return pnl >= 0 ? .financialRising(for: appState) : .financialFalling(for: appState)
     }
 
     private var directionLabel: String {

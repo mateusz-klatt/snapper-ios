@@ -38,7 +38,8 @@ final class PositionsViewModelTests: XCTestCase {
         unrealizedPnl: Double = 100.0,
         positionCyclePublicId: String? = "cycle-1",
         exchange: String = "kraken",
-        mode: String? = "live"
+        mode: String? = "live",
+        markStale: Bool? = nil
     ) -> PositionSnapshot {
         return PositionData(
             type: "position_data",
@@ -58,7 +59,7 @@ final class PositionsViewModelTests: XCTestCase {
             markPrice: nil,
             markedAt: nil,
             markAsOf: nil,
-            markStale: nil,
+            markStale: markStale,
             sourceVenueEventId: nil,
             positionCyclePublicId: positionCyclePublicId,
             walletPublicId: walletPublicId,
@@ -118,6 +119,26 @@ final class PositionsViewModelTests: XCTestCase {
         XCTAssertEqual(viewModel.positions.count, 1)
         XCTAssertNil(viewModel.loadError)
         XCTAssertFalse(viewModel.isLoading)
+    }
+
+    func testStalePositionsForSelectedWalletIncludesOnlyExplicitlyStalePositionsInScope() {
+        let viewModel = makeViewModel()
+        viewModel.positions = [
+            makePosition(publicId: "stale-one", markStale: true),
+            makePosition(publicId: "fresh", markStale: false),
+            makePosition(publicId: "legacy"),
+            makePosition(publicId: "stale-two", walletPublicId: "wallet-2", markStale: true),
+            makePosition(publicId: "unscoped", walletPublicId: nil, markStale: true),
+        ]
+
+        appState.selectedWalletPublicId = "wallet-1"
+        XCTAssertEqual(viewModel.stalePositionsForSelectedWallet.map(\.publicId), ["stale-one"])
+
+        appState.selectedWalletPublicId = "wallet-2"
+        XCTAssertEqual(viewModel.stalePositionsForSelectedWallet.map(\.publicId), ["stale-two"])
+
+        appState.selectedWalletPublicId = nil
+        XCTAssertTrue(viewModel.stalePositionsForSelectedWallet.isEmpty)
     }
 
     func testLoadFailureSetsLoadError() async {
